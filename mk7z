@@ -1,0 +1,137 @@
+#!/bin/sh
+#2.12.0
+#2018-10-10
+
+#Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
+#
+#This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#resources
+#https://sevenzip.osdn.jp/chm/cmdline/switches/method.htm
+
+#notes
+#m0=lzma2 is fast mode but produces samller archives
+#-m prefixes all options or -m0=lzma:a1:d25 for sub options
+
+#TODO
+#multiple input files
+#code cleanup
+
+comp_files="0"
+comp_dir="0"
+orig_rm="0"
+test_only="0"
+test_post="1"
+
+profile="multi"
+
+hlp() {
+	printf " default will compress files passed in \$1\n"
+	printf "\nPROFILES\n"
+	printf " -p1\tSingle threaded\n"
+	printf " -p2\tMultithreaded\n"
+	printf " -p3\tTest\n"
+	printf "\nOTHER\n"
+	printf " -d\tcompress all directories\n"
+	printf " -f\tcompress all files\n"
+	printf " -h\tprint this help\n"
+	printf " -P\tDisable post compression test\n"
+	printf " -s\tcompress \$1, delete after compressed\n"
+	printf " -t\tTest all compress files or file passed in \$1\n"
+	printf " -x\tcompress all files, delete original after compressed\n"
+	printf " -z\tcompress all directories, delete original after compressed\n"
+}
+
+compress() {
+	case "${profile}" in
+		single)
+			printf "\n***NOTICE*** The compression profile being used will probably use over 10G of ram\n"
+			printf "Profile : single\n"
+			nice -19 7z a -t7z -m0=lzma2 -md=1024m -mmf=bt4 -mmt=off -ms=off -myx=9 -mx=9 -mfb=276 -ms=on -mhc=on -mtm=off -mtc=off -mta=off "${f%%}.7z" "${f%%}"
+			;;
+		multi)
+			printf "\n***NOTICE*** The compression profile being used will probably use =LOTS= of ram\n"
+			printf "Profile : multi\n"
+			nice -19 7z a -t7z -m0=lzma2 -md=1024m -mmf=bt4 -mmt=on -mmtf=on -myx=9 -mx=9 -mfb=276 -mhc=on -ms=on -mtm=off -mtc=off -mta=off "${f%%}.7z" "${f%%}"
+			;;
+		test)
+			nice -19 7z a -t7z -m0=lzma2 -md=1024m -mmf=bt4 -mmt=off -myx=9 -mx=9 -mfb=276 -ms=on "${f%%}.7z" "${f%%}"
+			;;
+	esac
+
+	#exit if non 0 exit code
+	out="$?"
+	if [ "${out}" -eq 0 ] && [ "${orig_rm}" = "1" ] && [ -f "${f%%}.7z" ];then
+		if [ -n "$(${0} -t "${f%%}.7z"|grep FAILED)" ];then
+			printf "Test FAILED for : ${f%%}.7z\nNot removing original : "${f%%}"\n";exit 1
+		else
+			rm -r "${f%%}"
+		fi
+	fi
+}
+
+file_test(){
+	if [ "${f##*.}" = "7z" ] || [ "${f##*.}" = "zip" ];then
+		tst=$(nice -19 7z t "${f%%}"|grep Ok)
+		if ! [ -z "${tst}" ];then stat="PASSED"; else stat="FAILED";fi
+		if [ "${stat}" = "FAILED" ];then printf "${f}\n">>failed.txt;fi
+		printf "Test "${stat}" for : ${f%%}\n"
+	fi
+}
+
+if [ -z "${1}" ];then hlp;exit;fi
+while true;do
+	case "${1}" in
+		-p1) profile="single";shift;;
+		-p2) profile="multi";shift;;
+		-p3) profile="test";shift;;
+		-t) test_only="1";test_post="0";comp_files="1";shift;;
+		-P) test_post="0";shift;;
+		-d) comp_dir="1";shift;;
+		-f) comp_files="1";shift;;
+		-s) orig_rm="1";shift;;
+		-x) comp_files="1";orig_rm="1";shift;;
+		-z) comp_dir="1";orig_rm="1";shift;;
+		-h) hlp;exit;;
+		--) break;;
+		*) break;;
+	esac
+done
+
+if [ -n "${1}" ] && ! [ -e "${1}" ];then
+	printf "Not a valid file : ${1}\n";exit 1
+elif [ -n "${1}" ] && [ -e "${1}" ];then
+	f="${1%%}"
+	if [ "${test_only}" = "0" ];then compress;else file_test;fi
+elif [ "${comp_dir}" = "1" ] || [ "${comp_files}" = "1" ];then
+	for f in *; do
+		if [ "${comp_dir}" = "1" ] && [ -d "${f}" ];then
+			if [ "${test_only}" = "0" ];then compress;else file_test;fi
+		fi
+		if [ "${comp_files}" = "1" ] && [ -f "${f}" ];then
+			if [ "${test_only}" = "0" ];then compress;else file_test;fi
+		fi
+	done
+else
+	printf "Something is broken\nDumping vars :\n"
+	printf "\$1=$1\nprofile=${profile}\ncomp_files=${comp_files}\ncomp_dir=${comp_dir}\n"
+	printf "orig_rm=${orig_rm}\ntest_only=${test_only}\ntest_post=${test_post}\n"
+	exit 1
+fi
+
+if [ "${test_post}" = "1" ];then
+	for f in *.7z; do
+		if [ -f "${f}" ];then file_test;fi
+	done
+fi

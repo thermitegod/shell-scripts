@@ -1,0 +1,97 @@
+#!/bin/sh
+#4.1.0
+#2018-09-21
+
+#Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
+#
+#This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+comp_files="0"
+comp_dir="0"
+orig_rm="0"
+comp_njp="0"
+test_only="0"
+test_mk7z="1"
+
+basedir=$(dirname ${0})
+
+hlp() {
+	printf " -d\tcompress all directories\n"
+	printf " -f\tcompress all files\n"
+	printf " -h\tprint this help\n"
+	printf " -p\tcompress all directories, dont junk path\n"
+	printf " -P\tDisable post compression test\n"
+	printf " -s\tcompress \$1, delete after compressed\n"
+	printf " -t\tTest all files or file passed in \$1, using mk7z -t : prefered test method\n"
+	printf " -T\tTest all files or file passed in \$1, using unzip -tq\n"
+	printf " -x\tcompress all files, delete original after compressed\n"
+	printf " -z\tcompress all directories, delete original after compressed\n"
+	printf " -Z\tcompress all directories, delete original after compressed, dont junk path\n"
+}
+
+compress() {
+	if ! [ "${comp_njp}" = "1" ] && [ "${test_only}" = "0" ];then
+		nice -19 zip -rv -9 --junk-paths "${f%%}.zip" "${f%%}"
+	elif [ "${comp_njp}" = "1" ] && [ "${test_only}" = "0" ];then
+		nice -19 zip -rv -9 "${f%%}.zip" "${f%%}"
+	fi
+
+	if [ "${test_only}" = "1" ] && ! [ "${f}" = "failed.txt" ];then
+		if [ "${test_mk7z}" = "1" ];then
+			${basedir}/mk7z -t "${f%%}"
+		else
+			nice -19 unzip -tq "${f%%}"
+		fi
+	fi
+
+	out="$?"
+	if [ "${out}" -eq 0 ] && [ "${test_only}" = "0" ] && [ "${orig_rm}" = "1" ] && [ -f "${f%%}.zip" ];then
+		rm -r "${f%%}"
+	fi
+}
+
+while true;do
+	case "$1" in
+		-t) test_only="1";comp_files="1";shift;break;;
+		-T) test_only="1";comp_files="1";test_mk7z="0";shift;break;;
+		-d) comp_dir="1";shift;;
+		-f) comp_files="1";shift;;
+		-p) comp_dir="1";comp_njp="1";shift;;
+		-s) orig_rm="1";shift;;
+		-x) comp_files="1";orig_rm="1";shift;;
+		-z) comp_dir="1";orig_rm="1";shift;;
+		-Z) comp_dir="1";orig_rm="1";comp_njp="1";shift;;
+		-h) hlp;return;;
+		--) break;;
+		*) break;;
+	esac
+done
+
+if [ -n "${1}" ] && ! [ -e "${1}" ];then
+	printf "Not a valid file : %s\n" "${1}"
+elif [ -n "${1}" ] && [ -e "${1}" ];then
+	f="${1%%}"
+	compress
+elif [ "${comp_dir}" = "1" ] || [ "${comp_files}" = "1" ];then
+	for f in *; do
+		if [ "${comp_dir}" = "1" ] && [ -d "${f%%}" ];then
+			compress
+		fi
+		if [ "${comp_files}" = "1" ] && [ -f "${f%%}" ];then
+			compress
+		fi
+	done
+else
+	printf "Something is broken\n";return
+fi

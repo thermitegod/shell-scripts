@@ -1,0 +1,139 @@
+#!/bin/sh
+#4.5.0
+#2018-09-28
+
+#Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
+#
+#This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#assumed values in
+#/etc/portage/make.conf
+#DISTDIR="/usr/distfiles"
+#PKGDIR="/usr/packages"
+
+die(){ echo >&2 "$@";exit 1; }
+if [ "$(id -u)" -ne 0 ];then die "Requires root, exiting.";fi
+finish() { if [ -d "${tmpdir}" ];then rm --preserve-root -r "${tmpdir}";fi }
+trap 'exit 1' INT HUP QUIT TERM USR1
+trap finish EXIT
+tmpdir=$(mktemp -d)
+
+date=$(date +%F-%H%M)
+user="brandon"
+group="${user}"
+data="/mnt/data/backup/gentoo"
+mode="z"
+
+dir_check(){ if ! [ -d "${target_dest}" ]; then mkdir -p "${target_dest}";fi; }
+xz_name(){ target_xz="${name}-${date}.tar.xz";target_dest="${data}/${name}"; }
+xz_move(){ mv -i "${tmpdir}/${target_xz}" "${target_dest}"; }
+xz_chmod(){ chown -R "${user}:${group}" "${tmpdir}"; }
+tar_nx(){ XZ_OPT="-e9" tar --xattrs -cJpf "${tmpdir}/${target_xz}" "${target_dir}"; }
+tar_git(){ XZ_OPT="-e9" tar --exclude="${target_dir}/.git" --exclude="${target_dir}/*/.git" --xattrs -cJpf "${tmpdir}/${target_xz}" "${target_dir}"; }
+
+hlp(){
+	printf " -a\teverything\n"
+	printf " -h\tprint this help\n"
+	printf " -1\tpackages\n"
+	printf " -2\tportage\n"
+	printf " -3\tportage local\n"
+	printf " -4\tportage etc\n"
+	printf " -5\tportage world\n"
+	printf " -6\tlayman\n"
+}
+
+if [ -z "${1}" ];then hlp;exit 1;fi
+while true;do
+	case "$1" in
+		-1) mode="packages";shift;;
+		-2) mode="portage";shift;;
+		-3) mode="portage_local";shift;;
+		-4) mode="portage_etc";shift;;
+		-5) mode="portage_world";shift;;
+		-6) mode="layman";shift;;
+		-a) mode="all";shift;;
+		-h) hlp;shift;;
+		*) break;;
+	esac
+done
+
+case ${mode} in
+	packages)
+		target_dest="${data}/packages"
+		dir_check
+		work="${tmpdir}/packages-${date}"
+		mkdir "${work}"
+		export PKGDIR="${work}"
+		#export BINPKG_COMPRESS="xz"
+		#export BINPKG_COMPRESS_FLAGS="-9e"
+		quickpkg --include-config=y "*/*"
+		xz_chmod
+		mv -i "${work}" "${target_dest}"
+		;;
+	portage)
+		name="portage"
+
+		target_dir=$(grep PORTDIR= /etc/portage/make.conf|sed 's/PORTDIR=//g;s/"//g')
+		xz_name
+		dir_check
+		tar_git
+		xz_chmod
+		xz_move
+		;;
+	portage_local)
+		name="portage-local"
+		target_dir=$(grep PORTDIR_OVERLAY= /etc/portage/make.conf|sed 's/PORTDIR_OVERLAY=//g;s/"//g')
+		xz_name
+		dir_check
+		tar_nx
+		xz_chmod
+		xz_move
+		;;
+	portage_etc)
+		name="portage-etc"
+		target_dir="/etc/portage"
+		xz_name
+		dir_check
+		tar_nx
+		xz_chmod
+		xz_move
+		;;
+	portage_world)
+		name="portage-world"
+		target_dir="/var/lib/portage"
+		xz_name
+		dir_check
+		tar_nx
+		xz_chmod
+		xz_move
+		;;
+	layman)
+		name="layman"
+		target_dir="/var/lib/layman"
+		xz_name
+		dir_check
+		tar_git
+		xz_chmod
+		xz_move
+		;;
+	all)
+		"${0}" -2 &
+		"${0}" -3 &
+		"${0}" -4 &
+		"${0}" -5 &
+		"${0}" -6 &
+		"${0}" -1
+		;;
+	*) hlp;exit 1;;
+esac

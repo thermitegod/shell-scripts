@@ -1,0 +1,64 @@
+#!/bin/sh
+#4.0.0
+#2018-09-23
+
+#Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
+#
+#This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+finish() { if [ -d "${tmpdir}" ];then rm --preserve-root -r "${tmpdir}";fi }
+trap 'exit 1' INT HUP QUIT TERM USR1
+trap finish EXIT
+tmpdir=$(mktemp -d)
+chmod 755 "${tmpdir}"
+mode="single"
+
+hlp(){
+	printf " -B\tBatch mode\n"
+	printf " -h\tPrint this help\n"
+	printf " -i\tInclude iso files\n"
+}
+
+while true;do
+	case "${1}" in
+		-B) find . -maxdepth 1 -type d \( ! -name . \) -exec dash -c 'cd "{}" && ${0}' \;exit;;
+		-i) inc_iso="1";shift;;
+		-h) hlp;exit;;
+		*) break;;
+	esac
+done
+
+#printf "Tmpdir: %s\n" "${tmpdir}"
+O="${PWD}/original"
+if ! [ -d "${O}" ];then mkdir "${O}";fi
+
+for f in *;do
+	mimetype=$(file -b --mime-type "${f%%}")
+	ext="${f##*.}"
+	if [ -f "${f%%}" ] && [ "${mimetype%%/*}" = "video" ] && ! [ "${ext}" = "mkv" ];then
+
+		if [ "${inc_iso}" = "1" ] && [ -f "${f%.*}.${iso}" ];then
+			find . -iname '*.iso' -exec 7z x -- '{}' \;
+			cd ./VIDEO_TS
+		fi
+
+		ffmpeg -hide_banner -i "${f}" -c:a copy -c:v copy -c:s copy "${tmpdir}/${f%.*}.mkv"
+		mv "${tmpdir}/${f%.*}.mkv" "${PWD}"
+		mv "${f}" "${O}"
+
+		if [ "${inc_iso}" = "1" ] && [ -f "${f%.*}.${iso}" ];then mv *.mkv ../;fi
+	fi
+done
+
+if [ -d "${O}" ] && ! [ "$(ls -A $O)" ];then rm -rf "${O}";fi

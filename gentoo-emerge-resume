@@ -1,0 +1,103 @@
+#!/bin/sh
+#5.2.0
+#2018-06-14
+
+#Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
+#
+#This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+die(){ echo >&2 "$@";exit 1; }
+finish(){ if [ -d "${tmpdir}" ];then rm --preserve-root -r "${tmpdir}";fi }
+trap 'exit 1' INT HUP QUIT TERM USR1
+trap finish EXIT
+tmpdir=$(mktemp -d)
+chmod 755 "${tmpdir}"
+
+res_specific="0"
+date=$(date "+%F-%s")
+store="/mnt/data/backup/emerge-resume"
+resume="/var/cache/edb/mtimedb"
+mtime_xz="mtimedb-${date}.tar.xz"
+user="brandon"
+group="${user}"
+
+bac() {
+	if ! [ -d "${store}" ]; then mkdir -p ${store} && chown ${user}:${group} ${store};fi
+	if [ -f "${store}/${mtime_xz}" ]; then rm ${store}/${mtime_xz};fi
+	cp ${resume} ${tmpdir}
+	cd ${tmpdir}
+	XZ_OPT="-e9" tar --xattrs -cJf ${mtime_xz} mtimedb
+	rm mtimedb
+	mv ${mtime_xz} ${store}
+	chown ${user}:${group} ${store}/${mtime_xz}
+	printf "Finished backup of %s to %s\n" "${mtime_xz}" "${store}"
+}
+
+res() {
+	if ! [ -d "${store}" ]; then die "Run a backup first. Exiting.";fi
+	if [ -f "${resume}" ]; then rm ${resume};fi
+	if [ "${res_specific}" = "1" ];then
+		printf "Selected mtimedb to restore\n"
+		printf "==MUST== input full name\n"
+		cd "${store}"
+		ls -1A
+		read mtime_res
+	else
+		mtime_res=$(ls -1A|tail -n1)
+	fi
+
+	cp ${store}/${mtime_res} ${tmpdir}
+	cd ${tmpdir}
+	tar --xattrs -xJf ${mtime_res}
+	mv mtimedb ${resume}
+	rm ${mtime_res}
+	printf "Finished restore of %s to %s\n" "${mtime_res}" "${resume}"
+}
+
+list() {
+	if ! [ -d "${store}" ]; then die "Run a backup first. Exiting.";fi
+	printf "Listing files in : ${store}\n"
+	ls -1A ${store}
+}
+
+del() {
+	if [ -d "${store}" ]; then
+		rm -rf ${store}
+		printf "Deleted ${store}\n"
+	else
+		printf "Nothing to delete\n"
+	fi
+}
+
+hlp() {
+	printf " -b\tbackup\n"
+	printf " -r\trestore last <BROKEN>\n"
+	printf " -s\trestore selected\n"
+	printf " -l\tlist\n"
+	printf " -d\tdelete\n"
+	printf " -h\tprint this help\n"
+}
+
+while true;do
+	case "$1" in
+		-b) bac;shift;;
+		#-r) res;shift;;
+		-r) die "Disabled, use -s";;
+		-s) res_specific="1";res;shift;;
+		-l) list;shift;;
+		-d) del;shift;;
+		-h) hlp;return;;
+		*) break;;
+	esac
+done

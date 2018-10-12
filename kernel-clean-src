@@ -1,0 +1,69 @@
+#!/bin/sh
+#3.0.0
+#2018-07-11
+
+#Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
+#
+#This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+if [ $(id -u) -ne 0 ]; then printf "Requires root, exiting.\n";return;fi
+finish(){ if [ -d "${tmpdir}" ];then rm --preserve-root -r "${tmpdir}";fi }
+trap 'exit 1' INT HUP QUIT TERM USR1
+trap finish EXIT
+tmpdir=$(mktemp -d)
+
+hlp() {
+	printf " -c\tclean only /usr/src/linux symlink\n"
+	printf " -C\tclean /usr/src/linux*\n"
+	printf " -h\tprint this help\n"
+	printf " -r\tremove all dirs in /usr/src\n"
+}
+
+mode="clean"
+while true;do
+	case "${1}" in
+		-r) mode="remove";shift;;
+		-c) mode="clean";shift;;
+		-C) mode="cleanall";shift;;
+		-h) hlp;return;;
+		--) break;;
+		*) break;;
+	esac
+done
+
+case "${mode}" in
+	clean)
+		kdir="/usr/src/linux"
+		mv "${kdir}"/.config "${tmpdir}"
+		cd "${kdir}"
+		make distclean
+		mv "${tmpdir}"/.config "${kdir}"
+		;;
+	cleanall)
+		ksrc="/usr/src"
+		for f in $ksrc/*;do
+			if [ -d "${f}" ];then
+				cd "${f}"
+				make distclean
+			fi
+		done
+
+		;;
+	remove)
+		ksrc="/usr/src"
+		for f in $ksrc/*;do
+			rm -rf "${f}"
+		done
+		;;
+esac

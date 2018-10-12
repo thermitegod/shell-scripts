@@ -1,0 +1,144 @@
+#!/bin/sh
+#1.14.0
+#2018-09-21
+
+#Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
+#
+#This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+mode="manga"
+basedir=$(dirname ${0})
+match_zzz="0"
+numerical_rename="0"
+
+optimize="1"
+show_time="1"
+comp_test="1"
+mime_check="1"
+comp_advzip="1"
+remove_win_osx="1"
+detect_nested_dirs="1"
+
+hlp() {
+	printf "General\n"
+	printf " -h\tPrint this help\n"
+	printf "Enable\n"
+	printf " -m\tEnable hentai mode\n"
+	printf " -r\tEnable numerical renaming\n"
+	printf "Disable\n"
+	printf " -A\tDisable mkadvzip\n"
+	printf " -D\tDisable nested directory detection\n"
+	printf " -M\tDisable mime checker\n"
+	printf " -O\tDisable image optimizer\n"
+	printf " -R\tDisable junk file removal\n"
+	printf " -T\tDisable compressed file test\n"
+	printf " -t\tDisable time total\n"
+	printf " -z\tDisable zzz matching in credits\n"
+}
+
+while true;do
+	case "$1" in
+		-A) comp_advzip="0";shift;;
+		-D) detect_nested_dirs="0";shift;;
+		-R) remove_win_osx="0";shift;;
+		-M) mime_check="0";shift;;
+		-t) show_time="0";shift;;
+		-T) comp_test="0";shift;;
+		-O) optimize="0";shift;;
+		-r) numerical_rename="1";shift;;
+		-z) match_zzz="1";shift;;
+		-m) mode="hentai";shift;;
+		-h) hlp;return;;
+		*) break;;
+	esac
+done
+
+if [ "${detect_nested_dirs}" = "1" ];then
+	nest_dir=$(find . -mindepth 2 -path '*/*' -type d)
+	if [ -n "${nest_dir}" ];then
+		printf "Nested directories detected\n\n${nest_dir}\n\n"
+	fi
+fi
+
+if [ "${remove_win_osx}" = "1" ];then
+	${basedir}/remove-win-osx-files -l
+	${basedir}/remove-win-osx-files -r -A
+fi
+
+g=$(${basedir}/remove-manga-credits -l)
+if [ -n "${g}" ];then
+	printf "${g}\n\n"
+	if [ "${mode}" = "hentai" ];then
+		printf "Enter to remove found credits\n"
+		read z;unset z
+		if [ "${match_zzz}" = "1" ];then
+			${basedir}/remove-manga-credits -r -z
+		else
+			${basedir}/remove-manga-credits -r
+		fi
+	else
+		printf "Printing found, will NOT remove, use -m to remove\n"
+	fi
+fi
+unset g
+
+if [ "${numerical_rename}" = "1" ];then
+	${basedir}/rename-numerical-batch >/dev/null 2>&1
+fi
+
+printf "\n\nMode is : ${mode}\n\n"
+
+if [ "${mime_check}" = "1" ];then
+	${basedir}/mime-correct -A
+	printf "\n"
+fi
+
+${basedir}/count-archive
+${basedir}/count-image
+
+printf "Size\t: $(du -h .|tail -n1|awk '{print $1}')\n"
+
+printf "Choose archive type [DEFAULT:1]\n"
+printf "1: zip-dir-destructive\n"
+printf "2: zip-dir-destructive-nojunkpath\n"
+printf "3: 7z-dir-destructive\n"
+read archivetype
+
+if [ "${show_time}" = "1" ];then
+	datestart=$(date)
+fi
+
+if [ "${optimize}" = "1" ];then
+	${basedir}/optimize-all -m -v
+fi
+
+case "${archivetype}" in
+	1) ${basedir}/mkzip -z;;
+	2) ${basedir}/mkzip -Z;;
+	3) ${basedir}/mk7z -P -z;;
+	*) ${basedir}/mkzip -z;;
+esac
+
+if [ "${comp_advzip}" = "1" ] && ! [ "${archivetype}" = "3" ];then
+	${basedir}/mkadvzip -a
+fi
+
+if [ "${comp_test}" = "1" ];then
+	${basedir}/mk7z -t
+fi
+
+if [ "${show_time}" = "1" ];then
+	printf "Started\t\t: ${datestart}\n"
+	printf "Finished\t: $(date)\n"
+fi

@@ -1,0 +1,72 @@
+#!/bin/sh
+#1.5.0
+#2018-09-21
+
+#Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
+#
+#This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#TODO
+#list only option
+#make less shit
+
+mime_type_image(){
+	if [ -d "${f}" ];then return;fi
+	C=$((C+1))
+	mimeext=$(file -b --mime-type -- "${f%%}"|awk '{print $NF}' FS=/)
+	if ! [ "${mimeext}" = "jpeg" ] && ! [ "${mimeext}" = "png" ] && ! [ "${mimeext}" = "gif" ];then return;fi
+	ext="${f##*.}"
+	if [ "${mimeext}" = "jpeg" ] && [ "${ext}" = "jpg" ];then return;fi
+	if ! [ "${mimeext}" = "${ext}" ];then
+		printf "Mismatch : $(readlink -f ${f%%})\n"
+		if ! [ -f "${f%%.*}.${mimeext}" ] && [ "${listonly}" = "0" ];then
+			if [ "${mimeext}" = "jpeg" ];then mimeext="jpg";fi
+			mv -v "${f%%}" "${f%%.*}.${mimeext}"
+		else
+			printf "File collision : $(readlink -f ${f%%})\n"
+		fi
+	fi
+}
+
+#basedir=$(dirname ${0})
+#echo $basedir
+#exit
+
+while true;do
+	case "${1}" in
+		-I)
+			C="0"
+			listonly="0"
+			for f in *;do mime_type_image;done
+			#if ! [ "${C}" = "0" ];then printf "Checked : ${C} in : ${PWD}\n";fi
+			if ! [ "${C}" = "0" ];then printf "Checked : ${C}\n";fi
+			break;;
+		-L)
+			C="0"
+			listonly="1"
+			for f in *;do mime_type_image;done
+			if ! [ "${C}" = "0" ];then printf "Checked : ${C}\n";fi
+			break;;
+		-A)
+			printf "Checking file mime info\n"
+			find . -type d -exec dash -c 'cd "{}" && /usr/local/bin/mime-correct -I' \; #basedir wont work here, unknown why
+			break;;
+		*)
+			printf "Invalid selection\n"
+			printf " -A\trun in all sub-dirs of \$PWD\n"
+			printf " -I\trun in single dir only\n"
+			printf " -L\tlist only, no corrections\n"
+			break;;
+	esac
+done

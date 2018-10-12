@@ -1,0 +1,52 @@
+#!/bin/sh
+#3.2.0
+#2018-10-12
+
+#Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
+#
+#This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+verbose="1"
+advall="0"
+
+while true;do
+	case "$1" in
+		-a) advall="1";shift;;
+		-q) verbose="0";shift;;
+		*) break;;
+	esac
+done
+
+if [ ${advall} = "1" ];then
+	if [ ${verbose} = "1" ];then
+		bf1=$(du|tail -n1)
+		bf2=$(du -h|tail -n1)
+	fi
+
+	find . -type f -iname "*.zip" -print0 | nice -19 xargs --max-args=1 --max-procs=$(nproc) --null /usr/bin/advzip -z -4
+
+	if [ ${verbose} = "1" ];then
+		af1=$(du|tail -n1)
+		af2=$(du -h|tail -n1)
+		printf "Before : ${bf1}\t${bf2}\n"
+		printf "After  : ${af1}\t${af2}\n"
+	fi
+	return
+else
+	if [ -z "$1" ]; then
+		printf "Nothing to compress\n"
+		return
+	fi
+	nice -19 /usr/bin/advzip -z -4 "${1}"
+fi

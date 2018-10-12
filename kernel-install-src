@@ -1,0 +1,61 @@
+#!/bin/sh
+#2.2.0
+#2018-09-26
+
+#Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
+#
+#This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+if [ $(id -u) -ne 0 ]; then printf "Requires root, exiting.\n";return;fi
+
+hlp() {
+	printf "Defaults too sys-kernel/gentoo-sources\n"
+	printf " -g\tinstall sys-kernel/git-sources\n"
+	printf " -h\tPrint this help\n"
+	printf " -v\tverbose emerge\n"
+}
+
+mode="release"
+v="0"
+while true;do
+	case "$1" in
+		-h) hlp;return;;
+		-v) v="1";shift;;
+		-g) mode="git";shift;;
+		*) break;;
+	esac
+done
+
+case "${mode}" in
+	git)
+		#emerge --ignore-default-opts --oneshot "${v}" sys-kernel/gentoo-sources
+		if [ "${v}"  = "1" ];then
+			emerge --ignore-default-opts --oneshot --verbose sys-kernel/git-sources
+		else
+			emerge --ignore-default-opts --oneshot --quiet  sys-kernel/git-sources
+		fi
+		;;
+	release)
+		if [ "${v}"  = "1" ];then
+			emerge --ignore-default-opts --oneshot --verbose sys-kernel/gentoo-sources
+		else
+			emerge --ignore-default-opts --oneshot --quiet sys-kernel/gentoo-sources
+		fi
+		;;
+esac
+
+if [ -f "/proc/config.gz" ];then
+	printf "Installing running kernel config\n"
+	zcat /proc/config.gz >| /usr/src/linux/.config
+fi

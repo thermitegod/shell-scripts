@@ -1,0 +1,83 @@
+#!/bin/sh
+#2.3.0
+#2018-09-21
+
+#Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
+#
+#This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#TODO
+#improve hash check
+#debug flags
+#make less shit
+
+hlp(){
+	printf " -b\tBatch mode\n"
+	printf " -h\tPrint this help\n"
+}
+
+arrfix() {
+	array1=$(echo "$array"|cut -d ' ' -f 1)
+	newname="${array1}.${f##*.}"
+}
+
+v2() {
+	#will force natural order
+	#for f in `ls -1A|sort -V`;do
+	for f in $files;do
+		if [ -f "${f%%}" ];then
+			arrfix
+			if ! [ -f "${newname}" ];then
+				mv -- "${f%%}" "${newname}" #>/dev/null 2>&1
+			else
+				a=$(md5sum "${f%%}")
+				b=$(md5sum "${newname}")
+				if [ "${a}" = "${b}" ];then
+					printf "Same File not renaming\n"
+				else
+					printf "diferent files with same filename exist\n"
+				fi
+			fi
+			#echo ${f%%}
+			#echo $array1
+			array=$(echo "$array"|sed "s/[^ ]* //")
+		fi
+	done
+}
+
+num=$(ls -1A|wc -l)
+int=$(seq -w -s ' ' ${num})
+array="${int}"
+files=$(ls -1A|sort -V)
+mode="single"
+
+while true;do
+	case "$1" in
+		-b) mode="batch";shift;;
+		-h) hlp;exit;;
+		*) break;;
+	esac
+done
+
+case "${mode}" in
+	single)
+		#echo $num
+		#echo $int
+		#echo $array
+		v2
+		;;
+	batch)
+		find . -maxdepth 1 -type d \( ! -name . \) -exec cd -- '{}' && "${0}" \;
+		;;
+esac

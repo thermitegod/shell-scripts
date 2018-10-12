@@ -1,0 +1,72 @@
+#!/bin/sh
+#3.6.0
+#2018-09-19
+
+#Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
+#
+#This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+comp_decrypt="0"
+comp_files="0"
+comp_rm="0"
+
+user="brandon"
+
+hlp() {
+	printf " default will gpg files passed in \$1\n"
+	printf " -d\tDecrypt\n"
+	printf " -f\tgpg all files\n"
+	printf " -h\tprint this help\n"
+	printf " -s\tgpg \$1, delete after gpg\n"
+	printf " -x\tgpg all files, delete original after gpg\n"
+}
+
+compress() {
+	if [ "${comp_decrypt}" = "0" ];then
+		printf "Encrypting : ${f%%}\n"
+		nice -19 gpg --yes --batch -e -r "${user}" "${f%%}"
+		if [ "${comp_rm}" = "1" ];then rm -r "${f%%}";fi
+	elif [ "${comp_decrypt}" = "1" ] && [ -f "${f%%.*}.gpg" ];then
+		printf "Decrypting : ${f%%}\n"
+		#printf "output ${f%%.*}\n"
+		#printf "decrypt ${f%%}\n"
+		nice -19 gpg --output "${f%%.*}" --decrypt "${f%%}"
+	fi
+}
+
+while true;do
+	case "$1" in
+		-D) comp_decrypt="1";shift;;
+		-f) comp_files="1";shift;;
+		-s) comp_rm="1";shift;;
+		-x) comp_files="1";comp_rm="1";shift;;
+		-h) hlp;exit;;
+		*) break;;
+	esac
+done
+
+if [ -n "${1}" ] && ! [ -e "${1}" ];then
+	printf "Not a valid file : %s\n" "${1}"
+elif [ -n "${1}" ] && [ -e "${1}" ];then
+	f="${1%%}"
+	compress
+elif [ "${comp_files}" = "1" ];then
+	for f in *; do
+		if [ -f "${f}" ];then
+			compress
+		fi
+	done
+else
+	printf "Something is broken\n";return
+fi

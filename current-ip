@@ -1,0 +1,49 @@
+#!/bin/sh
+#2.5.0
+#2018-07-11
+
+#Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
+#
+#This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+hlp() {
+	printf " -d\tdaily files timestamped\n"
+	printf " -h\tPrint this help\n"
+}
+
+mode="once"
+
+while true;do
+	case "$1" in
+		-d) mode="daily";shift;;
+		-h) hlp;break;;
+		*) break;;
+	esac
+done
+
+date_day=$(date "+%F")
+date_time=$(date "+%H:%M:%S")
+ip=$(curl --max-time 30 --silent ifconfig.co)
+if [ -z "${ip}" ];then ip="DOWN";fi
+
+case "${mode}" in
+	daily)
+		d="${HOME}/documents/internet"
+		if ! [ -d "${d}" ];then mkdir -p "${d}";fi
+		printf "${date_day} ${date_time} : ${ip}\n" >> "${d}/${date_day}.txt"
+		;;
+	once)
+		printf "${date_day} ${date_time} : ${ip}\n"
+		;;
+esac

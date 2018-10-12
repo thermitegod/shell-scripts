@@ -1,0 +1,60 @@
+#!/bin/sh
+#1.5.0
+#2018-04-18
+
+#Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
+#
+#This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+if [ "$(id -u)" -ne 0 ];then printf "Requires root, exiting.\n";return;fi
+if ! [ -f "/usr/src/linux/usr/gen_init_cpio" ];then printf "Make sure the kernel is build first\n";exit;fi
+
+log="/dev/null"
+#log="/tmp/genkernel-initgen.log"
+
+export XZ_OPT="-9e"
+genkernel initramfs \
+	--logfile=${log} \
+	--install \
+	--makeopts=-j$(($(nproc)+1)) \
+	--loglevel=1 \
+	--kernel-config=/usr/src/linux/.config \
+	--no-ramdisk-modules \
+	--busybox \
+	--compress-initramfs \
+	--compress-initramfs-type=xz \
+	--no-clean \
+	--no-mountboot \
+	--no-keymap \
+	--no-lvm \
+	--no-mdadm \
+	--no-nfs \
+	--no-dmraid \
+	--no-btrfs \
+	--no-multipath \
+	--no-iscsi \
+	--no-hyperv \
+	--no-ssh \
+	--no-luks \
+	--no-gpg \
+	--no-unionfs \
+	--no-netboot \
+	--e2fsprogs \
+	--no-dmraid \
+	--postclear \
+	--no-splash \
+	--strip=all \
+	--zfs \
+	--firmware \
+	--firmware-dir=/lib/firmware

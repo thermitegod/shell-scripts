@@ -1,0 +1,68 @@
+#!/bin/sh
+#5.1.0
+#2018-04-23
+
+#Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
+#
+#This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+zzz="1"
+tst="0"
+frm="0"
+fls="0"
+
+hlp() {
+	printf " -h\tprint this help\n"
+	printf " -l\tList found\n"
+	printf " -r\tRemove found\n"
+	printf " -t\tUse test dir '/tmp/test'\n"
+	printf " -z\tDisable 'zzz' matching\n"
+}
+
+if [ -z "${1}" ];then hlp;return;fi
+
+while true;do
+	case "$1" in
+		-r) frm="1";shift;;
+		-l) fls="1";shift;;
+		-t) tst="1";shift;;
+		-z) zzz="0";shift;;
+		-h) hlp;return;;
+		*) break;;
+	esac
+done
+
+if [ ${tst} = "0" ];then
+	d="/mnt/data/hentai-processing/credits"
+else
+	d="/tmp/test/credits"
+fi
+
+
+find_credits(){
+	if [ "${fls}" = "1" ];then
+		j=$(find . -iname "${1}" -exec ls -1A -- "{}" \;)
+		if ! [ -z "${j}" ];then printf "*** Found 'POSSIBLE' credit files ***\n${j}\n";fi
+	fi
+	if [ "${frm}" = "1" ];then
+		find . -type f -iname "${1}" -exec mv -v -- "{}" "${d}" \;
+	fi
+}
+
+find_credits *credit*.j*pg
+find_credits *credit*.png
+if [ ${zzz} = "1" ] || [ "${fls}" = "1" ];then
+	find_credits *zzz*.j*pg
+	find_credits *zzz*.png
+fi

@@ -1,0 +1,105 @@
+#!/bin/sh
+#1.7.0
+#2018-09-21
+
+#Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
+#
+#This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+finish() { if [ -d "${tmpdir}" ];then rm --preserve-root -r "${tmpdir}";fi }
+trap 'exit 1' INT HUP QUIT TERM USR1
+trap finish EXIT
+tmpdir=$(mktemp -d)
+
+date=$(date "+%F-%H%M")
+user="brandon"
+group="${user}"
+backup_dir="/mnt/data/backup"
+
+dir_check(){ if ! [ -d "${target_dest}" ];then mkdir -p "${target_dest}";fi }
+move_finish(){
+	chown -R "${user}:${group}" "${tmpdir}"
+	mv -iv "${tmpdir}/${target_xz}" "${target_dest}"
+}
+
+mode="${0##*/}"
+case "${mode}" in
+	backup-chromium)
+		target_source="${HOME}/.config"
+		target_dest="${backup_dir}/${user}/chromium-profile"
+		dir_check
+		cd "${target_source}"
+		for f in *chromium*;do
+			target_xz="${date}-${user}-${f}.tar.xz"
+			XZ_OPT="-e9" tar \
+				--exclude="${f}/Default/File System" \
+				--xattrs -cJpvf "${tmpdir}/${target_xz}" "${f}"
+		done
+		move_finish
+		;;
+	backup-user-config)
+		target_xz="${user}-config-${date}.tar.xz"
+		target_source="${HOME}/.config"
+		target_dest="${backup_dir}/${user}/config"
+		dir_check
+		XZ_OPT="-e9" tar \
+			--exclude="${target_source}/*chromium*" \
+			--exclude="${target_source}/rtorrent/session/*" \
+			--exclude="${target_source}/kernel/src/*" \
+			--exclude="${target_source}/kernel/distfiles/*" \
+			--xattrs -cJpvf "${tmpdir}/${target_xz}" "${target_source}"
+		;;
+	backup-user-local)
+		target_xz="${user}-local-${date}.tar.xz"
+		target_source="${HOME}/.local"
+		target_dest="${backup_dir}/${user}/local"
+		dir_check
+		XZ_OPT="-e9" tar \
+			--exclude="${target_source}/share/Trash/*" \
+			--xattrs -cJpvf "${tmpdir}/${target_xz}" "${target_source}"
+		move_finish
+		;;
+	backup-etc)
+		target_xz="etc-${date}.tar.xz"
+		target_source="/etc"
+		target_dest="${backup_dir}/etc"
+		dir_check
+		XZ_OPT="-e9" tar \
+			--xattrs -cJpvf "${tmpdir}/${target_xz}" "${target_source}"
+		move_finish
+		;;
+	backup-user-bin)
+		target_xz="${date}-${user}-bin.tar.xz"
+		target_source="${HOME}/.bin"
+		target_dest="${backup_dir}/${user}/bin"
+		dir_check
+		mkdir "${tmpdir}"/bin
+		cp -r "${target_source}" "${tmpdir}/bin"
+		cd "${tmpdir}"
+		XZ_OPT="-e9" tar \
+			--xattrs -cJpvf "${tmpdir}/${target_xz}" ./bin
+		rm -rf "${tmpdir}/bin"
+		move_finish
+		;;
+	backup-vnstat)
+		year=$(date "+%Y")
+		month=$(date "+%m")
+		day=$(date "+%d")
+		target_source="${HOME}/.config/vnstat"
+		target_dest="${backup_dir}/vnstat-database"
+		mkdir -p "${target_dest}/${year}/${month}"
+		cp -r "${target_source}" "${target_dest}/${year}/${month}/${day}"
+		;;
+	backup-meta) printf "Not run directly\n";exit;;
+esac

@@ -1,0 +1,135 @@
+#!/bin/sh
+#4.1.0
+#2018-04-26
+
+#Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
+#
+#This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+verbose="1"
+audio="0"
+
+hlp() {
+	printf " -a\tonly download audio\\n"
+	printf " -e\tedit batch file\n"
+	printf " -r\trun batch file\n"
+	printf " -q\tfork and dont show output\\n"
+	printf " -h\tprint this help\n"
+}
+
+while true;do
+	case "${1}" in
+		-e) mode="edit";shift;;
+		-r) mode="batch";shift;;
+		-a) audio="1";shift;;
+		-q) verbose="0";shift;;
+		-h) hlp;return;;
+		*) break;;
+	esac
+done
+
+dl() {
+	printf "downloading : %s\n" "${link}"
+	youtube-dl \
+		--geo-bypass \
+		--no-overwrites \
+		--continue \
+		--no-call-home \
+		--yes-playlist \
+		--audio-format best \
+		--audio-quality 0 \
+		--no-check-certificate \
+		"${link}"
+	printf "downloaded : %s\n" "${link}"
+}
+
+dla() {
+	printf "downloading audio : %s\n" "${link}"
+	youtube-dl \
+		--geo-bypass \
+		--no-overwrites \
+		--continue \
+		--no-call-home \
+		--yes-playlist \
+		--audio-format best \
+		--audio-quality 0 \
+		--no-check-certificate \
+		--extract-audio
+		"${link}"
+	printf "downloaded audio : %s\n" "${link}"
+}
+
+batch_dl(){ while read -r line;do dl "${line}";done < "${links}"; }
+links="/tmp/ytdl-batch.txt"
+case "${mode}" in
+	batch)
+		c="1"
+		while read -r line;do
+			echo
+			youtube-dl \
+				--geo-bypass \
+				--no-overwrites \
+				--continue \
+				--no-call-home \
+				--yes-playlist \
+				--audio-format best \
+				--audio-quality 0 \
+				--no-check-certificate \
+				"${line}"
+			echo $c
+			echo
+			c=$((c+1))
+		done < "${links}"
+		exit
+		;;
+	edit) $EDITOR /tmp/ytdl-batch.txt;;
+esac
+
+
+if [ -z "${1}" ];then
+	link=$(xclip -o)
+	link_check=$(echo ${link}|grep http)
+	if [ -z "${link_check}" ];then
+		printf "%s : not a valid link\n" "${link}"
+		return
+	fi
+	if [ ${verbose} = "1" ];then
+		if [ ${audio} = "0" ];then
+			dl
+		else
+			dla
+		fi
+	else
+		if [ ${audio} = "0" ];then
+			dl >/dev/null 2>&1 &
+		else
+			dla >/dev/null 2>&1 &
+		fi
+	fi
+elif ! [ -z "${1}"];then
+	link="${1}"
+	link_check=$(echo ${link}|grep http)
+	if [ -z "${link_check}" ];then
+		printf "%s : not a valid link\n" "${link}"
+		return
+	fi
+	if [ ${audio} = "0" ];then
+		dl
+	else
+		dla
+	fi
+else
+	printf "Need something to download\n"
+	return
+fi

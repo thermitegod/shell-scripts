@@ -1,0 +1,123 @@
+#!/bin/sh
+#5.3.0
+#2018-10-06
+
+#Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
+#
+#This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <https://www.gnu.org/licenses/>.<Paste>
+
+if [ "$(id -u)" -ne 0 ];then printf "Requires root, exiting.\n";return;fi
+ch_1(){ ch="/mnt/gentoo" ; }
+#ch_3(){ ch="/mnt/" ; }
+
+mount_sys(){
+	mount -t proc proc "${ch}/proc"
+	mount --rbind /sys "${ch}/sys"
+	mount --rbind /dev "${ch}/dev"
+}
+
+umount_sys(){
+	umount "${ch}/proc"
+	umount "${ch}/sys"
+	umount "${ch}/dev"
+}
+
+mount_bind(){
+	portage=$(grep PORTDIR= /etc/portage/make.conf|sed 's/PORTDIR=//g;s/"//g')
+	portagelocal=$(grep PORTDIR_OVERLAY= /etc/portage/make.conf|sed 's/PORTDIR_OVERLAY=//g;s/"//g')
+	packages=$(grep PKDIR= /etc/portage/make.conf|sed 's/PKDIR=//g;s/"//g')
+	distfiles=$(grep DISTDIR= /etc/portage/make.conf|sed 's/DISTDIR=//g;s/"//g')
+	if ! [ -d "${ch}/${portage}" ];then mkdir -p "${ch}/${portage}";fi
+	if ! [ -d "${ch}/${portagelocal}" ];then mkdir -p "${ch}/${portagelocal}";fi
+	if ! [ -d "${ch}/${distfiles}" ];then mkdir -p "${ch}/${distfiles}";fi
+	mount --bind "${portage}" "${ch}/${portage}"
+	mount --bind "${portagelocal}" "${ch}/${portagelocal}"
+	mount --bind "${packages}" "${ch}/${packages}"
+	mount --bind "${distfiles}" "${ch}/${distfiles}"
+	#TODO find better way
+	mount --bind /var/db/repos/layman /mnt/gentoo/usr/layman
+}
+
+umount_bind(){
+	portage=$(grep PORTDIR= /etc/portage/make.conf|sed 's/PORTDIR=//g;s/"//g')
+	portagelocal=$(grep PORTDIR_OVERLAY= /etc/portage/make.conf|sed 's/PORTDIR_OVERLAY=//g;s/"//g')
+	distfiles=$(grep DISTDIR= /etc/portage/make.conf|sed 's/DISTDIR=//g;s/"//g')
+	umount "${ch}/${portage}"
+	umount "${ch}/${portagelocal}"
+	umount "${ch}/${distfiles}"
+}
+
+shell_check(){
+	if [ -f "${ch}"/bin/zsh ];then S="zsh"
+	elif [ -f "${ch}"/bin/bash ];then S="bash"
+	elif [ -f "${ch}"/bin/sh ];then S="sh"
+	else
+		printf "no shells in chroot location, ensure validity, exiting."
+		exit 1
+	fi
+}
+
+hlp(){
+	printf " -A\tOnly mount binds\n"
+	printf " -b\tDont mount binds\n"
+	printf " -B\tunmount binds portage\n"
+	printf " -h\tprint this help\n"
+	printf " -u\tumount binds sys\n"
+}
+
+setup="init"
+mountbind="1"
+
+
+while true;do
+	case "$1" in
+		-A) setup="bind";return;;
+		-b) mountbind="0";return;;
+		-B) setup="ubind";return;;
+		-h) hlp;return;;
+		-u) setup="usys";shift;;
+		*) break;;
+	esac
+done
+
+printf "Gentoo chroot location\n"
+ch_1;printf "1: ${ch}\n"
+#ch_2;printf "2: ${ch}\n"
+#ch_3;printf "3: ${ch}\n"
+unset ch
+read ch_loc
+#if [ -n "${ch_loc}" ];then ch="${ch_loc}";fi
+
+case "${ch_loc}" in
+	1) ch_1;;
+	2) ch_2;;
+	*) printf "INVALID\n";return
+esac
+
+case "${setup}" in
+	init)
+		shell_check
+		if ! [ -d "${ch}/proc" ];then printf "Invalid location. Missing ${ch}/proc\n";exit 1;fi
+		if ! [ -d "${ch}/sys" ];then printf "Invalid location. Missing ${ch}/sys\n";exit 1;fi
+		if ! [ -d "${ch}/dev" ];then printf "Invalid location. Missing ${ch}/dev\n";exit 1;fi
+		mount_sys
+		if [ "${mountbind}" = "1" ];then mount_bind;fi
+		chroot "${ch}" /bin/${S}
+		;;
+	usys) umount_sys;;
+	bind)
+		echo 1
+		mount_bind;;
+	ubind) umount_bind;;
+esac

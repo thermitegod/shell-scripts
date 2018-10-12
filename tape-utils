@@ -1,0 +1,139 @@
+#!/bin/sh
+#1.0.0
+#2018-03-10
+
+#Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
+#
+#This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#TODO
+#xz tar
+#use statusbar in mkxz?
+#???
+
+if [ "$(id -u)" -ne 0 ];then printf "Requires root, exiting.\n";return;fi
+
+tape="/dev/st0"
+
+t_rewind(){ /usr/sbin/mt -f "${tape}" rewind ; }
+t_status(){ /usr/sbin/mt -f "${tape}" status ; }
+t_reten(){ /usr/sbin/mt -f "${tape}" retension ; }
+t_eject(){ /usr/sbin/mt -f "${tape}" eject ; }
+t_erase(){ /usr/sbin/mt -f "${tape}" erase ; }
+
+t_confirm_erase(){
+	printf "Erase current tape: y/n\n"
+	read confirm
+	if echo "${confirm}" | grep -iq "^y" ;then
+		t_erase
+	else
+		printf "Did not enter: y\nNot running, Exiting.\n"
+		return
+	fi
+}
+
+t_backup(){
+	if [ -z "${target}" ];then
+		printf "nothing to backup, exiting\n"
+		return
+	fi
+
+	#if [ -d "${target}" ];then
+	#	cd "${target}"/..
+	#else
+		#if file, cd to dir it is in
+	#	g=$(echo ${target}|sed 's%/[^/]*$%/%')
+	#	cd "${g}"
+	#fi
+	#remove everything before last /
+	#btarget=$(echo $target|sed 's@.*/@@')
+
+	#move to end last tar on tape
+	#/usr/sbin/mt -f "${tape}" eom
+	/usr/sbin/mt -f "${tape}" eod
+	tar -cvf "${tape}" "${target}"
+}
+
+t_backup_overwrite(){
+	if [ -z "${target}" ];then
+		printf "nothing to backup, exiting\n"
+		return
+	fi
+	t_rewind
+	tar -cvf "${tape}" "${target}"
+}
+
+t_restore(){
+	if [ -z "${target}" ];then
+		printf "no restore target specified, exiting\n"
+		return
+	fi
+	t_rewind
+	tar -xvf /dev/st0 -C "${target}"
+}
+
+t_verify(){
+	t_rewind
+	tar -tvf $tape
+}
+
+t_list(){
+	tar -tf $tape
+}
+
+hlp() {
+	printf " Tape drive is : %s\n" "$tape"
+	printf " -b\tbackup \$1 at end of last backup on $tape\n"
+	printf " -B\tbackup \$1 at start, overwriting existing, on $tape\n"
+	printf " -e\teject tape\n"
+	printf " -g\trestore from begining of $tape to \$1\n"
+	printf " -h\tPrint this help\n"
+	printf " -l\tlist contents of $tape\n"
+	printf " -L\tprint web links\n"
+	printf " -r\trewind tape\n"
+	printf " -R\ttape retensioning <only for tape read errors>\n"
+	printf " -s\tdrive status\n"
+	printf " -v\tverify files on current tape\n"
+	printf " -z\terase/rewind tape\n"
+	printf " -Z\terase/rewind/eject tape\n"
+}
+
+links() {
+	printf "https://www.cyberciti.biz/hardware/unix-linux-basic-tape-management-commands\n"
+	printf "https://www.cyberciti.biz/faq/unix-verify-tape-backup\n"
+	printf "https://www.cyberciti.biz/faq/linux-tape-backup-with-mt-and-tar-command-howto\n"
+	printf "https://community.hpe.com/t5/StoreEver-Tape-Storage/determining-free-space-on-tape-under-Linux/td-p/3624568\n"
+	printf "\n"
+}
+
+while true;do
+	case "$1" in
+		-b) target="${2}";t_backup;shift;;
+		-B) target="${2}";t_backup_overwrite;shift;;
+		-e) t_eject;shift;;
+		-g) target="${2}";t_restore;shift;;
+		-h) hlp;return;;
+		-l) t_list;shift;;
+		-L) links;shift;;
+		#-) t_;shift;;
+		-R) t_reten;shift;;
+		-r) t_rewind;shift;;
+		-s) t_status;shift;;
+		-v) t_verify;shift;;
+		-z) t_confirm_erase;t_rewind;shift;;
+		-Z) t_confirm_erase;t_rewind;t_eject;shift;;
+		*) break;;
+	esac
+done
+

@@ -1,0 +1,268 @@
+#!/bin/sh
+#2.6.0
+#2018-09-26
+
+#Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
+#
+#This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#ZFS Builtin Kernel Build Script - gentoo
+
+#hard requirments
+#>=linux-4.17.0 : >=zfs-0.8.0 / git | 1.x.x for previous support
+	#removal of spl
+	#kernel : silentoldconfig > syncconfig
+
+#storage dirs - need to exist
+#/home/${user}/.config/kernel/{config,distfiles,src}
+
+#assumptions
+#/usr/src/linux is real source or symlink to real source
+#/etc/portage/make.conf uses double quotes
+#PORTDIR PORTDIR_OVERLAY are set in make.conf, PORTAGE_OVERLAY is also only one repo
+#$run_kernel_bump is based om my own config and others CONFIG_* options may be needed based on kenrel config
+
+#What this script does, basically
+###if no preconfigured kmod_zfs sources exist###
+#runs configure phase on kmod-zfs ebuild
+#saves work to tar.xz file in $kmod_src
+#installs configured kmod-zfs to /usr/src/linux
+#builds kernel
+###if preconfigured kmod_zfs sources exist###
+#moves saved work in tar.xz file to /usr/src/linux
+#builds kernel
+
+die(){ echo >&2 "$@";exit 1; }
+if [ "$(id -u)" -ne 0 ];then die "Requires root";fi
+
+finish(){ if [ -d "${tmpdir}" ];then rm --preserve-root -r "${tmpdir}";fi }
+trap 'exit 1' INT HUP QUIT TERM USR1
+trap finish EXIT
+tmpdir=$(mktemp -d)
+chmod 755 "${tmpdir}"
+
+kernel_intro(){
+	printf "\n"
+	printf "kernel             : ${ksym}\n"
+	printf "Install Kernel     : ${run_kernel_install}\n"
+	printf "ZFS version        : ${zver}\n"
+	printf "ZFS local ebuild   : ${use_local_zfs_ebuild}\n"
+	printf "Configure kmod     : ${run_kmod_build}\n"
+	printf "Enable modules     : ${use_modules}\n"
+	if [ "${extra}" = "1" ];then
+		printf "\nEXTRA\n"
+		printf "Make opts          : $(($(nproc)+1))\n"
+		printf "PORTDIR            : ${port}\n"
+		printf "kver               : ${kver}\n"
+		printf "Tempdir            : ${tmpdir}\n"
+		printf "\n"
+		eselect kernel list
+	fi
+	printf "\n"
+	printf "Enter to start kernel build. "
+	read z;unset z
+}
+
+kernel_mod(){
+	if [ "${1}" = "1" ];then
+		cd "${kdir}" || return
+		make syncconfig
+		mv .config "${tmpdir}"
+		cp "${switch_kconf}" .config
+		make modules_prepare
+	elif [ "${1}" = "2" ];then
+		rm "${kdir}/.config"
+		mv "${tmpdir}/.config" "${kdir}"
+	fi
+}
+
+kernel_zfs_build(){
+	if [ "${run_kmod_build}" = "1" ];then
+		export PORTAGE_TMPDIR="${tmpdir}"
+		if [ -d "${kmod_src}" ];then rm --preserve-root -r "${kmod_src}";fi
+		mkdir -p "${kmod_src}"
+		CC=gcc env EXTRA_ECONF="--enable-linux-builtin" \
+			ebuild "${port}/sys-fs/zfs-kmod/zfs-kmod-${zver}.ebuild" clean configure
+		cd "${tmpdir}/portage/sys-fs/zfs-kmod-${zver}/work/${kmod}-${zver}" || die
+		./copy-builtin "${kdir}"
+		cd ..
+		tar --xattrs -cvf - "${kmod}-${zver}" -P | XZ_OPT="-e9" xz >| "zfs-${zver}.tar.xz"
+		mv "zfs-${zver}.tar.xz" "${kmod_src}"
+		chown -R "${user}:${group}" "${kmod_src}"
+	else
+		cd "${kmod_src}" || die
+		tar --xattrs -xJf "zfs-${zver}.tar.xz" -C "${tmpdir}"
+		cd "${tmpdir}/${kmod}-${zver}" || die
+		./copy-builtin "${kdir}"
+	fi
+}
+
+kernel_build(){
+	cd "${kdir}" || die
+	make syncconfig
+	nice -19 make -j$(($(nproc)+1)) || die
+	if [ "${use_modules}" = "1" ];then make modules_install;fi
+	if [ "${run_kernel_install}" = "1" ];then make install;fi
+}
+
+kernel_post(){
+	if [ "${run_zfs_build}" = "1" ];then
+		if [ "${run_kmod_build}" = "1" ] && [ "${use_zfs_version}" = "git" ];then
+			#always rebuild zfs when building git
+			emerge --ignore-default-opts --oneshot --quiet sys-fs/zfs
+		else
+			#only runs on non-git and on version bump
+			emerge --ignore-default-opts --oneshot --quiet --update sys-fs/zfs
+		fi
+	fi
+	if [ "${use_modules}" = "1" ];then emerge --ignore-default-opts --oneshot --jobs --quiet @module-rebuild;fi
+	${basedir}/kernel-initramfs-genkernel
+	${basedir}/kernel-grub
+	${basedir}/kernel-clean-src
+}
+
+hlp(){
+	printf "GENERAL\n"
+	printf " -B\tforce run_kernel_bump=1\n"
+	printf " -h\tprint this help\n"
+	printf " -I\tdo not run kernel_intro()\n"
+	printf " -v\textra vars in kenrel_intro()\n"
+	printf "\nZFS\n"
+	printf " -c\tconfigure kmod even if preconfigured sources exist\n"
+	printf " -g\tuse zfs git\n"
+	printf " -r\tuse zfs release\n"
+	printf " -l\tforce use PORTDIR_OVERLAY repo\n"
+	printf "\nKERNEL BUILDING\n"
+	printf " -i\tdo not install kenrel and do not run kernel_post()\n"
+	printf " -m\tenable module build\n"
+	printf " -p\tdo not run kernel_post()\n"
+	printf " -x\tdo not run kernel_zfs_build()\n"
+	printf " -z\tonly run kernel_zfs_build()\n"
+}
+
+user="brandon"
+group="${user}"
+basedir=$(dirname ${0})
+storage="/home/${user}/.config/kernel"
+kdir="/usr/src/linux"
+use_zfs_version="git"
+extra="0"
+
+run_intro="1"
+run_zfs_build="1"
+run_kmod_build="0"
+run_kernel_post="1"
+run_kernel_build="1"
+run_kernel_install="1"
+use_local_zfs_ebuild="0"
+
+if ! [ -e "${kdir}" ];then die "${kdir} is not a valid symlink to kernel sources";fi
+if ! [ -d "${storage}/config" ];then mkdir -p "${storage}/config";fi
+if [ -z "$(grep CONFIG_MODULES=y ${kdir}/.config)" ];then use_modules="0";else use_modules="1";fi
+
+ksym=$(readlink -f ${kdir}|awk '{print $NF}' FS=/)
+is_rc=$(echo ${ksym}|grep rc) #would match /usr/src/
+if [ -z ${is_rc} ];then
+	kver=$(echo ${ksym}|awk 'BEGIN{FS=OFS="."} NF--')
+else
+	kver=$(echo ${ksym}|sed s'/.$//')
+fi
+
+switch_kconf="${storage}/config/${kver}-config"
+if [ -f "${switch_kconf}" ];then run_kernel_bump="0";else run_kernel_bump="1";fi
+
+while true;do
+	case "${1}" in
+		-B) run_kernel_bump="1";shift;;
+		-g) use_zfs_version="git";shift;;
+		-r) use_zfs_version="release";shift;;
+		-c) run_kmod_build="1";shift;;
+		-I) run_intro="0";shift;;
+		-i) run_kernel_install="0";run_kernel_post="0";shift;;
+		-m) use_modules="1";shift;;
+		-p) run_kernel_post="0";shift;;
+		-l) use_local_zfs_ebuild="1";shift;;
+		-x) run_zfs_build="0";shift;;
+		-z) run_zfs_build="1";use_modules="0";run_kernel_build="0";run_kernel_post="0";shift;;
+		-v) extra="1";shift;;
+		-h) hlp;exit;;
+		*) break;;
+	esac
+done
+
+if [ -f "/proc/config.gz" ] && [ -L "${kdir}" ] && ! [ -f "${kdir}/.config" ];then
+	printf "WARNING: No kernel config found, using running kernel config.\n"
+	zcat /proc/config.gz >| /usr/src/linux/.config || die
+	cd "${kdir}" || die
+	make syncconfig
+fi
+
+#CONFIG_MODULES and CONFIG_KALLSYMS are required to build kmod
+#which are not needed at runtime if zfs is build into the kernel.
+while [ "${run_kernel_bump}" = "1" ];do
+	c1=$(grep -s CONFIG_MODULES=y ${switch_kconf})
+	c2=$(grep -s CONFIG_KALLSYMS=y ${switch_kconf})
+	if [ "${run_zfs_build}" = "1" ] && [ -z "${c1}" ] || [ -z "${c2}" ];then
+		if [ -z "${c1}" ];then b1="NOT ENABLED";else b1="ENABLED";fi
+		if [ -z "${c2}" ];then b2="NOT ENABLED";else b2="ENABLED";fi
+		printf "CONFIG_MODULES : ${b1}\nCONFIG_KALSYMS : ${b2}\n"
+		printf "\nOptions located at:\n"
+		printf "\n[*] Enable loadable module support\n"
+		printf "\nGeneral setup  --->\n"
+		printf "\t[*] Configure standard kernel features (expert users)  --->\n"
+		printf "\t\t[*] Load all symbols for debugging/ksymoops\n\n"
+		printf "Enter to config switch config : "
+		read z;unset z
+		if [ -f "${switch_kconf}" ];then rm "${switch_kconf}";fi
+		cd "${kdir}" || die
+		cp .config "${tmpdir}"
+		make nconfig
+		mv .config "${switch_kconf}"
+		chown "${user}:${group}" "${switch_kconf}"
+		mv "${tmpdir}/.config" .
+	else break
+	fi
+done
+
+if [ "${use_local_zfs_ebuild}" = "0" ];then
+	port=$(grep PORTDIR= /etc/portage/make.conf|sed 's/PORTDIR=//g;s/"//g')
+else
+	port=$(grep PORTDIR_OVERLAY= /etc/portage/make.conf|sed 's/PORTDIR_OVERLAY=//g;s/"//g')
+	if ! [ -d "${port}/sys-fs/zfs-kmod" ];then die "No local ebuild found";fi
+fi
+
+case "${use_zfs_version}" in
+	git)
+		zver="9999"
+		kmod="zfs-kmod" #build path
+		;;
+	release)
+		Z=$(ls -1A --ignore=*9999* ${port}/sys-fs/zfs|sort -V|tail -n1)
+		zver=$(echo ${Z%???????}|awk '{print $NF}' FS=-) #clean up filename
+		unset Z
+		kmod="zfs" #build path
+		export DISTDIR="${storage}/distfiles" #keep sources on dist-clean, but have to manually remove old
+		;;
+esac
+kmod_src="${storage}/src/${kver}/${zver}"
+if ! [ -d "${kmod_src}" ];then run_kmod_build="1";fi #dont need to build if configured src exists
+
+if [ "${run_intro}" = "1" ];then kernel_intro;fi
+if [ "${run_zfs_build}" = "1" ];then
+	if [ "${run_kmod_build}" = "1" ] && [ "${use_modules}" = "0" ];then kernel_mod 1 || die;fi
+	kernel_zfs_build || die
+	if [ "${run_kmod_build}" = "1" ] && [ "${use_modules}" = "0" ];then kernel_mod 2 || die;fi
+fi
+if [ "${run_kernel_build}" = "1" ];then kernel_build || die;fi
+if [ "${run_kernel_post}" = "1" ];then kernel_post || die;fi

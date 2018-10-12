@@ -1,0 +1,94 @@
+#!/bin/sh
+#5.0.0
+#2018-09-19
+
+#Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
+#
+#This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+comp_dir="0"
+comp_files="0"
+orig_rm="0"
+comp_status="0"
+
+hlp(){
+	printf "CURRENT ${C}\n\n"
+	printf " default will compress files passed in \$1\n"
+	printf " -d\tcompress all directories\n"
+	printf " -f\tcompress all files\n"
+	printf " -h\tprint this help\n"
+	printf " -s\tcompress \$1, delete after compressed\n"
+	printf " -S\tenable cool status bar\n"
+	printf " -x\tcompress all files, delete original after compressed\n"
+	printf " -z\tcompress all directories, delete original after compressed\n"
+	printf "\nMODES\n"
+	printf " -B\tuse bzip2\n"
+	printf " -G\tuse gzip\n"
+	printf " -X\tuse xz\n"
+}
+
+compress(){
+	#this actually makes the archive smaller, atleast for xz
+	if [ ${comp_status} = "1" ];then
+		tar --xattrs -cf - "${f%%}" -P | pv -s $(du -sb "${f%%}" | awk '{print $1}') | XZ_OPT="-e9" "${C}" >| "${f%%}.tar.${E}"
+	else
+		tar --xattrs -cvf - "${f%%}" -P | XZ_OPT="-e9" "${C}" >| "${f%%}.tar.${E}"
+	fi
+	if [ "${comp_rm}" = "1" ];then rm -r "${f%%}";fi
+}
+
+mode="${0##*/}"
+
+case "${mode}" in
+	mkbz2) C="bzip2";E="bz2";;
+	mkgz) C="gzip";E="gz";;
+	mkxz) C="xz";E="xz";;
+esac
+
+if [ -z "${1}" ];then hlp;exit;fi
+while true;do
+	case "$1" in
+		-B) C="bzip2";E="bz2";shift;;
+		-G) C="gzip";E="gz";shift;;
+		-X) C="xz";E="xz";shift;;
+		-d) comp_dir="1";shift;;
+		-f) comp_files="1";shift;;
+		-s) orig_rm="1";shift;;
+		-S) comp_status="1";shift;;
+		-x) comp_dir="1";orig_rm="1";shift;;
+		-z) comp_files="1";orig_rm="1";shift;;
+		-h) hlp;exit;;
+		*) break;;
+	esac
+done
+
+if [ -z "${C}" ] || [ -z "${E}" ];then printf "No compresion format set\n";exit 1;fi
+
+if [ -n "${1}" ] && ! [ -e "${1}" ];then
+	printf "Not a valid file : ${1}\n"
+elif [ -n "${1}" ] && [ -e "${1}" ];then
+	f="${1%%}"
+	compress
+elif [ "${comp_dir}" = "1" ] || [ "${comp_files}" = "1" ];then
+	for f in *; do
+		if [ "${comp_dir}" = "1" ] && [ -d "${f}" ];then
+			compress
+		fi
+		if [ "${comp_files}" = "1" ] && [ -f "${f}" ];then
+			compress
+		fi
+	done
+else
+	printf "Something is broken\n";exit 1
+fi

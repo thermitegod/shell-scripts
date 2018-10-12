@@ -1,0 +1,72 @@
+#!/bin/sh
+#5.2.0
+#2018-06-12
+
+#Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
+#
+#This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+count="0"
+list="0"
+
+mode="${0##*/}"
+case "${mode}" in
+	count-image)
+		type="PNG JPG JPEG JPE GIF BMP ICO WEBM MP4 MKV"
+		;;
+	count-archive)
+		type="ZIP 7Z RAR CBR CBZ TAR GZ XZ"
+		mode="archive"
+		;;
+esac
+
+if [ -n "${1}" ];then D="${1}";else D=".";fi
+
+hlp() {
+	printf "MODE  : %s\n" "${mode}"
+	printf "TYPES : %s\n" "${type}"
+	printf " -h\tprint this help\n"
+	if [ "${mode}" = "archive" ];then
+		printf " -l\tlist found archives\n"
+	fi
+}
+
+arc_list() {
+	printf "List found [yn]? "
+	read confirm
+	if echo "${confirm}" | grep -iq "^y" ;then
+		for f in ${type}; do
+			printf "Listing all of : ${f}\n"
+			find . -iname "*.${f}"
+		done
+	fi
+}
+
+while true;do
+	case "$1" in
+		-l) list="1";shift;;
+		-h) hlp;return;;
+		--) break;;
+		*) break;;
+	esac
+done
+
+for f in ${type};do
+	cnt=$(find ${D} -type f -iname "*.${f}"|wc -l)
+	if ! [ "${cnt}" = "0" ];then printf "${f}\t: ${cnt}\n";fi
+	count=$((cnt+count))
+done
+
+if ! [ "${count}" = "0" ];then printf "Total\t: ${count}\n";fi
+if [ "${list}" = "1" ] && [ "${mode}" = "archive" ];then arc_list;fi

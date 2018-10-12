@@ -1,0 +1,50 @@
+#!/bin/sh
+#1.7.0
+#2018-10-01
+
+#Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
+#
+#This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+if [ "$(id -u)" -ne 0 ];then printf "Requires root\n";exit;fi
+
+hlp(){
+	printf " -h\tprint this help\n"
+	printf " -o\tfiles in /home/brandon/.config/bin-other\n"
+}
+
+a="/usr/local/bin"
+b="/home/brandon/.bin/bin"
+
+while true;do
+	case "$1" in
+		-o) unset b;b="/home/brandon/.bin/bin-other";shift;;
+		-h) hlp;return;;
+		*) break;;
+	esac
+done
+
+cd "${a}"
+for f in *;do
+	if ! [ -e "${f}" ] && [ -h "${f}" ];then
+		rm "${f}"
+	fi
+done
+
+cd "${b}"
+for f in *;do
+	if ! [ -e "${a}/${f}" ];then
+		ln -s "${b}/${f}" "${a}/${f}"
+	fi
+done

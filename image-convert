@@ -1,0 +1,167 @@
+#!/bin/sh
+#4.0.0
+#2018-10-09
+
+#Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
+#
+#This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#TODO
+#reduce case size
+
+hlp(){
+	printf "MODE=${mode}\n"
+	printf " -m\tdisable mime check\n"
+	printf "\nCONVERT\n"
+	printf "\nSource jpg\n"
+	printf " -J1\tjpg > jpg : low  q=90\n"
+	printf " -J2\tjpg > jpg : mid  q=95\n"
+	printf " -J3\tjpg > jpg : high q=100\n"
+	printf "\nSource jpg\n"
+	printf " -j1\tjpg > png : low  q=7\n"
+	printf " -j2\tjpg > png : mid  q=8\n"
+	printf " -j3\tjpg > png : high q=9\n"
+	printf "\nSource png\n"
+	printf " -P1\tpng > png : low  q=7\n"
+	printf " -P2\tpng > png : mid  q=8\n"
+	printf " -P3\tpng > png : high q=9\n"
+	printf "\nSource png\n"
+	printf " -p1\tpng > jpg : low  q=90\n"
+	printf " -p2\tpng > jpg : mid  q=95\n"
+	printf " -p3\tpng > jpg : high q=100\n"
+}
+
+convert_main(){
+	mkdir "${O}"
+	for f in *;do
+		if [ -f "${f%.*}.${origext}" ];then
+			convert -quality ${qaul} "${f%%}" "${f%.*}.${newext}"
+			mv "${f}" orig
+		fi
+	done
+	if [ -d "${O}" ] && ! [ "$(ls -A ${O})" ];then rm -rf "${O}";fi
+}
+
+O="orig"
+mode="z"
+mimecheck="1"
+
+if [ -z "${1}" ];then hlp;exit 1;fi
+while true;do
+	case "$1" in
+		-m) mimecheck="0";shift;;
+
+		-j1) mode="jpg2png-low";shift;;
+		-j2) mode="jpg2png-mid";shift;;
+		-j3) mode="jpg2png-high";shift;;
+
+		-J1) mode="jpg2jpg-low";shift;;
+		-J2) mode="jpg2jpg-mid";shift;;
+		-J3) mode="jpg2jpg-high";shift;;
+
+		-p1) mode="png2jpg-low";shift;;
+		-p2) mode="png2jpg-mid";shift;;
+		-p3) mode="png2jpg-high";shift;;
+
+		-P1) mode="png2png-low";shift;;
+		-P2) mode="png2png-mid";shift;;
+		-P3) mode="png2png-high";shift;;
+		-h) hlp;return;;
+		*) break;;
+	esac
+done
+
+if [ "${mimecheck}" = "1" ];then
+	basedir=$(dirname ${0})
+	${basedir}/mime-correct -A
+fi
+
+case "${mode}" in
+	png2jpg-low)
+		origext="jpg"
+		newext="png"
+		qual="90"
+		convert_main
+		;;
+	png2jpg-mid)
+		origext="jpg"
+		newext="png"
+		qual="95"
+		convert_main
+		;;
+	png2jpg-high)
+		origext="jpg"
+		newext="png"
+		qual="100"
+		convert_main
+		;;
+
+	png2png-low)
+		origext="png"
+		newext="png"
+		qual="7"
+		convert_main
+		;;
+	png2png-mid)
+		origext="png"
+		newext="png"
+		qual="8"
+		convert_main
+		;;
+	png2png-high)
+		origext="png"
+		newext="png"
+		qual="9"
+		convert_main
+		;;
+
+	jpg2png-low)
+		origext="png"
+		newext="jpg"
+		qual="7"
+		convert_main
+		;;
+	jpg2png-mid)
+		origext="png"
+		newext="jpg"
+		qual="8"
+		convert_main
+		;;
+	jpg2png-high)
+		origext="png"
+		newext="jpg"
+		qual="9"
+		convert_main
+		;;
+
+	jpg2jpg-low)
+		origext="jpg"
+		newext="jpg"
+		qual="90"
+		convert_main
+		;;
+	jpg2jpg-mid)
+		origext="jpg"
+		newext="jpg"
+		qual="95"
+		convert_main
+		;;
+	jpg2jpg-high)
+		origext="jpg"
+		newext="jpg"
+		qual="100"
+		convert_main
+		;;
+	*) printf "error\n";exit 1;;
+esac
