@@ -32,19 +32,19 @@ mode="${0##*/}"
 case "${mode}" in
 	chromium-default)
 		data="/home/brandon/.config/chromium-default"
-		D="chromium-ex"
+		D="chromium-default"
 		launch
 		cache_rm
 		;;
 	chromium-ex)
 		data="/home/brandon/.config/chromium-ex"
-		D="chromium-default"
+		D="chromium-ex"
 		launch
 		cache_rm
 		;;
 	chromium-ex2)
 		data="/home/brandon/.config/chromium-ex2"
-		D="chromium-default"
+		D="chromium-ex2"
 		launch
 		cache_rm
 		;;
