@@ -1,6 +1,6 @@
 #!/bin/sh
-#5.3.0
-#2018-10-06
+#5.4.0
+#2018-10-13
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -19,6 +19,7 @@
 
 if [ "$(id -u)" -ne 0 ];then printf "Requires root, exiting.\n";return;fi
 ch_1(){ ch="/mnt/gentoo" ; }
+ch_2(){ ch="/mnt/gentoo-gcc" ; }
 #ch_3(){ ch="/mnt/" ; }
 
 mount_sys(){
@@ -27,35 +28,20 @@ mount_sys(){
 	mount --rbind /dev "${ch}/dev"
 }
 
-umount_sys(){
-	umount "${ch}/proc"
-	umount "${ch}/sys"
-	umount "${ch}/dev"
-}
-
 mount_bind(){
 	portage=$(grep PORTDIR= /etc/portage/make.conf|sed 's/PORTDIR=//g;s/"//g')
 	portagelocal=$(grep PORTDIR_OVERLAY= /etc/portage/make.conf|sed 's/PORTDIR_OVERLAY=//g;s/"//g')
-	packages=$(grep PKDIR= /etc/portage/make.conf|sed 's/PKDIR=//g;s/"//g')
-	distfiles=$(grep DISTDIR= /etc/portage/make.conf|sed 's/DISTDIR=//g;s/"//g')
+	#packages=$(grep PKDIR= /etc/portage/make.conf|sed 's/PKDIR=//g;s/"//g')
+	#distfiles=$(grep DISTDIR= /etc/portage/make.conf|sed 's/DISTDIR=//g;s/"//g')
 	if ! [ -d "${ch}/${portage}" ];then mkdir -p "${ch}/${portage}";fi
 	if ! [ -d "${ch}/${portagelocal}" ];then mkdir -p "${ch}/${portagelocal}";fi
-	if ! [ -d "${ch}/${distfiles}" ];then mkdir -p "${ch}/${distfiles}";fi
+	#if ! [ -d "${ch}/${distfiles}" ];then mkdir -p "${ch}/${distfiles}";fi
 	mount --bind "${portage}" "${ch}/${portage}"
 	mount --bind "${portagelocal}" "${ch}/${portagelocal}"
-	mount --bind "${packages}" "${ch}/${packages}"
-	mount --bind "${distfiles}" "${ch}/${distfiles}"
+	#mount --bind "${packages}" "${ch}/${packages}"
+	#mount --bind "${distfiles}" "${ch}/${distfiles}"
 	#TODO find better way
-	mount --bind /var/db/repos/layman /mnt/gentoo/usr/layman
-}
-
-umount_bind(){
-	portage=$(grep PORTDIR= /etc/portage/make.conf|sed 's/PORTDIR=//g;s/"//g')
-	portagelocal=$(grep PORTDIR_OVERLAY= /etc/portage/make.conf|sed 's/PORTDIR_OVERLAY=//g;s/"//g')
-	distfiles=$(grep DISTDIR= /etc/portage/make.conf|sed 's/DISTDIR=//g;s/"//g')
-	umount "${ch}/${portage}"
-	umount "${ch}/${portagelocal}"
-	umount "${ch}/${distfiles}"
+	#mount --bind /var/db/repos/layman /mnt/gentoo/usr/layman
 }
 
 shell_check(){
@@ -71,33 +57,27 @@ shell_check(){
 hlp(){
 	printf " -A\tOnly mount binds\n"
 	printf " -b\tDont mount binds\n"
-	printf " -B\tunmount binds portage\n"
 	printf " -h\tprint this help\n"
-	printf " -u\tumount binds sys\n"
 }
 
 setup="init"
 mountbind="1"
 
-
 while true;do
 	case "$1" in
 		-A) setup="bind";return;;
 		-b) mountbind="0";return;;
-		-B) setup="ubind";return;;
 		-h) hlp;return;;
-		-u) setup="usys";shift;;
 		*) break;;
 	esac
 done
 
 printf "Gentoo chroot location\n"
 ch_1;printf "1: ${ch}\n"
-#ch_2;printf "2: ${ch}\n"
+ch_2;printf "2: ${ch}\n"
 #ch_3;printf "3: ${ch}\n"
 unset ch
 read ch_loc
-#if [ -n "${ch_loc}" ];then ch="${ch_loc}";fi
 
 case "${ch_loc}" in
 	1) ch_1;;
@@ -115,9 +95,5 @@ case "${setup}" in
 		if [ "${mountbind}" = "1" ];then mount_bind;fi
 		chroot "${ch}" /bin/${S}
 		;;
-	usys) umount_sys;;
-	bind)
-		echo 1
-		mount_bind;;
-	ubind) umount_bind;;
+	bind) mount_bind;;
 esac
