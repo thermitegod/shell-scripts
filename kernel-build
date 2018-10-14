@@ -88,8 +88,11 @@ kernel_mod(){
 }
 
 fix_builtin(){
-	#script breaks install, check again later
+	#9999
+	#running make_gitrev.sh in copy-buildin does allow it to finish/copy files?
+	#this works, to lazy to find actual problem in copy-buildin right now
 	sed -i '/scripts\/make_gitrev.sh/d' ./copy-builtin
+	scripts/make_gitrev.sh
 }
 
 kernel_zfs_build(){
@@ -110,7 +113,6 @@ kernel_zfs_build(){
 		cd "${kmod_src}" || die
 		tar --xattrs -xJf "zfs-${zver}.tar.xz" -C "${tmpdir}"
 		cd "${tmpdir}/${kmod}-${zver}" || die
-		fix_builtin
 		./copy-builtin "${kdir}"
 	fi
 }
