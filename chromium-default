@@ -1,6 +1,6 @@
 #!/bin/sh
-#3.2.0
-#2018-10-03
+#3.3.0
+#2018-10-14
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -18,9 +18,9 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 cache_rm(){
-	if [ -d "${XDG_CACHE_HOME}/${D}" ];then
+	if [ -d "${XDG_CACHE_HOME}/${data##*/}" ];then
 		sleep 5
-		rm -rf "${XDG_CACHE_HOME}/${D}"
+		rm -rf "${XDG_CACHE_HOME}/${data##*/}"
 	fi
 }
 
@@ -32,29 +32,25 @@ mode="${0##*/}"
 case "${mode}" in
 	chromium-default)
 		data="/home/brandon/.config/chromium-default"
-		D="chromium-default"
 		launch
 		cache_rm
 		;;
 	chromium-ex)
 		data="/home/brandon/.config/chromium-ex"
-		D="chromium-ex"
 		launch
 		cache_rm
 		;;
 	chromium-ex2)
 		data="/home/brandon/.config/chromium-ex2"
-		D="chromium-ex2"
 		launch
 		cache_rm
 		;;
 	chromium-sandbox)
-		finish(){ if [ -d "${tmpdir}" ];then rm --preserve-root -r "${tmpdir}";fi }
+		finish(){ if [ -d "${data}" ];then rm --preserve-root -r "${data}";fi }
 		trap 'exit 1' INT HUP QUIT TERM USR1
 		trap finish EXIT
-		tmpdir=$(mktemp -d)
-		chmod 755 "${tmpdir}"
-		data="${tmpdir}"
+		data=$(mktemp -d)
+		chmod 755 "${data}"
 		launch
 		;;
 esac
