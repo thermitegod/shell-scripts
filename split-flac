@@ -1,6 +1,6 @@
 #!/bin/sh
-#1.0.0
-#2017-09-21
+#1.1.0
+#2018-10-14
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -36,6 +36,6 @@ case "${mode}" in
 		split2flac -of '@track - @title.@ext' ./
 		;;
 	batch)
-		find . -maxdepth 1 -type d \( ! -name . \) -exec cd '{}' && "${0}" \;
+		find . -maxdepth 1 -type d \( ! -name . \) -exec "cd '{}' && ${0}" \;
 		;;
 esac
