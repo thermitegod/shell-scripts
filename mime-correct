@@ -1,6 +1,6 @@
 #!/bin/sh
-#1.5.0
-#2018-09-21
+#1.6.0
+#2018-10-14
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -18,49 +18,49 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #TODO
-#list only option
-#make less shit
+#fix -A
 
 mime_type_image(){
 	if [ -d "${f}" ];then return;fi
-	C=$((C+1))
+	total=$((total+1))
 	mimeext=$(file -b --mime-type -- "${f%%}"|awk '{print $NF}' FS=/)
 	if ! [ "${mimeext}" = "jpeg" ] && ! [ "${mimeext}" = "png" ] && ! [ "${mimeext}" = "gif" ];then return;fi
 	ext="${f##*.}"
 	if [ "${mimeext}" = "jpeg" ] && [ "${ext}" = "jpg" ];then return;fi
 	if ! [ "${mimeext}" = "${ext}" ];then
-		printf "Mismatch : $(readlink -f ${f%%})\n"
-		if ! [ -f "${f%%.*}.${mimeext}" ] && [ "${listonly}" = "0" ];then
-			if [ "${mimeext}" = "jpeg" ];then mimeext="jpg";fi
-			mv -v "${f%%}" "${f%%.*}.${mimeext}"
-		else
+		if [ "${mimeext}" = "jpeg" ];then mimeext="jpg";fi
+		if [ -f "${f%%.*}.${mimeext}" ] && [ -f "${f%%.*}.${ext}" ];then
 			printf "File collision : $(readlink -f ${f%%})\n"
+			coll=$((coll+1))
+			return
+		else
+			printf "Mismatch : $(readlink -f ${f%%})\n"
 		fi
+		if [ "${listonly}" = "1" ];then return;fi
+		mv "${f%%}" "${f%%.*}.${mimeext}"
+		fixed=$((fixed+1))
 	fi
 }
-
-#basedir=$(dirname ${0})
-#echo $basedir
-#exit
 
 while true;do
 	case "${1}" in
 		-I)
-			C="0"
+			total="0"
+			coll="0"
+			fixed="0"
 			listonly="0"
 			for f in *;do mime_type_image;done
-			#if ! [ "${C}" = "0" ];then printf "Checked : ${C} in : ${PWD}\n";fi
-			if ! [ "${C}" = "0" ];then printf "Checked : ${C}\n";fi
+			if ! [ "${total}" = "0" ];then printf "Checked : ${total}\tCorrected : ${fixed}\tCollisions : ${coll}\tin : ${PWD}\n";fi
 			break;;
 		-L)
-			C="0"
+			total="0"
 			listonly="1"
 			for f in *;do mime_type_image;done
-			if ! [ "${C}" = "0" ];then printf "Checked : ${C}\n";fi
+			if ! [ "${total}" = "0" ];then printf "Checked : ${total} \tCollisions : ${coll}\tin : ${PWD}\n";fi
 			break;;
 		-A)
 			printf "Checking file mime info\n"
-			find . -type d -exec dash -c 'cd "{}" && /usr/local/bin/mime-correct -I' \; #basedir wont work here, unknown why
+			find . -type d -exec sh -c 'cd "{}" && /usr/local/bin/mime-correct -I' \;
 			break;;
 		*)
 			printf "Invalid selection\n"
