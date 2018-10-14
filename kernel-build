@@ -87,7 +87,7 @@ kernel_mod(){
 	fi
 }
 
-fix-builtin(){
+fix_builtin(){
 	#script breaks install, check again later
 	sed -i '/scripts\/make_gitrev.sh/d' ./copy-builtin
 }
@@ -100,7 +100,7 @@ kernel_zfs_build(){
 		CC=gcc env EXTRA_ECONF="--with-linux=${kdir} --enable-linux-builtin" \
 			ebuild "${port}/sys-fs/zfs-kmod/zfs-kmod-${zver}.ebuild" clean configure
 		cd "${tmpdir}/portage/sys-fs/zfs-kmod-${zver}/work/${kmod}-${zver}" || die
-		fix-builtin
+		fix_builtin
 		./copy-builtin "${kdir}"
 		cd ..
 		tar --xattrs -cvf - "${kmod}-${zver}" -P | XZ_OPT="-e9" xz >| "zfs-${zver}.tar.xz"
@@ -110,7 +110,7 @@ kernel_zfs_build(){
 		cd "${kmod_src}" || die
 		tar --xattrs -xJf "zfs-${zver}.tar.xz" -C "${tmpdir}"
 		cd "${tmpdir}/${kmod}-${zver}" || die
-		fix-builtin
+		fix_builtin
 		./copy-builtin "${kdir}"
 	fi
 }
