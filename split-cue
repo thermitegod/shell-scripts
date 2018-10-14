@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-#2.0.0
-#2018-09-21
+#2.1.0
+#2018-10-14
 #req bash
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
@@ -38,10 +38,10 @@ case "${mode}" in
 		shopt -s extglob
 		for f in *.cue;do
 			cuebreakpoints "${f%.*}".cue | shnsplit -t "%n-%t" -o flac "${f%.*}".flac
-			mv "${f%.*}".flac ../
+			#mv "${f%.*}".flac ../
 		done
 		;;
 	batch)
-		find . -maxdepth 1 -type d \( ! -name . \) -exec cd '{}' && "${0}" \;
+		find . -maxdepth 1 -type d \( ! -name . \) -exec sh -c "cd '{}' && ${0}" \;
 		;;
 esac
