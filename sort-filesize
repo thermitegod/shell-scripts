@@ -34,13 +34,11 @@ hlp(){
 }
 
 file_sort(){
-	#if ! [ -d "${upper}" ];then mkdir -p "${upper}";fi
 	find . -maxdepth 1 -type f -size +${lower} -size -${upper} -exec mkdir -p "${upper}" \; -quit
 	find . -maxdepth 1 -type f -size +${lower} -size -${upper} -exec mv -i -- "{}" "${upper}" \;
-	#if [ -d "${upper}" ] && ! [ "$(ls -A ${upper})" ];then rm -rf "${upper}";fi
 }
 
-if [ -z "${1}" ];then hlp;exit 1;fi
+if [ -z "${1}" ];then hlp;exit;fi
 basedir=$(dirname ${0})
 while true;do
 	case "$1" in
