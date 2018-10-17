@@ -1,6 +1,6 @@
 #!/bin/sh
-#1.6.0
-#2018-10-14
+#1.7.0
+#2018-10-17
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -16,9 +16,6 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#TODO
-#fix -A
 
 mime_type_image(){
 	if [ -d "${f}" ];then return;fi
@@ -45,6 +42,7 @@ mime_type_image(){
 while true;do
 	case "${1}" in
 		-I)
+			echo 2
 			total="0"
 			coll="0"
 			fixed="0"
@@ -54,13 +52,14 @@ while true;do
 			break;;
 		-L)
 			total="0"
+			coll="0"
 			listonly="1"
 			for f in *;do mime_type_image;done
 			if ! [ "${total}" = "0" ];then printf "Checked : ${total} \tCollisions : ${coll}\tin : ${PWD}\n";fi
 			break;;
 		-A)
-			printf "Checking file mime info\n"
-			find . -type d -exec sh -c 'cd "{}" && /usr/local/bin/mime-correct -I' \;
+			#i give up on fixing this
+			find . -type d -type d \( ! -name . \) -exec sh -c 'cd "{}" && /usr/local/bin/mime-correct -I' \;
 			break;;
 		*)
 			printf "Invalid selection\n"
