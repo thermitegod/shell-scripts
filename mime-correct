@@ -42,7 +42,6 @@ mime_type_image(){
 while true;do
 	case "${1}" in
 		-I)
-			echo 2
 			total="0"
 			coll="0"
 			fixed="0"
