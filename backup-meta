@@ -1,6 +1,6 @@
 #!/bin/sh
-#1.7.0
-#2018-09-21
+#1.8.0
+#2018-10-17
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -37,7 +37,7 @@ mode="${0##*/}"
 case "${mode}" in
 	backup-chromium)
 		target_source="${HOME}/.config"
-		target_dest="${backup_dir}/${user}/chromium-profile"
+		target_dest="${backup_dir}/${user}/chromium-profile/${date}"
 		dir_check
 		cd "${target_source}"
 		for f in *chromium*;do
@@ -45,8 +45,8 @@ case "${mode}" in
 			XZ_OPT="-e9" tar \
 				--exclude="${f}/Default/File System" \
 				--xattrs -cJpvf "${tmpdir}/${target_xz}" "${f}"
+			move_finish
 		done
-		move_finish
 		;;
 	backup-user-config)
 		target_xz="${user}-config-${date}.tar.xz"
