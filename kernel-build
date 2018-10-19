@@ -1,6 +1,6 @@
 #!/bin/sh
-#2.7.0
-#2018-10-13
+#2.8.0
+#2018-10-18
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -81,18 +81,10 @@ kernel_mod(){
 		mv .config "${tmpdir}"
 		cp "${switch_kconf}" .config
 		make modules_prepare
-	elif [ "${1}" = "2" ];then
+	else
 		rm "${kdir}/.config"
 		mv "${tmpdir}/.config" "${kdir}"
 	fi
-}
-
-fix_builtin(){
-	#9999
-	#running make_gitrev.sh in copy-buildin does allow it to finish/copy files?
-	#this works, to lazy to find actual problem in copy-buildin right now
-	sed -i '/scripts\/make_gitrev.sh/d' ./copy-builtin
-	scripts/make_gitrev.sh
 }
 
 kernel_zfs_build(){
@@ -103,8 +95,7 @@ kernel_zfs_build(){
 		CC=gcc env EXTRA_ECONF="--with-linux=${kdir} --enable-linux-builtin" \
 			ebuild "${port}/sys-fs/zfs-kmod/zfs-kmod-${zver}.ebuild" clean configure
 		cd "${tmpdir}/portage/sys-fs/zfs-kmod-${zver}/work/${kmod}-${zver}" || die
-		fix_builtin
-		./copy-builtin "${kdir}"
+		./copy-builtin "${kdir}" || die
 		cd ..
 		tar --xattrs -cvf - "${kmod}-${zver}" -P | XZ_OPT="-e9" xz >| "zfs-${zver}.tar.xz"
 		mv "zfs-${zver}.tar.xz" "${kmod_src}"
@@ -113,13 +104,14 @@ kernel_zfs_build(){
 		cd "${kmod_src}" || die
 		tar --xattrs -xJf "zfs-${zver}.tar.xz" -C "${tmpdir}"
 		cd "${tmpdir}/${kmod}-${zver}" || die
-		./copy-builtin "${kdir}"
+		./copy-builtin "${kdir}" || die
 	fi
 }
 
+
 kernel_build(){
 	cd "${kdir}" || die
-	make syncconfig
+	msc
 	nice -19 make -j$(($(nproc)+1)) || die
 	if [ "${use_modules}" = "1" ];then make modules_install;fi
 	if [ "${run_kernel_install}" = "1" ];then make install;fi
@@ -136,10 +128,12 @@ kernel_post(){
 		fi
 	fi
 	if [ "${use_modules}" = "1" ];then emerge --ignore-default-opts --oneshot --jobs --quiet @module-rebuild;fi
-	${basedir}/kernel-initramfs-genkernel
-	${basedir}/kernel-grub
-	${basedir}/kernel-clean-src
+	kernel-initramfs-genkernel
+	kernel-grub
+	kernel-clean-src
 }
+
+msc(){ make syncconfig; }
 
 hlp(){
 	printf "GENERAL\n"
@@ -162,7 +156,6 @@ hlp(){
 
 user="brandon"
 group="${user}"
-basedir=$(dirname ${0})
 storage="/home/${user}/.config/kernel"
 kdir="/usr/src/linux"
 use_zfs_version="git"
@@ -210,11 +203,11 @@ while true;do
 	esac
 done
 
-if [ -f "/proc/config.gz" ] && [ -L "${kdir}" ] && ! [ -f "${kdir}/.config" ];then
+if [ -f "/proc/config.gz" ] && ! [ -f "${kdir}/.config" ];then
 	printf "WARNING: No kernel config found, using running kernel config.\n"
 	zcat /proc/config.gz >| /usr/src/linux/.config || die
 	cd "${kdir}" || die
-	make syncconfig
+	msc
 fi
 
 #CONFIG_MODULES and CONFIG_KALLSYMS are required to build kmod
