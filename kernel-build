@@ -1,5 +1,5 @@
 #!/bin/sh
-#2.8.0
+#2.9.0
 #2018-10-18
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
@@ -77,10 +77,12 @@ kernel_intro(){
 kernel_mod(){
 	if [ "${1}" = "1" ];then
 		cd "${kdir}" || return
-		make syncconfig
-		mv .config "${tmpdir}"
-		cp "${switch_kconf}" .config
-		make modules_prepare
+		msc
+		if [ "${use_modules}" = "0" ];then
+			mv .config "${tmpdir}"
+			cp "${switch_kconf}" .config
+		fi
+		make prepare
 	else
 		rm "${kdir}/.config"
 		mv "${tmpdir}/.config" "${kdir}"
@@ -262,7 +264,7 @@ if ! [ -d "${kmod_src}" ];then run_kmod_build="1";fi #dont need to build if conf
 
 if [ "${run_intro}" = "1" ];then kernel_intro;fi
 if [ "${run_zfs_build}" = "1" ];then
-	if [ "${run_kmod_build}" = "1" ] && [ "${use_modules}" = "0" ];then kernel_mod 1 || die;fi
+	if [ "${run_kmod_build}" = "1" ];then kernel_mod 1 || die;fi
 	kernel_zfs_build || die
 	if [ "${run_kmod_build}" = "1" ] && [ "${use_modules}" = "0" ];then kernel_mod 2 || die;fi
 fi
