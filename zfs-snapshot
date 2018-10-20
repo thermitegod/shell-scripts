@@ -1,0 +1,83 @@
+#!/bin/sh
+#2.7.0
+#2018-10-19
+
+#Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
+#
+#This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+hlp(){
+	printf "HELP\n"
+	printf " -h\tprint this help\n"
+	printf " -l\tprint snapshots of zroot/ROOT/gentoo\n"
+	printf " -L\tprint all snapshots\n"
+	printf "\nSNAPSHOT CREATION\n"
+	printf "\tformat  : pool/dataset@${S}\n"
+	printf " -m\tSnapshot: zroot/ROOT/gentoo\n"
+	printf " -m1\tSnapshot: zroot/HOME/brandon\n"
+	printf " -m2\tSnapshot: storage/anime\n"
+	printf " -m3\tSnapshot: storage/data\n"
+	printf " -m4\tSnapshot: ssd-mirror/KVM\n"
+	printf " -m5\tSnapshot: torrents/\n"
+	printf " -m6\tSnapshot: zroot/CACHE/torrents\n"
+	printf "\nCREATION\n"
+	printf "zfs create -o mountpoint=/mnt pool/dataset\n"
+	printf "zfs set compression=gzip-9 pool/dataset\n"
+	printf "\nBACKUP\n"
+	printf "zfs send pool/dataset@snapshot | gzip >| /tmp/backup.gz\n"
+	printf "gunzip -c -d backup.gz | zfs receive pool/newdataset\n"
+	printf "\nMISC\n"
+	printf "zfs set mountpoint=/newmount pool/dataset\n"
+	printf "zfs snapshot -r zroot/ROOT/gentoo@<type>-<date>\n"
+	printf "zfs rollback -r <snapshot>\n"
+	printf "zfs destroy <snapshot@snapshot>\n"
+	printf "zfs list -t snapshot\n"
+}
+
+S="manual-$(date +%F-%H%M)"
+ZFS="/sbin/zfs"
+if [ -z "${1}" ];then hlp;exit;fi
+while true;do
+	case "$1" in
+		#snapshots
+		-m) mode="root";shift;;
+		-m1) mode="brandon";shift;;
+		-m2) mode="anime";shift;;
+		-m3) mode="data";shift;;
+		-m3) mode="kvm";shift;;
+		-m5) mode="torrent";shift;;
+		-m6) mode="torrentcache";shift;;
+		#other
+		-l) mode="listroot";shift;;
+		-L) mode="listall";shift;;
+		-h) hlp;exit;;
+		*) break;;
+	esac
+done
+
+case "${mode}" in
+	kvm) "${ZFS}" snapshot -r ssd-mirror/KVM@${S};;
+	root) "${ZFS}" snapshot -r zroot/ROOT/gentoo@${S};;
+	data) "${ZFS}" snapshot -r storage/data@${S};;
+	anime) "${ZFS}" snapshot -r storage/anime@${S};;
+	brandon) "${ZFS}" snapshot -r zroot/HOME/brandon@${S};;
+	torrentcache) "${ZFS}" snapshot -r zroot/CACHE/torrents@${S};;
+
+	listall) "${ZFS}" list -t snapshot;;
+	listroot)
+		G=$(${ZFS} list -t snapshot)
+		printf "${G}"|head -n1
+		printf "${G}"|grep gentoo
+		;;
+esac
