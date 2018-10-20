@@ -49,7 +49,7 @@ main2(){
 		echo $r
 	else
 		rand
-		main
+		main2
 	fi
 	count=$((count+1))
 }
