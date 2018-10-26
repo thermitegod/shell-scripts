@@ -1,5 +1,5 @@
 #!/bin/sh
-#1.1.0
+#1.1.1
 #2018-10-26
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
@@ -26,7 +26,7 @@ hlp(){
 }
 
 main(){
-	equery belongs $(ldd ${elf}|awk '{print $1}'|awk '$1=$1' ORS=' ')
+	equery b $(ldd ${elf}|awk '{print $1}'|awk '$1=$1' ORS=' ')
 }
 
 mode="list"
@@ -57,12 +57,12 @@ case "${mode}" in
 		main
 		;;
 	list_sort)
-		main|awk '{print $1}'|uniq|sort
+		main|awk '{print $1}'|sort -u
 		;;
 	list_nover)
-		main|awk '{print $1}'|sed 's/-r.*//;s/-[^-]*$//'|uniq|sort
+		main|awk '{print $1}'|sed 's/-r.*//;s/-[^-]*$//'|sort -u
 		;;
 	list_emerge)
-		main|awk '{print $1}'|sed 's/-r.*//;s/-[^-]*$//'|awk '$1=$1' ORS=' '|uniq|sort
+		main|awk '{print $1}'|sed 's/-r.*//;s/-[^-]*$//'|awk '$1=$1' ORS=' '|sort -u
 		;;
 esac
