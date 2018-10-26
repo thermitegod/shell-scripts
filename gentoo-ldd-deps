@@ -1,6 +1,6 @@
 #!/bin/sh
-#0.2.0
-#2018-09-15
+#1.0.0
+#2018-10-25
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -17,22 +17,48 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-if [ -z "${1}" ];then
+hlp(){
+	printf "No flag will be standard 'equery b' output\n"
+	printf " -e\tPrint emergablelist\n"
+	printf " -h\tprint this help\n"
+	printf " -l\tPrint sorted with versions\n"
+	printf " -n\tPrint sorted no version list, package.*\n"
+}
+
+main(){
+	equery belongs $(ldd ${e}|awk '{print $1}'|awk '$1=$1' ORS=' ')
+}
+
+mode="list"
+while true;do
+	case "$1" in
+		-l) mode="list_sort";shift;;
+		-n) mode="list_nover";shift;;
+		-e) mode="list_emerge";shift;;
+		-h) hlp;exit;;
+		*) break;;
+	esac
+done
+
+if [ -n "${1}" ];then
+	e="${1}"
+else
 	printf "Enter ELF path\n"
 	read e
-else
-	e="${1}"
 fi
 
-l=$(ldd ${e}|awk '{print $1}'|awk '$1=$1' ORS=' ')
-echo $l
+case "${mode}" in
+	list)
+		main
+		;;
+	list_sort)
+		main|awk '{print $1}'|uniq|sort
+		;;
+	list_nover)
+		main|awk '{print $1}'|sed 's/-r.*//;s/-[^-]*$//'|sort|uniq
+		;;
 
-echo
-echo
-echo Use 'equery d' to find deps. WIP
-
-#for f in $l;do
-#	equery b "${f}"
-#done
-
-#equery b "${l}"
+	list_emerge)
+		main|awk '{print $1}'|sed 's/-r.*//;s/-[^-]*$//'|awk '$1=$1' ORS=' '|sort|uniq
+		;;
+esac
