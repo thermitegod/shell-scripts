@@ -19,7 +19,7 @@
 
 hlp(){
 	printf "No flag will be standard 'equery b' output\n"
-	printf " -e\tPrint emergablelist\n"
+	printf " -e\tPrint emergable list\n"
 	printf " -h\tprint this help\n"
 	printf " -l\tPrint sorted with versions\n"
 	printf " -n\tPrint sorted no version list, package.*\n"
@@ -57,7 +57,6 @@ case "${mode}" in
 	list_nover)
 		main|awk '{print $1}'|sed 's/-r.*//;s/-[^-]*$//'|sort|uniq
 		;;
-
 	list_emerge)
 		main|awk '{print $1}'|sed 's/-r.*//;s/-[^-]*$//'|awk '$1=$1' ORS=' '|sort|uniq
 		;;
