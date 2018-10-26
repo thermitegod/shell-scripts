@@ -1,6 +1,6 @@
 #!/bin/sh
-#1.0.0
-#2018-10-25
+#1.1.0
+#2018-10-26
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -26,12 +26,12 @@ hlp(){
 }
 
 main(){
-	equery belongs $(ldd ${e}|awk '{print $1}'|awk '$1=$1' ORS=' ')
+	equery belongs $(ldd ${elf}|awk '{print $1}'|awk '$1=$1' ORS=' ')
 }
 
 mode="list"
 while true;do
-	case "$1" in
+	case "${1}" in
 		-l) mode="list_sort";shift;;
 		-n) mode="list_nover";shift;;
 		-e) mode="list_emerge";shift;;
@@ -41,10 +41,15 @@ while true;do
 done
 
 if [ -n "${1}" ];then
-	e="${1}"
+	elf="${1}"
 else
 	printf "Enter ELF path\n"
-	read e
+	read elf
+fi
+
+if [ -z "$(file ${elf}|grep ELF)" ];then
+	printf "Entered file is not marked as ELF\n"
+	exit 1
 fi
 
 case "${mode}" in
@@ -55,9 +60,9 @@ case "${mode}" in
 		main|awk '{print $1}'|uniq|sort
 		;;
 	list_nover)
-		main|awk '{print $1}'|sed 's/-r.*//;s/-[^-]*$//'|sort|uniq
+		main|awk '{print $1}'|sed 's/-r.*//;s/-[^-]*$//'|uniq|sort
 		;;
 	list_emerge)
-		main|awk '{print $1}'|sed 's/-r.*//;s/-[^-]*$//'|awk '$1=$1' ORS=' '|sort|uniq
+		main|awk '{print $1}'|sed 's/-r.*//;s/-[^-]*$//'|awk '$1=$1' ORS=' '|uniq|sort
 		;;
 esac
