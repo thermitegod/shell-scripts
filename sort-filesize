@@ -1,6 +1,6 @@
 #!/bin/sh
-#3.0.0
-#2018-09-29
+#3.0.1
+#2018-10-26
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -39,7 +39,6 @@ file_sort(){
 }
 
 if [ -z "${1}" ];then hlp;exit;fi
-basedir=$(dirname ${0})
 while true;do
 	case "$1" in
 		-a) mode="all";shift;;
@@ -51,7 +50,7 @@ while true;do
 		-g1) mode="less1G";shift;;
 		-g10) mode="less10G";shift;;
 		-g100) mode="less100G";shift;;
-		-l) ${basedir}/count-size;exit;;
+		-l) count-size;exit;;
 		-h) hlp;exit;;
 		*) break;;
 	esac
