@@ -1,6 +1,6 @@
 #!/bin/sh
-#1.14.0
-#2018-09-21
+#1.14.1
+#2018-10-24
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -18,16 +18,16 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 mode="manga"
-basedir=$(dirname ${0})
-match_zzz="0"
-numerical_rename="0"
+archivetype="z"
 
 optimize="1"
+match_zzz="0"
 show_time="1"
 comp_test="1"
 mime_check="1"
 comp_advzip="1"
 remove_win_osx="1"
+numerical_rename="0"
 detect_nested_dirs="1"
 
 hlp() {
@@ -72,20 +72,20 @@ if [ "${detect_nested_dirs}" = "1" ];then
 fi
 
 if [ "${remove_win_osx}" = "1" ];then
-	${basedir}/remove-win-osx-files -l
-	${basedir}/remove-win-osx-files -r -A
+	remove-win-osx-files -l
+	remove-win-osx-files -r -A
 fi
 
-g=$(${basedir}/remove-manga-credits -l)
+g=$(remove-manga-credits -l)
 if [ -n "${g}" ];then
 	printf "${g}\n\n"
 	if [ "${mode}" = "hentai" ];then
 		printf "Enter to remove found credits\n"
 		read z;unset z
 		if [ "${match_zzz}" = "1" ];then
-			${basedir}/remove-manga-credits -r -z
+			remove-manga-credits -r -z
 		else
-			${basedir}/remove-manga-credits -r
+			remove-manga-credits -r
 		fi
 	else
 		printf "Printing found, will NOT remove, use -m to remove\n"
@@ -94,20 +94,18 @@ fi
 unset g
 
 if [ "${numerical_rename}" = "1" ];then
-	${basedir}/rename-numerical-batch >/dev/null 2>&1
+	rename-numerical-batch
 fi
 
-printf "\n\nMode is : ${mode}\n\n"
-
 if [ "${mime_check}" = "1" ];then
-	${basedir}/mime-correct -A
+	mime-correct -A
 	printf "\n"
 fi
 
-${basedir}/count-archive
-${basedir}/count-image
-
-printf "Size\t: $(du -h .|tail -n1|awk '{print $1}')\n"
+printf "\n\nMode is : ${mode}\n\n"
+count-archive
+count-image
+printf "Size\t: $(du -h|tail -n1|awk '{print $1}')\n"
 
 printf "Choose archive type [DEFAULT:1]\n"
 printf "1: zip-dir-destructive\n"
@@ -120,22 +118,22 @@ if [ "${show_time}" = "1" ];then
 fi
 
 if [ "${optimize}" = "1" ];then
-	${basedir}/optimize-all -m -v
+	optimize-all -m -v
 fi
 
 case "${archivetype}" in
-	1) ${basedir}/mkzip -z;;
-	2) ${basedir}/mkzip -Z;;
-	3) ${basedir}/mk7z -P -z;;
-	*) ${basedir}/mkzip -z;;
+	1) mkzip -z;;
+	2) mkzip -Z;;
+	3) mk7z -P -z;;
+	*) mkzip -z;;
 esac
 
 if [ "${comp_advzip}" = "1" ] && ! [ "${archivetype}" = "3" ];then
-	${basedir}/mkadvzip -a
+	mkadvzip -a
 fi
 
 if [ "${comp_test}" = "1" ];then
-	${basedir}/mk7z -t
+	mk7z -t
 fi
 
 if [ "${show_time}" = "1" ];then
