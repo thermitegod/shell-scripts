@@ -1,6 +1,6 @@
 #!/bin/sh
-#1.7.0
-#2018-10-17
+#1.8.0
+#2018-10-26
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -17,6 +17,10 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+#ref
+#collision -- same filename when corrected
+#mismatch -- wrong file extension
+
 mime_type_image(){
 	if [ -d "${f}" ];then return;fi
 	total=$((total+1))
@@ -27,11 +31,19 @@ mime_type_image(){
 	if ! [ "${mimeext}" = "${ext}" ];then
 		if [ "${mimeext}" = "jpeg" ];then mimeext="jpg";fi
 		if [ -f "${f%%.*}.${mimeext}" ] && [ -f "${f%%.*}.${ext}" ];then
-			printf "File collision : $(readlink -f ${f%%})\n"
+			if [ "${V}" = "1" ];then
+				if [ "$(sha1sum ${f%%.*}.${mimeext}|awk '{print $1}')" = "$(sha1sum ${f%%.*}.${ext}|awk '{print $1}')" ];then
+					printf "File collision is same file : ${f%%.*}.${mimeext} ${f%%.*}.${ext}\n"
+					#TODO
+					#remove wrong ext file, since they are the same?
+				else
+					printf "File collision with different files : ${f%%.*}.${mimeext} ${f%%.*}.${ext}\n"
+				fi
+			fi
 			coll=$((coll+1))
 			return
 		else
-			printf "Mismatch : $(readlink -f ${f%%})\n"
+			if [ "${V}" = "1" ];then printf "Mismatch : $(readlink -f ${f%%})\n";fi
 		fi
 		if [ "${listonly}" = "1" ];then return;fi
 		mv "${f%%}" "${f%%.*}.${mimeext}"
@@ -39,32 +51,57 @@ mime_type_image(){
 	fi
 }
 
+set_vars(){
+	total="0"
+	coll="0"
+	fixed="0"
+}
+
+hlp(){
+	printf " -A\trun in all sub-dirs of \$PWD\n"
+	printf " -h\tprint this help\n"
+	printf " -I\trun in single dir only\n"
+	printf " -L\tlist only in \$PWD, no corrections\n"
+	printf " -v\tverbose\n"
+}
+
+if [ -z "${1}" ];then hlp;exit;fi
 while true;do
 	case "${1}" in
-		-I)
-			total="0"
-			coll="0"
-			fixed="0"
+		-A) mode=all;shift;;
+		-I) mode=correct;shift;;
+		-L) mode=list;shift;;
+		-v) export V="1";shift;;
+		-h) hlp;exit;;
+		*) break;;
+	esac
+done
+
+while true;do
+	case "${mode}" in
+		correct)
 			listonly="0"
+			set_vars
 			for f in *;do mime_type_image;done
-			if ! [ "${total}" = "0" ];then printf "Checked : ${total}\tCorrected : ${fixed}\tCollisions : ${coll}\tin : ${PWD}\n";fi
+			if [ "${V}" = "1" ] && ! [ "${total}" = "0" ];then
+				printf "Checked : ${total}\tCorrected : ${fixed}\tCollisions : ${coll}\tin : ${PWD}\n"
+			elif ! [ "${total}" = "0" ];then
+				printf "Checked : ${total}\tCorrected : ${fixed}\tCollisions : ${coll}\n"
+			fi
 			break;;
-		-L)
-			total="0"
-			coll="0"
+		list)
 			listonly="1"
+			set_vars
 			for f in *;do mime_type_image;done
-			if ! [ "${total}" = "0" ];then printf "Checked : ${total} \tCollisions : ${coll}\tin : ${PWD}\n";fi
+			if [ "${V}" = "1" ] && ! [ "${total}" = "0" ];then
+				printf "Checked : ${total}\tCollisions : ${coll}\tin : ${PWD}\n"
+			elif ! [ "${total}" = "0" ];then
+				printf "Checked : ${total}\tCollisions : ${coll}\n"
+			fi
 			break;;
-		-A)
-			#i give up on fixing this
-			find . -type d -type d \( ! -name . \) -exec sh -c 'cd "{}" && /usr/local/bin/mime-correct -I' \;
-			break;;
-		*)
-			printf "Invalid selection\n"
-			printf " -A\trun in all sub-dirs of \$PWD\n"
-			printf " -I\trun in single dir only\n"
-			printf " -L\tlist only, no corrections\n"
+		all)
+			#i give up on fixing this, if script renamed change below
+			find . -type d -type d \( ! -name . \) -exec sh -c 'cd "{}" && mime-correct -I' \;
 			break;;
 	esac
 done
