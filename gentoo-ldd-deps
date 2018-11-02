@@ -1,6 +1,6 @@
 #!/bin/sh
-#1.2.0
-#2018-10-26
+#1.2.1
+#2018-11-02
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -64,9 +64,9 @@ case "${mode}" in
 		main|awk '{print $1}'|sort -u
 		;;
 	list_nover)
-		main|awk '{print $1}'|sort -u|sed 's/-r.*//;s/-[^-]*$//'
+		main|awk '{print $1}'|sort -u|sed 's/-r[0-9]//;s/-[^-]*$//'
 		;;
 	list_emerge)
-		main|awk '{print $1}'|sort -u|sed 's/-r.*//;s/-[^-]*$//'|awk '$1=$1' ORS=' '
+		main|awk '{print $1}'|sort -u|sed 's/-r[0-9]//;s/-[^-]*$//'|awk '$1=$1' ORS=' '
 		;;
 esac
