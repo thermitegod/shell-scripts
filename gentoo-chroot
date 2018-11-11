@@ -17,6 +17,9 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.<Paste>
 
+#TODO
+# live enviroment that is not gentoo host
+
 if [ "$(id -u)" -ne 0 ];then printf "Requires root, exiting.\n";return;fi
 ch_1(){ ch="/mnt/gentoo" ; }
 ch_2(){ ch="/mnt/gentoo-gcc" ; }
