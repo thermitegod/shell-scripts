@@ -1,6 +1,6 @@
 #!/bin/sh
-#1.5.0
-#2018-04-18
+#2.0.0
+#2018-11-11
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -20,20 +20,46 @@
 if [ "$(id -u)" -ne 0 ];then printf "Requires root, exiting.\n";return;fi
 if ! [ -f "/usr/src/linux/usr/gen_init_cpio" ];then printf "Make sure the kernel is build first\n";exit;fi
 
-log="/dev/null"
-#log="/tmp/genkernel-initgen.log"
+logfile="/dev/null"
+comp="lz4"
+loglevel="1"
 
-export XZ_OPT="-9e"
+hlp(){
+	printf "GENERAL\n"
+	printf " -h\tprint this help\n"
+	printf " -L #\tset loglevel 1-5 [default : 1]\n"
+	printf " -v\tlog to /tmp/genkernel-initgen.log\n"
+	printf "\nCOMPRESSION\n"
+	printf " -l\tcompress initramfs using : lz4 [default]\n"
+	printf " -x\tcompress initramfs using : xz \n"
+}
+
+while true;do
+	case "${1}" in
+		-v) logfile="/tmp/genkernel-initgen.log";shift;;
+		-l) comp="lz4";shift;;
+		-x) comp="xz";export XZ_OPT="-9e";shift;;
+		-L)
+			if [ -n "${2}" ] && [ ${2} -ge "1" ] && [ "${2}" -le "5"  ] ;then
+				loglevel="${2}"
+			else
+				printf "loglevel not within bounds, using default value\n"
+			fi
+			shift;shift;;
+		-h) hlp;return;;
+		*) break;;
+	esac
+done
+
 genkernel initramfs \
-	--logfile=${log} \
+	--logfile=${logfile} \
 	--install \
 	--makeopts=-j$(($(nproc)+1)) \
-	--loglevel=1 \
-	--kernel-config=/usr/src/linux/.config \
+	--loglevel=${loglevel} \
 	--no-ramdisk-modules \
 	--busybox \
 	--compress-initramfs \
-	--compress-initramfs-type=xz \
+	--compress-initramfs-type=${comp} \
 	--no-clean \
 	--no-mountboot \
 	--no-keymap \
@@ -50,11 +76,13 @@ genkernel initramfs \
 	--no-gpg \
 	--no-unionfs \
 	--no-netboot \
-	--e2fsprogs \
+	--no-e2fsprogs \
 	--no-dmraid \
 	--postclear \
 	--no-splash \
+	--disklabel \
 	--strip=all \
 	--zfs \
+	--microcode \
 	--firmware \
 	--firmware-dir=/lib/firmware
