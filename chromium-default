@@ -1,6 +1,6 @@
 #!/bin/sh
-#3.3.0
-#2018-10-14
+#4.0.0
+#2018-11-07
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -17,31 +17,40 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+if [ "$(id -u)" -eq 0 ];then printf "Do not run as root\n";exit;fi
+
 cache_rm(){
-	if [ -d "${XDG_CACHE_HOME}/${data##*/}" ];then
-		sleep 5
-		rm -rf "${XDG_CACHE_HOME}/${data##*/}"
+	cache="${XDG_CACHE_HOME}/${data##*/}"
+	if [ -d "${cache}" ];then
+		sleep 3
+		rm -rf "${cache}"
 	fi
 }
 
-launch(){
-	/usr/lib64/chromium-browser/chromium-launcher.sh --user-data-dir="${data}"
-}
+launch(){ ${ver} --user-data-dir="${data}"; }
 
+#ver="chromium"
+ver="google-chrome-unstable"
+config="${HOME}/.config/chrome/${ver}"
 mode="${0##*/}"
 case "${mode}" in
 	chromium-default)
-		data="/home/brandon/.config/chromium-default"
+		data="${config}-default"
 		launch
 		cache_rm
 		;;
-	chromium-ex)
-		data="/home/brandon/.config/chromium-ex"
+	chromium-ex1)
+		data="${config}-ex1"
 		launch
 		cache_rm
 		;;
 	chromium-ex2)
-		data="/home/brandon/.config/chromium-ex2"
+		data="${config}-ex2"
+		launch
+		cache_rm
+		;;
+	chromium-ex3)
+		data="${config}-ex3"
 		launch
 		cache_rm
 		;;
@@ -50,7 +59,6 @@ case "${mode}" in
 		trap 'exit 1' INT HUP QUIT TERM USR1
 		trap finish EXIT
 		data=$(mktemp -d)
-		chmod 755 "${data}"
 		launch
 		;;
 esac
