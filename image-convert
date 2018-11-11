@@ -17,9 +17,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#TODO
-#reduce case size
-
 hlp(){
 	printf "MODE=${mode}\n"
 	printf " -m\tdisable mime check\n"
@@ -82,10 +79,7 @@ while true;do
 	esac
 done
 
-if [ "${mimecheck}" = "1" ];then
-	basedir=$(dirname ${0})
-	${basedir}/mime-correct -A
-fi
+if [ "${mimecheck}" = "1" ];then mime-correct -A;fi
 
 case "${mode}" in
 	png2jpg-low)
@@ -163,5 +157,4 @@ case "${mode}" in
 		qual="100"
 		convert_main
 		;;
-	*) printf "error\n";exit 1;;
 esac
