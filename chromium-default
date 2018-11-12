@@ -1,6 +1,6 @@
 #!/bin/sh
-#4.0.0
-#2018-11-07
+#4.1.0
+#2018-11-12
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -20,7 +20,7 @@
 if [ "$(id -u)" -eq 0 ];then printf "Do not run as root\n";exit;fi
 
 cache_rm(){
-	cache="${XDG_CACHE_HOME}/${data##*/}"
+	cache="${XDG_CACHE_HOME}/${cachedir}/${data##*/}"
 	if [ -d "${cache}" ];then
 		sleep 3
 		rm -rf "${cache}"
@@ -29,10 +29,33 @@ cache_rm(){
 
 launch(){ ${ver} --user-data-dir="${data}"; }
 
+hlp(){
+	printf "GENERAL\n"
+	printf " -h\tprint this help\n"
+	printf " -c\tchromium\n"
+	printf " -g1\tgoogle-chrome-unstable\n"
+	printf " -g2\tgoogle-chrome-beta\n"
+	printf " -g3\tgoogle-chrome\n"
+}
+
 #ver="chromium"
+#cachedir="chromium"
 ver="google-chrome-unstable"
+cachedir="chrome"
 config="${HOME}/.config/chrome/${ver}"
 mode="${0##*/}"
+
+while true;do
+	case "${1}" in
+		-c) ver="chromium";cachedir="${ver}";shift;;
+		-g1) ver="google-chrome-unstable";cachedir="chrome";shift;;
+		-g2) ver="google-chrome-beta";cachedir="chrome";shift;;
+		-g3) ver="google-chrome";cachedir="chrome";shift;;
+		-h) hlp;exit;;
+		*) break;;
+	esac
+done
+
 case "${mode}" in
 	chromium-default)
 		data="${config}-default"
