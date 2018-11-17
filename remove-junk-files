@@ -47,7 +47,6 @@ find_junk(){
 		rm)
 			find . -type f -iname "${1}" -exec trash-put -- "{}" \;
 			;;
-
 	esac
 }
 
