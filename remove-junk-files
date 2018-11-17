@@ -1,6 +1,6 @@
 #!/bin/sh
-#4.6.0
-#2018-09-21
+#4.7.0
+#2018-11-16
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -17,12 +17,12 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-found_rm="0"
-found_ls="0"
+act="ls"
 
 url="0"
-json="0"
 txt="0"
+json="0"
+other="0"
 
 hlp(){
 	printf "General\n"
@@ -31,33 +31,38 @@ hlp(){
 	printf " -r\tRemove enabled pattern files\n"
 	printf " -R\tRemove all pattern files\n"
 	printf "Patterns\n"
-	printf " -A\tEnable remove for ALL patterns\n"
-	printf " -j\tEnable remove for json\n"
-	printf " -t\tEnable remove for txt\n"
-	printf " -u\tEnable remove for url/mht\n"
+	printf " -A\tRemove ALL patterns\n"
+	printf " -j\tRemove json\n"
+	printf " -o\tRemove md5/nfo/svf/bridgesort/padding_file\n"
+	printf " -t\tRemove txt\n"
+	printf " -u\tRemove url/mht/htm/html\n"
 }
 
 find_junk(){
-	if [ "${found_ls}" = "1" ];then
-		j=$(find . -iname "${1}" -exec ls -1A -- "{}" \;)
-		if [ -n "${j}" ];then printf "*** Found \"${1}\" files ***\n${j}\n";fi
-	fi
-	if [ "${found_rm}" = "1" ];then
-		find . -type f -iname "${1}" -exec /usr/bin/trash-put -- '{}' \;
-	fi
+	case "${act}" in
+		ls)
+			j=$(find . -iname ${1} -exec ls -1A -- "{}" \;)
+			if [ -n "${j}" ];then printf "*** Found ${1} files ***\n${j}\n";fi
+			;;
+		rm)
+			find . -type f -iname "${1}" -exec trash-put -- "{}" \;
+			;;
+
+	esac
 }
 
 if [ -z "${1}" ];then hlp;return;fi
 while true;do
-	case "$1" in
-		-r) found_rm="1";shift;;
-		-l) found_ls="1";shift;;
-		-R) found_rm="1";txt="1";json="1";url="1";shift;;
-		-A) txt="1";json="1";url="1";shift;;
+	case "${1}" in
+		-r) act="rm";shift;;
+		-l) act="ls";shift;;
+		-R) act="rm";txt="1";json="1";url="1";other="1";shift;;
+		-A) txt="1";json="1";url="1";other="1";shift;;
 		-t) txt="1";shift;;
 		-j) json="1";shift;;
 		-u) url="1";shift;;
-		-h) hlp;return;;
+		-o) other="1";shift;;
+		-h) hlp;exit;;
 		*) break;;
 	esac
 done
@@ -66,17 +71,21 @@ find_junk desktop.ini
 find_junk Thumbs.db
 find_junk .DS_Store
 find_junk __MACOSX
-find_junk *.md5
-find_junk *.nfo
-find_junk *.sfv
-find_junk .BridgeSort
-find_junk _____padding_file*
 
-if [ ${url} = "1" ] || [ "${found_ls}" = "1" ];then
+if [ ${other} = "1" ] || [ "${act}" = "ls" ];then
+	find_junk *.md5
+	find_junk *.nfo
+	find_junk *.sfv
+	find_junk .BridgeSort
+	find_junk _____padding_file*
+fi
+
+if [ ${url} = "1" ] || [ "${act}" = "ls" ];then
 	find_junk *.url
 	find_junk *.mht
 	find_junk *.htm
 	find_junk *.html
 fi
-if [ ${txt} = "1" ] || [ "${found_ls}" = "1" ];then find_junk *.txt;fi
-if [ ${json} = "1" ] || [ "${found_ls}" = "1" ];then find_junk *.json;fi
+
+if [ ${txt} = "1" ] || [ "${act}" = "ls" ];then find_junk *.txt;fi
+if [ ${json} = "1" ] || [ "${act}" = "ls" ];then find_junk *.json;fi
