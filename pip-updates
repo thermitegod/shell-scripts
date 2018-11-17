@@ -1,6 +1,6 @@
 #!/bin/sh
-#1.1.0
-#2018-06-30
+#1.2.0
+#2018-11-16
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -19,11 +19,10 @@
 
 #pip3
 pip3 install --user flexget --upgrade
-#pip3 install --user  gallery-dl --upgrade
+pip3 install --user youtube-dl --upgrade
 
 #pip2
 pip2 install --user  czipfile --upgrade
 
-if [ -d "${XDG_CACHE_HOME}"/pip ];then
-	rm -rf "${XDG_CACHE_HOME}"/pip
-fi
+cache="${XDG_CACHE_HOME}/pip"
+if [ -d "${cache}" ];then rm -rf "${cache}";fi
