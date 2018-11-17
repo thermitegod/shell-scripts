@@ -1,5 +1,5 @@
 #!/bin/sh
-#4.2.0
+#4.2.1
 #2018-11-16
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
@@ -18,9 +18,8 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 fork="0"
-audio="0"
-batch_links="/tmp/ytdl-batch.txt"
 extra_args=""
+batch_links="/tmp/ytdl-batch.txt"
 
 hlp(){
 	printf " -a\tonly download audio\n"
@@ -36,7 +35,6 @@ dl(){
 	youtube-dl \
 		--geo-bypass \
 		--no-overwrites \
-		--continue \
 		--no-call-home \
 		--yes-playlist \
 		--audio-format best \
@@ -54,12 +52,11 @@ batch(){
 		printf "finished line : ${c}\n"
 		c=$((c+1))
 	done < "${batch_links}"
-	exit
 }
 
 while true;do
 	case "${1}" in
-		-a) audio="1";shift;;
+		-a) extra_args="--extract-audio";shift;;
 		-b) batch;exit;;
 		-e) $EDITOR ${batch_links};exit;;
 		-f) fork="1";shift;;
@@ -76,7 +73,6 @@ elif [ -z "${1}"];then
 fi
 
 if [ -z "$(echo ${link}|grep http)" ];then printf "${link} : not a valid link\n";exit;fi
-if [ ${audio} = "1" ];then extra_args="--extract-audio";fi
 if [ ${fork} = "0" ];then
 	dl
 else
