@@ -31,11 +31,11 @@ hlp(){
 	printf " -r\tRemove enabled pattern files\n"
 	printf " -R\tRemove all pattern files\n"
 	printf "Patterns\n"
-	printf " -A\tRemove ALL patterns\n"
-	printf " -j\tRemove json\n"
-	printf " -o\tRemove md5/nfo/svf/bridgesort/padding_file\n"
-	printf " -t\tRemove txt\n"
-	printf " -u\tRemove url/mht/htm/html\n"
+	printf " -A\tEnable ALL patterns\n"
+	printf " -j\tEnable json\n"
+	printf " -o\tEnable md5/nfo/svf/bridgesort/padding_file\n"
+	printf " -t\tEnable txt\n"
+	printf " -u\tEnable url/mht/htm/html\n"
 }
 
 find_junk(){
