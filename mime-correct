@@ -1,6 +1,6 @@
 #!/bin/sh
-#1.8.0
-#2018-10-26
+#1.8.1
+#2018-11-16
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -68,9 +68,9 @@ hlp(){
 if [ -z "${1}" ];then hlp;exit;fi
 while true;do
 	case "${1}" in
-		-A) mode=all;shift;;
-		-I) mode=correct;shift;;
-		-L) mode=list;shift;;
+		-A) mode="all";shift;;
+		-I) mode="correct";shift;;
+		-L) mode="list";shift;;
 		-v) export V="1";shift;;
 		-h) hlp;exit;;
 		*) break;;
