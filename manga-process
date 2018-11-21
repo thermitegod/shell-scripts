@@ -1,6 +1,6 @@
 #!/bin/sh
-#1.14.1
-#2018-10-24
+#1.14.2
+#2018-11-16
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -26,7 +26,7 @@ show_time="1"
 comp_test="1"
 mime_check="1"
 comp_advzip="1"
-remove_win_osx="1"
+remove_junk="1"
 numerical_rename="0"
 detect_nested_dirs="1"
 
@@ -51,7 +51,7 @@ while true;do
 	case "$1" in
 		-A) comp_advzip="0";shift;;
 		-D) detect_nested_dirs="0";shift;;
-		-R) remove_win_osx="0";shift;;
+		-R) remove_junk="0";shift;;
 		-M) mime_check="0";shift;;
 		-t) show_time="0";shift;;
 		-T) comp_test="0";shift;;
@@ -71,9 +71,9 @@ if [ "${detect_nested_dirs}" = "1" ];then
 	fi
 fi
 
-if [ "${remove_win_osx}" = "1" ];then
-	remove-win-osx-files -l
-	remove-win-osx-files -r -A
+if [ "${remove_junk}" = "1" ];then
+	remove-junk-files -l
+	remove-junk-files -r -A
 fi
 
 g=$(remove-manga-credits -l)
