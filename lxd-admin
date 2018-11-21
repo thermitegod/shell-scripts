@@ -1,0 +1,252 @@
+#!/bin/sh
+#5.0.0
+#2018-11-20
+
+#Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
+#
+#This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#TODO
+#improve variable names
+#integrate *images instead of current bolt-on
+
+hlp(){
+	printf "CONTAINER/IMAGE, only use to limit actions on specified\n"
+	printf " -T\tOnly run on transmission, uses :9091 as port\n"
+	printf " -R\tOnly run on rutorrent\n"
+	printf "\nCONTAINER GENERAL\n"
+	printf " -d\tDelete containers\n"
+	printf " -D\tDelete old containers\n"
+	printf " -h\tPrint this help\n"
+	printf " -r\tRestart all\n"
+	printf " -s\tStart all\n"
+	printf " -u\tUpdate, rename existing with 'old' prefix\n"
+	printf " -z\tStop all\n"
+	printf "\nIMAGE GENERAL, req -IT or -IR, needs work\n"
+	printf " -IT\trun for alpine-base-transmission\n"
+	printf " -IR\trun for alpine-base-rutorrent\n"
+	printf " -ex\texport\n"
+	printf " -im\timport, wip\n"
+	printf " -in\tinit\n"
+	printf " -pb\tpublish\n"
+	printf "\nSPECIFIC, no other flags req\n"
+	printf " -c\trtorrent lockfile cleanup\n"
+	printf " -C\trutorrent cleanup only, remove *.torrent files in \$config/rutorrent/share/torrents/\n"
+	printf "\nOTHER\n"
+	printf " -p\tPrint container vars only\n"
+	printf " -P\tPrint container vars and required directories\n"
+}
+
+copy_new(){ printf "Copying ${baseimg} to ${ctype}-${cname}\n";lxc copy "${baseimg}" "${ctype}-${cname}"; }
+rem_old(){ printf "Renaming ${ctype}-${cname} to old-${ctype}-${cname}\n";lxc rename "${ctype}-${cname}" old-"${ctype}-${cname}"; }
+
+dirset_rutorrent(){
+	#in container
+	var="/usr/share/webapps/rutorrent/share"
+	home="/home/brandon"
+	#not in container
+	base="/mnt/torrents"
+	config="${base}/.config/${cname}"
+	session="${config}/session"
+	watch="${config}/watch"
+	rushare="${config}/rutorrent/share"
+	if ! [ "${cname}" = "anime" ];then
+		save="${base}/${cname}"
+	else
+		#lxc will not mount on symlinks, but can mount through them
+		save="/mnt/anime/anime-working"
+	fi
+
+	if [ "${act}" = "print" ];then return;fi
+
+	dirset_dircheck
+
+	lxc config device add rutorrent-"${cname}" storage disk source="${save}" path="${home}/rtorrent/data"
+	lxc config device add rutorrent-"${cname}" watch disk source="${watch}" path="${home}/rtorrent/watch"
+	lxc config device add rutorrent-"${cname}" session disk source="${session}" path="${home}/rtorrent/session"
+	lxc config device add rutorrent-"${cname}" ru disk source="${rushare}" path="${var}"
+}
+
+dirset_transmission(){
+	#in container
+	tbase="/var/lib/transmission"
+	#not in container
+	base="/mnt/torrents"
+	config="${base}/.config/${cname}"
+	save="${base}/${cname}"
+	session="${config}/session"
+	watch="${config}/watch"
+
+	if [ "${act}" = "print" ];then return;fi
+
+	dirset_dircheck
+
+	lxc config device add "${ctype}-${cname}" storage disk source="${save}" path="${tbase}/downloads"
+	lxc config device add "${ctype}-${cname}" session disk source="${session}" path="${tbase}/config/torrents"
+	#lxc config device add rutorrent-"${cname}" watch disk source="${watch}" path="${tbase}/watch"
+}
+
+dirset_dircheck(){
+	if ! [ -e "${config}" ];then mkdir -p "${config}"; fi
+	if ! [ -e "${save}" ];then mkdir -p "${save}"; fi
+	if ! [ -e "${session}" ];then mkdir -p "${session}"; fi
+	if ! [ -e "${watch}" ];then mkdir -p "${watch}"; fi
+	if ! [ -e "${rushare}" ] && [ "${ctype}" = "${rutorrent}" ];then mkdir -p "${rushare}";fi
+}
+
+rtorrent_cleanup(){
+	dht="/mnt/torrents/.config/${cname}/session/rtorrent.dht_cache"
+	lock="/mnt/torrents/.config/${cname}/session/rtorrent.lock"
+	if [ -f "${dht}" ];then rm -v "${dht}";fi
+	if [ -f "${lock}" ];then rm -v "${lock}";fi
+}
+
+set_ip_alpine(){
+	tmp=$(mktemp)
+	net="${ctype}-${cname}/etc/network/interfaces"
+	printf "Seting StaticIP for ${ctype}-${cname} to 192.168.0.${ip4}\n"
+	printf "auto eth0\niface eth0 inet static\n\taddress 192.168.0.${ip4}\n\tnetmask 255.255.255.0\n\tgateway 192.168.0.1\n">|"${tmp}"
+	lxc file push "${tmp}" "${net}"
+	if [ -f "${tmp}" ];then rm "${tmp}";fi
+}
+
+clean_rutorrent(){
+	base="/mnt/torrents"
+	config="${base}/.config/${cname}"
+	#if [ $(find ${config}/rutorrent/share/torrents -type f -quit) ];then echo n;fi
+	#return
+	rm ${config}/rutorrent/share/torrents/*.torrent
+}
+
+update_main(){
+	update_run_once
+	stop_all
+	rem_old
+	copy_new
+	dirset_${ctype}
+	if [ "${ctype}" = "${rutorrent}" ];then rtorrent_cleanup;fi
+	set_ip_alpine
+}
+
+stop_all(){ printf "Stoping container ${ctype}-${cname}\n";lxc stop "${ctype}-${cname}"; }
+start_all(){ printf "Starting container ${ctype}-${cname}\n";lxc start "${ctype}-${cname}"; }
+delete_all(){ printf "Deleteing container ${ctype}-${cname}\n";lxc delete "${ctype}-${cname}"; }
+restart_all(){ printf "Restarting container ${ctype}-${cname}\n";lxc restart "${ctype}-${cname}"; }
+delete_all_old(){ printf "Deleteing container old-${ctype}-${cname}\n";lxc delete old-"${ctype}-${cname}"; }
+
+update_run_once(){ if [ "${update_has_run}" = "0" ];then lxc stop alpine-base-${ctype};update_has_run="1";fi; }
+
+printinfo(){
+	printf "Name\t\t: $cname\n"
+	printf "Container\t: $ctype\n"
+	printf "IPV4\t\t: 192.168.0.$ip4\n"
+	if [ "${verbose}" = "1" ];then
+	dirset_${ctype}
+	printf "rushare\t\t: ${rushare}\n"
+	printf "session\t\t: ${session}\n"
+	printf "watch\t\t: ${watch}\n"
+	printf "save\t\t: ${save}\n"
+	fi
+	printf "\n"
+}
+
+base_img(){
+	printf "${A}ing alpine-base-rutorrent\n"
+	lxc "${A}" alpine-base-rutorrent
+	printf "${A}ing alpine-base-transmission\n"
+	lxc "${A}" alpine-base-transmission
+}
+
+main_images(){
+	baseimg_img="${baseimg}"
+	case "${act_img}" in
+		publish) lxc publish "${baseimg}" --alias "${baseimg_img}";;
+		export) lxc image export "${baseimg_new}";;
+		#TODO import) lxc import <*tar> --alias $name ;;
+		init)
+			lxc init "${baseimg_img}" "${baseimg}"
+			lxc config device add "${baseimg}" eth0 nic name=eth0 nictype=bridged parent=br0
+			lxc config set "${baseimg}" security.privileged true
+			lxc config set "${baseimg}" limits.cpu 8
+			lxc config set "${baseimg}" limits.memory 8192MB
+			;;
+	esac
+}
+
+main_container(){
+	baseimg="alpine-base-${ctype}"
+	if [ "${limit}" = "1" ] && ! [ "${limit_to}" = "${ctype}" ];then return;fi
+	case "${act}" in
+		stopall) stop_all;;
+		startall) start_all;;
+		deleteall) delete_all;;
+		restartall) restart_all;;
+		deleteallold) delete_all_old;;
+		ru_cleanup) clean_rutorrent;;
+		rt_cleanup) rtorrent_cleanup;;
+		update) update_main;;
+		print) printinfo;;
+		img) main_images;;
+	esac
+}
+
+act="z"
+act_img="z"
+limit_to="z"
+
+limit="0"
+verbose="0"
+printonly="0"
+update_has_run="0"
+
+container_info="${HOME}/.bin/bin-extra/lxd-admin"
+
+if [ -z "${1}" ];then hlp;exit;fi
+while true;do
+	case "$1" in
+		-IT) baseimg="alpine-base-transmission";shift;;
+		-IR) baseimg="alpine-base-rutorrent";shift;;
+		-pb) act_img="publish";shift;;
+		-ex) act_img="export";shift;;
+		-im) act_img="import";shift;;
+		-in) act_img="init";shift;;
+		-a) A="start";base_img;exit;;
+		-A) A="stop";base_img;exit;;
+		-T) limit="1";limit_to="transmission";shift;;
+		-R) limit="1";limit_to="rutorrent";shift;;
+		-c) act="rt_cleanup";limit="1";limit_to="rutorrent";shift;;
+		-C) act="ru_cleanup";limit="1";limit_to="rutorrent";shift;;
+		-d) act="deleteall";shift;;
+		-D) act="deleteallold";shift;;
+		-r) act="restartall";shift;;
+		-s) act="startall";shift;;
+		-u) act="update";shift;;
+		-z) act="stopall";shift;;
+		-p) act="print";shift;;
+		-P) act="print";verbose="1";shift;;
+		-h) hlp;exit;;
+		*) break;;
+	esac
+done
+if ! [ "${act_img}" = "z" ];then main_images;fi
+
+#all containers are declared in $container_info using the following format, subject to change
+#"container type" "IPV4 ending" "container name"
+#$ctype                 $ip4    $cname
+#example: rutorrent 161 anime
+
+while IFS=' ' read -r ctype ip4 cname;do
+	main_container
+done < "${container_info}"
+
