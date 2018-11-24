@@ -21,7 +21,7 @@ verbose="1"
 advall="0"
 
 while true;do
-	case "$1" in
+	case "${1}" in
 		-a) advall="1";shift;;
 		-q) verbose="0";shift;;
 		*) break;;

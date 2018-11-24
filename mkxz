@@ -58,7 +58,7 @@ esac
 
 if [ -z "${1}" ];then hlp;exit;fi
 while true;do
-	case "$1" in
+	case "${1}" in
 		-B) C="bzip2";E="bz2";shift;;
 		-G) C="gzip";E="gz";shift;;
 		-X) C="xz";E="xz";shift;;

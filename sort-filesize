@@ -40,7 +40,7 @@ file_sort(){
 
 if [ -z "${1}" ];then hlp;exit;fi
 while true;do
-	case "$1" in
+	case "${1}" in
 		-a) mode="all";shift;;
 		-m10) mode="less10M";shift;;
 		-m100) mode="less100M";shift;;

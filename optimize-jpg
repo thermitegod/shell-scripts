@@ -32,7 +32,7 @@ V="0"
 mode="${0##*/}"
 
 while true;do
-	case "$1" in
+	case "${1}" in
 		-v) V="1";shift;;
 		-m) mimecheck="0";shift;;
 		-j) mode="optimize-jpg";shift;;

@@ -31,7 +31,7 @@ hlp() {
 
 if [ -z "${1}" ];then hlp;return;fi
 while true;do
-	case "$1" in
+	case "${1}" in
 		-a) mode="aud";shift;;
 		-s) mode="sub";shift;;
 		-v) mode="vid";shift;;

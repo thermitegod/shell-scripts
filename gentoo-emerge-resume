@@ -90,7 +90,7 @@ hlp() {
 }
 
 while true;do
-	case "$1" in
+	case "${1}" in
 		-b) bac;shift;;
 		#-r) res;shift;;
 		-r) die "Disabled, use -s";;
