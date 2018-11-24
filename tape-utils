@@ -118,7 +118,7 @@ links() {
 }
 
 while true;do
-	case "$1" in
+	case "${1}" in
 		-b) target="${2}";t_backup;shift;;
 		-B) target="${2}";t_backup_overwrite;shift;;
 		-e) t_eject;shift;;

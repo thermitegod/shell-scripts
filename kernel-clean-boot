@@ -38,7 +38,7 @@ hlp() {
 }
 
 while true;do
-	case "$1" in
+	case "${1}" in
 		-l) lst="1";shift;;
 		-r) rem="1";shift;;
 		-p) pat="1";shift;;

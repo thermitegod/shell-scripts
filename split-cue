@@ -25,7 +25,7 @@ hlp(){
 
 mode="single"
 while true;do
-	case "$1" in
+	case "${1}" in
 		-b) mode="batch";shift;;
 		-h) hlp;exit;;
 		*) break;;

@@ -49,7 +49,7 @@ S="manual-$(date +%F-%H%M)"
 ZFS="/sbin/zfs"
 if [ -z "${1}" ];then hlp;exit;fi
 while true;do
-	case "$1" in
+	case "${1}" in
 		#snapshots
 		-m) mode="root";shift;;
 		-m1) mode="brandon";shift;;

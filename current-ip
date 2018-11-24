@@ -25,7 +25,7 @@ hlp() {
 mode="once"
 
 while true;do
-	case "$1" in
+	case "${1}" in
 		-d) mode="daily";shift;;
 		-h) hlp;break;;
 		*) break;;

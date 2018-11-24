@@ -48,7 +48,7 @@ hlp() {
 }
 
 while true;do
-	case "$1" in
+	case "${1}" in
 		-A) comp_advzip="0";shift;;
 		-D) detect_nested_dirs="0";shift;;
 		-R) remove_junk="0";shift;;
