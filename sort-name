@@ -1,0 +1,105 @@
+#!/bin/sh
+#5.0.0
+#2018-11-24
+
+#Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
+#
+#This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#keeping it simple, since v2
+
+#TODO
+#debug statments
+#improve multi list
+
+debug="0"
+
+list_final="${HOME}/.bin/bin-extra/sort-name-final"
+list_type="${HOME}/.bin/bin-extra/sort-name-type"
+
+dest_final=$(head -n1 ${list_final}|sed -e "s/#//g")
+dest_type=$(head -n1 ${list_type}|sed -e "s/#//g")
+
+#defaults
+list_sort="${list_type}"
+dest="${dest_type}"
+
+hlp(){
+	printf " -d\tDebug output\n"
+	printf " -h\tPrint this help\n"
+	printf " -t\tUse test dir \"/tmp/test\"\n"
+	printf "\nEDIT\n"
+	printf " -e\tedit ${list_type}\n"
+	printf " -E\tedit ${list_final}\n"
+	printf "\nLIST\n"
+	printf " -f\trun final sort\n"
+	printf " -t\trun type sort\n"
+}
+
+main(){
+	while IFS=' ' read -r name override;do
+		name_sort
+	done < "${name_list}"
+}
+
+name_sort(){
+	if [ -n "$(echo ${name}|grep '\#')" ];then exit;fi
+	arc=$(echo "${name}" | sed -e "s/\-/\*/g")
+	if [ -z "${override}" ];then dir="${name}/.";else dir="${override}/.";fi
+	case "${job_run}" in
+		dir_check) find . -maxdepth 1 -type f -iname "*${arc}*" -exec mkdir -p -- "${dest}/${dir}" \; -quit;;
+		sort_main) find . -maxdepth 1 -type f -iname "*${arc}*" -exec mv -n -- "{}" "${dest}/${dir}" \;;;
+		sort_local) find . -maxdepth 1 -type f -iname "*${arc}*" -exec mkdir -p -- "${PWD}/${dir}" \; -exec mv -i -- "{}" "${PWD}/${dir}" \;;;
+	esac
+}
+
+if ! [ -f "${list_sort}" ];then printf "missing: ${name_list}\nformat, line 1 must be save path:\n/path/to/save\nto-sort\nto-sort override\n";exit 1;fi
+while true;do
+	case "${1}" in
+		-f) list_sort="${list_final}";dest="${dest_final}";shift;;
+		-t) list_sort="${list_type}";dest="${dest_type}";shift;;
+		-d) debug="1";shift;;
+		-t) dest="/tmp/test";shift;;
+		-h) hlp;exit;;
+		-E) $EDITOR "${list_final}";exit;;
+		-e) $EDITOR "${list_type}";exit;;
+		*) break;;
+	esac
+done
+
+if [ "${debug}" = "1" ];then printf "\n*** Debug printouts enabled ***\n\n";fi
+printf "Prerun info\n"
+printf "Running from\t: ${PWD}\n"
+printf "Dest is\t\t: ${dest}\n\n"
+printf "Make sure everything has been processed correctly\n"
+printf "Confirm run of '${0}' [yn]?\n"
+read confirm
+if echo "${confirm}"|grep -iq "^y" ;then
+	#all target dirs should exits before running
+	#otherwise you are going to have a bad time
+	if [ "${debug}" = "1" ];then printf "Debug: running dir_check\n";fi
+	job_run="dir_check"
+	main
+	#move maches to dest
+	if [ "${debug}" = "1" ];then printf "Debug: running sort_main\n";fi
+	job_run="sort_main"
+	main
+	#deal w/ name collisions in dest by sorting into $pwd, to be delt w/ manualy
+	if [ "${debug}" = "1" ];then printf "Debug: running sort_local\n";fi
+	job_run="sort_local"
+	main
+else
+	printf "Did not confirm, Exiting.\n"
+	exit 1
+fi
