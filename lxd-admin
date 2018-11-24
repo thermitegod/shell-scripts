@@ -1,6 +1,6 @@
 #!/bin/sh
-#5.1.0
-#2018-11-21
+#5.2.0
+#2018-11-24
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -20,11 +20,10 @@
 #misc
 #lxc will not mount on symlinks, but can mount through them
 
-#set -u
-
 hlp(){
 	printf "\nDISTRO, which template to use\n"
-	printf " -a\talpine [default]\n"
+	printf "\nCurrent is: ${distro}\n"
+	printf " -a\talpine\n"
 	printf " -g\tgentoo\n"
 	printf "CONTAINER, only use to limit actions on specified\n"
 	printf " -T\tOnly run on transmission, uses :9091 as port\n"
@@ -38,7 +37,7 @@ hlp(){
 	printf " -h\tPrint this help\n"
 	printf " -r\tRestart all\n"
 	printf " -s\tStart all\n"
-	printf " -u\tUpdate, rename existing with 'old' prefix\n"
+	printf " -u\tUpdate, rename existing with 'old-*' prefix\n"
 	printf " -z\tStop all\n"
 	printf "\nIMAGE GENERAL, req -IT or -IR, needs work\n"
 	printf " -IT\trun for transmission\n"
@@ -63,20 +62,28 @@ dirset(){
 	session="${config}/session"
 	watch="${config}/watch"
 	save="${storage}/${cname}"
+	if [ -n "${save_override}" ];then save="${save_override}";fi
 	case "${ctype}" in
 		rutorrent)
 			#in container
-			setbase="/home/brandon"
-			var="/usr/share/webapps/rutorrent/share"
+			case "${distro}" in
+				alpine) var="/usr/share/webapps/rutorrent/share";;
+				gentoo) var="/var/www/localhost/htdocs/rutorrent/share";;
+			esac
 			#not in container
 			rushare="${config}/rutorrent/share"
+			setbase="/home/brandon"
+			inside_data="${setbase}/${ctype}/data"
+			inside_watch="${setbase}/${ctype}/watch"
+			inside_session="${setbase}/${ctype}/session"
 			;;
 		transmission)
 			#in container
 			setbase="/var/lib/transmission"
+			inside_data="${setbase}/downloads"
+			inside_session="${setbase}/config"
 			;;
 	esac
-	if [ -n "${save_overwrite}" ];then save="${save_overwrite}";fi
 
 	if [ "${get_dirs}" = "1" ];then return;fi
 
@@ -86,10 +93,10 @@ dirset(){
 	if ! [ -e "${watch}" ];then mkdir -pv "${watch}"; fi
 	if ! [ -e "${rushare}" ] && [ "${ctype}" = "rutorrent" ];then mkdir -pv "${rushare}";fi
 
-	lxc config device add "${fullname}" storage disk source="${save}" path="${setbase}/rtorrent/data"
-	lxc config device add "${fullname}" watch disk source="${watch}" path="${setbase}/rtorrent/watch"
-	lxc config device add "${fullname}" session disk source="${session}" path="${setbase}/rtorrent/session"
+	lxc config device add "${fullname}" storage disk source="${save}" path="${inside_data}"
+	lxc config device add "${fullname}" session disk source="${session}" path="${inside_session}"
 	if [ "${ctype}" = "rutorrent" ];then
+		lxc config device add "${fullname}" watch disk source="${watch}" path="${inside_watch}"
 		lxc config device add "${fullname}" ru disk source="${rushare}" path="${var}"
 	fi
 }
@@ -104,7 +111,7 @@ set_ip(){
 			;;
 		gentoo)
 			net="${fullname}/etc/conf.d/net"
-			printf "\nrc_keyword=\"-stop\"\nconfig_eth0=\"192.168.0.16"${z}" netmask 255.255.255.0 brd 192.168.0.255\"\nroutes_eth0=\"default via 192.168.0.1\"\n">|"${tmp}"
+			printf "rc_keyword=\"-stop\"\nconfig_eth0=\"192.168.0.${ip4} netmask 255.255.255.0 brd 192.168.0.255\"\nroutes_eth0=\"default via 192.168.0.1\"\n">|"${tmp}"
 			;;
 	esac
 	lxc file push "${tmp}" "${net}"
@@ -182,8 +189,8 @@ main_container(){
 			printf "session\t\t: ${session}\n"
 			printf "watch\t\t: ${watch}\n"
 			printf "save\t\t: ${save}\n"
-			if [ -z "${save_overwrite}" ];then save_overwrite="none";fi
-			printf "save overwrite\t: ${save_overwrite}\n"
+			if [ -z "${save_override}" ];then save_override="none";fi
+			printf "save override\t: ${save_override}\n"
 			fi
 			printf "\n"
 			;;
@@ -193,7 +200,8 @@ main_container(){
 act="z"
 act_img="z"
 limit_to="z"
-distro="alpine"
+#distro="alpine"
+distro="gentoo"
 
 limit="0"
 verbose="0"
@@ -213,7 +221,7 @@ while true;do
 		-IR) template="base-${distro}-rutorrent";shift;;
 		-pb) act_img="publish";shift;;
 		-ex) act_img="export";shift;;
-		-im) act_img="import";shift;;
+		-im) exit;act_img="import";shift;;
 		-in) act_img="init";shift;;
 		#containers
 		-b) A="start";base_img;exit;;
@@ -232,7 +240,6 @@ while true;do
 		-P) act="print";get_dirs="1";verbose="1";shift;;
 		-h) hlp;exit;;
 		-e) $EDITOR "${container_info}";exit;;
-		--) break;;
 		*) break;;
 	esac
 done
@@ -241,12 +248,12 @@ if ! [ "${act_img}" = "z" ];then main_images;exit;fi
 
 if ! [ -f "${container_info}" ];then
 	printf "all containers are declared in ${container_info} using the following format, subject to change\n"
-	printf "'container type' 'IPV4 ending' 'container name' 'save location overwrite, optional'\n"
+	printf "'container type' 'IPV4 ending' 'container name' 'save location override, optional'\n"
 	printf "example: rutorrent 161 anime /mnt/anime/anime-working\n"
 	exit 1
 fi
 
-while IFS=' ' read -r ctype ip4 cname save_overwrite;do
+while IFS=' ' read -r ctype ip4 cname save_override;do
 	main_container
 done < "${container_info}"
 
