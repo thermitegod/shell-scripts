@@ -37,7 +37,7 @@ compress() {
 }
 
 while true;do
-	case "${1}" in
+	case "$1" in
 		-d) comp_dir="1";shift;;
 		-f) comp_files="1";shift;;
 		-s) orig_rm="1";shift;;

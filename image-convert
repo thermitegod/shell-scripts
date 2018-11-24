@@ -56,7 +56,7 @@ mimecheck="1"
 
 if [ -z "${1}" ];then hlp;exit 1;fi
 while true;do
-	case "${1}" in
+	case "$1" in
 		-m) mimecheck="0";shift;;
 
 		-j1) mode="jpg2png-low";shift;;

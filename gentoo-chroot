@@ -78,7 +78,7 @@ setup="init"
 mountbind="1"
 
 while true;do
-	case "${1}" in
+	case "$1" in
 		-A) setup="bind";return;;
 		-b) mountbind="0";return;;
 		-h) hlp;return;;

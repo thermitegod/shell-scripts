@@ -55,7 +55,7 @@ hlp(){
 
 if [ -z "${1}" ];then hlp;exit 1;fi
 while true;do
-	case "${1}" in
+	case "$1" in
 		-1) mode="packages";shift;;
 		-2) mode="portage";shift;;
 		-3) mode="portage_local";shift;;

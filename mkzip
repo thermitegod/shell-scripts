@@ -60,7 +60,7 @@ compress() {
 }
 
 while true;do
-	case "${1}" in
+	case "$1" in
 		-t) test_only="1";comp_files="1";shift;break;;
 		-T) test_only="1";comp_files="1";test_mk7z="0";shift;break;;
 		-d) comp_dir="1";shift;;

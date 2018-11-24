@@ -44,7 +44,7 @@ hlp() {
 if [ -z "${1}" ];then hlp;return;fi
 
 while true;do
-	case "${1}" in
+	case "$1" in
 		-1) sha1="1";break;;
 		-2) sha224="1";break;;
 		-3) sha256="1";break;;

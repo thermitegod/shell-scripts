@@ -28,7 +28,7 @@ a="/usr/local/bin"
 b="/home/brandon/.bin/bin"
 
 while true;do
-	case "${1}" in
+	case "$1" in
 		-o) unset b;b="/home/brandon/.bin/bin-other";shift;;
 		-h) hlp;return;;
 		*) break;;

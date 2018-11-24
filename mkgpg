@@ -46,7 +46,7 @@ compress() {
 }
 
 while true;do
-	case "${1}" in
+	case "$1" in
 		-D) comp_decrypt="1";shift;;
 		-f) comp_files="1";shift;;
 		-s) comp_rm="1";shift;;

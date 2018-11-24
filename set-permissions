@@ -38,7 +38,7 @@ hlp(){
 
 if [ -z "${1}" ];then hlp;return;fi
 while true;do
-	case "${1}" in
+	case "$1" in
 		-a) mode="sane";shift;;
 		-d) mode="dir";shift;;
 		-f) mode="file";shift;;

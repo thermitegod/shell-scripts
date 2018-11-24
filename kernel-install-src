@@ -29,7 +29,7 @@ hlp() {
 mode="release"
 v="0"
 while true;do
-	case "${1}" in
+	case "$1" in
 		-h) hlp;return;;
 		-v) v="1";shift;;
 		-g) mode="git";shift;;
