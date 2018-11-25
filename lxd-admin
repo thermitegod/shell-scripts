@@ -1,6 +1,6 @@
 #!/bin/sh
-#5.2.0
-#2018-11-24
+#5.3.0
+#2018-11-25
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -21,14 +21,13 @@
 #lxc will not mount on symlinks, but can mount through them
 
 hlp(){
-	printf "\nDISTRO, which template to use\n"
-	printf "\nCurrent is: ${distro}\n"
+	printf "DISTRO, current is: ${distro}\n"
 	printf " -a\talpine\n"
 	printf " -g\tgentoo\n"
-	printf "CONTAINER, only use to limit actions on specified\n"
-	printf " -T\tOnly run on transmission, uses :9091 as port\n"
+	printf "\nCONTAINER, only use to limit actions on specified\n"
+	printf " -T\tOnly run on transmission, uses :${transmission_port} as port\n"
 	printf " -R\tOnly run on rutorrent\n"
-	printf "CONTAINER BASE\n"
+	printf "\nCONTAINER BASE\n"
 	printf " -b\tstart template images\n"
 	printf " -B\tstop template images\n"
 	printf "\nCONTAINER GENERAL\n"
@@ -52,7 +51,7 @@ hlp(){
 	printf "\nOTHER\n"
 	printf " -e\tedit ${container_info}\n"
 	printf " -p\tPrint container vars only\n"
-	printf " -P\tPrint container vars and required directories\n"
+	printf " -P\tPrint container vars and directories\n"
 }
 
 dirset(){
@@ -63,22 +62,20 @@ dirset(){
 	watch="${config}/watch"
 	save="${storage}/${cname}"
 	if [ -n "${save_override}" ];then save="${save_override}";fi
+	#in container
 	case "${ctype}" in
 		rutorrent)
-			#in container
 			case "${distro}" in
 				alpine) var="/usr/share/webapps/rutorrent/share";;
 				gentoo) var="/var/www/localhost/htdocs/rutorrent/share";;
 			esac
-			#not in container
 			rushare="${config}/rutorrent/share"
 			setbase="/home/brandon"
-			inside_data="${setbase}/${ctype}/data"
-			inside_watch="${setbase}/${ctype}/watch"
-			inside_session="${setbase}/${ctype}/session"
+			inside_data="${setbase}/rtorrent/data"
+			inside_watch="${setbase}/rtorrent/watch"
+			inside_session="${setbase}/rtorrent/session"
 			;;
 		transmission)
-			#in container
 			setbase="/var/lib/transmission"
 			inside_data="${setbase}/downloads"
 			inside_session="${setbase}/config"
@@ -90,7 +87,7 @@ dirset(){
 	if ! [ -e "${config}" ];then mkdir -pv "${config}"; fi
 	if ! [ -e "${save}" ];then mkdir -pv "${save}"; fi
 	if ! [ -e "${session}" ];then mkdir -pv "${session}"; fi
-	if ! [ -e "${watch}" ];then mkdir -pv "${watch}"; fi
+	if ! [ -e "${watch}" ] && [ "${ctype}" = "rutorrent" ];then mkdir -pv "${watch}";fi
 	if ! [ -e "${rushare}" ] && [ "${ctype}" = "rutorrent" ];then mkdir -pv "${rushare}";fi
 
 	lxc config device add "${fullname}" storage disk source="${save}" path="${inside_data}"
@@ -122,6 +119,7 @@ rtorrent_clean_lock(){
 	get_dirs="1"
 	dirset
 	lock="${session}/rtorrent.lock"
+	echo $lock
 	if [ -f "${lock}" ];then rm -v "${lock}";fi
 	get_dirs="0"
 }
@@ -151,6 +149,7 @@ main_images(){
 }
 
 main_container(){
+	if [ -n "$(echo ${ctype}|grep '\#')" ];then return;fi #skip comments
 	template="base-${distro}-${ctype}"
 	fullname="${ctype}-${cname}"
 	if [ "${limit}" = "1" ] && ! [ "${limit_to}" = "${ctype}" ];then return;fi
@@ -182,15 +181,15 @@ main_container(){
 		print)
 			printf "Name\t\t: ${cname}\n"
 			printf "Container\t: ${ctype}\n"
+			if [ "${ctype}" = "transmission" ];then ip4="${ip4}:${transmission_port}";fi
 			printf "IPV4\t\t: 192.168.0.${ip4}\n"
 			if [ "${verbose}" = "1" ];then
-			dirset
-			printf "rushare\t\t: ${rushare}\n"
-			printf "session\t\t: ${session}\n"
-			printf "watch\t\t: ${watch}\n"
-			printf "save\t\t: ${save}\n"
-			if [ -z "${save_override}" ];then save_override="none";fi
-			printf "save override\t: ${save_override}\n"
+				dirset
+				printf "rushare\t\t: ${rushare}\n"
+				printf "session\t\t: ${session}\n"
+				if [ "${ctype}" = "rutorrent" ];then printf "watch\t\t: ${watch}\n";fi
+				printf "save\t\t: ${save}\n"
+				if [ -n "${save_override}" ];then printf "save override\t: active\n";fi
 			fi
 			printf "\n"
 			;;
@@ -202,6 +201,7 @@ act_img="z"
 limit_to="z"
 #distro="alpine"
 distro="gentoo"
+transmission_port="9091"
 
 limit="0"
 verbose="0"
