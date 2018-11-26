@@ -1,5 +1,5 @@
 #!/bin/sh
-#5.3.1
+#5.4.0
 #2018-11-25
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
@@ -21,30 +21,17 @@
 #lxc will not mount on symlinks, but can mount through them
 
 hlp(){
-	printf "DISTRO, current is: ${distro}\n"
-	printf " -a\talpine\n"
-	printf " -g\tgentoo\n"
 	printf "\nCONTAINER, only use to limit actions on specified\n"
 	printf " -T\tOnly run on transmission, uses :${transmission_port} as port\n"
 	printf " -R\tOnly run on rutorrent\n"
-	printf "\nCONTAINER BASE\n"
-	printf " -b\tstart template images\n"
-	printf " -B\tstop template images\n"
 	printf "\nCONTAINER GENERAL\n"
 	printf " -d\tDelete containers\n"
-	printf " -D\tDelete old containers\n"
+	printf " -D\tDelete 'old-*' containers\n"
 	printf " -h\tPrint this help\n"
 	printf " -r\tRestart all\n"
 	printf " -s\tStart all\n"
 	printf " -u\tUpdate, rename existing with 'old-*' prefix\n"
 	printf " -z\tStop all\n"
-	printf "\nIMAGE GENERAL, req -IT or -IR, needs work\n"
-	printf " -IT\trun for transmission\n"
-	printf " -IR\trun for rutorrent\n"
-	printf " -ex\texport\n"
-	printf " -im\timport, wip\n"
-	printf " -in\tinit\n"
-	printf " -pb\tpublish\n"
 	printf "\nSPECIFIC, no other flags req\n"
 	printf " -c\trtorrent lockfile cleanup\n"
 	printf " -C\trutorrent cleanup only, remove *.torrent files in \$config/rutorrent/share/torrents/\n"
@@ -123,32 +110,13 @@ rtorrent_clean_lock(){
 	get_dirs="0"
 }
 
-base_img(){
-	printf "${A}ing: base-${distro}-rutorrent\n"
-	lxc "${A}" base-${distro}-rutorrent
-	printf "${A}ing: base-${distro}-transmission\n"
-	lxc "${A}" base-${distro}-transmission
-}
-
-main_images(){
-	template_image="${template}"
-	case "${act_img}" in
-		publish) lxc publish "${template}" --alias "${template_image}";;
-		export) lxc image export "${baseimg_new}";;
-		#TODO : import will be done if i need it
-		#import) lxc import <*tar> --alias $name ;;
-		init)
-			lxc init "${template_image}" "${template}"
-			lxc config device add "${template}" eth0 nic name=eth0 nictype=bridged parent=br0
-			lxc config set "${template}" security.privileged true
-			lxc config set "${template}" limits.cpu 8
-			lxc config set "${template}" limits.memory 8192MB
-			;;
-	esac
-}
-
 main_container(){
 	if [ -n "$(echo ${ctype}|grep '\#')" ];then return;fi #skip comments
+	case "${distro}" in
+		alpine) true;;
+		gentoo) true;;
+		*) printf "non supported distro, skipping\n";return;;
+	esac
 	template="base-${distro}-${ctype}"
 	fullname="${ctype}-${cname}"
 	if [ "${limit}" = "1" ] && ! [ "${limit_to}" = "${ctype}" ];then return;fi
@@ -180,6 +148,7 @@ main_container(){
 		print)
 			printf "Name\t\t: ${cname}\n"
 			printf "Container\t: ${ctype}\n"
+			printf "Distro\t\t: ${distro}\n"
 			if [ "${ctype}" = "transmission" ];then ip4="${ip4}:${transmission_port}";fi
 			printf "IPV4\t\t: 192.168.0.${ip4}\n"
 			if [ "${verbose}" = "1" ];then
@@ -196,10 +165,7 @@ main_container(){
 }
 
 act="z"
-act_img="z"
 limit_to="z"
-#distro="alpine"
-distro="gentoo"
 transmission_port="9091"
 
 limit="0"
@@ -212,19 +178,6 @@ container_info="${HOME}/.bin/bin-extra/lxd-admin"
 if [ -z "${1}" ];then hlp;exit;fi
 while true;do
 	case "${1}" in
-		#distro
-		-a) distro="alpine";shift;;
-		-g) distro="gentoo";shift;;
-		#image
-		-IT) template="base-${distro}-transmission";shift;;
-		-IR) template="base-${distro}-rutorrent";shift;;
-		-pb) act_img="publish";shift;;
-		-ex) act_img="export";shift;;
-		-im) exit;act_img="import";shift;;
-		-in) act_img="init";shift;;
-		#containers
-		-b) A="start";base_img;exit;;
-		-B) A="stop";base_img;exit;;
 		-T) limit="1";limit_to="transmission";shift;;
 		-R) limit="1";limit_to="rutorrent";shift;;
 		-c) act="rt_cleanup_lock";limit="1";limit_to="rutorrent";shift;;
@@ -243,16 +196,14 @@ while true;do
 	esac
 done
 
-if ! [ "${act_img}" = "z" ];then main_images;exit;fi
-
 if ! [ -f "${container_info}" ];then
 	printf "all containers are declared in ${container_info} using the following format, subject to change\n"
-	printf "'container type' 'IPV4 ending' 'container name' 'save location override, optional'\n"
-	printf "example: rutorrent 161 anime /mnt/anime/anime-working\n"
+	printf "'container type' 'distro' 'IPV4 ending' 'container name' 'save location override, optional'\n"
+	printf "example: rutorrent gentoo 161 anime /mnt/anime/anime-working\n"
 	exit 1
 fi
 
-while IFS=' ' read -r ctype ip4 cname save_override;do
+while IFS=' ' read -r ctype distro ip4 cname save_override;do
 	main_container
 done < "${container_info}"
 
