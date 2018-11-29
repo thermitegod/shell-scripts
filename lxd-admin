@@ -1,6 +1,6 @@
 #!/bin/sh
-#5.4.0
-#2018-11-25
+#5.5.0
+#2018-11-28
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -20,6 +20,9 @@
 #misc
 #lxc will not mount on symlinks, but can mount through them
 
+#TODO
+#network io limits
+
 hlp(){
 	printf "\nCONTAINER, only use to limit actions on specified\n"
 	printf " -T\tOnly run on transmission, uses :${transmission_port} as port\n"
@@ -37,11 +40,11 @@ hlp(){
 	printf " -C\trutorrent cleanup only, remove *.torrent files in \$config/rutorrent/share/torrents/\n"
 	printf "\nOTHER\n"
 	printf " -e\tedit ${container_info}\n"
-	printf " -p\tPrint container vars only\n"
-	printf " -P\tPrint container vars and directories\n"
+	printf " -p\tPrint limited container vars\n"
+	printf " -P\tPrint all container vars\n"
 }
 
-dirset(){
+set_dirs(){
 	#not in container
 	storage="/mnt/torrents"
 	config="${storage}/.config/${cname}"
@@ -102,9 +105,16 @@ set_ip(){
 	if [ -f "${tmp}" ];then rm "${tmp}";fi
 }
 
+set_limits(){
+	if ! [ "${lim_cpu}" = "0" ];then lxc config set "${fullname}" limits.cpu "${lim_cpu}";fi
+	if ! [ "${lim_cpu_allow}" = "0" ];then lxc config set "${fullname}" limits.cpu.allowance "${lim_cpu_allow}";fi
+	if ! [ "${lim_mem}" = "0" ];then lxc config set "${fullname}" limits.memory "${lim_mem}";fi
+	#lxc config set "${fullname}" limits.cpu.priority 0
+}
+
 rtorrent_clean_lock(){
 	get_dirs="1"
-	dirset
+	set_dirs
 	lock="${session}/rtorrent.lock"
 	if [ -f "${lock}" ];then rm -v "${lock}";fi
 	get_dirs="0"
@@ -112,24 +122,25 @@ rtorrent_clean_lock(){
 
 main_container(){
 	if [ -n "$(echo ${ctype}|grep '\#')" ];then return;fi #skip comments
+	if [ -n "$(echo ${ctype}|grep 'stop')" ];then exit;fi #exit when 'stop' is read, will be changed
 	case "${distro}" in
 		alpine) true;;
 		gentoo) true;;
-		*) printf "non supported distro, skipping\n";return;;
+		*) printf "skipping non supported distro : ${distro}\n";return;;
 	esac
 	template="base-${distro}-${ctype}"
 	fullname="${ctype}-${cname}"
 	if [ "${limit}" = "1" ] && ! [ "${limit_to}" = "${ctype}" ];then return;fi
 	case "${act}" in
-		stop) printf "Stoping container: ${fullname}\n";lxc stop "${fullname}";;
-		start) printf "Starting container: ${fullname}\n";lxc start "${fullname}";;
-		delete) printf "Deleteing container: ${fullname}\n";lxc delete "${fullname}";;
-		restart) printf "Restarting container: ${fullname}\n";lxc restart "${fullname}";;
-		deleteold) printf "Deleting container: old-${fullname}\n";lxc delete "old-${fullname}";;
+		stop) printf "Stoping container: ${fullname}\n";lxc stop "${fullname}" &;;
+		start) printf "Starting container: ${fullname}\n";lxc start "${fullname}" &;;
+		delete) printf "Deleteing container: ${fullname}\n";lxc delete "${fullname}" &;;
+		restart) printf "Restarting container: ${fullname}\n";lxc restart "${fullname}" &;;
+		deleteold) printf "Deleting container: old-${fullname}\n";lxc delete "old-${fullname}" &;;
 		rt_cleanup_lock) rtorrent_clean_lock;;
 		ru_cleanup)
 			get_dirs="1"
-			dirset
+			set_dirs
 			#if [ $(find ${rushare}/share/torrents -type f -quit) ];then echo n;return;fi
 			rm ${rushare}/torrents/*.torrent
 			get_dirs="0"
@@ -141,18 +152,23 @@ main_container(){
 			printf "Copying ${template} to ${fullname}\n"
 			lxc copy "${template}" "${fullname}"
 
-			dirset
+			set_limits
+			set_dirs
 			set_ip
 			rtorrent_clean_lock
 			;;
 		print)
+			printf "Container Name\t: ${fullname}\n"
 			printf "Name\t\t: ${cname}\n"
-			printf "Container\t: ${ctype}\n"
+			printf "Template\t: ${ctype}\n"
 			printf "Distro\t\t: ${distro}\n"
 			if [ "${ctype}" = "transmission" ];then ip4="${ip4}:${transmission_port}";fi
 			printf "IPV4\t\t: 192.168.0.${ip4}\n"
 			if [ "${verbose}" = "1" ];then
-				dirset
+				printf "Limit CPU\t: ${lim_cpu}\n"
+				printf "Limit CPU ALLOW\t: %s\n" "${lim_cpu_allow}"
+				printf "Limit MEM\t: ${lim_mem}\n"
+				set_dirs
 				printf "rushare\t\t: ${rushare}\n"
 				printf "session\t\t: ${session}\n"
 				if [ "${ctype}" = "rutorrent" ];then printf "watch\t\t: ${watch}\n";fi
@@ -198,12 +214,13 @@ done
 
 if ! [ -f "${container_info}" ];then
 	printf "all containers are declared in ${container_info} using the following format, subject to change\n"
-	printf "'container type' 'distro' 'IPV4 ending' 'container name' 'save location override, optional'\n"
-	printf "example: rutorrent gentoo 161 anime /mnt/anime/anime-working\n"
+	printf "'container type' 'distro' 'IPV4 ending' 'limit cpu' 'cpu allowance' 'limit mem' 'container name' 'save location override, optional'\n"
+	printf "NOTE: to not use limits, set them to '0'\n"
+	printf "example: rutorrent gentoo 161 6 10% 8192MB anime /mnt/anime/anime-working\n"
 	exit 1
 fi
 
-while IFS=' ' read -r ctype distro ip4 cname save_override;do
+while IFS=' ' read -r ctype distro ip4 lim_cpu lim_cpu_allow lim_mem cname save_override;do
 	main_container
 done < "${container_info}"
 
