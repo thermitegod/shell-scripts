@@ -1,6 +1,6 @@
 #!/bin/sh
-#5.5.0
-#2018-11-28
+#5.6.0
+#2018-11-30
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -19,9 +19,6 @@
 
 #misc
 #lxc will not mount on symlinks, but can mount through them
-
-#TODO
-#network io limits
 
 hlp(){
 	printf "\nCONTAINER, only use to limit actions on specified\n"
@@ -89,7 +86,7 @@ set_dirs(){
 }
 
 set_ip(){
-	printf "Seting StaticIP for ${fullname} to 192.168.0.${ip4}\n"
+	printf "Seting StaticIP to 192.168.0.${ip4}\n"
 	tmp=$(mktemp)
 	case "${distro}" in
 		alpine)
@@ -108,8 +105,15 @@ set_ip(){
 set_limits(){
 	if ! [ "${lim_cpu}" = "0" ];then lxc config set "${fullname}" limits.cpu "${lim_cpu}";fi
 	if ! [ "${lim_cpu_allow}" = "0" ];then lxc config set "${fullname}" limits.cpu.allowance "${lim_cpu_allow}";fi
+	#if ! [ "${lim_cpu_priority}" = "0" ];then lxc config set "${fullname}" limits.cpu.priority "${lim_cpu_priority}";fi
 	if ! [ "${lim_mem}" = "0" ];then lxc config set "${fullname}" limits.memory "${lim_mem}";fi
-	#lxc config set "${fullname}" limits.cpu.priority 0
+}
+
+remove_devices(){
+	#remove unneeded access to filesystem
+	lxc config device remove "${fullname}" distfiles
+	lxc config device remove "${fullname}" packages
+	lxc config device remove "${fullname}" repos
 }
 
 rtorrent_clean_lock(){
@@ -130,7 +134,7 @@ main_container(){
 	esac
 	template="base-${distro}-${ctype}"
 	fullname="${ctype}-${cname}"
-	if [ "${limit}" = "1" ] && ! [ "${limit_to}" = "${ctype}" ];then return;fi
+	if [ "${limit_to}" = "${ctype}" ];then return;fi
 	case "${act}" in
 		stop) printf "Stoping container: ${fullname}\n";lxc stop "${fullname}" &;;
 		start) printf "Starting container: ${fullname}\n";lxc start "${fullname}" &;;
@@ -146,16 +150,19 @@ main_container(){
 			get_dirs="0"
 			;;
 		update)
+			printf "Update running for : ${fullname}\n"
+
 			printf "Renaming ${fullname} to old-${fullname}\n"
 			lxc rename "${fullname}" "old-${fullname}"
-
 			printf "Copying ${template} to ${fullname}\n"
 			lxc copy "${template}" "${fullname}"
 
+			remove_devices
 			set_limits
 			set_dirs
 			set_ip
 			rtorrent_clean_lock
+			printf "\n"
 			;;
 		print)
 			printf "Container Name\t: ${fullname}\n"
@@ -169,9 +176,11 @@ main_container(){
 				printf "Limit CPU ALLOW\t: %s\n" "${lim_cpu_allow}"
 				printf "Limit MEM\t: ${lim_mem}\n"
 				set_dirs
-				printf "rushare\t\t: ${rushare}\n"
 				printf "session\t\t: ${session}\n"
-				if [ "${ctype}" = "rutorrent" ];then printf "watch\t\t: ${watch}\n";fi
+				if [ "${ctype}" = "rutorrent" ];then
+					printf "rushare\t\t: ${rushare}\n"
+					printf "watch\t\t: ${watch}\n"
+				fi
 				printf "save\t\t: ${save}\n"
 				if [ -n "${save_override}" ];then printf "save override\t: active\n";fi
 			fi
@@ -180,31 +189,28 @@ main_container(){
 	esac
 }
 
-act="z"
-limit_to="z"
-transmission_port="9091"
-
-limit="0"
 verbose="0"
 get_dirs="0"
 printonly="0"
 
+limit_to="z"
+transmission_port="9091"
 container_info="${HOME}/.bin/bin-extra/lxd-admin"
 
 if [ -z "${1}" ];then hlp;exit;fi
 while true;do
 	case "${1}" in
-		-T) limit="1";limit_to="transmission";shift;;
-		-R) limit="1";limit_to="rutorrent";shift;;
-		-c) act="rt_cleanup_lock";limit="1";limit_to="rutorrent";shift;;
-		-C) act="ru_cleanup";limit="1";limit_to="rutorrent";shift;;
+		-T) limit_to="transmission";shift;;
+		-R) limit_to="rutorrent";shift;;
+		-c) act="rt_cleanup_lock";limit_to="rutorrent";shift;;
+		-C) act="ru_cleanup";limit_to="rutorrent";shift;;
 		-d) act="delete";shift;;
 		-D) act="deleteold";shift;;
 		-r) act="restart";shift;;
 		-s) act="start";shift;;
 		-u) act="update";shift;;
 		-z) act="stop";shift;;
-		-p) act="print";get_dirs="1";shift;;
+		-p) act="print";shift;;
 		-P) act="print";get_dirs="1";verbose="1";shift;;
 		-h) hlp;exit;;
 		-e) $EDITOR "${container_info}";exit;;
@@ -213,10 +219,10 @@ while true;do
 done
 
 if ! [ -f "${container_info}" ];then
-	printf "all containers are declared in ${container_info} using the following format, subject to change\n"
-	printf "'container type' 'distro' 'IPV4 ending' 'limit cpu' 'cpu allowance' 'limit mem' 'container name' 'save location override, optional'\n"
+	printf "all containers are declared in '${container_info}' using the following space delimited format, subject to change\n"
+	printf "'container type' 'distro' 'IPV4 ending' 'limit cpu' 'limit cpu allowance' 'limit mem' 'container name' 'save location override, optional'\n"
 	printf "NOTE: to not use limits, set them to '0'\n"
-	printf "example: rutorrent gentoo 161 6 10% 8192MB anime /mnt/anime/anime-working\n"
+	printf "example: rutorrent gentoo 161 6 10%% 8192MB anime /mnt/anime/anime-working\n"
 	exit 1
 fi
 
