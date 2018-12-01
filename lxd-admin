@@ -134,7 +134,7 @@ main_container(){
 	esac
 	template="base-${distro}-${ctype}"
 	fullname="${ctype}-${cname}"
-	if [ "${limit_to}" = "${ctype}" ];then return;fi
+	if ! [ "${limit_to}" = "${ctype}" ];then return;fi
 	case "${act}" in
 		stop) printf "Stoping container: ${fullname}\n";lxc stop "${fullname}" &;;
 		start) printf "Starting container: ${fullname}\n";lxc start "${fullname}" &;;
