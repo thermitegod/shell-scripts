@@ -1,6 +1,6 @@
 #!/bin/sh
-#5.6.0
-#2018-11-30
+#5.6.1
+#2018-12-02
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -134,7 +134,7 @@ main_container(){
 	esac
 	template="base-${distro}-${ctype}"
 	fullname="${ctype}-${cname}"
-	if ! [ "${limit_to}" = "${ctype}" ];then return;fi
+	if [ "${limit}" = "1" ] && ! [ "${limit_to}" = "${ctype}" ];then return;fi
 	case "${act}" in
 		stop) printf "Stoping container: ${fullname}\n";lxc stop "${fullname}" &;;
 		start) printf "Starting container: ${fullname}\n";lxc start "${fullname}" &;;
@@ -189,6 +189,7 @@ main_container(){
 	esac
 }
 
+limit="0"
 verbose="0"
 get_dirs="0"
 printonly="0"
@@ -200,8 +201,8 @@ container_info="${HOME}/.bin/bin-extra/lxd-admin"
 if [ -z "${1}" ];then hlp;exit;fi
 while true;do
 	case "${1}" in
-		-T) limit_to="transmission";shift;;
-		-R) limit_to="rutorrent";shift;;
+		-T) limit="1";limit_to="transmission";shift;;
+		-R) limit="1";limit_to="rutorrent";shift;;
 		-c) act="rt_cleanup_lock";limit_to="rutorrent";shift;;
 		-C) act="ru_cleanup";limit_to="rutorrent";shift;;
 		-d) act="delete";shift;;
