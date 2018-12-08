@@ -1,6 +1,6 @@
 #!/bin/sh
-#2.5.0
-#2018-07-11
+#2.5.1
+#2018-12-08
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -17,17 +17,14 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-hlp() {
-	printf " -d\tdaily files timestamped\n"
-	printf " -h\tPrint this help\n"
-}
-
 mode="once"
-
 while true;do
 	case "${1}" in
 		-d) mode="daily";shift;;
-		-h) hlp;break;;
+		-h)
+			printf " -d\tdaily files timestamped\n"
+			printf " -h\tPrint this help\n"
+			exit;;
 		*) break;;
 	esac
 done

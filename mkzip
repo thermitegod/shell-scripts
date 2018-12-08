@@ -1,6 +1,6 @@
 #!/bin/sh
-#4.1.1
-#2018-10-26
+#4.1.2
+#2018-12-08
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -24,22 +24,8 @@ comp_njp="0"
 test_only="0"
 test_mk7z="1"
 
-hlp() {
-	printf " -d\tcompress all directories\n"
-	printf " -f\tcompress all files\n"
-	printf " -h\tprint this help\n"
-	printf " -p\tcompress all directories, dont junk path\n"
-	printf " -P\tDisable post compression test\n"
-	printf " -s\tcompress \$1, delete after compressed\n"
-	printf " -t\tTest all files or file passed in \$1, using mk7z -t : prefered test method\n"
-	printf " -T\tTest all files or file passed in \$1, using unzip -tq\n"
-	printf " -x\tcompress all files, delete original after compressed\n"
-	printf " -z\tcompress all directories, delete original after compressed\n"
-	printf " -Z\tcompress all directories, delete original after compressed, dont junk path\n"
-}
-
 compress() {
-	if ! [ "${comp_njp}" = "1" ] && [ "${test_only}" = "0" ];then
+	if [ "${comp_njp}" = "0" ] && [ "${test_only}" = "0" ];then
 		nice -19 zip -rv -9 --junk-paths "${f%%}.zip" "${f%%}"
 	elif [ "${comp_njp}" = "1" ] && [ "${test_only}" = "0" ];then
 		nice -19 zip -rv -9 "${f%%}.zip" "${f%%}"
@@ -70,7 +56,19 @@ while true;do
 		-x) comp_files="1";orig_rm="1";shift;;
 		-z) comp_dir="1";orig_rm="1";shift;;
 		-Z) comp_dir="1";orig_rm="1";comp_njp="1";shift;;
-		-h) hlp;return;;
+		-h)
+			printf " -d\tcompress all directories\n"
+			printf " -f\tcompress all files\n"
+			printf " -h\tprint this help\n"
+			printf " -p\tcompress all directories, dont junk path\n"
+			printf " -P\tDisable post compression test\n"
+			printf " -s\tcompress \$1, delete after compressed\n"
+			printf " -t\tTest all files or file passed in \$1, using mk7z -t : prefered test method\n"
+			printf " -T\tTest all files or file passed in \$1, using unzip -tq\n"
+			printf " -x\tcompress all files, delete original after compressed\n"
+			printf " -z\tcompress all directories, delete original after compressed\n"
+			printf " -Z\tcompress all directories, delete original after compressed, dont junk path\n"
+			exit;;
 		--) break;;
 		*) break;;
 	esac
@@ -91,5 +89,5 @@ elif [ "${comp_dir}" = "1" ] || [ "${comp_files}" = "1" ];then
 		fi
 	done
 else
-	printf "Something is broken\n";return
+	printf "Nothing to compress\n";exit
 fi

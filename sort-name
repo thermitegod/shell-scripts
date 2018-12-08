@@ -1,6 +1,6 @@
 #!/bin/sh
-#5.0.0
-#2018-11-24
+#5.0.1
+#2018-12-08
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -35,18 +35,6 @@ dest_type=$(head -n1 ${list_type}|sed -e "s/#//g")
 list_sort="${list_type}"
 dest="${dest_type}"
 
-hlp(){
-	printf " -d\tDebug output\n"
-	printf " -h\tPrint this help\n"
-	printf " -t\tUse test dir \"/tmp/test\"\n"
-	printf "\nEDIT\n"
-	printf " -e\tedit ${list_type}\n"
-	printf " -E\tedit ${list_final}\n"
-	printf "\nLIST\n"
-	printf " -f\trun final sort\n"
-	printf " -t\trun type sort\n"
-}
-
 main(){
 	while IFS=' ' read -r name override;do
 		name_sort
@@ -71,9 +59,19 @@ while true;do
 		-t) list_sort="${list_type}";dest="${dest_type}";shift;;
 		-d) debug="1";shift;;
 		-t) dest="/tmp/test";shift;;
-		-h) hlp;exit;;
 		-E) $EDITOR "${list_final}";exit;;
 		-e) $EDITOR "${list_type}";exit;;
+		-h)
+			printf " -d\tDebug output\n"
+			printf " -h\tPrint this help\n"
+			printf " -t\tUse test dir \"/tmp/test\"\n"
+			printf "\nEDIT\n"
+			printf " -e\tedit ${list_type}\n"
+			printf " -E\tedit ${list_final}\n"
+			printf "\nLIST\n"
+			printf " -f\trun final sort\n"
+			printf " -t\trun type sort\n"
+			exit;;
 		*) break;;
 	esac
 done

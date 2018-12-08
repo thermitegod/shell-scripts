@@ -1,6 +1,6 @@
 #!/bin/sh
-#4.7.0
-#2018-11-16
+#4.7.1
+#2018-12-08
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -50,7 +50,7 @@ find_junk(){
 	esac
 }
 
-if [ -z "${1}" ];then hlp;return;fi
+if [ -z "${1}" ];then hlp;exit;fi
 while true;do
 	case "${1}" in
 		-r) act="rm";shift;;

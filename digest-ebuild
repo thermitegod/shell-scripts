@@ -1,6 +1,6 @@
 #!/bin/sh
-#2.3.0
-#2018-09-11
+#2.3.1
+#2018-12-08
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -17,26 +17,17 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-hlp(){
-	printf " -a\trun for the entire repo\n"
-	printf " -h\tprint this help\n"
-}
-
 mode="single"
 while true;do
 	case "${1}" in
-		-a) mode="repo";shift;;
-		-h) hlp;return;;
+		-a) find . -maxdepth 2 -mindepth 2 -path '*/*' -type d -exec dash -c "cd '{}' && ${0}" \;;exit;;
+		-h)
+			printf " -a\trun for the entire repo\n"
+			printf " -h\tprint this help\n"
+			exit;;
 		*) break;;
 	esac
 done
 
-case "${mode}" in
-	single)
-		e=$(ls -1A *.ebuild|tail -n1)
-		ebuild ${e} manifest
-		;;
-	repo)
-		find . -maxdepth 2 -mindepth 2 -path '*/*' -type d -exec dash -c "cd '{}' && ${0}" \;
-		;;
-esac
+e=$(ls -1A *.ebuild|tail -n1)
+ebuild ${e} manifest

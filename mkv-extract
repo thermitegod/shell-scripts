@@ -1,6 +1,6 @@
 #!/bin/sh
-#2.3.0
-#2018-10-12
+#2.3.1
+#2018-12-08
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -22,20 +22,20 @@
 
 mode="z"
 
-hlp() {
+hlp(){
 	printf " -a\tExtract audio track\n"
 	printf " -h\tprint this help\n"
 	printf " -s\tExtract sub track\n"
 	printf " -v\tExtract video track\n"
 }
 
-if [ -z "${1}" ];then hlp;return;fi
+if [ -z "${1}" ];then hlp;exit;fi
 while true;do
 	case "${1}" in
 		-a) mode="aud";shift;;
 		-s) mode="sub";shift;;
 		-v) mode="vid";shift;;
-		-h) hlp;return;;
+		-h) hlp;exit;;
 		*) break;;
 	esac
 done

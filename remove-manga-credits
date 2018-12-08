@@ -1,6 +1,6 @@
 #!/bin/sh
-#5.1.0
-#2018-04-23
+#5.1.1
+#2018-12-08
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -30,15 +30,14 @@ hlp() {
 	printf " -z\tDisable 'zzz' matching\n"
 }
 
-if [ -z "${1}" ];then hlp;return;fi
-
+if [ -z "${1}" ];then hlp;exit;fi
 while true;do
 	case "${1}" in
 		-r) frm="1";shift;;
 		-l) fls="1";shift;;
 		-t) tst="1";shift;;
 		-z) zzz="0";shift;;
-		-h) hlp;return;;
+		-h) hlp;exit;;
 		*) break;;
 	esac
 done
@@ -48,7 +47,6 @@ if [ ${tst} = "0" ];then
 else
 	d="/tmp/test/credits"
 fi
-
 
 find_credits(){
 	if [ "${fls}" = "1" ];then

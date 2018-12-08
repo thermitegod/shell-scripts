@@ -1,6 +1,6 @@
 #!/bin/sh
-#1.14.2
-#2018-11-16
+#1.14.3
+#2018-12-08
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -30,23 +30,6 @@ remove_junk="1"
 numerical_rename="0"
 detect_nested_dirs="1"
 
-hlp() {
-	printf "General\n"
-	printf " -h\tPrint this help\n"
-	printf "Enable\n"
-	printf " -m\tEnable hentai mode\n"
-	printf " -r\tEnable numerical renaming\n"
-	printf "Disable\n"
-	printf " -A\tDisable mkadvzip\n"
-	printf " -D\tDisable nested directory detection\n"
-	printf " -M\tDisable mime checker\n"
-	printf " -O\tDisable image optimizer\n"
-	printf " -R\tDisable junk file removal\n"
-	printf " -T\tDisable compressed file test\n"
-	printf " -t\tDisable time total\n"
-	printf " -z\tDisable zzz matching in credits\n"
-}
-
 while true;do
 	case "${1}" in
 		-A) comp_advzip="0";shift;;
@@ -59,7 +42,22 @@ while true;do
 		-r) numerical_rename="1";shift;;
 		-z) match_zzz="1";shift;;
 		-m) mode="hentai";shift;;
-		-h) hlp;return;;
+		-h)
+			printf "General\n"
+			printf " -h\tPrint this help\n"
+			printf "Enable\n"
+			printf " -m\tEnable hentai mode\n"
+			printf " -r\tEnable numerical renaming\n"
+			printf "Disable\n"
+			printf " -A\tDisable mkadvzip\n"
+			printf " -D\tDisable nested directory detection\n"
+			printf " -M\tDisable mime checker\n"
+			printf " -O\tDisable image optimizer\n"
+			printf " -R\tDisable junk file removal\n"
+			printf " -T\tDisable compressed file test\n"
+			printf " -t\tDisable time total\n"
+			printf " -z\tDisable zzz matching in credits\n"
+			exit;;
 		*) break;;
 	esac
 done

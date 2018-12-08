@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-#2.1.0
-#2018-10-14
+#2.1.1
+#2018-12-08
 #req bash
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
@@ -18,16 +18,14 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-hlp(){
-	printf " -b\tBatch mode\n"
-	printf " -h\tPrint this help\n"
-}
-
 mode="single"
 while true;do
 	case "${1}" in
 		-b) mode="batch";shift;;
-		-h) hlp;exit;;
+		-h)
+			printf " -b\tBatch mode\n"
+			printf " -h\tPrint this help\n"
+			exit;;
 		*) break;;
 	esac
 done
@@ -41,7 +39,5 @@ case "${mode}" in
 			#mv "${f%.*}".flac ../
 		done
 		;;
-	batch)
-		find . -maxdepth 1 -type d \( ! -name . \) -exec sh -c "cd '{}' && ${0}" \;
-		;;
+	batch) find . -maxdepth 1 -type d \( ! -name . \) -exec sh -c "cd '{}' && ${0}" \;;;
 esac

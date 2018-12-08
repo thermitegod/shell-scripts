@@ -1,6 +1,6 @@
 #!/bin/sh
-#5.2.0
-#2018-06-12
+#5.2.1
+#2018-12-08
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -17,31 +17,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-count="0"
-list="0"
-
-mode="${0##*/}"
-case "${mode}" in
-	count-image)
-		type="PNG JPG JPEG JPE GIF BMP ICO WEBM MP4 MKV"
-		;;
-	count-archive)
-		type="ZIP 7Z RAR CBR CBZ TAR GZ XZ"
-		mode="archive"
-		;;
-esac
-
-if [ -n "${1}" ];then D="${1}";else D=".";fi
-
-hlp() {
-	printf "MODE  : %s\n" "${mode}"
-	printf "TYPES : %s\n" "${type}"
-	printf " -h\tprint this help\n"
-	if [ "${mode}" = "archive" ];then
-		printf " -l\tlist found archives\n"
-	fi
-}
-
 arc_list() {
 	printf "List found [yn]? "
 	read confirm
@@ -53,10 +28,29 @@ arc_list() {
 	fi
 }
 
+mode="${0##*/}"
+case "${mode}" in
+	count-image) type="PNG JPG JPEG JPE GIF BMP ICO WEBM MP4 MKV";;
+	count-archive)
+		type="ZIP 7Z RAR CBR CBZ TAR GZ XZ"
+		mode="archive"
+		;;
+esac
+
+if [ -n "${1}" ];then D="${1}";else D=".";fi
+
+count="0"
+list="0"
+
 while true;do
 	case "${1}" in
 		-l) list="1";shift;;
-		-h) hlp;return;;
+		-h)
+			printf "MODE  : %s\n" "${mode}"
+			printf "TYPES : %s\n" "${type}"
+			printf " -h\tprint this help\n"
+			if [ "${mode}" = "archive" ];then printf " -l\tlist found archives\n";fi
+			exit;;
 		--) break;;
 		*) break;;
 	esac

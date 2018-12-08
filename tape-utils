@@ -1,6 +1,6 @@
 #!/bin/sh
-#1.0.0
-#2018-03-10
+#1.0.1
+#2018-12-08
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -17,20 +17,15 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#TODO
-#xz tar
-#use statusbar in mkxz?
-#???
-
-if [ "$(id -u)" -ne 0 ];then printf "Requires root, exiting.\n";return;fi
+if [ "$(id -u)" -ne 0 ];then printf "Requires root, exiting.\n";exit;fi
 
 tape="/dev/st0"
 
-t_rewind(){ /usr/sbin/mt -f "${tape}" rewind ; }
-t_status(){ /usr/sbin/mt -f "${tape}" status ; }
-t_reten(){ /usr/sbin/mt -f "${tape}" retension ; }
-t_eject(){ /usr/sbin/mt -f "${tape}" eject ; }
-t_erase(){ /usr/sbin/mt -f "${tape}" erase ; }
+t_rewind(){ mt -f "${tape}" rewind ; }
+t_status(){ mt -f "${tape}" status ; }
+t_reten(){ mt -f "${tape}" retension ; }
+t_eject(){ mt -f "${tape}" eject ; }
+t_erase(){ mt -f "${tape}" erase ; }
 
 t_confirm_erase(){
 	printf "Erase current tape: y/n\n"
@@ -39,14 +34,14 @@ t_confirm_erase(){
 		t_erase
 	else
 		printf "Did not enter: y\nNot running, Exiting.\n"
-		return
+		exit
 	fi
 }
 
 t_backup(){
 	if [ -z "${target}" ];then
 		printf "nothing to backup, exiting\n"
-		return
+		exit
 	fi
 
 	#if [ -d "${target}" ];then
@@ -60,15 +55,15 @@ t_backup(){
 	#btarget=$(echo $target|sed 's@.*/@@')
 
 	#move to end last tar on tape
-	#/usr/sbin/mt -f "${tape}" eom
-	/usr/sbin/mt -f "${tape}" eod
+	#mt -f "${tape}" eom
+	mt -f "${tape}" eod
 	tar -cvf "${tape}" "${target}"
 }
 
 t_backup_overwrite(){
 	if [ -z "${target}" ];then
 		printf "nothing to backup, exiting\n"
-		return
+		exit
 	fi
 	t_rewind
 	tar -cvf "${tape}" "${target}"
@@ -77,7 +72,7 @@ t_backup_overwrite(){
 t_restore(){
 	if [ -z "${target}" ];then
 		printf "no restore target specified, exiting\n"
-		return
+		exit
 	fi
 	t_rewind
 	tar -xvf /dev/st0 -C "${target}"
@@ -92,7 +87,7 @@ t_list(){
 	tar -tf $tape
 }
 
-hlp() {
+hlp(){
 	printf " Tape drive is : %s\n" "$tape"
 	printf " -b\tbackup \$1 at end of last backup on $tape\n"
 	printf " -B\tbackup \$1 at start, overwriting existing, on $tape\n"
@@ -109,7 +104,7 @@ hlp() {
 	printf " -Z\terase/rewind/eject tape\n"
 }
 
-links() {
+links(){
 	printf "https://www.cyberciti.biz/hardware/unix-linux-basic-tape-management-commands\n"
 	printf "https://www.cyberciti.biz/faq/unix-verify-tape-backup\n"
 	printf "https://www.cyberciti.biz/faq/linux-tape-backup-with-mt-and-tar-command-howto\n"
@@ -117,22 +112,22 @@ links() {
 	printf "\n"
 }
 
+if [ -z "${1}" ];then hlp;exit;fi
 while true;do
 	case "${1}" in
 		-b) target="${2}";t_backup;shift;;
 		-B) target="${2}";t_backup_overwrite;shift;;
 		-e) t_eject;shift;;
 		-g) target="${2}";t_restore;shift;;
-		-h) hlp;return;;
 		-l) t_list;shift;;
 		-L) links;shift;;
-		#-) t_;shift;;
 		-R) t_reten;shift;;
 		-r) t_rewind;shift;;
 		-s) t_status;shift;;
 		-v) t_verify;shift;;
 		-z) t_confirm_erase;t_rewind;shift;;
 		-Z) t_confirm_erase;t_rewind;t_eject;shift;;
+		-h) hlp;exit;;
 		*) break;;
 	esac
 done

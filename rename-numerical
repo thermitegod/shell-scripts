@@ -1,6 +1,6 @@
 #!/bin/sh
-#2.3.0
-#2018-09-21
+#2.3.1
+#2018-12-08
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -22,40 +22,6 @@
 #debug flags
 #make less shit
 
-hlp(){
-	printf " -b\tBatch mode\n"
-	printf " -h\tPrint this help\n"
-}
-
-arrfix() {
-	array1=$(echo "$array"|cut -d ' ' -f 1)
-	newname="${array1}.${f##*.}"
-}
-
-v2() {
-	#will force natural order
-	#for f in `ls -1A|sort -V`;do
-	for f in $files;do
-		if [ -f "${f%%}" ];then
-			arrfix
-			if ! [ -f "${newname}" ];then
-				mv -- "${f%%}" "${newname}" #>/dev/null 2>&1
-			else
-				a=$(md5sum "${f%%}")
-				b=$(md5sum "${newname}")
-				if [ "${a}" = "${b}" ];then
-					printf "Same File not renaming\n"
-				else
-					printf "diferent files with same filename exist\n"
-				fi
-			fi
-			#echo ${f%%}
-			#echo $array1
-			array=$(echo "$array"|sed "s/[^ ]* //")
-		fi
-	done
-}
-
 num=$(ls -1A|wc -l)
 int=$(seq -w -s ' ' ${num})
 array="${int}"
@@ -65,17 +31,34 @@ mode="single"
 while true;do
 	case "${1}" in
 		-b) mode="batch";shift;;
-		-h) hlp;exit;;
+		-h)
+			printf " -b\tBatch mode\n"
+			printf " -h\tPrint this help\n"
+			exit;;
 		*) break;;
 	esac
 done
 
 case "${mode}" in
 	single)
-		#echo $num
-		#echo $int
-		#echo $array
-		v2
+		for f in $files;do
+			if [ -f "${f%%}" ];then
+				array1=$(echo "$array"|cut -d ' ' -f 1)
+				newname="${array1}.${f##*.}"
+				if ! [ -f "${newname}" ];then
+					mv -- "${f%%}" "${newname}"
+				else
+					a=$(md5sum "${f%%}")
+					b=$(md5sum "${newname}")
+					if [ "${a}" = "${b}" ];then
+						printf "Same File not renaming\n"
+					else
+						printf "diferent files with same filename exist\n"
+					fi
+				fi
+				array=$(echo "$array"|sed "s/[^ ]* //")
+			fi
+		done
 		;;
 	batch)
 		find . -maxdepth 1 -type d \( ! -name . \) -exec cd -- '{}' && "${0}" \;

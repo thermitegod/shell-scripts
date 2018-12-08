@@ -1,6 +1,6 @@
 #!/bin/sh
-#5.2.0
-#2018-06-14
+#5.2.1
+#2018-12-08
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -32,7 +32,7 @@ mtime_xz="mtimedb-${date}.tar.xz"
 user="brandon"
 group="${user}"
 
-bac() {
+bac(){
 	if ! [ -d "${store}" ]; then mkdir -p ${store} && chown ${user}:${group} ${store};fi
 	if [ -f "${store}/${mtime_xz}" ]; then rm ${store}/${mtime_xz};fi
 	cp ${resume} ${tmpdir}
@@ -44,7 +44,7 @@ bac() {
 	printf "Finished backup of %s to %s\n" "${mtime_xz}" "${store}"
 }
 
-res() {
+res(){
 	if ! [ -d "${store}" ]; then die "Run a backup first. Exiting.";fi
 	if [ -f "${resume}" ]; then rm ${resume};fi
 	if [ "${res_specific}" = "1" ];then
@@ -65,13 +65,13 @@ res() {
 	printf "Finished restore of %s to %s\n" "${mtime_res}" "${resume}"
 }
 
-list() {
+list(){
 	if ! [ -d "${store}" ]; then die "Run a backup first. Exiting.";fi
 	printf "Listing files in : ${store}\n"
 	ls -1A ${store}
 }
 
-del() {
+del(){
 	if [ -d "${store}" ]; then
 		rm -rf ${store}
 		printf "Deleted ${store}\n"
@@ -80,7 +80,7 @@ del() {
 	fi
 }
 
-hlp() {
+hlp(){
 	printf " -b\tbackup\n"
 	printf " -r\trestore last <BROKEN>\n"
 	printf " -s\trestore selected\n"
@@ -89,6 +89,7 @@ hlp() {
 	printf " -h\tprint this help\n"
 }
 
+if [ -z "${1}" ];then hlp;exit;fi
 while true;do
 	case "${1}" in
 		-b) bac;shift;;
@@ -97,7 +98,7 @@ while true;do
 		-s) res_specific="1";res;shift;;
 		-l) list;shift;;
 		-d) del;shift;;
-		-h) hlp;return;;
+		-h) hlp;exit;;
 		*) break;;
 	esac
 done

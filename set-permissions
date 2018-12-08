@@ -1,6 +1,6 @@
 #!/bin/sh
-#2.0.0
-#2018-08-03
+#2.0.1
+#2018-12-08
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -24,7 +24,6 @@ hlp(){
 	printf " -f\tset 644 -rw-r--r-- | files\n"
 	printf " -h\tprint this help\n"
 	printf " -x\tset 755 -rwxr-x-rx | files execute\n"
-
 	printf "\nCodes\n"
 	printf "0\t---\n"
 	printf "1\t--x\n"
@@ -36,14 +35,14 @@ hlp(){
 	printf "7\trwx\n"
 }
 
-if [ -z "${1}" ];then hlp;return;fi
+if [ -z "${1}" ];then hlp;exit;fi
 while true;do
 	case "${1}" in
 		-a) mode="sane";shift;;
 		-d) mode="dir";shift;;
 		-f) mode="file";shift;;
 		-x) mode="ex";shift;;
-		-h) hlp;return;;
+		-h) hlp;exit;;
 		*) break;;
 	esac
 done

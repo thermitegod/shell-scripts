@@ -1,6 +1,6 @@
 #!/bin/sh
-#3.0.0
-#2018-03-31
+#3.0.1
+#2018-12-08
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -22,7 +22,7 @@ wip(){
 user=$(id -u)
 if ! [ -S "/tmp/tmux-${user}/default" ];then
 	printf "No tmux sessions exist for uid %s\n" "${user}"
-	return
+	exit
 fi
 
 if [ -z "${1}" ];then

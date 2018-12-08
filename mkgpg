@@ -1,6 +1,6 @@
 #!/bin/sh
-#3.6.0
-#2018-09-19
+#3.6.1
+#2018-12-08
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -23,16 +23,7 @@ comp_rm="0"
 
 user="brandon"
 
-hlp() {
-	printf " default will gpg files passed in \$1\n"
-	printf " -d\tDecrypt\n"
-	printf " -f\tgpg all files\n"
-	printf " -h\tprint this help\n"
-	printf " -s\tgpg \$1, delete after gpg\n"
-	printf " -x\tgpg all files, delete original after gpg\n"
-}
-
-compress() {
+compress(){
 	if [ "${comp_decrypt}" = "0" ];then
 		printf "Encrypting : ${f%%}\n"
 		nice -19 gpg --yes --batch -e -r "${user}" "${f%%}"
@@ -51,7 +42,14 @@ while true;do
 		-f) comp_files="1";shift;;
 		-s) comp_rm="1";shift;;
 		-x) comp_files="1";comp_rm="1";shift;;
-		-h) hlp;exit;;
+		-h)
+			printf " default will gpg files passed in \$1\n"
+			printf " -d\tDecrypt [broken]\n"
+			printf " -f\tgpg all files\n"
+			printf " -h\tprint this help\n"
+			printf " -s\tgpg \$1, delete after gpg\n"
+			printf " -x\tgpg all files, delete original after gpg\n"
+			exit;;
 		*) break;;
 	esac
 done
@@ -68,5 +66,5 @@ elif [ "${comp_files}" = "1" ];then
 		fi
 	done
 else
-	printf "Something is broken\n";return
+	printf "Nothing to compress\n";exit
 fi

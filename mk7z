@@ -1,6 +1,6 @@
 #!/bin/sh
-#2.12.0
-#2018-10-10
+#2.12.1
+#2018-12-08
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -36,24 +36,7 @@ test_post="1"
 
 profile="multi"
 
-hlp() {
-	printf " default will compress files passed in \$1\n"
-	printf "\nPROFILES\n"
-	printf " -p1\tSingle threaded\n"
-	printf " -p2\tMultithreaded\n"
-	printf " -p3\tTest\n"
-	printf "\nOTHER\n"
-	printf " -d\tcompress all directories\n"
-	printf " -f\tcompress all files\n"
-	printf " -h\tprint this help\n"
-	printf " -P\tDisable post compression test\n"
-	printf " -s\tcompress \$1, delete after compressed\n"
-	printf " -t\tTest all compress files or file passed in \$1\n"
-	printf " -x\tcompress all files, delete original after compressed\n"
-	printf " -z\tcompress all directories, delete original after compressed\n"
-}
-
-compress() {
+compress(){
 	case "${profile}" in
 		single)
 			printf "\n***NOTICE*** The compression profile being used will probably use over 10G of ram\n"
@@ -90,7 +73,6 @@ file_test(){
 	fi
 }
 
-if [ -z "${1}" ];then hlp;exit;fi
 while true;do
 	case "${1}" in
 		-p1) profile="single";shift;;
@@ -103,7 +85,22 @@ while true;do
 		-s) orig_rm="1";shift;;
 		-x) comp_files="1";orig_rm="1";shift;;
 		-z) comp_dir="1";orig_rm="1";shift;;
-		-h) hlp;exit;;
+		-h)
+			printf " default will compress files passed in \$1\n"
+			printf "\nPROFILES\n"
+			printf " -p1\tSingle threaded\n"
+			printf " -p2\tMultithreaded\n"
+			printf " -p3\tTest\n"
+			printf "\nOTHER\n"
+			printf " -d\tcompress all directories\n"
+			printf " -f\tcompress all files\n"
+			printf " -h\tprint this help\n"
+			printf " -P\tDisable post compression test\n"
+			printf " -s\tcompress \$1, delete after compressed\n"
+			printf " -t\tTest all compress files or file passed in \$1\n"
+			printf " -x\tcompress all files, delete original after compressed\n"
+			printf " -z\tcompress all directories, delete original after compressed\n"
+			exit;;
 		--) break;;
 		*) break;;
 	esac
@@ -124,10 +121,11 @@ elif [ "${comp_dir}" = "1" ] || [ "${comp_files}" = "1" ];then
 		fi
 	done
 else
-	printf "Something is broken\nDumping vars :\n"
-	printf "\$1=$1\nprofile=${profile}\ncomp_files=${comp_files}\ncomp_dir=${comp_dir}\n"
-	printf "orig_rm=${orig_rm}\ntest_only=${test_only}\ntest_post=${test_post}\n"
-	exit 1
+	printf "Nothing to compress\n"
+	#printf "Something is broken\nDumping vars :\n"
+	#printf "\$1=$1\nprofile=${profile}\ncomp_files=${comp_files}\ncomp_dir=${comp_dir}\n"
+	#printf "orig_rm=${orig_rm}\ntest_only=${test_only}\ntest_post=${test_post}\n"
+	exit
 fi
 
 if [ "${test_post}" = "1" ];then

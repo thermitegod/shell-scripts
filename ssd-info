@@ -1,14 +1,14 @@
 #!/bin/sh
-#1.2.0
-#2018-01-11
+#1.2.1
+#2018-12-08
 
 #original posted on lainchan
 #modified by, Brandon Zorn, brandonzorn@cock.li
 
-ssd_dev_1() { SSD_DEVICE="/dev/disk/by-id/wwn-0x5002538da007852e" ; }
-ssd_dev_2() { SSD_DEVICE="/dev/disk/by-id/wwn-0x5002538d417e53d6" ; }
-ssd_dev_3() { SSD_DEVICE="/dev/disk/by-id/wwn-0x5002538d426ccd6a" ; }
-#ssd_dev_3() { SSD_DEVICE="" }
+ssd_dev_1(){ SSD_DEVICE="/dev/disk/by-id/wwn-0x5002538da007852e" ; }
+ssd_dev_2(){ SSD_DEVICE="/dev/disk/by-id/wwn-0x5002538d417e53d6" ; }
+ssd_dev_3(){ SSD_DEVICE="/dev/disk/by-id/wwn-0x5002538d426ccd6a" ; }
+#ssd_dev_3(){ SSD_DEVICE="" }
 
 printf "SSD Devices\n"
 ssd_dev_1;printf "1: ${SSD_DEVICE}\n"
@@ -20,7 +20,7 @@ case "$device" in
 	1) ssd_dev_1;;
 	2) ssd_dev_2;;
 	3) ssd_dev_3;;
-	*) printf "INVALID\n";return;;
+	*) printf "INVALID\n";exit;;
 esac
 
 ON_TIME_TAG="Power_On_Hours"

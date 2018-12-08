@@ -1,6 +1,6 @@
 #!/bin/sh
-#5.0.0
-#2018-09-19
+#5.0.1
+#2018-12-08
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -22,28 +22,12 @@ comp_files="0"
 orig_rm="0"
 comp_status="0"
 
-hlp(){
-	printf "CURRENT ${C}\n\n"
-	printf " default will compress files passed in \$1\n"
-	printf " -d\tcompress all directories\n"
-	printf " -f\tcompress all files\n"
-	printf " -h\tprint this help\n"
-	printf " -s\tcompress \$1, delete after compressed\n"
-	printf " -S\tenable cool status bar\n"
-	printf " -x\tcompress all files, delete original after compressed\n"
-	printf " -z\tcompress all directories, delete original after compressed\n"
-	printf "\nMODES\n"
-	printf " -B\tuse bzip2\n"
-	printf " -G\tuse gzip\n"
-	printf " -X\tuse xz\n"
-}
-
 compress(){
 	#this actually makes the archive smaller, atleast for xz
 	if [ ${comp_status} = "1" ];then
-		tar --xattrs -cf - "${f%%}" -P | pv -s $(du -sb "${f%%}" | awk '{print $1}') | XZ_OPT="-e9" "${C}" >| "${f%%}.tar.${E}"
+		tar --xattrs -cf - "${f%%}" -P | pv -s $(du -sb "${f%%}" | awk '{print $1}') | "${C}" >| "${f%%}.tar.${E}"
 	else
-		tar --xattrs -cvf - "${f%%}" -P | XZ_OPT="-e9" "${C}" >| "${f%%}.tar.${E}"
+		tar --xattrs -cvf - "${f%%}" -P | "${C}" >| "${f%%}.tar.${E}"
 	fi
 	if [ "${comp_rm}" = "1" ];then rm -r "${f%%}";fi
 }
@@ -53,10 +37,9 @@ mode="${0##*/}"
 case "${mode}" in
 	mkbz2) C="bzip2";E="bz2";;
 	mkgz) C="gzip";E="gz";;
-	mkxz) C="xz";E="xz";;
+	mkxz) export XZ_OPT="-e9";C="xz";E="xz";;
 esac
 
-if [ -z "${1}" ];then hlp;exit;fi
 while true;do
 	case "${1}" in
 		-B) C="bzip2";E="bz2";shift;;
@@ -68,7 +51,21 @@ while true;do
 		-S) comp_status="1";shift;;
 		-x) comp_dir="1";orig_rm="1";shift;;
 		-z) comp_files="1";orig_rm="1";shift;;
-		-h) hlp;exit;;
+		-h)
+			printf "CURRENT ${C}\n\n"
+			printf " default will compress files passed in \$1\n"
+			printf " -d\tcompress all directories\n"
+			printf " -f\tcompress all files\n"
+			printf " -h\tprint this help\n"
+			printf " -s\tcompress \$1, delete after compressed\n"
+			printf " -S\tenable cool status bar\n"
+			printf " -x\tcompress all files, delete original after compressed\n"
+			printf " -z\tcompress all directories, delete original after compressed\n"
+			printf "\nMODES\n"
+			printf " -B\tuse bzip2\n"
+			printf " -G\tuse gzip\n"
+			printf " -X\tuse xz\n"
+			exit;;
 		*) break;;
 	esac
 done
@@ -90,5 +87,5 @@ elif [ "${comp_dir}" = "1" ] || [ "${comp_files}" = "1" ];then
 		fi
 	done
 else
-	printf "Something is broken\n";exit 1
+	printf "Nothing to compress\n";exit
 fi

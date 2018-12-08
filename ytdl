@@ -1,6 +1,6 @@
 #!/bin/sh
-#4.2.1
-#2018-11-16
+#4.2.2
+#2018-12-08
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -20,15 +20,6 @@
 fork="0"
 extra_args=""
 batch_links="/tmp/ytdl-batch.txt"
-
-hlp(){
-	printf " -a\tonly download audio\n"
-	printf " -b\trun batch file\n"
-	printf " -e\tedit batch file\n"
-	printf " -f\tfork\n"
-	printf " -h\tprint this help\n"
-	printf " -r\tremove ${batch_links}\n"
-}
 
 dl(){
 	printf "downloading : %s\n" "${link}"
@@ -60,8 +51,15 @@ while true;do
 		-b) batch;exit;;
 		-e) $EDITOR ${batch_links};exit;;
 		-f) fork="1";shift;;
-		-h) hlp;exit;;
 		-r) if [ -f "${batch_links}" ];then rm "${batch_links}";fi;exit;;
+		-h)
+			printf " -a\tonly download audio\n"
+			printf " -b\trun batch file\n"
+			printf " -e\tedit batch file\n"
+			printf " -f\tfork\n"
+			printf " -h\tprint this help\n"
+			printf " -r\tremove ${batch_links}\n"
+			exit;;
 		*) break;;
 	esac
 done

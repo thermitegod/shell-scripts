@@ -1,6 +1,6 @@
 #!/bin/sh
-#3.2.0
-#2018-10-12
+#3.2.1
+#2018-12-08
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -24,6 +24,11 @@ while true;do
 	case "${1}" in
 		-a) advall="1";shift;;
 		-q) verbose="0";shift;;
+		-h)
+			printf " -a\trun for all zip files\n"
+			printf " -h\tprint this help\n"
+			printf " -q\tquiet\n"
+			exit;;
 		*) break;;
 	esac
 done
@@ -34,7 +39,7 @@ if [ ${advall} = "1" ];then
 		bf2=$(du -h|tail -n1)
 	fi
 
-	find . -type f -iname "*.zip" -print0 | nice -19 xargs --max-args=1 --max-procs=$(nproc) --null /usr/bin/advzip -z -4
+	find . -type f -iname "*.zip" -print0 | nice -19 xargs --max-args=1 --max-procs=$(nproc) --null advzip -z -4
 
 	if [ ${verbose} = "1" ];then
 		af1=$(du|tail -n1)
@@ -42,11 +47,10 @@ if [ ${advall} = "1" ];then
 		printf "Before : ${bf1}\t${bf2}\n"
 		printf "After  : ${af1}\t${af2}\n"
 	fi
-	return
 else
 	if [ -z "$1" ]; then
 		printf "Nothing to compress\n"
-		return
+		exit
 	fi
-	nice -19 /usr/bin/advzip -z -4 "${1}"
+	nice -19 advzip -z -4 "${1}"
 fi
