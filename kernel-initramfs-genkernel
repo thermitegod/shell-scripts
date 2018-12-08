@@ -1,6 +1,6 @@
 #!/bin/sh
-#2.0.0
-#2018-11-11
+#2.0.1
+#2018-12-08
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -17,22 +17,12 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-if [ "$(id -u)" -ne 0 ];then printf "Requires root, exiting.\n";return;fi
+if [ "$(id -u)" -ne 0 ];then printf "Requires root, exiting.\n";exit;fi
 if ! [ -f "/usr/src/linux/usr/gen_init_cpio" ];then printf "Make sure the kernel is build first\n";exit;fi
 
 logfile="/dev/null"
 comp="lz4"
 loglevel="1"
-
-hlp(){
-	printf "GENERAL\n"
-	printf " -h\tprint this help\n"
-	printf " -L #\tset loglevel 1-5 [default : 1]\n"
-	printf " -v\tlog to /tmp/genkernel-initgen.log\n"
-	printf "\nCOMPRESSION\n"
-	printf " -l\tcompress initramfs using : lz4 [default]\n"
-	printf " -x\tcompress initramfs using : xz \n"
-}
 
 while true;do
 	case "${1}" in
@@ -46,7 +36,15 @@ while true;do
 				printf "loglevel not within bounds, using default value\n"
 			fi
 			shift;shift;;
-		-h) hlp;return;;
+		-h)
+			printf "GENERAL\n"
+			printf " -h\tprint this help\n"
+			printf " -L #\tset loglevel 1-5 [default : 1]\n"
+			printf " -v\tlog to /tmp/genkernel-initgen.log\n"
+			printf "\nCOMPRESSION\n"
+			printf " -l\tcompress initramfs using : lz4 [default]\n"
+			printf " -x\tcompress initramfs using : xz \n"
+			exit;;
 		*) break;;
 	esac
 done

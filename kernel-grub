@@ -1,6 +1,6 @@
 #!/bin/sh
-#1.0.0
-#2018-04-18
+#1.0.1
+#2018-12-08
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -17,5 +17,5 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-if [ "$(id -u)" -ne 0 ];then printf "Requires root, exiting.\n";return;fi
+if [ "$(id -u)" -ne 0 ];then printf "Requires root, exiting.\n";exit;fi
 grub-mkconfig -o /boot/grub/grub.cfg

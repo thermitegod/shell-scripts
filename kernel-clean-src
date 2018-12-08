@@ -1,6 +1,6 @@
 #!/bin/sh
-#3.0.0
-#2018-07-11
+#3.1.0
+#2018-12-08
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -17,53 +17,43 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-if [ $(id -u) -ne 0 ]; then printf "Requires root, exiting.\n";return;fi
+if [ $(id -u) -ne 0 ]; then printf "Requires root, exiting.\n";exit;fi
 finish(){ if [ -d "${tmpdir}" ];then rm --preserve-root -r "${tmpdir}";fi }
 trap 'exit 1' INT HUP QUIT TERM USR1
 trap finish EXIT
 tmpdir=$(mktemp -d)
 
-hlp() {
-	printf " -c\tclean only /usr/src/linux symlink\n"
-	printf " -C\tclean /usr/src/linux*\n"
-	printf " -h\tprint this help\n"
-	printf " -r\tremove all dirs in /usr/src\n"
+clean(){
+	mv .config ${tmpdir}
+	make distclean
+	mv ${tmpdir}/.config .
 }
 
-mode="clean"
+kdir="/usr/src/linux"
+
 while true;do
 	case "${1}" in
-		-r) mode="remove";shift;;
-		-c) mode="clean";shift;;
-		-C) mode="cleanall";shift;;
-		-h) hlp;return;;
-		--) break;;
-		*) break;;
+		-r)
+			for f in ${kdir}*;do
+				rm -rf "${f}"
+			done
+			exit;;
+		-c)
+			cd ${kdir} || exit
+			clean
+			exit;;
+		-C)
+			for f in ${kdir}-*;do
+				cd ${f} || exit
+				clean
+			done
+			exit;;
+		-h)
+			printf " -c\tclean only /usr/src/linux symlink\n"
+			printf " -C\tclean /usr/src/linux-*\n"
+			printf " -h\tprint this help\n"
+			printf " -r\tremove all /usr/src/linux*\n"
+			exit;;
+		*) printf "Nothing to do, for options see -h\n";exit;;
 	esac
 done
-
-case "${mode}" in
-	clean)
-		kdir="/usr/src/linux"
-		mv "${kdir}"/.config "${tmpdir}"
-		cd "${kdir}"
-		make distclean
-		mv "${tmpdir}"/.config "${kdir}"
-		;;
-	cleanall)
-		ksrc="/usr/src"
-		for f in $ksrc/*;do
-			if [ -d "${f}" ];then
-				cd "${f}"
-				make distclean
-			fi
-		done
-
-		;;
-	remove)
-		ksrc="/usr/src"
-		for f in $ksrc/*;do
-			rm -rf "${f}"
-		done
-		;;
-esac

@@ -1,6 +1,6 @@
 #!/bin/sh
-#2.3.0
-#2018-12-04
+#2.4.0
+#2018-12-08
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -19,35 +19,27 @@
 
 if [ $(id -u) -ne 0 ]; then printf "Requires root, exiting.\n";exit;fi
 
-hlp() {
-	printf "GENERAL\n"
-	printf " -h\tPrint this help\n"
-	printf " -V\tverbose emerge\n"
-	printf "\nKERNELS\n"
-	printf " -G\tinstall sys-kernel/gentoo-sources [default]\n"
-	printf " -g\tinstall sys-kernel/git-sources\n"
-	printf " -v\tinstall sys-kernel/vanilla-sources\n"
-}
-
-mode="gentoo"
+pkg="sys-kernel/gentoo-sources"
 v="--quiet"
 
 while true;do
 	case "${1}" in
-		-h) hlp;exit;;
 		-V) v="--verbose";shift;;
-		-G) mode="gentoo";shift;;
-		-g) mode="git";shift;;
-		-v) mode="vanilla";shift;;
+		-g) pkg="sys-kernel/git-sources";shift;;
+		-v) pkg="sys-kernel/vanilla-sources";shift;;
+		-h)
+			printf "GENERAL\n"
+			printf " -h\tPrint this help\n"
+			printf " -V\tverbose emerge\n"
+			printf "\nKERNELS: defaults is sys-kernel/gentoo-sources\n"
+			printf " -g\tinstall sys-kernel/git-sources\n"
+			printf " -v\tinstall sys-kernel/vanilla-sources\n"
+			exit;;
 		*) break;;
 	esac
 done
 
-case "${mode}" in
-	gentoo) emerge --ignore-default-opts --oneshot ${v} sys-kernel/gentoo-sources;;
-	git) emerge --ignore-default-opts --oneshot ${v}  sys-kernel/git-sources;;
-	vanilla) emerge --ignore-default-opts --oneshot ${v} sys-kernel/vanilla-sources;;
-esac
+emerge --ignore-default-opts --oneshot ${v} ${pkg} || exit 1
 
 if [ -f "/proc/config.gz" ];then
 	printf "Installing running kernel config\n"
