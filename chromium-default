@@ -1,6 +1,6 @@
 #!/bin/sh
-#4.1.1
-#2018-12-08
+#4.2.0
+#2018-12-12
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -28,55 +28,52 @@ launch(){ ${ver} --user-data-dir="${data}"; }
 
 #ver="chromium"
 #cachedir="chromium"
+
 ver="google-chrome-unstable"
 cachedir="chrome"
+
 config="${HOME}/.config/chrome/${ver}"
-mode="${0##*/}"
+
+mode="${0##*/chromium-}"
+E="${mode}"
 
 while true;do
 	case "${1}" in
-		-c) ver="chromium";cachedir="${ver}";shift;;
+		-e[0-9]) mode="main";E="ex${1##-e}";shift;;
+		-d) mode="main";E="default";shift;;
+		-s) mode="sandbox";shift;;
+
+		-c) ver="chromium";cachedir="chromium";shift;;
 		-g1) ver="google-chrome-unstable";cachedir="chrome";shift;;
 		-g2) ver="google-chrome-beta";cachedir="chrome";shift;;
 		-g3) ver="google-chrome";cachedir="chrome";shift;;
 		-h)
-			printf "GENERAL\n"
-			printf " -h\tprint this help\n"
+			printf "\nPROFILE\n"
+			printf " -d\tdefault\n"
+			printf " -e#\tex#, where '#' is [0-9]\n"
+			printf " -s\tsandbox, all data deleted on close\n"
+			printf "\nBROWSER\n"
 			printf " -c\tchromium\n"
 			printf " -g1\tgoogle-chrome-unstable\n"
 			printf " -g2\tgoogle-chrome-beta\n"
 			printf " -g3\tgoogle-chrome\n"
+			printf "GENERAL\n"
+			printf " -h\tprint this help\n"
 			exit;;
 		*) break;;
 	esac
 done
 
-case "${mode}" in
-	chromium-default)
-		data="${config}-default"
-		launch
-		cache_rm
-		;;
-	chromium-ex1)
-		data="${config}-ex1"
-		launch
-		cache_rm
-		;;
-	chromium-ex2)
-		data="${config}-ex2"
-		launch
-		cache_rm
-		;;
-	chromium-ex3)
-		data="${config}-ex3"
-		launch
-		cache_rm
-		;;
-	chromium-sandbox)
-		finish(){ if [ -d "${data}" ];then rm --preserve-root -r "${data}";fi }
-		trap 'exit 1' INT HUP QUIT TERM USR1
-		trap finish EXIT
-		data=$(mktemp -d)
-		launch
-		;;
-esac
+if [ "${mode}" = "sandbox" ];then
+	finish(){ if [ -d "${data}" ];then rm --preserve-root -r "${data}";fi }
+	trap 'exit 1' INT HUP QUIT TERM USR1
+	trap finish EXIT
+	data=$(mktemp -d)
+	launch
+	cache_rm
+else
+	if [ -z "${E}" ];then printf "something is wrong\n";exit;fi
+	data="${config}-${E}"
+	launch
+	cache_rm
+fi
