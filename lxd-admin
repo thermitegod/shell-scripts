@@ -1,6 +1,6 @@
 #!/bin/sh
-#5.6.1
-#2018-12-02
+#5.6.3
+#2018-12-07
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -28,10 +28,11 @@ hlp(){
 	printf " -d\tDelete containers\n"
 	printf " -D\tDelete 'old-*' containers\n"
 	printf " -h\tPrint this help\n"
-	printf " -r\tRestart all\n"
-	printf " -s\tStart all\n"
+	printf " -r\tRestart\n"
+	printf " -s\tStart\n"
 	printf " -u\tUpdate, rename existing with 'old-*' prefix\n"
-	printf " -z\tStop all\n"
+	printf " -z\tStop\n"
+	printf " -Z\tForce stop\n"
 	printf "\nSPECIFIC, no other flags req\n"
 	printf " -c\trtorrent lockfile cleanup\n"
 	printf " -C\trutorrent cleanup only, remove *.torrent files in \$config/rutorrent/share/torrents/\n"
@@ -136,11 +137,12 @@ main_container(){
 	fullname="${ctype}-${cname}"
 	if [ "${limit}" = "1" ] && ! [ "${limit_to}" = "${ctype}" ];then return;fi
 	case "${act}" in
-		stop) printf "Stoping container: ${fullname}\n";lxc stop "${fullname}" &;;
-		start) printf "Starting container: ${fullname}\n";lxc start "${fullname}" &;;
+		stop) printf "Stopping container: ${fullname}\n";lxc stop "${fullname}" &;;
+		start) printf "Starting container: ${fullname}\n";sleep 1;lxc start "${fullname}" &;;
 		delete) printf "Deleteing container: ${fullname}\n";lxc delete "${fullname}" &;;
 		restart) printf "Restarting container: ${fullname}\n";lxc restart "${fullname}" &;;
 		deleteold) printf "Deleting container: old-${fullname}\n";lxc delete "old-${fullname}" &;;
+		forcestop) printf "Force stopping container: ${fullname}\n";lxc stop --force "${fullname}" &;;
 		rt_cleanup_lock) rtorrent_clean_lock;;
 		ru_cleanup)
 			get_dirs="1"
@@ -152,12 +154,15 @@ main_container(){
 		update)
 			printf "Update running for : ${fullname}\n"
 
-			printf "Renaming ${fullname} to old-${fullname}\n"
-			lxc rename "${fullname}" "old-${fullname}"
+			if [ "$(echo ${lxclist}|grep ${fullname})" ];then
+				printf "Renaming ${fullname} to old-${fullname}\n"
+				lxc rename "${fullname}" "old-${fullname}"
+			fi
+
 			printf "Copying ${template} to ${fullname}\n"
 			lxc copy "${template}" "${fullname}"
 
-			remove_devices
+			if [ "${distro}" = "gentoo" ];then remove_devices;fi
 			set_limits
 			set_dirs
 			set_ip
@@ -197,6 +202,7 @@ printonly="0"
 limit_to="z"
 transmission_port="9091"
 container_info="${HOME}/.bin/bin-extra/lxd-admin"
+lxclist=$(lxc list)
 
 if [ -z "${1}" ];then hlp;exit;fi
 while true;do
@@ -211,6 +217,7 @@ while true;do
 		-s) act="start";shift;;
 		-u) act="update";shift;;
 		-z) act="stop";shift;;
+		-Z) act="forcestop";shift;;
 		-p) act="print";shift;;
 		-P) act="print";get_dirs="1";verbose="1";shift;;
 		-h) hlp;exit;;
