@@ -1,6 +1,6 @@
 #!/bin/sh
-#5.0.1
-#2018-12-08
+#5.1.0
+#2018-12-27
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -23,11 +23,15 @@ orig_rm="0"
 comp_status="0"
 
 compress(){
-	#this actually makes the archive smaller, atleast for xz
-	if [ ${comp_status} = "1" ];then
-		tar --xattrs -cf - "${f%%}" -P | pv -s $(du -sb "${f%%}" | awk '{print $1}') | "${C}" >| "${f%%}.tar.${E}"
-	else
-		tar --xattrs -cvf - "${f%%}" -P | "${C}" >| "${f%%}.tar.${E}"
+	if [ -d "${f}" ];then
+		#the piping actually makes the archive smaller, at least for xz
+		if [ ${comp_status} = "1" ];then
+			tar --xattrs -cf - "${f%%}" -P | pv -s $(du -sb "${f%%}" | awk '{print $1}') | "${C}" >| "${f%%}.tar.${E}"
+		else
+			tar --xattrs -cvf - "${f%%}" -P | "${C}" >| "${f%%}.tar.${E}"
+		fi
+	elif [ -f "${f}" ];then
+		"${C}" "${f%%}"
 	fi
 	if [ "${comp_rm}" = "1" ];then rm -r "${f%%}";fi
 }
@@ -58,7 +62,7 @@ while true;do
 			printf " -f\tcompress all files\n"
 			printf " -h\tprint this help\n"
 			printf " -s\tcompress \$1, delete after compressed\n"
-			printf " -S\tenable cool status bar\n"
+			printf " -S\tenable cool status bar, directories only\n"
 			printf " -x\tcompress all files, delete original after compressed\n"
 			printf " -z\tcompress all directories, delete original after compressed\n"
 			printf "\nMODES\n"
@@ -72,11 +76,16 @@ done
 
 if [ -z "${C}" ] || [ -z "${E}" ];then printf "No compresion format set\n";exit 1;fi
 
-if [ -n "${1}" ] && ! [ -e "${1}" ];then
-	printf "Not a valid file : ${1}\n"
-elif [ -n "${1}" ] && [ -e "${1}" ];then
-	f="${1%%}"
-	compress
+if [ -n "${1}" ];then
+	while true;do
+		f="${1%%}"
+		if [ -e "${f}" ];then
+			compress
+		else
+			printf "\nInput is none existent : ${1}\n\n"
+		fi
+		if [ -n "${2}" ];then shift;else break;fi
+	done
 elif [ "${comp_dir}" = "1" ] || [ "${comp_files}" = "1" ];then
 	for f in *; do
 		if [ "${comp_dir}" = "1" ] && [ -d "${f}" ];then
