@@ -1,6 +1,6 @@
 #!/bin/sh
-#4.1.2
-#2018-12-08
+#4.2.0
+#2018-12-27
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -63,22 +63,27 @@ while true;do
 			printf " -p\tcompress all directories, dont junk path\n"
 			printf " -P\tDisable post compression test\n"
 			printf " -s\tcompress \$1, delete after compressed\n"
-			printf " -t\tTest all files or file passed in \$1, using mk7z -t : prefered test method\n"
-			printf " -T\tTest all files or file passed in \$1, using unzip -tq\n"
+			printf " -t\tTest all files or files passed in \$1, using mk7z -t : prefered test method\n"
+			printf " -T\tTest all files or files passed in \$1, using unzip -tq\n"
 			printf " -x\tcompress all files, delete original after compressed\n"
 			printf " -z\tcompress all directories, delete original after compressed\n"
 			printf " -Z\tcompress all directories, delete original after compressed, dont junk path\n"
 			exit;;
-		--) break;;
+		--) shift;break;;
 		*) break;;
 	esac
 done
 
-if [ -n "${1}" ] && ! [ -e "${1}" ];then
-	printf "Not a valid file : %s\n" "${1}"
-elif [ -n "${1}" ] && [ -e "${1}" ];then
-	f="${1%%}"
-	compress
+if [ -n "${1}" ];then
+	while true;do
+		f="${1%%}"
+		if [ -e "${f}" ];then
+			compress
+		else
+			printf "\nInput is none existent : ${1}\n\n"
+		fi
+		if [ -n "${2}" ];then shift;else break;fi
+	done
 elif [ "${comp_dir}" = "1" ] || [ "${comp_files}" = "1" ];then
 	for f in *; do
 		if [ "${comp_dir}" = "1" ] && [ -d "${f%%}" ];then
