@@ -1,6 +1,6 @@
 #!/bin/sh
-#2.13.0
-#2018-12-27
+#2.13.1
+#2018-12-28
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -66,7 +66,7 @@ compress(){
 
 file_test(){
 	if [ "${f##*.}" = "7z" ] || [ "${f##*.}" = "zip" ];then
-		tst=$(nice -19 7z t ${f%%}|grep Ok)
+		tst=$(nice -19 7z t "${f%%}"|grep Ok)
 		if ! [ -z "${tst}" ];then stat="PASSED"; else stat="FAILED";fi
 		if [ "${stat}" = "FAILED" ];then printf "${f}\n">>failed.txt;fi
 		printf "Test ${stat} for : ${f%%}\n"
