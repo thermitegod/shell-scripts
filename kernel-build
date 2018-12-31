@@ -1,6 +1,6 @@
 #!/bin/sh
-#2.11.0
-#2018-12-13
+#2.12.0
+#2018-12-30
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -43,7 +43,7 @@
 #moves saved work in tar.xz file to /usr/src/linux
 #builds kernel
 
-die(){ echo >&2 "$@";exit 1; }
+die(){ /bin/echo -e "\033[0;31m$*\033[m" >&2 "$@";exit 1; }
 if [ "$(id -u)" -ne 0 ];then die "Requires root";fi
 
 finish(){ if [ -d "${tmpdir}" ];then rm --preserve-root -r "${tmpdir}";fi; }
@@ -97,22 +97,22 @@ fi
 switch_kconf="${storage}/config/${kver}-config"
 if [ -f "${switch_kconf}" ];then run_kernel_bump="0";else run_kernel_bump="1";fi
 
-while true;do
-	case "${1}" in
-		-B) run_kernel_bump="1";shift;;
-		-g) use_zfs_version="git";shift;;
-		-r) use_zfs_version="release";shift;;
-		-c) run_kmod_build="1";shift;;
-		-e) run_emerge="0";shift;;
-		-I) run_intro="0";shift;;
-		-i) run_kernel_install="0";run_kernel_post="0";shift;;
-		-m) use_modules="1";shift;;
-		-p) run_kernel_post="0";shift;;
-		-l) use_local_zfs_ebuild="1";shift;;
-		-x) run_zfs_build="0";shift;;
-		-z) run_zfs_build="1";run_kernel_build="0";run_kernel_post="0";shift;;
-		-v) intro_extra="1";shift;;
-		-h)
+while getopts "BgrceIimplxzvh" OPT;do
+	case "$OPT" in
+		B) run_kernel_bump="1";;
+		c) run_kmod_build="1";;
+		e) run_emerge="0";;
+		g) use_zfs_version="git";;
+		I) run_intro="0";;
+		i) run_kernel_install="0";run_kernel_post="0";;
+		l) use_local_zfs_ebuild="1";;
+		p) run_kernel_post="0";;
+		m) use_modules="1";;
+		r) use_zfs_version="release";;
+		x) run_zfs_build="0";;
+		v) intro_extra="1";;
+		z) run_zfs_build="1";run_kernel_build="0";run_kernel_post="0";;
+		h)
 			printf "GENERAL\n"
 			printf " -B\tforce run_kernel_bump=1\n"
 			printf " -h\tprint this help\n"
@@ -131,7 +131,6 @@ while true;do
 			printf " -x\tdisable zfs build, all checks must still pass, script becomes fancy 'make;make install'\n"
 			printf " -z\tonly run zfs build, will install zfs into kenrel tree\n"
 			exit;;
-		*) break;;
 	esac
 done
 

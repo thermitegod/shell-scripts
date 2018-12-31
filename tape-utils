@@ -1,6 +1,6 @@
 #!/bin/sh
-#1.0.1
-#2018-12-08
+#1.1.0
+#2018-12-30
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -113,22 +113,22 @@ links(){
 }
 
 if [ -z "${1}" ];then hlp;exit;fi
-while true;do
-	case "${1}" in
-		-b) target="${2}";t_backup;shift;;
-		-B) target="${2}";t_backup_overwrite;shift;;
-		-e) t_eject;shift;;
-		-g) target="${2}";t_restore;shift;;
-		-l) t_list;shift;;
-		-L) links;shift;;
-		-R) t_reten;shift;;
-		-r) t_rewind;shift;;
-		-s) t_status;shift;;
-		-v) t_verify;shift;;
-		-z) t_confirm_erase;t_rewind;shift;;
-		-Z) t_confirm_erase;t_rewind;t_eject;shift;;
-		-h) hlp;exit;;
-		*) break;;
+while getopts "BLRbZeglrsvzh" OPT;do
+	case "$OPT" in
+		b) target="${2}";t_backup;;
+		B) target="${2}";t_backup_overwrite;;
+		e) t_eject;;
+		g) target="${2}";t_restore;;
+		l) t_list;;
+		L) links;;
+		R) t_reten;;
+		r) t_rewind;;
+		s) t_status;;
+		v) t_verify;;
+		z) t_confirm_erase;t_rewind;;
+		Z) t_confirm_erase;t_rewind;t_eject;;
+		h) hlp;exit;;
 	esac
 done
+shift $((OPTIND - 1))
 

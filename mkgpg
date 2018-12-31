@@ -1,6 +1,6 @@
 #!/bin/sh
-#3.6.1
-#2018-12-08
+#3.7.0
+#2018-12-30
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -36,13 +36,13 @@ compress(){
 	fi
 }
 
-while true;do
-	case "${1}" in
-		-D) comp_decrypt="1";shift;;
-		-f) comp_files="1";shift;;
-		-s) comp_rm="1";shift;;
-		-x) comp_files="1";comp_rm="1";shift;;
-		-h)
+while getopts "Dfsxh" OPT;do
+	case "$OPT" in
+		D) comp_decrypt="1";;
+		f) comp_files="1";;
+		s) comp_rm="1";;
+		x) comp_files="1";comp_rm="1";;
+		h)
 			printf " default will gpg files passed in \$1\n"
 			printf " -d\tDecrypt [broken]\n"
 			printf " -f\tgpg all files\n"
@@ -50,9 +50,9 @@ while true;do
 			printf " -s\tgpg \$1, delete after gpg\n"
 			printf " -x\tgpg all files, delete original after gpg\n"
 			exit;;
-		*) break;;
 	esac
 done
+shift $((OPTIND - 1))
 
 if [ -n "${1}" ] && ! [ -e "${1}" ];then
 	printf "Not a valid file : %s\n" "${1}"

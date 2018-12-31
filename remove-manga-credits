@@ -1,6 +1,6 @@
 #!/bin/sh
-#5.1.1
-#2018-12-08
+#5.2.0
+#2018-12-30
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -31,14 +31,13 @@ hlp() {
 }
 
 if [ -z "${1}" ];then hlp;exit;fi
-while true;do
-	case "${1}" in
-		-r) frm="1";shift;;
-		-l) fls="1";shift;;
-		-t) tst="1";shift;;
-		-z) zzz="0";shift;;
-		-h) hlp;exit;;
-		*) break;;
+while getopts "rltzh" OPT;do
+	case "$OPT" in
+		r) frm="1";;
+		l) fls="1";;
+		t) tst="1";;
+		z) zzz="0";;
+		h) hlp;exit;;
 	esac
 done
 

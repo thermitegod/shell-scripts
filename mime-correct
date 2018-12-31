@@ -66,14 +66,13 @@ hlp(){
 }
 
 if [ -z "${1}" ];then hlp;exit;fi
-while true;do
-	case "${1}" in
-		-A) mode="all";shift;;
-		-I) mode="correct";shift;;
-		-L) mode="list";shift;;
-		-v) export V="1";shift;;
-		-h) hlp;exit;;
-		*) break;;
+while getopts "AILvh" OPT;do
+	case "$OPT" in
+		A) mode="all";;
+		I) mode="correct";;
+		L) mode="list";;
+		v) export V="1";;
+		h) hlp;exit;;
 	esac
 done
 

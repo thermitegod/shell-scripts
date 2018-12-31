@@ -1,6 +1,6 @@
 #!/bin/sh
-#5.6.3
-#2018-12-07
+#5.7.0
+#2018-12-30
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -21,7 +21,7 @@
 #lxc will not mount on symlinks, but can mount through them
 
 hlp(){
-	printf "\nCONTAINER, only use to limit actions on specified\n"
+	printf "\nCONTAINER, only use to limit actions to specified\n"
 	printf " -T\tOnly run on transmission, uses :${transmission_port} as port\n"
 	printf " -R\tOnly run on rutorrent\n"
 	printf "\nCONTAINER GENERAL\n"
@@ -201,28 +201,28 @@ printonly="0"
 
 limit_to="z"
 transmission_port="9091"
-container_info="${HOME}/.bin/bin-extra/lxd-admin"
+. $(dirname "$0")/utils.sh
+container_info="${extra}/lxd-admin"
 lxclist=$(lxc list)
 
 if [ -z "${1}" ];then hlp;exit;fi
-while true;do
-	case "${1}" in
-		-T) limit="1";limit_to="transmission";shift;;
-		-R) limit="1";limit_to="rutorrent";shift;;
-		-c) act="rt_cleanup_lock";limit_to="rutorrent";shift;;
-		-C) act="ru_cleanup";limit_to="rutorrent";shift;;
-		-d) act="delete";shift;;
-		-D) act="deleteold";shift;;
-		-r) act="restart";shift;;
-		-s) act="start";shift;;
-		-u) act="update";shift;;
-		-z) act="stop";shift;;
-		-Z) act="forcestop";shift;;
-		-p) act="print";shift;;
-		-P) act="print";get_dirs="1";verbose="1";shift;;
-		-h) hlp;exit;;
-		-e) $EDITOR "${container_info}";exit;;
-		*) break;;
+while getopts "TRCDPZcdrsuzphe" OPT;do
+	case "${OPT}" in
+		T) limit="1";limit_to="transmission";;
+		R) limit="1";limit_to="rutorrent";;
+		c) act="rt_cleanup_lock";limit_to="rutorrent";;
+		C) act="ru_cleanup";limit_to="rutorrent";;
+		d) act="delete";;
+		D) act="deleteold";;
+		r) act="restart";;
+		s) act="start";;
+		u) act="update";;
+		z) act="stop";;
+		Z) act="forcestop";;
+		p) act="print";;
+		P) act="print";get_dirs="1";verbose="1";;
+		h) hlp;exit;;
+		e) $EDITOR "${container_info}";exit;;
 	esac
 done
 

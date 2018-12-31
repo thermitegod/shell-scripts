@@ -1,6 +1,6 @@
 #!/bin/sh
-#5.2.1
-#2018-12-08
+#5.3.0
+#2018-12-30
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -17,7 +17,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-die(){ echo >&2 "$@";exit 1; }
+die(){ /bin/echo -e "\033[0;31m$*\033[m" >&2 "$@";exit 1; }
 finish(){ if [ -d "${tmpdir}" ];then rm --preserve-root -r "${tmpdir}";fi }
 trap 'exit 1' INT HUP QUIT TERM USR1
 trap finish EXIT
@@ -90,15 +90,14 @@ hlp(){
 }
 
 if [ -z "${1}" ];then hlp;exit;fi
-while true;do
-	case "${1}" in
-		-b) bac;shift;;
-		#-r) res;shift;;
-		-r) die "Disabled, use -s";;
-		-s) res_specific="1";res;shift;;
-		-l) list;shift;;
-		-d) del;shift;;
-		-h) hlp;exit;;
-		*) break;;
+while getopts "brsldh" OPT;do
+	case "$OPT" in
+		b) bac;;
+		#r) res;;
+		r) die "Disabled, use -s";;
+		s) res_specific="1";res;;
+		l) list;;
+		d) del;;
+		h) hlp;exit;;
 	esac
 done

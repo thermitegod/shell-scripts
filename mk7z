@@ -1,6 +1,6 @@
 #!/bin/sh
-#2.13.1
-#2018-12-28
+#2.14.0
+#2018-12-30
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -48,9 +48,7 @@ compress(){
 			printf "Profile : multi\n"
 			nice -19 7z a -t7z -m0=lzma2 -md=1024m -mmf=bt4 -mmt=on -mmtf=on -myx=9 -mx=9 -mfb=276 -mhc=on -ms=on -mtm=off -mtc=off -mta=off "${f%%}.7z" "${f%%}"
 			;;
-		test)
-			nice -19 7z a -t7z -m0=lzma2 -md=1024m -mmf=bt4 -mmt=off -myx=9 -mx=9 -mfb=276 -ms=on "${f%%}.7z" "${f%%}"
-			;;
+		test) nice -19 7z a -t7z -m0=lzma2 -md=1024m -mmf=bt4 -mmt=off -myx=9 -mx=9 -mfb=276 -ms=on "${f%%}.7z" "${f%%}";;
 	esac
 
 	#exit if non 0 exit code
@@ -73,24 +71,24 @@ file_test(){
 	fi
 }
 
-while true;do
-	case "${1}" in
-		-p1) profile="single";shift;;
-		-p2) profile="multi";shift;;
-		-p3) profile="test";shift;;
-		-t) test_only="1";test_post="0";comp_file="1";shift;;
-		-P) test_post="0";shift;;
-		-d) comp_dir="1";shift;;
-		-f) comp_file="1";shift;;
-		-s) orig_rm="1";shift;;
-		-x) comp_file="1";orig_rm="1";shift;;
-		-z) comp_dir="1";orig_rm="1";shift;;
-		-h)
+while getopts "SMTtpdfsxzh" OPT;do
+	case "$OPT" in
+		S) profile="single";;
+		M) profile="multi";;
+		T) profile="test";;
+		t) test_only="1";test_post="0";comp_file="1";;
+		P) test_post="0";;
+		d) comp_dir="1";;
+		f) comp_file="1";;
+		s) orig_rm="1";;
+		x) comp_file="1";orig_rm="1";;
+		z) comp_dir="1";orig_rm="1";;
+		h)
 			printf " default will compress file passed in \$1\n"
 			printf "\nPROFILES\n"
-			printf " -p1\tSingle threaded, useful when hitting oom with multi\n"
-			printf " -p2\tMultithreaded\n"
-			printf " -p3\tTest\n"
+			printf " -S\tSingle threaded, useful when hitting oom with multi\n"
+			printf " -M\tMultithreaded\n"
+			printf " -T\tTest\n"
 			printf "\nOTHER\n"
 			printf " -d\tcompress all directories\n"
 			printf " -f\tcompress all files\n"
@@ -101,10 +99,9 @@ while true;do
 			printf " -x\tcompress all files, delete original after compressed\n"
 			printf " -z\tcompress all directories, delete original after compressed\n"
 			exit;;
-		--) shift;break;;
-		*) break;;
 	esac
 done
+shift $((OPTIND - 1))
 
 if [ -n "${1}" ];then
 	while true;do

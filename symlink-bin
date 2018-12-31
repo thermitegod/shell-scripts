@@ -1,6 +1,6 @@
 #!/bin/sh
-#1.7.1
-#2018-12-08
+#1.8.0
+#2018-12-30
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -22,14 +22,13 @@ if [ "$(id -u)" -ne 0 ];then printf "Requires root\n";exit;fi
 a="/usr/local/bin"
 b="/home/brandon/.bin/bin"
 
-while true;do
-	case "${1}" in
-		-o) unset b;b="/home/brandon/.bin/bin-other";shift;;
-		-h)
+while getopts "oh" OPT;do
+	case "$OPT" in
+		o) unset b;b="/home/brandon/.bin/bin-other";;
+		h)
 			printf " -h\tprint this help\n"
 			printf " -o\tfiles in /home/brandon/.config/bin-other\n"
 			exit;;
-		*) break;;
 	esac
 done
 

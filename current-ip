@@ -1,6 +1,6 @@
 #!/bin/sh
-#2.5.1
-#2018-12-08
+#2.6.0
+#2018-12-30
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -18,14 +18,13 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 mode="once"
-while true;do
-	case "${1}" in
-		-d) mode="daily";shift;;
-		-h)
+while getopts "dh" OPT;do
+	case "$OPT" in
+		d) mode="daily";;
+		h)
 			printf " -d\tdaily files timestamped\n"
 			printf " -h\tPrint this help\n"
 			exit;;
-		*) break;;
 	esac
 done
 
@@ -34,7 +33,7 @@ date_time=$(date "+%H:%M:%S")
 ip=$(curl --max-time 30 --silent ifconfig.co)
 if [ -z "${ip}" ];then ip="DOWN";fi
 
-case "${mode}" in
+case "$mode" in
 	daily)
 		d="${HOME}/documents/internet"
 		if ! [ -d "${d}" ];then mkdir -p "${d}";fi

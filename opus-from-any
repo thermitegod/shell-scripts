@@ -1,6 +1,6 @@
 #!/bin/sh
-#4.0.1
-#2018-12-08
+#4.1.0
+#2018-12-30
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -17,14 +17,13 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-while true;do
-	case "${1}" in
-		-B) find . -maxdepth 1 -type d \( ! -name . \) -exec dash -c 'cd "{}" && ${0}' \;exit;;
-		-h)
+while getopts "Bh" OPT;do
+	case "$OPT" in
+		B) find . -maxdepth 1 -type d \( ! -name . \) -exec dash -c 'cd "{}" && ${0}' \;exit;;
+		h)
 			printf " -B\tEnable batch mode\n"
 			printf " -h\tPrint this help\n"
 			exit;;
-		*) break;;
 	esac
 done
 

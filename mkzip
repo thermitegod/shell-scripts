@@ -1,6 +1,6 @@
 #!/bin/sh
-#4.2.0
-#2018-12-27
+#4.3.0
+#2018-12-30
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -45,18 +45,18 @@ compress() {
 	fi
 }
 
-while true;do
-	case "${1}" in
-		-t) test_only="1";comp_files="1";shift;break;;
-		-T) test_only="1";comp_files="1";test_mk7z="0";shift;break;;
-		-d) comp_dir="1";shift;;
-		-f) comp_files="1";shift;;
-		-p) comp_dir="1";comp_njp="1";shift;;
-		-s) orig_rm="1";shift;;
-		-x) comp_files="1";orig_rm="1";shift;;
-		-z) comp_dir="1";orig_rm="1";shift;;
-		-Z) comp_dir="1";orig_rm="1";comp_njp="1";shift;;
-		-h)
+while getopts "TZtdfpsxzh" OPT;do
+	case "$OPT" in
+		t) test_only="1";comp_files="1";;
+		T) test_only="1";comp_files="1";test_mk7z="0";;
+		d) comp_dir="1";;
+		f) comp_files="1";;
+		p) comp_dir="1";comp_njp="1";;
+		s) orig_rm="1";;
+		x) comp_files="1";orig_rm="1";;
+		z) comp_dir="1";orig_rm="1";;
+		Z) comp_dir="1";orig_rm="1";comp_njp="1";;
+		h)
 			printf " -d\tcompress all directories\n"
 			printf " -f\tcompress all files\n"
 			printf " -h\tprint this help\n"
@@ -69,10 +69,9 @@ while true;do
 			printf " -z\tcompress all directories, delete original after compressed\n"
 			printf " -Z\tcompress all directories, delete original after compressed, dont junk path\n"
 			exit;;
-		--) shift;break;;
-		*) break;;
 	esac
 done
+shift $((OPTIND - 1))
 
 if [ -n "${1}" ];then
 	while true;do

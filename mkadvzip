@@ -1,6 +1,6 @@
 #!/bin/sh
-#3.2.1
-#2018-12-08
+#3.3.0
+#2018-12-30
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -19,19 +19,18 @@
 
 verbose="1"
 advall="0"
-
-while true;do
-	case "${1}" in
-		-a) advall="1";shift;;
-		-q) verbose="0";shift;;
-		-h)
+while getopts "aqh" OPT;do
+	case "$OPT" in
+		a) advall="1";;
+		q) verbose="0";;
+		h)
 			printf " -a\trun for all zip files\n"
 			printf " -h\tprint this help\n"
 			printf " -q\tquiet\n"
 			exit;;
-		*) break;;
 	esac
 done
+shift $((OPTIND - 1))
 
 if [ ${advall} = "1" ];then
 	if [ ${verbose} = "1" ];then

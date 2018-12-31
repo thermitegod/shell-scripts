@@ -1,6 +1,6 @@
 #!/bin/sh
-#2.4.0
-#2018-12-08
+#2.5.0
+#2018-12-30
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -21,13 +21,12 @@ if [ $(id -u) -ne 0 ]; then printf "Requires root, exiting.\n";exit;fi
 
 pkg="sys-kernel/gentoo-sources"
 v="--quiet"
-
-while true;do
-	case "${1}" in
-		-V) v="--verbose";shift;;
-		-g) pkg="sys-kernel/git-sources";shift;;
-		-v) pkg="sys-kernel/vanilla-sources";shift;;
-		-h)
+while getopts "Vvgh" OPT;do
+	case "$OPT" in
+		V) v="--verbose";;
+		g) pkg="sys-kernel/git-sources";;
+		v) pkg="sys-kernel/vanilla-sources";;
+		h)
 			printf "GENERAL\n"
 			printf " -h\tPrint this help\n"
 			printf " -V\tverbose emerge\n"
@@ -35,11 +34,10 @@ while true;do
 			printf " -g\tinstall sys-kernel/git-sources\n"
 			printf " -v\tinstall sys-kernel/vanilla-sources\n"
 			exit;;
-		*) break;;
 	esac
 done
 
-emerge --ignore-default-opts --oneshot ${v} ${pkg} || exit 1
+emerge --ignore-default-opts --oneshot "$v" "$pkg" || exit 1
 
 if [ -f "/proc/config.gz" ];then
 	printf "Installing running kernel config\n"

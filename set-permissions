@@ -1,6 +1,6 @@
 #!/bin/sh
-#2.0.1
-#2018-12-08
+#2.1.0
+#2018-12-30
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -36,29 +36,23 @@ hlp(){
 }
 
 if [ -z "${1}" ];then hlp;exit;fi
-while true;do
-	case "${1}" in
-		-a) mode="sane";shift;;
-		-d) mode="dir";shift;;
-		-f) mode="file";shift;;
-		-x) mode="ex";shift;;
-		-h) hlp;exit;;
-		*) break;;
+while getopts "adfxh" OPT;do
+	case "$OPT" in
+		a) mode="sane";;
+		d) mode="dir";;
+		f) mode="file";;
+		x) mode="ex";;
+		h) hlp;exit;;
 	esac
 done
 
+alias chmod="chmod -v --preserve-root"
 case "${mode}" in
 	sane)
-		nice -19 find . -type d -exec chmod -v --preserve-root 755 -- "{}" \;
-		nice -19 find . -type f -exec chmod -v --preserve-root 644 -- "{}" \;
+		nice -19 find . -type d -exec chmod 755 -- "{}" \;
+		nice -19 find . -type f -exec chmod 644 -- "{}" \;
 		;;
-	dir)
-		nice -19 find . -type d -exec chmod -v --preserve-root 755 -- "{}" \;
-		;;
-	file)
-		nice -19 find . -type f -exec chmod -v --preserve-root 644 -- "{}" \;
-		;;
-	ex)
-		nice -19 find . -type f -exec chmod -v --preserve-root 755 -- "{}" \;
-		;;
+	dir) nice -19 find . -type d -exec chmod 755 -- "{}" \;;;
+	file) nice -19 find . -type f -exec chmod 644 -- "{}" \;;;
+	ex) nice -19 find . -type f -exec chmod 755 -- "{}" \;;;
 esac

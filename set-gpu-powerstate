@@ -1,5 +1,5 @@
 #!/bin/sh
-#1.2.0
+#1.0.0
 #2018-12-30
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
@@ -17,18 +17,23 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-mode="single"
-while getopts "bh" OPT;do
+if [ "$(id -u)" -ne 0 ];then printf "Requires root, exiting.\n";exit;fi
+state="auto"
+card=/sys/class/drm/card0/device/power_dpm_force_performance_level
+while getopts "aplh" OPT;do
 	case "$OPT" in
-		b) mode="batch";;
+		a) state="auto";;
+		p) state="high";;
+		l) state="low";;
 		h)
-			printf " -b\tBatch mode\n"
+			printf " -a\tauto\n"
+			printf " -p\thigh\n"
+			printf " -l\tlow\n"
 			printf " -h\tPrint this help\n"
 			exit;;
 	esac
 done
 
-case "${mode}" in
-	single) split2flac -of '@track - @title.@ext' ./;;
-	batch) find . -maxdepth 1 -type d \( ! -name . \) -exec "cd '{}' && ${0}" \;;;
-esac
+if [ "$(cat $card)" = "$state" ];then printf "state '$state' is already active\n";exit;fi
+printf "current state is '%s', switching state to '%s'\n" "$(cat $card)" "$state"
+echo "$state" > "$card"

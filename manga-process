@@ -1,6 +1,6 @@
 #!/bin/sh
-#1.14.3
-#2018-12-08
+#1.15.0
+#2018-12-30
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -29,20 +29,19 @@ comp_advzip="1"
 remove_junk="1"
 numerical_rename="0"
 detect_nested_dirs="1"
-
-while true;do
-	case "${1}" in
-		-A) comp_advzip="0";shift;;
-		-D) detect_nested_dirs="0";shift;;
-		-R) remove_junk="0";shift;;
-		-M) mime_check="0";shift;;
-		-t) show_time="0";shift;;
-		-T) comp_test="0";shift;;
-		-O) optimize="0";shift;;
-		-r) numerical_rename="1";shift;;
-		-z) match_zzz="1";shift;;
-		-m) mode="hentai";shift;;
-		-h)
+while getopts "ADRMTtorzmh" OPT;do
+	case "$OPT" in
+		A) comp_advzip="0";;
+		D) detect_nested_dirs="0";;
+		R) remove_junk="0";;
+		M) mime_check="0";;
+		t) show_time="0";;
+		T) comp_test="0";;
+		O) optimize="0";;
+		r) numerical_rename="1";;
+		z) match_zzz="1";;
+		m) mode="hentai";;
+		h)
 			printf "General\n"
 			printf " -h\tPrint this help\n"
 			printf "Enable\n"
@@ -58,7 +57,6 @@ while true;do
 			printf " -t\tDisable time total\n"
 			printf " -z\tDisable zzz matching in credits\n"
 			exit;;
-		*) break;;
 	esac
 done
 

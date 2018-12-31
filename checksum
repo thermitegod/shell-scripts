@@ -1,6 +1,6 @@
 #!/bin/sh
-#3.0.0
-#2018-12-08
+#3.1.0
+#2018-12-30
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -30,18 +30,17 @@ hlp(){
 }
 
 if [ -z "${1}" ];then hlp;exit;fi
-while true;do
-	case "${1}" in
-		-1) h="sha1";break;;
-		-2) h="sha224";break;;
-		-3) h="sha256";break;;
-		-4) h="sha384";break;;
-		-5) h="sha512";break;;
-		-6) h="md5";break;;
-		-c) mode="checksum";shift;;
-		-r) mode="rename-checksum";shift;;
-		-h) hlp;exit;;
-		*) break;;
+while getopts "123456hrc" OPT;do
+	case "$OPT" in
+		1) h="sha1";;
+		2) h="sha224";;
+		3) h="sha256";;
+		4) h="sha384";;
+		5) h="sha512";;
+		6) h="md5";;
+		c) mode="checksum";;
+		r) mode="rename-checksum";;
+		h) hlp;exit;;
 	esac
 done
 

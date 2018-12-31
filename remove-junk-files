@@ -1,6 +1,6 @@
 #!/bin/sh
-#4.7.1
-#2018-12-08
+#4.8.0
+#2018-12-30
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -44,25 +44,22 @@ find_junk(){
 			j=$(find . -iname ${1} -exec ls -1A -- "{}" \;)
 			if [ -n "${j}" ];then printf "*** Found ${1} files ***\n${j}\n";fi
 			;;
-		rm)
-			find . -type f -iname "${1}" -exec trash-put -- "{}" \;
-			;;
+		rm) find . -type f -iname "${1}" -exec trash-put -- "{}" \;;;
 	esac
 }
 
 if [ -z "${1}" ];then hlp;exit;fi
-while true;do
-	case "${1}" in
-		-r) act="rm";shift;;
-		-l) act="ls";shift;;
-		-R) act="rm";txt="1";json="1";url="1";other="1";shift;;
-		-A) txt="1";json="1";url="1";other="1";shift;;
-		-t) txt="1";shift;;
-		-j) json="1";shift;;
-		-u) url="1";shift;;
-		-o) other="1";shift;;
-		-h) hlp;exit;;
-		*) break;;
+while getopts "ARrltjuoh" OPT;do
+	case "$OPT" in
+		r) act="rm";;
+		l) act="ls";;
+		R) act="rm";txt="1";json="1";url="1";other="1";;
+		A) txt="1";json="1";url="1";other="1";;
+		t) txt="1";;
+		j) json="1";;
+		u) url="1";;
+		o) other="1";;
+		h) hlp;exit;;
 	esac
 done
 

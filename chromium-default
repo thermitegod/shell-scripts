@@ -1,6 +1,6 @@
 #!/bin/sh
-#4.2.0
-#2018-12-12
+#4.3.0
+#2018-12-20
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -19,12 +19,11 @@
 
 if [ "$(id -u)" -eq 0 ];then printf "Do not run as root\n";exit;fi
 
-cache_rm(){
+launch(){
+	${ver} --user-data-dir="${data}"
 	cache="${XDG_CACHE_HOME}/${cachedir}/${data##*/}"
 	if [ -d "${cache}" ];then sleep 3;rm -rf "${cache}";fi
 }
-
-launch(){ ${ver} --user-data-dir="${data}"; }
 
 #ver="chromium"
 #cachedir="chromium"
@@ -42,13 +41,12 @@ while true;do
 		-e[0-9]) mode="main";E="ex${1##-e}";shift;;
 		-d) mode="main";E="default";shift;;
 		-s) mode="sandbox";shift;;
-
 		-c) ver="chromium";cachedir="chromium";shift;;
 		-g1) ver="google-chrome-unstable";cachedir="chrome";shift;;
 		-g2) ver="google-chrome-beta";cachedir="chrome";shift;;
 		-g3) ver="google-chrome";cachedir="chrome";shift;;
 		-h)
-			printf "\nPROFILE\n"
+			printf "PROFILE\n"
 			printf " -d\tdefault\n"
 			printf " -e#\tex#, where '#' is [0-9]\n"
 			printf " -s\tsandbox, all data deleted on close\n"
@@ -57,7 +55,7 @@ while true;do
 			printf " -g1\tgoogle-chrome-unstable\n"
 			printf " -g2\tgoogle-chrome-beta\n"
 			printf " -g3\tgoogle-chrome\n"
-			printf "GENERAL\n"
+			printf "\nGENERAL\n"
 			printf " -h\tprint this help\n"
 			exit;;
 		*) break;;
@@ -70,10 +68,7 @@ if [ "${mode}" = "sandbox" ];then
 	trap finish EXIT
 	data=$(mktemp -d)
 	launch
-	cache_rm
 else
-	if [ -z "${E}" ];then printf "something is wrong\n";exit;fi
 	data="${config}-${E}"
 	launch
-	cache_rm
 fi

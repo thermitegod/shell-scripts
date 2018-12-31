@@ -1,6 +1,6 @@
 #!/bin/sh
-#4.5.1
-#2018-12-08
+#4.6.0
+#2018-12-30
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -17,7 +17,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-die(){ echo >&2 "$@";exit 1; }
+die(){ /bin/echo -e "\033[0;31m$*\033[m" >&2 "$@";exit 1; }
 if [ "$(id -u)" -ne 0 ];then die "Requires root, exiting.";fi
 finish() { if [ -d "${tmpdir}" ];then rm --preserve-root -r "${tmpdir}";fi }
 trap 'exit 1' INT HUP QUIT TERM USR1
@@ -49,17 +49,16 @@ hlp(){
 }
 
 if [ -z "${1}" ];then hlp;exit;fi
-while true;do
-	case "${1}" in
-		-1) mode="packages";shift;;
-		-2) mode="portage";shift;;
-		-3) mode="portage_local";shift;;
-		-4) mode="portage_etc";shift;;
-		-5) mode="portage_world";shift;;
-		-6) mode="layman";shift;;
-		-a) mode="all";shift;;
-		-h) hlp;exit;;
-		*) break;;
+while getopts "123456ah" OPT;do
+	case "$OPT" in
+		1) mode="packages";;
+		2) mode="portage";;
+		3) mode="portage_local";;
+		4) mode="portage_etc";;
+		5) mode="portage_world";;
+		6) mode="layman";;
+		a) mode="all";;
+		h) hlp;exit;;
 	esac
 done
 

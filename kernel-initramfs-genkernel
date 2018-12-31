@@ -1,6 +1,6 @@
 #!/bin/sh
-#2.0.1
-#2018-12-08
+#2.1.0
+#2018-12-30
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -24,19 +24,19 @@ logfile="/dev/null"
 comp="lz4"
 loglevel="1"
 
-while true;do
-	case "${1}" in
-		-v) logfile="/tmp/genkernel-initgen.log";shift;;
-		-l) comp="lz4";shift;;
-		-x) comp="xz";export XZ_OPT="-9e";shift;;
-		-L)
+while getopts "vlxLh" OPT;do
+	case "$OPT" in
+		v) logfile="/tmp/genkernel-initgen.log";shift;;
+		l) comp="lz4";shift;;
+		x) comp="xz";export XZ_OPT="-9e";shift;;
+		L)
 			if [ -n "${2}" ] && [ ${2} -ge "1" ] && [ "${2}" -le "5"  ] ;then
 				loglevel="${2}"
 			else
 				printf "loglevel not within bounds, using default value\n"
 			fi
-			shift;shift;;
-		-h)
+			shift;;
+		h)
 			printf "GENERAL\n"
 			printf " -h\tprint this help\n"
 			printf " -L #\tset loglevel 1-5 [default : 1]\n"
@@ -45,7 +45,6 @@ while true;do
 			printf " -l\tcompress initramfs using : lz4 [default]\n"
 			printf " -x\tcompress initramfs using : xz \n"
 			exit;;
-		*) break;;
 	esac
 done
 

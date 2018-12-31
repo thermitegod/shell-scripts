@@ -1,6 +1,6 @@
 #!/bin/sh
-#2.3.1
-#2018-12-08
+#2.4.0
+#2018-12-30
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -30,13 +30,12 @@ hlp(){
 }
 
 if [ -z "${1}" ];then hlp;exit;fi
-while true;do
-	case "${1}" in
-		-a) mode="aud";shift;;
-		-s) mode="sub";shift;;
-		-v) mode="vid";shift;;
-		-h) hlp;exit;;
-		*) break;;
+while getopts "asvh" OPT;do
+	case "$OPT" in
+		a) mode="aud";;
+		s) mode="sub";;
+		v) mode="vid";;
+		h) hlp;exit;;
 	esac
 done
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-#2.1.1
-#2018-12-08
+#2.2.0
+#2018-12-30
 #req bash
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
@@ -19,14 +19,13 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 mode="single"
-while true;do
-	case "${1}" in
-		-b) mode="batch";shift;;
+while getopts "bh" OPT;do
+	case "$OPT" in
+		-b) mode="batch";;
 		-h)
 			printf " -b\tBatch mode\n"
 			printf " -h\tPrint this help\n"
 			exit;;
-		*) break;;
 	esac
 done
 

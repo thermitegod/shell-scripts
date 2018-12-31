@@ -1,6 +1,6 @@
 #!/bin/sh
-#4.8.2
-#2018-12-08
+#4.9.0
+#2018-12-30
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -20,15 +20,14 @@
 mimecheck="1"
 V="0"
 mode="${0##*/}"
-
-while true;do
-	case "${1}" in
-		-v) V="1";shift;;
-		-m) mimecheck="0";shift;;
-		-j) mode="optimize-jpg";shift;;
-		-p) mode="optimize-png";shift;;
-		-g) mode="optimize-gif";shift;;
-		-h)
+while getopts "vmjpgh" OPT;do
+	case "$OPT" in
+		v) V="1";;
+		m) mimecheck="0";;
+		j) mode="optimize-jpg";;
+		p) mode="optimize-png";;
+		g) mode="optimize-gif";;
+		h)
 			printf "MODE=${mode}\n"
 			printf " -g\tforce mode=gif\n"
 			printf " -h\tprint this help\n"
@@ -37,7 +36,6 @@ while true;do
 			printf " -p\tforce mode=png\n"
 			printf " -v\tPrint change in dir size\n"
 			exit;;
-		*) break;;
 	esac
 done
 

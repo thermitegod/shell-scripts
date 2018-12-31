@@ -1,6 +1,6 @@
 #!/bin/sh
-#5.1.0
-#2018-12-27
+#5.2.0
+#2018-12-30
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -43,19 +43,18 @@ case "${mode}" in
 	mkgz) C="gzip";E="gz";;
 	mkxz) export XZ_OPT="-e9";C="xz";E="xz";;
 esac
-
-while true;do
-	case "${1}" in
-		-B) C="bzip2";E="bz2";shift;;
-		-G) C="gzip";E="gz";shift;;
-		-X) C="xz";E="xz";shift;;
-		-d) comp_dir="1";shift;;
-		-f) comp_files="1";shift;;
-		-s) orig_rm="1";shift;;
-		-S) comp_status="1";shift;;
-		-x) comp_dir="1";orig_rm="1";shift;;
-		-z) comp_files="1";orig_rm="1";shift;;
-		-h)
+while getopts "BGXSdfsxzh" OPT;do
+	case "$OPT" in
+		B) C="bzip2";E="bz2";;
+		G) C="gzip";E="gz";;
+		X) C="xz";E="xz";;
+		d) comp_dir="1";;
+		f) comp_files="1";;
+		s) orig_rm="1";;
+		S) comp_status="1";;
+		x) comp_dir="1";orig_rm="1";;
+		z) comp_files="1";orig_rm="1";;
+		h)
 			printf "CURRENT ${C}\n\n"
 			printf " default will compress files passed in \$1\n"
 			printf " -d\tcompress all directories\n"
@@ -70,9 +69,9 @@ while true;do
 			printf " -G\tuse gzip\n"
 			printf " -X\tuse xz\n"
 			exit;;
-		*) break;;
 	esac
 done
+shift $((OPTIND - 1))
 
 if [ -z "${C}" ] || [ -z "${E}" ];then printf "No compresion format set\n";exit 1;fi
 

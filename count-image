@@ -1,6 +1,6 @@
 #!/bin/sh
-#5.2.1
-#2018-12-08
+#5.3.0
+#2018-12-30
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -41,18 +41,15 @@ if [ -n "${1}" ];then D="${1}";else D=".";fi
 
 count="0"
 list="0"
-
-while true;do
-	case "${1}" in
-		-l) list="1";shift;;
-		-h)
+while getopts "lh" OPT;do
+	case "$OPT" in
+		l) list="1";;
+		h)
 			printf "MODE  : %s\n" "${mode}"
 			printf "TYPES : %s\n" "${type}"
 			printf " -h\tprint this help\n"
 			if [ "${mode}" = "archive" ];then printf " -l\tlist found archives\n";fi
 			exit;;
-		--) break;;
-		*) break;;
 	esac
 done
 
