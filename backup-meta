@@ -1,8 +1,8 @@
 #!/bin/sh
-#1.9.0
-#2018-11-07
+#2.0.0
+#2018-01-06
 
-#Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
+#Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
 #This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -26,80 +26,120 @@ date=$(date "+%F-%H%M")
 user="brandon"
 group="${user}"
 backup_dir="/mnt/data/backup"
+comp="zstd"
+V=""
 
 dir_check(){ if ! [ -d "${target_dest}" ];then mkdir -p "${target_dest}";fi }
 move_finish(){
-	chown -R "${user}:${group}" "${tmpdir}"
-	mv -iv "${tmpdir}/${target_xz}" "${target_dest}"
+	chown "${user}:${group}" "${tmpdir}/${target_zst}"
+	mv -iv "${tmpdir}/${target_zst}" "${target_dest}"
 }
 
-mode="${0##*/}"
+hlp(){
+	printf "\nGENERAL\n"
+	printf " -h\tprint this help\n"
+	printf " -v\tverbose\n"
+	printf " -x\tuse xz\n"
+	printf " -z\tuse zstd\n"
+	printf "\nCOMPRESS\n"
+	printf " -1\tchromium\n"
+	printf " -2\tuser-bin\n"
+	printf " -3\tuser-config\n"
+	printf " -4\tuser-local\n"
+	printf " -5\tetc\n"
+	printf " -6\tvnstat\n"
+}
+
+mode="${0##*/backup-}"
+while getopts "123456hvxz" OPT;do
+	case "$OPT" in
+		1) mode="chromium";;
+		2) mode="user-bin";;
+		3) mode="user-config";;
+		4) mode="user-local";;
+		5) mode="etc";;
+		6) mode="vnstat";;
+		v) V="v";;
+		x) comp="xz";;
+		z) comp="zstd";;
+		h) hlp;exit;;
+	esac
+done
+
+case "${comp}" in
+	zstd) C="zstd";E="zst";;
+	xz) export XZ_OPT="-e9";C="xz";E="xz";;
+esac
+
 case "${mode}" in
-	backup-chromium)
+	chromium)
 		target_source="${HOME}/.config/chrome"
-		target_dest="${backup_dir}/${user}/chromium-profile/${date}"
+		target_dest="${backup_dir}/${user}/chromium-profiles/${date}"
 		dir_check
 		cd "${target_source}"
 		for f in *chrom*;do
-			target_xz="${date}-${user}-${f}.tar.xz"
-			XZ_OPT="-e9" tar \
+			if ! [ -d "${f}" ];then return;fi
+			target_zst="${date}-${user}-${f}.tar.${E}"
+			tar \
 				--exclude="${f}/Default/File System" \
-				--xattrs -cJpvf "${tmpdir}/${target_xz}" "${f}"
+				--xattrs --sparse -${V}cf - "${f}" -P | "$C" >| "${tmpdir}/${target_zst}"
 			move_finish
 		done
 		;;
-	backup-user-config)
-		target_xz="${user}-config-${date}.tar.xz"
+	user-config)
+		target_zst="${user}-config-${date}.tar.${E}"
 		target_source="${HOME}/.config"
 		target_dest="${backup_dir}/${user}/config"
 		dir_check
-		XZ_OPT="-e9" tar \
-			--exclude="${target_source}/*chromium*" \
+		tar \
+			--exclude="${target_source}/*chrom*" \
 			--exclude="${target_source}/rtorrent/session/*" \
+			--exclude="${target_source}/transmission/resume/*" \
+			--exclude="${target_source}/transmission/torrents/*" \
 			--exclude="${target_source}/kernel/src/*" \
 			--exclude="${target_source}/kernel/distfiles/*" \
-			--xattrs -cJpvf "${tmpdir}/${target_xz}" "${target_source}"
+			--xattrs --sparse -${V}cf - "${target_source}" -P | "$C" >| "${tmpdir}/${target_zst}"
 		;;
-	backup-user-local)
-		target_xz="${user}-local-${date}.tar.xz"
+	user-local)
+		target_zst="${user}-local-${date}.tar.${E}"
 		target_source="${HOME}/.local"
 		target_dest="${backup_dir}/${user}/local"
 		dir_check
-		XZ_OPT="-e9" tar \
+		tar \
 			--exclude="${target_source}/share/Trash/*" \
-			--xattrs -cJpvf "${tmpdir}/${target_xz}" "${target_source}"
+			--xattrs --sparse -${V}cf - "${target_source}" -P | "$C" >| "${tmpdir}/${target_zst}"
 		move_finish
 		;;
-	backup-etc)
-		target_xz="etc-${date}.tar.xz"
+	etc)
+		target_zst="etc-${date}.tar.${E}"
 		target_source="/etc"
 		target_dest="${backup_dir}/etc"
 		dir_check
-		XZ_OPT="-e9" tar \
-			--xattrs -cJpvf "${tmpdir}/${target_xz}" "${target_source}"
+		tar \
+			--xattrs --sparse -${V}cf - "${target_source}" -P | "$C" >| "${tmpdir}/${target_zst}"
 		move_finish
 		;;
-	backup-user-bin)
-		target_xz="${date}-${user}-bin.tar.xz"
+	user-bin)
+		target_zst="${date}-${user}-bin.tar.${E}"
 		target_source="${HOME}/.bin"
 		target_dest="${backup_dir}/${user}/bin"
 		dir_check
 		mkdir "${tmpdir}"/bin
 		cp -r "${target_source}" "${tmpdir}/bin"
 		cd "${tmpdir}"
-		XZ_OPT="-e9" tar \
-			--xattrs -cJpvf "${tmpdir}/${target_xz}" ./bin
+		tar \
+			--xattrs --sparse -${V}cf - "${target_source}" -P | "$C" >| "${tmpdir}/${target_zst}"
 		rm -rf "${tmpdir}/bin"
 		move_finish
 		;;
-	backup-vnstat)
+	vnstat)
 		year=$(date "+%Y")
 		month=$(date "+%m")
 		day=$(date "+%d")
-		target_source="${HOME}/.config/vnstat"
+		target_source="${HOME}/.config/vnstat/vnstat.db"
 		target_dest="${backup_dir}/vnstat-database"
-		mkdir -p "${target_dest}/${year}/${month}"
-		cp -r "${target_source}" "${target_dest}/${year}/${month}/${day}"
+		mkdir -p "${target_dest}/${year}/${month}/${day}"
+		cp "${target_source}" "${target_dest}/${year}/${month}/${day}"
 		;;
-	backup-meta) printf "Not run directly\n";exit;;
+	meta) hlp;exit;;
 esac

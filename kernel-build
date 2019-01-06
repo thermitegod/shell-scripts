@@ -1,8 +1,8 @@
 #!/bin/sh
-#2.12.0
-#2018-12-30
+#2.13.0
+#2018-01-06
 
-#Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
+#Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
 #This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -43,7 +43,7 @@
 #moves saved work in tar.xz file to /usr/src/linux
 #builds kernel
 
-die(){ /bin/echo -e "\033[0;31m$*\033[m" >&2 "$@";exit 1; }
+die(){ /bin/echo -e "\033[0;31m$*\033[m";exit 1; }
 if [ "$(id -u)" -ne 0 ];then die "Requires root";fi
 
 finish(){ if [ -d "${tmpdir}" ];then rm --preserve-root -r "${tmpdir}";fi; }
@@ -229,8 +229,8 @@ if [ "${run_zfs_build}" = "1" ];then
 		cd "${tmpdir}/portage/sys-fs/zfs-kmod-${zver}/work/${kmod}-${zver}" || die
 		./copy-builtin "${kdir}" || die
 		cd ..
-		tar --xattrs -cvf - "${kmod}-${zver}" -P | XZ_OPT="-e9" xz >| "zfs-${zver}.tar.xz" #smaller archive, do not question it
-		mv "zfs-${zver}.tar.xz" "${kmod_src}"
+		tar --xattrs -cf - "${kmod}-${zver}" -P | zstd >| "zfs-${zver}.tar.zst" || die "ERROR: did not compress zfs work dir"
+		mv "zfs-${zver}.tar.zst" "${kmod_src}"
 		chown -R "${user}:${group}" "${kmod_src}"
 
 		if [ "${use_modules}" = "0" ];then
@@ -239,7 +239,7 @@ if [ "${run_zfs_build}" = "1" ];then
 		fi
 	else
 		cd "${kmod_src}" || die
-		tar --xattrs -xJf "zfs-${zver}.tar.xz" -C "${tmpdir}"
+		tar --xattrs -I zstd -xf "zfs-${zver}.tar.zst" -C "${tmpdir}" || die "ERROR: cannot extract zfs work dir"
 		cd "${tmpdir}/${kmod}-${zver}" || die
 		./copy-builtin "${kdir}" || die "ERROR: copy-builtin failed"
 	fi

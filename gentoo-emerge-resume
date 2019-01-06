@@ -1,8 +1,8 @@
 #!/bin/sh
-#5.3.0
-#2018-12-30
+#5.5.0
+#2018-01-06
 
-#Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
+#Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
 #This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-die(){ /bin/echo -e "\033[0;31m$*\033[m" >&2 "$@";exit 1; }
+die(){ /bin/echo -e "\033[0;31m$*\033[m";exit 1; }
 finish(){ if [ -d "${tmpdir}" ];then rm --preserve-root -r "${tmpdir}";fi }
 trap 'exit 1' INT HUP QUIT TERM USR1
 trap finish EXIT
@@ -28,20 +28,19 @@ res_specific="0"
 date=$(date "+%F-%s")
 store="/mnt/data/backup/emerge-resume"
 resume="/var/cache/edb/mtimedb"
-mtime_xz="mtimedb-${date}.tar.xz"
+mtime_zst="${date}-mtimedb.zst"
 user="brandon"
 group="${user}"
 
 bac(){
 	if ! [ -d "${store}" ]; then mkdir -p ${store} && chown ${user}:${group} ${store};fi
-	if [ -f "${store}/${mtime_xz}" ]; then rm ${store}/${mtime_xz};fi
+	if [ -f "${store}/${mtime_zst}" ]; then rm ${store}/${mtime_zst};fi
 	cp ${resume} ${tmpdir}
 	cd ${tmpdir}
-	XZ_OPT="-e9" tar --xattrs -cJf ${mtime_xz} mtimedb
-	rm mtimedb
-	mv ${mtime_xz} ${store}
-	chown ${user}:${group} ${store}/${mtime_xz}
-	printf "Finished backup of %s to %s\n" "${mtime_xz}" "${store}"
+	zstd ${mtime_zst}
+	mv ${mtime_zst} ${store}
+	chown ${user}:${group} ${store}/${mtime_zst}
+	printf "Finished backup of %s to %s\n" "${mtime_zst}" "${store}"
 }
 
 res(){
@@ -59,25 +58,11 @@ res(){
 
 	cp ${store}/${mtime_res} ${tmpdir}
 	cd ${tmpdir}
-	tar --xattrs -xJf ${mtime_res}
+	unzstd -d ${mtime_res}
+	printf " -h\tprint this help\n"
 	mv mtimedb ${resume}
 	rm ${mtime_res}
 	printf "Finished restore of %s to %s\n" "${mtime_res}" "${resume}"
-}
-
-list(){
-	if ! [ -d "${store}" ]; then die "Run a backup first. Exiting.";fi
-	printf "Listing files in : ${store}\n"
-	ls -1A ${store}
-}
-
-del(){
-	if [ -d "${store}" ]; then
-		rm -rf ${store}
-		printf "Deleted ${store}\n"
-	else
-		printf "Nothing to delete\n"
-	fi
 }
 
 hlp(){
@@ -96,8 +81,18 @@ while getopts "brsldh" OPT;do
 		#r) res;;
 		r) die "Disabled, use -s";;
 		s) res_specific="1";res;;
-		l) list;;
-		d) del;;
+		l)
+			if ! [ -d "${store}" ]; then die "Run a backup first. Exiting.";fi
+			printf "Listing files in : ${store}\n"
+			ls -1A ${store}
+			;;
+		d)
+			if [ -d "${store}" ]; then
+				rm -rfv "${store}" || die
+			else
+				printf "Nothing to delete\n"
+			fi
+			;;
 		h) hlp;exit;;
 	esac
 done
