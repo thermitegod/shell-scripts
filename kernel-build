@@ -1,5 +1,5 @@
 #!/bin/sh
-#2.13.0
+#2.13.1
 #2018-01-06
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
@@ -229,7 +229,7 @@ if [ "${run_zfs_build}" = "1" ];then
 		cd "${tmpdir}/portage/sys-fs/zfs-kmod-${zver}/work/${kmod}-${zver}" || die
 		./copy-builtin "${kdir}" || die
 		cd ..
-		tar --xattrs -cf - "${kmod}-${zver}" -P | zstd >| "zfs-${zver}.tar.zst" || die "ERROR: did not compress zfs work dir"
+		tar --xattrs -cf - "${kmod}-${zver}" -P | zstd -T0 >| "zfs-${zver}.tar.zst" || die "ERROR: did not compress zfs work dir"
 		mv "zfs-${zver}.tar.zst" "${kmod_src}"
 		chown -R "${user}:${group}" "${kmod_src}"
 

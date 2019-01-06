@@ -1,5 +1,5 @@
 #!/bin/sh
-#4.7.0
+#4.7.1
 #2018-01-06
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
@@ -26,19 +26,21 @@ finish() { if [ -d "${tmpdir}" ];then rm --preserve-root -r "${tmpdir}";fi }
 trap 'exit 1' INT HUP QUIT TERM USR1
 trap finish EXIT
 tmpdir=$(mktemp -d)
+chmod 755 "$tmpdir"
 
 date=$(date +%F-%H%M)
 user="brandon"
 group="${user}"
 data="/mnt/data/backup/gentoo"
 mode="z"
+comp="zstd"
 v=""
 
 comp(){
 	target_zst="${date}-${name}.tar.${E}"
 	target_dest="${data}/${name}"
 	if ! [ -d "${target_dest}" ];then mkdir -p "${target_dest}";fi
-	tar --exclude="${target_dir}/.git" --exclude="${target_dir}/*/.git" --xattrs --sparse -${V}cf - "${target_dir}" -P | "$C" >| "${tmpdir}/${target_zst}"
+	tar --xattrs --sparse -${V}cf - "${target_dir}" -P | "$C" "$A" >| "${tmpdir}/${target_zst}"
 	chown -R "${user}:${group}" "${tmpdir}"
 	mv -i "${tmpdir}/${target_zst}" "${target_dest}"
 }
@@ -73,14 +75,14 @@ while getopts "1234ahvxz" OPT;do
 done
 
 case "${comp}" in
-	zstd) C="zstd";E="zst";;
-	xz) export XZ_OPT="-e9";C="xz";E="xz";;
+	zstd) C="zstd";A="-T0";E="zst";;
+	xz) C="xz";A="-e9";E="xz";;
 esac
 
 case ${mode} in
 	packages)
 		target_dest="${data}/packages"
-		dir_check
+		if ! [ -d "${target_dest}" ];then mkdir -p "${target_dest}";fi
 		work="${tmpdir}/packages-${date}"
 		mkdir "${work}"
 		export PKGDIR="${work}"
@@ -104,9 +106,9 @@ case ${mode} in
 		comp
 		;;
 	all)
-		"${0}" -2 &
-		"${0}" -3 &
-		"${0}" -4 &
-		"${0}" -1
+		"$0" -2 &
+		"$0" -3 &
+		"$0" -4 &
+		"$0" -1
 		;;
 esac

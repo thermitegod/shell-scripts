@@ -1,5 +1,5 @@
 #!/bin/sh
-#2.0.0
+#2.0.1
 #2018-01-06
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
@@ -67,8 +67,8 @@ while getopts "123456hvxz" OPT;do
 done
 
 case "${comp}" in
-	zstd) C="zstd";E="zst";;
-	xz) export XZ_OPT="-e9";C="xz";E="xz";;
+	zstd) C="zstd";A="-T0";E="zst";;
+	xz) C="xz";A="-e9";E="xz";;
 esac
 
 case "${mode}" in
@@ -78,11 +78,10 @@ case "${mode}" in
 		dir_check
 		cd "${target_source}"
 		for f in *chrom*;do
-			if ! [ -d "${f}" ];then return;fi
 			target_zst="${date}-${user}-${f}.tar.${E}"
 			tar \
 				--exclude="${f}/Default/File System" \
-				--xattrs --sparse -${V}cf - "${f}" -P | "$C" >| "${tmpdir}/${target_zst}"
+				--xattrs --sparse -${V}cf - "${f}" -P | "$C" "$A" >| "${tmpdir}/${target_zst}"
 			move_finish
 		done
 		;;
@@ -98,7 +97,7 @@ case "${mode}" in
 			--exclude="${target_source}/transmission/torrents/*" \
 			--exclude="${target_source}/kernel/src/*" \
 			--exclude="${target_source}/kernel/distfiles/*" \
-			--xattrs --sparse -${V}cf - "${target_source}" -P | "$C" >| "${tmpdir}/${target_zst}"
+			--xattrs --sparse -${V}cf - "${target_source}" -P | "$C" "$A" >| "${tmpdir}/${target_zst}"
 		;;
 	user-local)
 		target_zst="${user}-local-${date}.tar.${E}"
@@ -107,7 +106,7 @@ case "${mode}" in
 		dir_check
 		tar \
 			--exclude="${target_source}/share/Trash/*" \
-			--xattrs --sparse -${V}cf - "${target_source}" -P | "$C" >| "${tmpdir}/${target_zst}"
+			--xattrs --sparse -${V}cf - "${target_source}" -P | "$C" "$A" >| "${tmpdir}/${target_zst}"
 		move_finish
 		;;
 	etc)
@@ -116,7 +115,7 @@ case "${mode}" in
 		target_dest="${backup_dir}/etc"
 		dir_check
 		tar \
-			--xattrs --sparse -${V}cf - "${target_source}" -P | "$C" >| "${tmpdir}/${target_zst}"
+			--xattrs --sparse -${V}cf - "${target_source}" -P | "$C" "$A" >| "${tmpdir}/${target_zst}"
 		move_finish
 		;;
 	user-bin)
@@ -128,7 +127,7 @@ case "${mode}" in
 		cp -r "${target_source}" "${tmpdir}/bin"
 		cd "${tmpdir}"
 		tar \
-			--xattrs --sparse -${V}cf - "${target_source}" -P | "$C" >| "${tmpdir}/${target_zst}"
+			--xattrs --sparse -${V}cf - "${target_source}" -P | "$C" "$A" >| "${tmpdir}/${target_zst}"
 		rm -rf "${tmpdir}/bin"
 		move_finish
 		;;
