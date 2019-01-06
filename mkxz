@@ -1,8 +1,8 @@
 #!/bin/sh
-#5.2.0
-#2018-12-30
+#5.3.0
+#2018-01-05
 
-#Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
+#Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
 #This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -16,11 +16,6 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-comp_dir="0"
-comp_files="0"
-orig_rm="0"
-comp_status="0"
 
 compress(){
 	if [ -d "${f}" ];then
@@ -36,18 +31,19 @@ compress(){
 	if [ "${comp_rm}" = "1" ];then rm -r "${f%%}";fi
 }
 
+comp_dir="0"
+comp_files="0"
+orig_rm="0"
+comp_status="0"
 mode="${0##*/}"
 
-case "${mode}" in
-	mkbz2) C="bzip2";E="bz2";;
-	mkgz) C="gzip";E="gz";;
-	mkxz) export XZ_OPT="-e9";C="xz";E="xz";;
-esac
-while getopts "BGXSdfsxzh" OPT;do
+while getopts "BGXSLZdfsxzh" OPT;do
 	case "$OPT" in
-		B) C="bzip2";E="bz2";;
-		G) C="gzip";E="gz";;
-		X) C="xz";E="xz";;
+		B) mode="mkbz2";;
+		G) mode="mkgz";;
+		L) mode="mklz4";;
+		X) mode="mkxz";;
+		Z) mode="mkzst";;
 		d) comp_dir="1";;
 		f) comp_files="1";;
 		s) orig_rm="1";;
@@ -55,7 +51,6 @@ while getopts "BGXSdfsxzh" OPT;do
 		x) comp_dir="1";orig_rm="1";;
 		z) comp_files="1";orig_rm="1";;
 		h)
-			printf "CURRENT ${C}\n\n"
 			printf " default will compress files passed in \$1\n"
 			printf " -d\tcompress all directories\n"
 			printf " -f\tcompress all files\n"
@@ -64,14 +59,24 @@ while getopts "BGXSdfsxzh" OPT;do
 			printf " -S\tenable cool status bar, directories only\n"
 			printf " -x\tcompress all files, delete original after compressed\n"
 			printf " -z\tcompress all directories, delete original after compressed\n"
-			printf "\nMODES\n"
+			printf "\nForce MODES\n"
 			printf " -B\tuse bzip2\n"
 			printf " -G\tuse gzip\n"
+			printf " -L\tuse lz4\n"
 			printf " -X\tuse xz\n"
+			printf " -Z\tuse zstd\n"
 			exit;;
 	esac
 done
 shift $((OPTIND - 1))
+
+case "${mode}" in
+	mkbz2) C="bzip2";E="bz2";;
+	mkzst) C="zstd";E="zst";;
+	mklz4) C="lz4";E="lz4";;
+	mkgz) C="gzip";E="gz";;
+	mkxz) export XZ_OPT="-e9";C="xz";E="xz";;
+esac
 
 if [ -z "${C}" ] || [ -z "${E}" ];then printf "No compresion format set\n";exit 1;fi
 
