@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-#2.2.0
-#2018-12-30
+#2.2.1
+#2018-01-05
 #req bash
 
-#Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
+#Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
 #This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -21,8 +21,8 @@
 mode="single"
 while getopts "bh" OPT;do
 	case "$OPT" in
-		-b) mode="batch";;
-		-h)
+		b) mode="batch";;
+		h)
 			printf " -b\tBatch mode\n"
 			printf " -h\tPrint this help\n"
 			exit;;

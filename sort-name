@@ -1,8 +1,8 @@
 #!/bin/sh
-#5.1.0
-#2018-12-30
+#5.1.1
+#2019-01-05
 
-#Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
+#Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
 #This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -55,13 +55,13 @@ name_sort(){
 if ! [ -f "${list_sort}" ];then printf "missing: ${name_list}\nformat, line 1 must be save path:\n/path/to/save\nto-sort\nto-sort override\n";exit 1;fi
 while getopts "ETeftdh" OPT;do
 	case "$OPT" in
-		-f) list_sort="${list_final}";dest="${dest_final}";;
-		-t) list_sort="${list_type}";dest="${dest_type}";;
-		-d) debug="1";;
-		-T) dest="/tmp/test";;
-		-E) $EDITOR "${list_final}";exit;;
-		-e) $EDITOR "${list_type}";exit;;
-		-h)
+		f) list_sort="${list_final}";dest="${dest_final}";;
+		t) list_sort="${list_type}";dest="${dest_type}";;
+		d) debug="1";;
+		T) dest="/tmp/test";;
+		E) $EDITOR "${list_final}";exit;;
+		e) $EDITOR "${list_type}";exit;;
+		h)
 			printf " -d\tDebug output\n"
 			printf " -h\tPrint this help\n"
 			printf " -T\tUse test dir \"/tmp/test\"\n"
