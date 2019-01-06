@@ -1,8 +1,8 @@
 #!/bin/sh
-#4.1.0
-#2018-12-30
+#4.2.0
+#2018-01-06
 
-#Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
+#Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
 #This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -17,18 +17,19 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+die(){ /bin/echo -e "\033[0;31m$*\033[m";exit 1; }
 finish() { if [ -d "${tmpdir}" ];then rm --preserve-root -r "${tmpdir}";fi }
 trap 'exit 1' INT HUP QUIT TERM USR1
 trap finish EXIT
 tmpdir=$(mktemp -d)
 chmod 755 "${tmpdir}"
-mode="single"
 
 hlp(){
 	printf " -B\tBatch mode\n"
 	printf " -h\tPrint this help\n"
 	printf " -i\tInclude iso files\n"
 }
+
 while getopts "Bih" OPT;do
 	case "$OPT" in
 		B) find . -maxdepth 1 -type d \( ! -name . \) -exec dash -c 'cd "{}" && ${0}' \;exit;;
@@ -37,26 +38,28 @@ while getopts "Bih" OPT;do
 	esac
 done
 
-#printf "Tmpdir: %s\n" "${tmpdir}"
-O="${PWD}/original"
-if ! [ -d "${O}" ];then mkdir "${O}";fi
+printf "Tmpdir: %s\n" "${tmpdir}"
+O="${PWD%%}/original"
+if ! [ -d "$O" ];then mkdir -p -- "$O";fi
 
 for f in *;do
 	mimetype=$(file -b --mime-type "${f%%}")
 	ext="${f##*.}"
 	if [ -f "${f%%}" ] && [ "${mimetype%%/*}" = "video" ] && ! [ "${ext}" = "mkv" ];then
 
+
 		if [ "${inc_iso}" = "1" ] && [ -f "${f%.*}.${iso}" ];then
-			find . -iname '*.iso' -exec 7z x -- '{}' \;
+			find . -iname '*.iso' -exec 7z x -- "{}" \;
 			cd ./VIDEO_TS
 		fi
 
-		ffmpeg -hide_banner -i "${f}" -c:a copy -c:v copy -c:s copy "${tmpdir}/${f%.*}.mkv"
-		mv "${tmpdir}/${f%.*}.mkv" "${PWD}"
-		mv "${f}" "${O}"
+		ffmpeg -hide_banner -i "${f}" -c:a copy -c:v copy -c:s copy "${tmpdir}/${f%%.*}.mkv" || die "ERROR: conversion failed for ${f%%}"
 
-		if [ "${inc_iso}" = "1" ] && [ -f "${f%.*}.${iso}" ];then mv *.mkv ../;fi
+		mv -i "${tmpdir}/${f%%.*}.mkv" "${PWD}" || die "ERROR: cannot move ${tmpdir}/${f%%.*}.mkv to ${PWD}"
+		mv -i "${f}" "${O}" || die "ERROR: cannot move ${PWD}/${f%%} to ${O}"
+
+		if [ "${inc_iso}" = "1" ] && [ -f "${f%%.*}.${iso}" ];then mv -i *.mkv ../;fi
 	fi
 done
 
-if [ -d "${O}" ] && ! [ "$(ls -A $O)" ];then rm -rf "${O}";fi
+if [ -d "${O}" ] && ! [ "$(ls -A "$O")" ];then rm -rf "$O";fi
