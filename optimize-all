@@ -1,1 +1,66 @@
-optimize-jpg
+#!/bin/sh
+#4.9.0
+#2018-12-30
+
+#Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
+#
+#This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+mimecheck="1"
+V="0"
+mode="${0##*/}"
+while getopts "vmjpgh" OPT;do
+	case "$OPT" in
+		v) V="1";;
+		m) mimecheck="0";;
+		j) mode="optimize-jpg";;
+		p) mode="optimize-png";;
+		g) mode="optimize-gif";;
+		h)
+			printf "MODE=${mode}\n"
+			printf " -g\tforce mode=gif\n"
+			printf " -h\tprint this help\n"
+			printf " -j\tforce mode=jpg\n"
+			printf " -m\tdisanle mime check\n"
+			printf " -p\tforce mode=png\n"
+			printf " -v\tPrint change in dir size\n"
+			exit;;
+	esac
+done
+
+if [ "${mimecheck}" = "1" ];then mime-correct -A;fi
+if [ ${V} = "1" ];then B=$(printf "Before : $(du|tail -n1)\t$(du -h|tail -n1)\n");fi
+
+case "${mode}" in
+	optimize-jpg)
+		find . -type f -iname '*.jp**' -print0 | \
+			nice -19 xargs --max-args=1 --max-procs=$(nproc) --null jpegoptim --strip-all --preserve --preserve-perms
+		;;
+	optimize-png)
+
+		find . -type f -iname '*.png' -print0 | \
+			nice -19 xargs --max-args=1 --max-procs=$(nproc) --null optipng -o7 -strip all -preserve
+		;;
+	optimize-gif)
+		find . -type f -iname '*.gif' -print0 | \
+			nice -19 xargs --max-args=1 --max-procs=$(nproc) --null gifsicle -bO3 -V
+		;;
+	optimize-all)
+		optimize-gif -m
+		optimize-jpg -m
+		optimize-png -m
+		;;
+esac
+
+if [ ${V} = "1" ];then printf "${B}\nAfter  : $(du|tail -n1)\t$(du -h|tail -n1)\n";fi
