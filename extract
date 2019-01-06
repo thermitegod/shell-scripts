@@ -1,29 +1,29 @@
 #!/bin/sh
-#1.4.0
-#2019-01-05
+#1.4.1
+#2019-01-06
 #original unknown
 #modified by, Brandon Zorn, brandonzorn@cock.li
 if [ -f "${1}" ];then
 	case "${1}" in
-		*.tgz|*.tbz2) tar xvf -- "${1}";;
-		*.txz) tar xvJf -- "${1}";;
-		*.tar.bz2) tar xvjf -- "${1}";;
-		*.bz2) bzip2 -dk -- "${1}";;
-		*.tar.gz) tar xvzf -- "${1}";;
-		*.tar.xz) tar xvJf -- "${1}";;
+		*.tgz|*.tbz2) tar xvf "${1}";;
+		*.txz) tar xvJf "${1}";;
+		*.tar.bz2) tar xvjf "${1}";;
+		*.bz2) bzip2 -dk "${1}";;
+		*.tar.gz) tar xvzf "${1}";;
+		*.tar.xz) tar xvJf "${1}";;
 		*.tar.zst) zstd -dc "${1}"|tar xvf -;;
-		*.tar.lz4) lz4 -dc --no-sparse "${1}"|tar xvf -;;
-		*.tar.lzma) tar --lzma xvf -- "${1}";;
-		*.rar) unrar -- "${1}";;
-		*.gz) gunzip -k -- "${1}";;
-		*.xz) unxz -k -- "${1}";;
-		*.zst) unzstd -d -- "${1}";;
-		*.tar) tar xvf -- "${1}";;
-		*.zip) unzip -- "${1}";;
-		*.iso) 7z x -- "${1}";;
-		*.ISO) 7z x -- "${1}";;
-		*.7z) 7z x -- "${1}";;
-		*.tar.lrz) lrzuntar -- "${1}";;
+		*.tar.lz4) lz4 -dcno-sparse "${1}"|tar xvf -;;
+		*.tar.lzma) tarlzma xvf "${1}";;
+		*.rar) unrar "${1}";;
+		*.gz) gunzip -k "${1}";;
+		*.xz) unxz -k "${1}";;
+		*.zst) unzstd -d "${1}";;
+		*.tar) tar xvf "${1}";;
+		*.zip) unzip "${1}";;
+		*.iso) 7z x "${1}";;
+		*.ISO) 7z x "${1}";;
+		*.7z) 7z x "${1}";;
+		*.tar.lrz) lrzuntar "${1}";;
 		*.cbz) 7z x "${1}" -o"${1}";;
 		*.cbr) 7z x "${1}" -o"${1}";;
 		*) printf "'"${1}"' cannot be extracted via >extract<\n";;
