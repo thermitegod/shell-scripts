@@ -1,8 +1,8 @@
 #!/bin/sh
-#5.7.0
-#2018-12-30
+#5.8.0
+#2018-01-08
 
-#Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
+#Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
 #This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -31,6 +31,7 @@ hlp(){
 	printf " -r\tRestart\n"
 	printf " -s\tStart\n"
 	printf " -u\tUpdate, rename existing with 'old-*' prefix\n"
+	printf " -U\tUpdate, delete existing instead of renaming\n"
 	printf " -z\tStop\n"
 	printf " -Z\tForce stop\n"
 	printf "\nSPECIFIC, no other flags req\n"
@@ -72,9 +73,9 @@ set_dirs(){
 
 	if [ "${get_dirs}" = "1" ];then return;fi
 
-	if ! [ -e "${config}" ];then mkdir -pv "${config}"; fi
-	if ! [ -e "${save}" ];then mkdir -pv "${save}"; fi
-	if ! [ -e "${session}" ];then mkdir -pv "${session}"; fi
+	if ! [ -e "${config}" ];then mkdir -pv "${config}";fi
+	if ! [ -e "${save}" ];then mkdir -pv "${save}";fi
+	if ! [ -e "${session}" ];then mkdir -pv "${session}";fi
 	if ! [ -e "${watch}" ] && [ "${ctype}" = "rutorrent" ];then mkdir -pv "${watch}";fi
 	if ! [ -e "${rushare}" ] && [ "${ctype}" = "rutorrent" ];then mkdir -pv "${rushare}";fi
 
@@ -111,7 +112,7 @@ set_limits(){
 }
 
 remove_devices(){
-	#remove unneeded access to filesystem
+	#removes unneeded access to filesystem on gentoo containers
 	lxc config device remove "${fullname}" distfiles
 	lxc config device remove "${fullname}" packages
 	lxc config device remove "${fullname}" repos
@@ -125,9 +126,17 @@ rtorrent_clean_lock(){
 	get_dirs="0"
 }
 
+get_state(){
+	if [ "$(lxc info ${1}|grep Running)" ];then
+		is_running="1"
+	else
+		is_running="0"
+	fi
+}
+
 main_container(){
 	if [ -n "$(echo ${ctype}|grep '\#')" ];then return;fi #skip comments
-	if [ -n "$(echo ${ctype}|grep 'stop')" ];then exit;fi #exit when 'stop' is read, will be changed
+	if [ -n "$(echo ${ctype}|grep 'stop')" ];then exit;fi #exit when 'stop' is read
 	case "${distro}" in
 		alpine) true;;
 		gentoo) true;;
@@ -137,26 +146,55 @@ main_container(){
 	fullname="${ctype}-${cname}"
 	if [ "${limit}" = "1" ] && ! [ "${limit_to}" = "${ctype}" ];then return;fi
 	case "${act}" in
-		stop) printf "Stopping container: ${fullname}\n";lxc stop "${fullname}" &;;
-		start) printf "Starting container: ${fullname}\n";sleep 1;lxc start "${fullname}" &;;
-		delete) printf "Deleteing container: ${fullname}\n";lxc delete "${fullname}" &;;
-		restart) printf "Restarting container: ${fullname}\n";lxc restart "${fullname}" &;;
-		deleteold) printf "Deleting container: old-${fullname}\n";lxc delete "old-${fullname}" &;;
-		forcestop) printf "Force stopping container: ${fullname}\n";lxc stop --force "${fullname}" &;;
+		stop)
+			get_state "${fullname}"
+			if [ "${is_running}" = "0" ];then return;fi
+			printf "Stopping container: ${fullname}\n";lxc stop "${fullname}" &;;
+		start)
+			get_state "${fullname}"
+			if [ "${is_running}" = "1" ];then return;fi
+			printf "Starting container: ${fullname}\n";sleep 1;lxc start "${fullname}" &;;
+		delete)
+			get_state "${fullname}"
+			if [ "${is_running}" = "1" ];then printf "Must stop before deleting: ${fullname}\n";return;fi
+			printf "Deleteing container: ${fullname}\n";lxc delete "${fullname}" &;;
+		restart)
+			get_state "${fullname}"
+			if [ "${is_running}" = "0" ];then return;fi
+			printf "Restarting container: ${fullname}\n";lxc restart "${fullname}" &;;
+		deleteold)
+			get_state "${fullname}"
+			if [ "${is_running}" = "1" ];then printf "Must stop before deleting: ${fullname}\n";return;fi
+			printf "Deleting container: old-${fullname}\n";lxc delete "old-${fullname}" &;;
+		forcestop)
+			get_state "${fullname}"
+			if [ "${is_running}" = "0" ];then return;fi
+			printf "Force stopping container: ${fullname}\n";lxc stop --force "${fullname}" &;;
 		rt_cleanup_lock) rtorrent_clean_lock;;
 		ru_cleanup)
 			get_dirs="1"
 			set_dirs
 			#if [ $(find ${rushare}/share/torrents -type f -quit) ];then echo n;return;fi
-			rm ${rushare}/torrents/*.torrent
+			rm -v ${rushare}/torrents/*.torrent
 			get_dirs="0"
 			;;
 		update)
+			get_state "${template}"
+			if [ "${is_running}" = "1" ];then
+				printf "Stopping: ${template}\n"
+				lxc stop "${template}"
+				printf "\n\n"
+			fi
+
+
 			printf "Update running for : ${fullname}\n"
 
-			if [ "$(echo ${lxclist}|grep ${fullname})" ];then
+			if [ "$(echo ${lxclist}|grep ${fullname})" ] && [ "${update_keep_old}" = "1" ];then
 				printf "Renaming ${fullname} to old-${fullname}\n"
 				lxc rename "${fullname}" "old-${fullname}"
+			elif [ "$(echo ${lxclist}|grep ${fullname})" ] && [ "${update_keep_old}" = "0" ];then
+				printf "Deleting ${fullname}\n"
+				lxc delete "${fullname}"
 			fi
 
 			printf "Copying ${template} to ${fullname}\n"
@@ -198,6 +236,7 @@ limit="0"
 verbose="0"
 get_dirs="0"
 printonly="0"
+update_keep_old="1"
 
 limit_to="z"
 transmission_port="9091"
@@ -206,7 +245,7 @@ container_info="${extra}/lxd-admin"
 lxclist=$(lxc list)
 
 if [ -z "${1}" ];then hlp;exit;fi
-while getopts "TRCDPZcdrsuzphe" OPT;do
+while getopts "TRCDPZUcdrsuzphe" OPT;do
 	case "${OPT}" in
 		T) limit="1";limit_to="transmission";;
 		R) limit="1";limit_to="rutorrent";;
@@ -217,6 +256,7 @@ while getopts "TRCDPZcdrsuzphe" OPT;do
 		r) act="restart";;
 		s) act="start";;
 		u) act="update";;
+		U) act="update";update_keep_old="0";;
 		z) act="stop";;
 		Z) act="forcestop";;
 		p) act="print";;
