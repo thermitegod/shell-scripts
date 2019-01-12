@@ -1,6 +1,6 @@
 #!/bin/sh
-#5.4.1
-#2019-01-06
+#5.4.2
+#2019-01-08
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -20,31 +20,30 @@
 compress(){
 	if [ -d "${f}" ];then
 		if [ ${comp_status} = "1" ];then
-			tar --xattrs --sparse -${V}cf - "${f%%}" -P | pv -s $(du -sb "${f%%}" | awk '{print $1}') | "$C" >| "${f%%}.tar.${E}"
+			tar --xattrs --sparse -${V}cf - "${f%%}" -P | pv -s $(du -sb "${f%%}" | awk '{print $1}') | "$C" "$A" >| "${f%%}.tar.${E}"
 		else
 			tar --xattrs --sparse -${V}cf - "${f%%}" -P | "$C" "$A" >| "${f%%}.tar.${E}"
 		fi
 	elif [ -f "${f}" ];then
-		"${C}" "${f%%}"
+		"$C" "$A" "${f%%}"
 	fi
 	if [ "${comp_rm}" = "1" ];then rm -r "${f%%}";fi
 }
 
-A=
 V=""
 comp_dir="0"
 comp_files="0"
 orig_rm="0"
 comp_status="0"
-mode="${0##*/}"
+mode="${0##*/mk}"
 
 while getopts "BGXSLZdfsxzvh" OPT;do
 	case "$OPT" in
-		B) mode="mkbz2";;
-		G) mode="mkgz";;
-		L) mode="mklz4";;
-		X) mode="mkxz";;
-		Z) mode="mkzst";;
+		B) mode="bz2";;
+		G) mode="gz";;
+		L) mode="lz4";;
+		X) mode="xz";;
+		Z) mode="zst";;
 		d) comp_dir="1";;
 		f) comp_files="1";;
 		s) orig_rm="1";;
@@ -74,11 +73,11 @@ done
 shift $((OPTIND - 1))
 
 case "${mode}" in
-	mkbz2) C="bzip2";A="-k";E="bz2";;
-	mklz4) C="lz4";A="-k";E="lz4";;
-	mkgz) C="gzip";A="-k";E="gz";;
-	mkxz) C="xz";A="-e9 -k";E="xz";;
-	mkzst) C="zstd";A="-T0";E="zst";;
+	bz2) C="bzip2";A="-k";E="bz2";;
+	lz4) C="lz4";A="-k";E="lz4";;
+	gz) C="gzip";A="-k";E="gz";;
+	xz) C="xz";A="-e9";E="xz";;
+	zst) C="zstd";A="-T0";E="zst";;
 esac
 
 if [ -z "${C}" ] || [ -z "${E}" ];then printf "No compresion format set\n";exit 1;fi

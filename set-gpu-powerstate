@@ -1,8 +1,8 @@
 #!/bin/sh
-#1.0.0
-#2018-12-30
+#1.1.0
+#2018-01-10
 
-#Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
+#Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
 #This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -20,15 +20,19 @@
 if [ "$(id -u)" -ne 0 ];then printf "Requires root, exiting.\n";exit;fi
 state="auto"
 card=/sys/class/drm/card0/device/power_dpm_force_performance_level
-while getopts "aplh" OPT;do
+while getopts "acplh" OPT;do
 	case "$OPT" in
+		c) printf "Current power state is: $(cat $card)\n";exit;;
 		a) state="auto";;
 		p) state="high";;
 		l) state="low";;
 		h)
+			printf "SET STATE\n"
 			printf " -a\tauto\n"
 			printf " -p\thigh\n"
 			printf " -l\tlow\n"
+			printf "GENERAL\n"
+			printf " -c\tget current power state\n"
 			printf " -h\tPrint this help\n"
 			exit;;
 	esac
@@ -36,4 +40,4 @@ done
 
 if [ "$(cat $card)" = "$state" ];then printf "state '$state' is already active\n";exit;fi
 printf "current state is '%s', switching state to '%s'\n" "$(cat $card)" "$state"
-echo "$state" > "$card"
+echo "$state" >| "$card"
