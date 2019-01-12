@@ -1,6 +1,6 @@
 #!/bin/sh
-#2.13.1
-#2018-01-06
+#2.14.0
+#2018-01-11
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -20,27 +20,25 @@
 #ZFS Builtin Kernel Build Script - gentoo
 
 #hard requirments
-#>=linux-4.17.0 : >=zfs-0.8.0 / git | 1.x.x for previous support
+#>=linux-4.17.0 : >=zfs-0.8.0 / git | 1.x.x script for previous support
 
 #storage dirs - need to exist
 #/home/${user}/.config/kernel/{config,distfiles,src}
 
 #assumptions
 #/usr/src/linux is real source or symlink to real source
-#/etc/portage/make.conf uses double quotes
-#PORTDIR PORTDIR_OVERLAY are set in make.conf, PORTAGE_OVERLAY is also only one repo
 #$run_kernel_bump is based om my own config and others CONFIG_* options may be needed based on kenrel config
 
 ###What this script does, basically###
 
 ###if no preconfigured kmod_zfs sources exist###
 #runs configure phase on kmod-zfs ebuild
-#saves work/ to tar.xz file in $kmod_src
+#saves work/ to tar.zst file in $kmod_src
 #installs configured kmod-zfs to /usr/src/linux
 #builds kernel
 
 ###if preconfigured kmod_zfs sources exist###
-#moves saved work in tar.xz file to /usr/src/linux
+#moves saved work in tar.zst file to /usr/src/linux
 #builds kernel
 
 die(){ /bin/echo -e "\033[0;31m$*\033[m";exit 1; }
@@ -58,21 +56,24 @@ cdkdir(){ cd "${kdir}" || die "ERROR: can not cd into kenrel directory"; }
 user="brandon"
 group="${user}"
 storage="/home/${user}/.config/kernel"
-kdir="/usr/src/linux"
+ksym="/usr/src/linux"
+kdir="$(readlink -f ${ksym})"
 use_zfs_version="git"
-intro_extra="0"
 
 run_intro="1"
 run_emerge="1"
 run_zfs_build="1"
-run_kmod_build="0"
 run_kernel_post="1"
 run_kernel_build="1"
 run_kernel_install="1"
+
+intro_extra="0"
+use_distdir="0"
+run_kmod_build="0"
 use_local_zfs_ebuild="0"
 
-if ! [ -e "${kdir}" ];then die "ERROR: ${kdir} is not a valid symlink";fi
-if ! [ -d "${storage}/config" ];then mkdir -p "${storage}/config";fi
+if ! [ -e "${ksym}" ];then die "ERROR: ${ksym} is not a valid symlink";fi
+if ! [ -d "${storage}/{src,distfiles,config}" ];then mkdir -p "${storage}/{src,distfiles,config}";fi
 
 if ! [ -f "${kdir}/.config" ];then
 	if [ -f "/proc/config.gz" ];then
@@ -87,19 +88,19 @@ fi
 
 if [ -n "$(grep CONFIG_MODULES=y ${kdir}/.config)" ];then use_modules="1";else use_modules="0";fi
 
-ksym=$(readlink -f ${kdir}|awk '{print $NF}' FS=/)
-if [ -z $(echo ${ksym}|grep rc) ];then #would match /usr/src/
-	kver=$(echo ${ksym}|awk 'BEGIN{FS=OFS="."} NF--')
-else
-	kver=$(echo ${ksym}|sed s'/.$//')
-fi
+case "$(echo ${kdir##*/}|grep rc)" in
+	*rc*) kver="$(echo ${kdir##*/linux-}|sed s'/.$//')";;
+	*) kver="$(echo ${kdir##*/linux-}|awk 'BEGIN{FS=OFS="."} NF--')";;
+esac
 
 switch_kconf="${storage}/config/${kver}-config"
 if [ -f "${switch_kconf}" ];then run_kernel_bump="0";else run_kernel_bump="1";fi
 
-while getopts "BgrceIimplxzvh" OPT;do
+while getopts "BbdgrceIimplxzvh" OPT;do
 	case "$OPT" in
 		B) run_kernel_bump="1";;
+		b) run_kernel_bump="0";;
+		d) use_distdir="1";;
 		c) run_kmod_build="1";;
 		e) run_emerge="0";;
 		g) use_zfs_version="git";;
@@ -114,12 +115,14 @@ while getopts "BgrceIimplxzvh" OPT;do
 		z) run_zfs_build="1";run_kernel_build="0";run_kernel_post="0";;
 		h)
 			printf "GENERAL\n"
+			printf " -b\tforce run_kernel_bump=0\n"
 			printf " -B\tforce run_kernel_bump=1\n"
 			printf " -h\tprint this help\n"
 			printf " -I\tdisable  intro\n"
 			printf " -v\textra vars in intro\n"
 			printf "\nZFS\n"
 			printf " -c\tbuild kmod even if preconfigured sources exist\n"
+			printf " -d\tuse \$DISTDIR from make.conf\n"
 			printf " -e\tdisable running emerge in post\n"
 			printf " -g\tuse git ebuild\n"
 			printf " -r\tuse release ebuild\n"
@@ -137,37 +140,28 @@ done
 #CONFIG_MODULES and CONFIG_KALLSYMS are required to build kmod
 #which are not needed at runtime if zfs is build into the kernel.
 while [ "${run_kernel_bump}" = "1" ];do
+	if ! [ -f "${switch_kconf}" ];then cp "${kdir}/.config" "${switch_kconf}";fi
 	c1=$(grep -s CONFIG_MODULES=y ${switch_kconf})
 	c2=$(grep -s CONFIG_KALLSYMS=y ${switch_kconf})
 	if [ "${run_zfs_build}" = "1" ] && [ -z "${c1}" ] || [ -z "${c2}" ];then
-		if [ -z "${c1}" ];then b1="NOT ENABLED";else b1="ENABLED";fi
-		if [ -z "${c2}" ];then b2="NOT ENABLED";else b2="ENABLED";fi
-		printf "CONFIG_MODULES : ${b1}\nCONFIG_KALSYMS : ${b2}\n"
-		printf "\nOptions located at:\n"
-		printf "\n[*] Enable loadable module support\n"
-		printf "\nGeneral setup  --->\n"
-		printf "\t[*] Configure standard kernel features (expert users)  --->\n"
-		printf "\t\t[*] Load all symbols for debugging/ksymoops\n\n"
+		printf "\nRequired option[s] located at:\n"
+		if [ -z "${c1}" ];then printf "\n[*] Enable loadable module support\n";fi
+		if [ -z "${c2}" ];then printf "\nGeneral setup  --->\n\t[*] Configure standard kernel features (expert users)  --->\n\t\t[*] Load all symbols for debugging/ksymoops\n\n";fi
 		printf "Enter to config switch config : "
 		read z;unset z
 		if [ -f "${switch_kconf}" ];then rm "${switch_kconf}";fi
 		cdkdir
-		cp .config "${tmpdir}"
 		make nconfig
-		mv .config "${switch_kconf}"
+		cp .config "${switch_kconf}"
 		chown "${user}:${group}" "${switch_kconf}"
-		mv "${tmpdir}/.config" .
 	else break
 	fi
 done
 
-if [ "${use_local_zfs_ebuild}" = "0" ];then
-	port=$(grep PORTDIR= /etc/portage/make.conf|sed 's/PORTDIR=//g;s/"//g')
-else
-	port=$(grep PORTDIR_OVERLAY= /etc/portage/make.conf|sed 's/PORTDIR_OVERLAY=//g;s/"//g')
-	if ! [ -d "${port}/sys-fs/zfs" ];then die "ERROR: missing directory ${port}/sys-fs/zfs";fi
-	if ! [ -d "${port}/sys-fs/zfs-kmod" ];then die "ERROR: missing directory ${port}/sys-fs/zfs-kmod";fi
-fi
+case "${use_local_zfs_ebuild}" in
+	0) port="$(grep location /etc/portage/repos.conf/gentoo.conf|awk '{print $3}')";;
+	1) port="$(grep location /etc/portage/repos.conf/local.conf|awk '{print $3}')";;
+esac
 
 case "${use_zfs_version}" in
 	git)
@@ -179,24 +173,27 @@ case "${use_zfs_version}" in
 		zver=$(echo ${Z%%.ebuild}|awk '{print $NF}' FS=-) #clean up filename
 		unset Z
 		kmod="zfs" #build path
-		export DISTDIR="${storage}/distfiles" #keep sources on dist-clean, but have to manually remove old
+		if [ "${use_distdir}" = "0" ];then export DISTDIR="${storage}/distfiles";fi #keep sources on dist-clean
 		;;
 esac
 
+if ! [ -d "${port}/sys-fs/zfs" ];then die "ERROR: missing directory ${port}/sys-fs/zfs";fi
+if ! [ -d "${port}/sys-fs/zfs-kmod" ];then die "ERROR: missing directory ${port}/sys-fs/zfs-kmod";fi
 if ! [ -f "${port}/sys-fs/zfs/zfs-${zver}.ebuild" ];then die "ERROR: missing zfs-${zver}.ebuild";fi
 if ! [ -f "${port}/sys-fs/zfs-kmod/zfs-kmod-${zver}.ebuild" ];then die "ERROR: missing zfs-kmod-${zver}.ebuild";fi
 
 kmod_src="${storage}/src/${kver}/${zver}"
-if ! [ -d "${kmod_src}" ];then run_kmod_build="1";fi #need to build if configured src do not exists
+if ! [ -d "${kmod_src}" ] && [ "${run_zfs_build}" = "1" ];then run_kmod_build="1";fi #need to build if configured src do not exists
 
 if [ "${run_intro}" = "1" ];then
 	printf "\n"
-	printf "kernel             : ${ksym}\n"
+	printf "kernel             : ${kdir}\n"
 	printf "Install Kernel     : ${run_kernel_install}\n"
 	printf "ZFS version        : ${zver}\n"
 	printf "ZFS local ebuild   : ${use_local_zfs_ebuild}\n"
 	printf "Configure kmod     : ${run_kmod_build}\n"
 	printf "Enable modules     : ${use_modules}\n"
+	printf "Running emerge     : ${run_emerge}\n"
 	if [ "${intro_extra}" = "1" ];then
 		printf "\nEXTRA\n"
 		printf "Make opts          : $(($(nproc)+1))\n"
@@ -229,7 +226,7 @@ if [ "${run_zfs_build}" = "1" ];then
 		cd "${tmpdir}/portage/sys-fs/zfs-kmod-${zver}/work/${kmod}-${zver}" || die
 		./copy-builtin "${kdir}" || die
 		cd ..
-		tar --xattrs -cf - "${kmod}-${zver}" -P | zstd -T0 >| "zfs-${zver}.tar.zst" || die "ERROR: did not compress zfs work dir"
+		tar -cf - "${kmod}-${zver}" -P | zstd -T0 >| "zfs-${zver}.tar.zst" || die "ERROR: did not compress zfs work dir"
 		mv "zfs-${zver}.tar.zst" "${kmod_src}"
 		chown -R "${user}:${group}" "${kmod_src}"
 
@@ -239,11 +236,10 @@ if [ "${run_zfs_build}" = "1" ];then
 		fi
 	else
 		cd "${kmod_src}" || die
-		tar --xattrs -I zstd -xf "zfs-${zver}.tar.zst" -C "${tmpdir}" || die "ERROR: cannot extract zfs work dir"
+		tar -xf -I zstd "zfs-${zver}.tar.zst" -C "${tmpdir}" || die "ERROR: cannot extract zfs work dir"
 		cd "${tmpdir}/${kmod}-${zver}" || die
 		./copy-builtin "${kdir}" || die "ERROR: copy-builtin failed"
 	fi
-
 fi
 
 if [ "${run_kernel_build}" = "1" ];then
