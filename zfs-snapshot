@@ -1,8 +1,8 @@
 #!/bin/sh
-#2.7.0
-#2018-10-19
+#2.8.0
+#2018-01-12
 
-#Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
+#Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
 #This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 hlp(){
-	printf "HELP\n"
+	printf "GENERAL\n"
 	printf " -h\tprint this help\n"
 	printf " -l\tprint snapshots of zroot/ROOT/gentoo\n"
 	printf " -L\tprint all snapshots\n"
@@ -31,17 +31,17 @@ hlp(){
 	printf " -m4\tSnapshot: ssd-mirror/KVM\n"
 	printf " -m5\tSnapshot: torrents/\n"
 	printf " -m6\tSnapshot: zroot/CACHE/torrents\n"
+	printf "\nBACKUP\n"
+	printf " -B\texport snapshot passed in \$1\n"
 	printf "\nCREATION\n"
 	printf "zfs create -o mountpoint=/mnt pool/dataset\n"
-	printf "zfs set compression=gzip-9 pool/dataset\n"
-	printf "\nBACKUP\n"
-	printf "zfs send pool/dataset@snapshot | gzip >| /tmp/backup.gz\n"
-	printf "gunzip -c -d backup.gz | zfs receive pool/newdataset\n"
 	printf "\nMISC\n"
-	printf "zfs set mountpoint=/newmount pool/dataset\n"
+	printf "zfs send pool/dataset@snapshot | zstd >| /tmp/backup.zst\n"
+	printf "unzstd -c backup.zst | zfs receive pool/newdataset\n\n"
+	printf "zfs set mountpoint=/newmount pool/dataset\n\n"
 	printf "zfs snapshot -r zroot/ROOT/gentoo@<type>-<date>\n"
-	printf "zfs rollback -r <snapshot>\n"
-	printf "zfs destroy <snapshot@snapshot>\n"
+	printf "zfs rollback -r <pool/dataset@snapshot>\n"
+	printf "zfs destroy <pool/dataset@snapshot>\n"
 	printf "zfs list -t snapshot\n"
 }
 
@@ -59,6 +59,7 @@ while true;do
 		-m5) mode="torrent";shift;;
 		-m6) mode="torrentcache";shift;;
 		#other
+		-B) mode="export";shift;;
 		-l) mode="listroot";shift;;
 		-L) mode="listall";shift;;
 		-h) hlp;exit;;
@@ -67,17 +68,17 @@ while true;do
 done
 
 case "${mode}" in
-	kvm) "${ZFS}" snapshot -r ssd-mirror/KVM@${S};;
-	root) "${ZFS}" snapshot -r zroot/ROOT/gentoo@${S};;
-	data) "${ZFS}" snapshot -r storage/data@${S};;
-	anime) "${ZFS}" snapshot -r storage/anime@${S};;
-	brandon) "${ZFS}" snapshot -r zroot/HOME/brandon@${S};;
-	torrentcache) "${ZFS}" snapshot -r zroot/CACHE/torrents@${S};;
-
-	listall) "${ZFS}" list -t snapshot;;
+	kvm) "$ZFS" snapshot -r ssd-mirror/KVM@${S};;
+	root) "$ZFS" snapshot -r zroot/ROOT/gentoo@${S};;
+	data) "$ZFS" snapshot -r storage/data@${S};;
+	anime) "$ZFS" snapshot -r storage/anime@${S};;
+	brandon) "$ZFS" snapshot -r zroot/HOME/brandon@${S};;
+	torrentcache) "$ZFS" snapshot -r zroot/CACHE/torrents@${S};;
+	listall) "$ZFS" list -t snapshot;;
 	listroot)
-		G=$(${ZFS} list -t snapshot)
+		G=$($ZFS list -t snapshot)
 		printf "${G}"|head -n1
-		printf "${G}"|grep gentoo
+		printf "${G}"|grep "zroot\/ROOT\/gentoo"
 		;;
+	export) zfs send "${1}" | zstd >| "${1##*/}.zst";;
 esac
