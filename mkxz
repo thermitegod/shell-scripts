@@ -1,6 +1,6 @@
 #!/bin/sh
-#5.4.2
-#2019-01-08
+#6.0.0
+#2019-01-17
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -17,40 +17,40 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+die(){ /bin/echo -e "\033[0;31m$*\033[m";exit 1; }
 compress(){
-	if [ -d "${f}" ];then
-		if [ ${comp_status} = "1" ];then
-			tar --xattrs --sparse -${V}cf - "${f%%}" -P | pv -s $(du -sb "${f%%}" | awk '{print $1}') | "$C" "$A" >| "${f%%}.tar.${E}"
-		else
-			tar --xattrs --sparse -${V}cf - "${f%%}" -P | "$C" "$A" >| "${f%%}.tar.${E}"
-		fi
-	elif [ -f "${f}" ];then
-		"$C" "$A" "${f%%}"
-	fi
+	case "${comp_type}" in
+		0) tar --xattrs -${V}Scf - "${f%%}" -P | pv -s $(du -sb "${f%%}" | awk '{print $1}') | "$C" "$A" >| "${f%%}.tar.${E}" || die "Compression failed for: ${f%%}";;
+		1) tar --xattrs -${V}Scf - "${f%%}" -P | "$C" "$A" >| "${f%%}.tar.${E}" || die "Compression failed for: ${f%%}";;
+		2) "$C" "$A" "${f%%}" || die "Compression failed for: ${f%%}";;
+	esac
+
 	if [ "${comp_rm}" = "1" ];then rm -r "${f%%}";fi
 }
 
-V=""
+orig_rm="0"
 comp_dir="0"
 comp_files="0"
-orig_rm="0"
-comp_status="0"
+
+V=""
+comp_type="2"
 mode="${0##*/mk}"
 
 while getopts "BGXSLZdfsxzvh" OPT;do
 	case "$OPT" in
+
+		d) comp_dir="1";comp_type="1";;
+		f) comp_files="1";;
+		s) orig_rm="1";;
+		S) comp_dir="1";comp_type="0";;
+		v) V="v";;
+		x) comp_dir="1";orig_rm="1";;
+		z) comp_files="1";orig_rm="1";comp_type="1";;
 		B) mode="bz2";;
 		G) mode="gz";;
 		L) mode="lz4";;
 		X) mode="xz";;
 		Z) mode="zst";;
-		d) comp_dir="1";;
-		f) comp_files="1";;
-		s) orig_rm="1";;
-		S) comp_status="1";;
-		x) comp_dir="1";orig_rm="1";;
-		z) comp_files="1";orig_rm="1";;
-		v) V="v";;
 		h)
 			printf " default will compress files passed in \$1\n"
 			printf " -d\tcompress all directories\n"
@@ -76,12 +76,11 @@ case "${mode}" in
 	bz2) C="bzip2";A="-k";E="bz2";;
 	lz4) C="lz4";A="-k";E="lz4";;
 	gz) C="gzip";A="-k";E="gz";;
-	xz) C="xz";A="-e9";E="xz";;
+	xz) C="xz";A="-e9";E="xz";XZ_OPT="-9e";;
 	zst) C="zstd";A="-T0";E="zst";;
 esac
 
-if [ -z "${C}" ] || [ -z "${E}" ];then printf "No compresion format set\n";exit 1;fi
-
+if [ -z "${C}" ];then printf "No compresion format set\n";exit 1;fi
 if [ -n "${1}" ];then
 	while true;do
 		f="${1%%}"
@@ -94,12 +93,8 @@ if [ -n "${1}" ];then
 	done
 elif [ "${comp_dir}" = "1" ] || [ "${comp_files}" = "1" ];then
 	for f in *; do
-		if [ "${comp_dir}" = "1" ] && [ -d "${f}" ];then
-			compress
-		fi
-		if [ "${comp_files}" = "1" ] && [ -f "${f}" ];then
-			compress
-		fi
+		if [ "${comp_dir}" = "1" ] && [ -d "${f}" ];then compress;fi
+		if [ "${comp_files}" = "1" ] && [ -f "${f}" ];then compress;fi
 	done
 else
 	printf "Nothing to compress\n";exit

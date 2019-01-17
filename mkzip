@@ -1,8 +1,8 @@
 #!/bin/sh
-#4.3.0
-#2018-12-30
+#5.0.0
+#2018-01-17
 
-#Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
+#Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
 #This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -17,56 +17,71 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-comp_files="0"
-comp_dir="0"
-orig_rm="0"
-comp_njp="0"
-test_only="0"
-test_mk7z="1"
+die(){ /bin/echo -e "\033[0;31m$*\033[m";exit 1; }
+test_file_list(){ if [ -f "${f%%}.zip" ];then file_list="${file_list} ${f%%}.zip";fi; }
+compress(){
+	case "${comp_type}" in
+		0)
+			nice -19 zip -rv -9 --junk-paths "${f%%}.zip" "${f%%}" || die "Compression failed for: ${f%%}"
+			test_file_list
+			;;
+		1)
+			nice -19 zip -rv -9 "${f%%}.zip" "${f%%}" || die "Compression failed for: ${f%%}"
+			test_file_list
+			;;
+		test)
+			if [ "${f##*.}" = "zip" ];then
+				case "${test_mk7z}" in
+					0) nice -19 unzip -tq "${f%%}";;
+					1) mk7z -T "${f%%}";;
+				esac
+				return
+			fi;;
+	esac
 
-compress() {
-	if [ "${comp_njp}" = "0" ] && [ "${test_only}" = "0" ];then
-		nice -19 zip -rv -9 --junk-paths "${f%%}.zip" "${f%%}"
-	elif [ "${comp_njp}" = "1" ] && [ "${test_only}" = "0" ];then
-		nice -19 zip -rv -9 "${f%%}.zip" "${f%%}"
-	fi
-
-	if [ "${test_only}" = "1" ] && ! [ "${f}" = "failed.txt" ];then
-		if [ "${test_mk7z}" = "1" ];then
-			mk7z -t "${f%%}"
+	if [ "$?" -eq 0 ] && ! [ "${comp_type}" = "test" ] && [ "${orig_rm}" = "1" ] && [ -f "${f%%}.zip" ];then
+		if [ -n "$(${0} -t "${f%%}.zip"|grep FAILED)" ];then
+			printf "Test FAILED for: ${f%%}.7z\nNot removing original: "${f%%}"\n"
 		else
-			nice -19 unzip -tq "${f%%}"
+			rm -r "${f%%}"
 		fi
-	fi
-
-	out="$?"
-	if [ "${out}" -eq 0 ] && [ "${test_only}" = "0" ] && [ "${orig_rm}" = "1" ] && [ -f "${f%%}.zip" ];then
-		rm -r "${f%%}"
 	fi
 }
 
-while getopts "TZtdfpsxzh" OPT;do
+orig_rm="0"
+comp_dir="0"
+comp_files="0"
+
+comp_type="0"
+test_post="1"
+test_mk7z="1"
+file_list=""
+
+while getopts "TZFDPRtdfszh" OPT;do
 	case "$OPT" in
-		t) test_only="1";comp_files="1";;
-		T) test_only="1";comp_files="1";test_mk7z="0";;
 		d) comp_dir="1";;
+		D) comp_dir="1";comp_type="1";;
 		f) comp_files="1";;
-		p) comp_dir="1";comp_njp="1";;
+		F) comp_files="1";orig_rm="1";;
+		P) test_post="0";;
 		s) orig_rm="1";;
-		x) comp_files="1";orig_rm="1";;
+		R) orig_rm="1";test_post="0";;
+		t) comp_type="test";;
+		T) comp_type="test";test_mk7z="0";;
 		z) comp_dir="1";orig_rm="1";;
-		Z) comp_dir="1";orig_rm="1";comp_njp="1";;
+		Z) comp_dir="1";orig_rm="1";comp_type="1";;
 		h)
-			printf " -d\tcompress all directories\n"
+			printf " -d\tcompress all directories, junk path\n"
+			printf " -D\tcompress all directories, dont junk path\n"
 			printf " -f\tcompress all files\n"
+			printf " -F\tcompress all files, delete original after compressed\n"
 			printf " -h\tprint this help\n"
-			printf " -p\tcompress all directories, dont junk path\n"
 			printf " -P\tDisable post compression test\n"
 			printf " -s\tcompress \$1, delete after compressed\n"
+			printf " -R\tdelete after compressed, will test before deleting, disables post testing, works in all modes but test\n"
 			printf " -t\tTest all files or files passed in \$1, using mk7z -t : prefered test method\n"
 			printf " -T\tTest all files or files passed in \$1, using unzip -tq\n"
-			printf " -x\tcompress all files, delete original after compressed\n"
-			printf " -z\tcompress all directories, delete original after compressed\n"
+			printf " -z\tcompress all directories, delete original after compressed, junk path\n"
 			printf " -Z\tcompress all directories, delete original after compressed, dont junk path\n"
 			exit;;
 	esac
@@ -85,13 +100,18 @@ if [ -n "${1}" ];then
 	done
 elif [ "${comp_dir}" = "1" ] || [ "${comp_files}" = "1" ];then
 	for f in *; do
-		if [ "${comp_dir}" = "1" ] && [ -d "${f%%}" ];then
-			compress
-		fi
-		if [ "${comp_files}" = "1" ] && [ -f "${f%%}" ];then
-			compress
-		fi
+		if [ "${comp_dir}" = "1" ] && [ -d "${f%%}" ];then compress;fi
+		if [ "${comp_files}" = "1" ] && [ -f "${f%%}" ];then compress;fi
 	done
 else
 	printf "Nothing to compress\n";exit
+fi
+
+if [ "${test_post}" = "1" ] && [ "${orig_rm}" = "0" ];then
+	for f in ${file_list}; do
+		if [ -f "${f}" ];then
+			comp_type="test"
+			compress
+		fi
+	done
 fi
