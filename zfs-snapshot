@@ -1,6 +1,6 @@
 #!/bin/sh
-#2.8.0
-#2018-01-12
+#2.8.1
+#2019-01-13
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -36,7 +36,7 @@ hlp(){
 	printf "\nCREATION\n"
 	printf "zfs create -o mountpoint=/mnt pool/dataset\n"
 	printf "\nMISC\n"
-	printf "zfs send pool/dataset@snapshot | zstd >| /tmp/backup.zst\n"
+	printf "zfs send pool/dataset@snapshot | zstd -T0 >| /tmp/backup.zst\n"
 	printf "unzstd -c backup.zst | zfs receive pool/newdataset\n\n"
 	printf "zfs set mountpoint=/newmount pool/dataset\n\n"
 	printf "zfs snapshot -r zroot/ROOT/gentoo@<type>-<date>\n"
@@ -80,5 +80,5 @@ case "${mode}" in
 		printf "${G}"|head -n1
 		printf "${G}"|grep "zroot\/ROOT\/gentoo"
 		;;
-	export) zfs send "${1}" | zstd >| "${1##*/}.zst";;
+	export) zfs send "${1}" | zstd -T0 >| "${1##*/}.zst";;
 esac

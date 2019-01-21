@@ -1,6 +1,6 @@
 #!/bin/sh
-#6.0.0
-#2019-01-17
+#6.1.0
+#2019-01-18
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -19,10 +19,11 @@
 
 die(){ /bin/echo -e "\033[0;31m$*\033[m";exit 1; }
 compress(){
+	if [ -d "${f%%}" ] && ! [ "${comp_type}" = "status" ];then comp_type="dir";fi
 	case "${comp_type}" in
-		0) tar --xattrs -${V}Scf - "${f%%}" -P | pv -s $(du -sb "${f%%}" | awk '{print $1}') | "$C" "$A" >| "${f%%}.tar.${E}" || die "Compression failed for: ${f%%}";;
-		1) tar --xattrs -${V}Scf - "${f%%}" -P | "$C" "$A" >| "${f%%}.tar.${E}" || die "Compression failed for: ${f%%}";;
-		2) "$C" "$A" "${f%%}" || die "Compression failed for: ${f%%}";;
+		status) tar --xattrs -${V}Scf - "${f%%}" -P | pv -s $(du -sb "${f%%}" | awk '{print $1}') | "$C" "$A" >| "${f%%}.tar.${E}" || die "Compression failed for: ${f%%}";;
+		dir) tar --xattrs -${V}Scf - "${f%%}" -P | "$C" "$A" >| "${f%%}.tar.${E}" || die "Compression failed for: ${f%%}";;
+		file) "$C" "$A" "${f%%}" || die "Compression failed for: ${f%%}";;
 	esac
 
 	if [ "${comp_rm}" = "1" ];then rm -r "${f%%}";fi
@@ -33,19 +34,19 @@ comp_dir="0"
 comp_files="0"
 
 V=""
-comp_type="2"
+comp_type="file"
 mode="${0##*/mk}"
 
 while getopts "BGXSLZdfsxzvh" OPT;do
 	case "$OPT" in
 
-		d) comp_dir="1";comp_type="1";;
+		d) comp_dir="1";comp_type="dir";;
 		f) comp_files="1";;
 		s) orig_rm="1";;
-		S) comp_dir="1";comp_type="0";;
+		S) comp_dir="1";comp_type="status";;
 		v) V="v";;
 		x) comp_dir="1";orig_rm="1";;
-		z) comp_files="1";orig_rm="1";comp_type="1";;
+		z) comp_files="1";orig_rm="1";comp_type="dir";;
 		B) mode="bz2";;
 		G) mode="gz";;
 		L) mode="lz4";;
@@ -76,7 +77,7 @@ case "${mode}" in
 	bz2) C="bzip2";A="-k";E="bz2";;
 	lz4) C="lz4";A="-k";E="lz4";;
 	gz) C="gzip";A="-k";E="gz";;
-	xz) C="xz";A="-e9";E="xz";XZ_OPT="-9e";;
+	xz) C="xz";A="-e9";E="xz";export XZ_OPT="-9e";;
 	zst) C="zstd";A="-T0";E="zst";;
 esac
 

@@ -1,6 +1,6 @@
 #!/bin/sh
-#3.0.0
-#2018-01-17
+#3.0.2
+#2019-01-18
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -22,32 +22,50 @@
 #m0=lzma2 is fast mode but produces samller archives, needs more testing
 #-m prefixes all options or -m0=lzma:a1:d25 for sub options
 
-die(){ /bin/echo -e "\033[0;31m$*\033[m";exit 1; }
+usage(){
+	printf " default will compress file passed in \$1\n"
+	printf "\nPROFILES\n"
+	printf " -S\tSingle threaded, useful when hitting oom with multi\n"
+	printf " -M\tMultithreaded\n"
+	printf " -O\tOld profile for testing\n"
+	printf "\nOTHER\n"
+	printf " -d\tcompress all directories\n"
+	printf " -f\tcompress all files\n"
+	printf " -h\tprint this help\n"
+	printf " -P\tDisable post compression test\n"
+	printf " -R\tdelete after compressed, will test before deleting, disables post testing, works in all modes but test\n"
+	printf " -t\tTest file[s] passed in \$1\n"
+	printf " -T\tTest file[s] passed in \$1\n disable total output"
+	printf " -x\tcompress all files, delete original after compressed\n"
+	printf " -z\tcompress all directories, delete original after compressed\n"
+}
+
+die(){ /bin/echo -e "$*";exit 1; }
 test_file_list(){ if [ -f "${f%%}.7z" ];then file_list="${file_list} ${f%%}.7z";fi; }
 compress(){
 	case "${comp_type}" in
 		single)
-			printf "\n***NOTICE*** The compression profile being used will probably use over 10G of ram\n"
-			printf "Profile : single\n"
-			printf "File    : ${f%%}\n"
+			printf "\n${YEL}NOTICE\t: The compression profile being used will probably use over 10G of ram${NC}\n"
+			printf "${YEL}Profile\t: single${NC}\n"
+			printf "${YEL}File\t: ${f%%}${NC}\n"
 			nice -19 \
 				7z a -t7z -m0=lzma2 -md=1024m -mmf=bt4 -mmt=off -ms=off -myx=9 -mx=9 -mfb=276 \
-				-ms=on -mhc=on -mtm=off -mtc=off -mta=off "${f%%}.7z" "${f%%}" || die "Compression failed for: ${f%%}"
+				-ms=on -mhc=on -mtm=off -mtc=off -mta=off "${f%%}.7z" "${f%%}" || die "${RED}Compression failed for${NC}: ${f%%}"
 			test_file_list
 			;;
 		multi)
-			printf "\n***NOTICE*** The compression profile being used will probably use =LOTS= of ram\n"
-			printf "Profile : multi\n"
-			printf "File    : ${f%%}\n"
+			printf "\n${YEL}NOTICE\t: The compression profile being used will probably use =LOTS= of ram${NC}\n"
+			printf "${YEL}Profile\t: multi${NC}\n"
+			printf "${YEL}File\t: ${f%%}${NC}\n"
 			nice -19 \
 				7z a -t7z -m0=lzma2 -md=1024m -mmf=bt4 -mmt=on -mmtf=on -myx=9 -mx=9 -mfb=276 \
-				-mhc=on -ms=on -mtm=off -mtc=off -mta=off "${f%%}.7z" "${f%%}" || die "Compression failed for: ${f%%}"
+				-mhc=on -ms=on -mtm=off -mtc=off -mta=off "${f%%}.7z" "${f%%}" || die "${RED}Compression failed for${NC}: ${f%%}"
 			test_file_list
 			;;
 		old)
 			nice -19 \
 				7z a -t7z -m0=lzma2 -md=1024m -mmf=bt4 -mmt=off -myx=9 -mx=9 -mfb=276 -ms=on \
-				"${f%%}.7z" "${f%%}" || die "Compression failed for: ${f%%}"
+				"${f%%}.7z" "${f%%}" || die "${RED}Compression failed for${NC}: ${f%%}"
 			test_file_list
 			;;
 		test)
@@ -57,7 +75,7 @@ compress(){
 					P=$((P+1))
 				else
 					printf "${f}\n">>failed.txt
-					printf "${RED}FAILLED${NC}\t${f%%}\n"
+					printf "${RED}FAILED${NC}\t${f%%}\n"
 					F=$((F+1))
 				fi
 			fi;;
@@ -65,18 +83,15 @@ compress(){
 
 	if [ "$?" -eq 0 ] && ! [ "${comp_type}" = "test" ] && [ "${orig_rm}" = "1" ] && [ -f "${f%%}.7z" ];then
 		if [ -n "$(${0} -t "${f%%}.7z"|grep FAILED)" ];then
-			printf "Test ${RED}FAILED${NC} for: ${f%%}.7z\nNot removing original: "${f%%}"\n"
+			printf "${RED}FAILED${NC} test for: ${f%%}.7z\n${YEL}Not removing original${NC}: "${f%%}"\n"
 		else
 			rm -r "${f%%}"
 		fi
 	fi
 }
 
-RED="\033[0;31m"
-GRE="\033[0;32m"
-YEL="\033[0;33m"
-NC="\033[0m"
-
+P="0"
+F="0"
 orig_rm="0"
 comp_dir="0"
 comp_file="0"
@@ -85,13 +100,14 @@ test_post="1"
 file_list=""
 comp_type="multi"
 test_post_fancy="1"
+. $(dirname "$0")/colors.sh
 
 while getopts "SMTROtpdfhxz" OPT;do
 	case "$OPT" in
 		S) comp_type="single";;
 		M) comp_type="multi";;
 		O) comp_type="old";;
-		t) comp_type="test";test_post="0";P="0";F="0";printf "${YEL}RUNNING TESTS${NC}\n";;
+		t) comp_type="test";test_post="0";printf "${YEL}RUNNING TESTS${NC}\n";;
 		T) comp_type="test";test_post="0";test_post_fancy="0";;
 		P) test_post="0";;
 		d) comp_dir="1";;
@@ -99,23 +115,7 @@ while getopts "SMTROtpdfhxz" OPT;do
 		R) orig_rm="1";test_post="0";;
 		x) comp_file="1";orig_rm="1";;
 		z) comp_dir="1";orig_rm="1";;
-		h)
-			printf " default will compress file passed in \$1\n"
-			printf "\nPROFILES\n"
-			printf " -S\tSingle threaded, useful when hitting oom with multi\n"
-			printf " -M\tMultithreaded\n"
-			printf " -O\tOld profile for testing\n"
-			printf "\nOTHER\n"
-			printf " -d\tcompress all directories\n"
-			printf " -f\tcompress all files\n"
-			printf " -h\tprint this help\n"
-			printf " -P\tDisable post compression test\n"
-			printf " -R\tdelete after compressed, will test before deleting, disables post testing, works in all modes but test\n"
-			printf " -t\tTest file[s] passed in \$1\n"
-			printf " -T\tTest file[s] passed in \$1\n disable total output"
-			printf " -x\tcompress all files, delete original after compressed\n"
-			printf " -z\tcompress all directories, delete original after compressed\n"
-			exit;;
+		h) usage;exit;;
 	esac
 done
 shift $((OPTIND - 1))
@@ -126,7 +126,7 @@ if [ -n "${1}" ];then
 		if [ -e "${f}" ];then
 			compress
 		else
-			printf "\nInput is none existent : ${1}\n\n"
+			printf "\n${RED}Input does not exist${NC}: ${1}\n\n"
 		fi
 		if [ -n "${2}" ];then shift;else break;fi
 	done
@@ -136,7 +136,7 @@ elif [ "${comp_dir}" = "1" ] || [ "${comp_files}" = "1" ];then
 		if [ "${comp_files}" = "1" ] && [ -f "${f%%}" ];then compress;fi
 	done
 else
-	printf "No input files\n";exit
+	printf "\n${RED}No input files${NC}\n\n";exit
 fi
 
 if [ "${test_post}" = "1" ] && [ "${orig_rm}" = "0" ];then
@@ -150,7 +150,9 @@ fi
 
 if [ "${comp_type}" = "test" ] && [ "${test_post_fancy}" = "1" ];then
 	T="$((P+F))"
-	if ! [ "${total}" = "0" ];then printf "\n${YEL}TOTAL${NC} \t${T}\n";fi
-	if ! [ "${P}" = "0" ];then printf "${GRE}PASSED${NC}\t${P}\n";fi
-	if ! [ "${F}" = "0" ];then printf "${RED}FAILED${NC}\t${F}\n";fi
+	if ! [ "${total}" = "0" ];then
+		printf "\n${YEL}TOTAL${NC} \t${T}\n"
+		if ! [ "${P}" = "0" ];then printf "${GRE}PASSED${NC}\t${P}\n";fi
+		if ! [ "${F}" = "0" ];then printf "${RED}FAILED${NC}\t${F}\n";fi
+	fi
 fi

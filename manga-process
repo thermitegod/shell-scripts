@@ -1,8 +1,8 @@
 #!/bin/sh
-#1.15.0
-#2018-12-30
+#1.15.1
+#2019-01-17
 
-#Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
+#Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
 #This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -69,7 +69,7 @@ fi
 
 if [ "${remove_junk}" = "1" ];then
 	remove-junk-files -l
-	remove-junk-files -r -A
+	remove-junk-files -Ar
 fi
 
 g=$(remove-manga-credits -l)
@@ -79,7 +79,7 @@ if [ -n "${g}" ];then
 		printf "Enter to remove found credits\n"
 		read z;unset z
 		if [ "${match_zzz}" = "1" ];then
-			remove-manga-credits -r -z
+			remove-manga-credits -rz
 		else
 			remove-manga-credits -r
 		fi
@@ -104,9 +104,9 @@ count-image
 printf "Size\t: $(du -h|tail -n1|awk '{print $1}')\n"
 
 printf "Choose archive type [DEFAULT:1]\n"
-printf "1: zip-dir-destructive\n"
-printf "2: zip-dir-destructive-nojunkpath\n"
-printf "3: 7z-dir-destructive\n"
+printf "1: zip destructive\n"
+printf "2: zip destructive nojunkpath\n"
+printf "3: 7z dir destructive\n"
 read archivetype
 
 if [ "${show_time}" = "1" ];then
@@ -114,14 +114,14 @@ if [ "${show_time}" = "1" ];then
 fi
 
 if [ "${optimize}" = "1" ];then
-	optimize-all -m -v
+	optimize-all -mv
 fi
 
 case "${archivetype}" in
-	1) mkzip -z;;
-	2) mkzip -Z;;
-	3) mk7z -P -z;;
-	*) mkzip -z;;
+	1) mkzip -zP;;
+	2) mkzip -ZP;;
+	3) mk7z -zP;;
+	*) mkzip -zP;;
 esac
 
 if [ "${comp_advzip}" = "1" ] && ! [ "${archivetype}" = "3" ];then
@@ -129,7 +129,7 @@ if [ "${comp_advzip}" = "1" ] && ! [ "${archivetype}" = "3" ];then
 fi
 
 if [ "${comp_test}" = "1" ];then
-	mk7z -t
+	mk7z -t *
 fi
 
 if [ "${show_time}" = "1" ];then
