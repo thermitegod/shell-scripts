@@ -1,8 +1,8 @@
 #!/bin/sh
-#1.1.0
-#2018-12-30
+#1.2.0
+#2019-01-17
 
-#Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
+#Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
 #This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -17,15 +17,31 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-if [ "$(id -u)" -ne 0 ];then printf "Requires root, exiting.\n";exit;fi
+die(){ /bin/echo -e "$*";exit 1; }
+if [ "$(id -u)" -ne 0 ];then die "Requires root, exiting";fi
 
+. $(dirname "$0")/colors.sh
 tape="/dev/st0"
 
-t_rewind(){ mt -f "${tape}" rewind ; }
-t_status(){ mt -f "${tape}" status ; }
-t_reten(){ mt -f "${tape}" retension ; }
-t_eject(){ mt -f "${tape}" eject ; }
-t_erase(){ mt -f "${tape}" erase ; }
+t_rewind(){ mt -f "$tape" rewind; }
+t_status(){ mt -f "$tape" status; }
+t_reten(){ mt -f "$tape" retension; }
+t_eject(){ mt -f "$tape" eject; }
+t_erase(){ mt -f "$tape" erase; }
+
+t_list(){ tar -tf "${tape}"; }
+
+t_cdloc(){
+	#dont tar unneeded paths
+	if [ -d "${target}" ];then
+		cd "${target}/.."
+	elif [ -f "${target}" ];then
+		target="$(dirname ${target})"
+		cd "${target}"
+	else
+		printf "not a file or directory\n"
+	fi
+}
 
 t_confirm_erase(){
 	printf "Erase current tape: y/n\n"
@@ -33,26 +49,13 @@ t_confirm_erase(){
 	if echo "${confirm}" | grep -iq "^y" ;then
 		t_erase
 	else
-		printf "Did not enter: y\nNot running, Exiting.\n"
-		exit
+		die "Exiting. Did not enter: y"
 	fi
 }
 
 t_backup(){
-	if [ -z "${target}" ];then
-		printf "nothing to backup, exiting\n"
-		exit
-	fi
-
-	#if [ -d "${target}" ];then
-	#	cd "${target}"/..
-	#else
-		#if file, cd to dir it is in
-	#	g=$(echo ${target}|sed 's%/[^/]*$%/%')
-	#	cd "${g}"
-	#fi
-	#remove everything before last /
-	#btarget=$(echo $target|sed 's@.*/@@')
+	if [ -z "${target}" ];then die "nothing to backup, exiting";fi
+	t_cdloc
 
 	#move to end last tar on tape
 	#mt -f "${tape}" eom
@@ -61,30 +64,21 @@ t_backup(){
 }
 
 t_backup_overwrite(){
-	if [ -z "${target}" ];then
-		printf "nothing to backup, exiting\n"
-		exit
-	fi
+	if [ -z "${target}" ];then die "nothing to backup, exiting";fi
+	t_cdloc
 	t_rewind
 	tar -cvf "${tape}" "${target}"
 }
 
 t_restore(){
-	if [ -z "${target}" ];then
-		printf "no restore target specified, exiting\n"
-		exit
-	fi
+	if [ -z "${target}" ];then die "no restore target specified, exiting";fi
 	t_rewind
 	tar -xvf /dev/st0 -C "${target}"
 }
 
 t_verify(){
 	t_rewind
-	tar -tvf $tape
-}
-
-t_list(){
-	tar -tf $tape
+	tar -tvf "${tape}"
 }
 
 hlp(){
@@ -113,21 +107,21 @@ links(){
 }
 
 if [ -z "${1}" ];then hlp;exit;fi
-while getopts "BLRbZeglrsvzh" OPT;do
+while getopts "B:b:eg:hHlRrsvZz" OPT;do
 	case "$OPT" in
-		b) target="${2}";t_backup;;
-		B) target="${2}";t_backup_overwrite;;
+		b) target="$OPTARG";t_backup;;
+		B) target="$OPTARG";t_backup_overwrite;;
 		e) t_eject;;
-		g) target="${2}";t_restore;;
+		g) target="$OPTARG";t_restore;;
+		h) hlp;exit;;
+		H) links;;
 		l) t_list;;
-		L) links;;
 		R) t_reten;;
 		r) t_rewind;;
 		s) t_status;;
 		v) t_verify;;
 		z) t_confirm_erase;t_rewind;;
 		Z) t_confirm_erase;t_rewind;t_eject;;
-		h) hlp;exit;;
 	esac
 done
 shift $((OPTIND - 1))

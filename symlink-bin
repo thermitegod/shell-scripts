@@ -1,8 +1,8 @@
 #!/bin/sh
-#1.8.0
-#2018-12-30
+#2.0.0
+#2019-01-19
 
-#Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
+#Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
 #This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -17,31 +17,38 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-if [ "$(id -u)" -ne 0 ];then printf "Requires root\n";exit;fi
+hlp(){
+	printf "STOW\n"
+	printf " -b\tstow files in ${B}/.bin/bin{-other},opt to /usr/local/bin\n"
+	printf " -p\tstow files in ${c}/{public,private} to ${B}\n"
+	printf " -t\tstow files in ${c}/themes to ${B}\n"
+	printf " -r\tstow files in ${c}/public to /root\n"
+	printf "\nUNSTOW\n"
+	printf " -B\tunstow files in ${B}/.bin/bin{-other},opt in /usr/local/bin\n"
+	printf " -P\tunstow files in ${c}/{public,private} in ${B}\n"
+	printf " -T\tstow files in ${c}/themes in ${B}\n"
+	printf " -R\tunstow files in ${c}/public in /root\n"
+	printf "\nGENERAL\n"
+	printf " -h\tprint this help\n"
+}
 
-a="/usr/local/bin"
-b="/home/brandon/.bin/bin"
+ignore="--ignore=".git" --ignore=".gitignore""
 
-while getopts "oh" OPT;do
+B="/home/brandon"
+c="${B}/documents/configs"
+h="${B}/.bin"
+
+if [ -z "${1}" ];then hlp;exit;fi
+while getopts "BPRTbprth" OPT;do
 	case "$OPT" in
-		o) unset b;b="/home/brandon/.bin/bin-other";;
-		h)
-			printf " -h\tprint this help\n"
-			printf " -o\tfiles in /home/brandon/.config/bin-other\n"
-			exit;;
+		b) cd "$h";doas stow "$ignore" -v --target=/usr/local/bin bin bin-other opt;;
+		B) cd "$h";doas stow "$ignore" -D -v --target=/usr/local/bin bin bin-other opt;;
+		p) cd "$c";stow "$ignore" -v --target="${B}" public private;;
+		P) cd "$c";stow "$ignore" -D -v --target="${B}" public private;;
+		t) cd "$c";stow "$ignore" -v --target="${B}" themes;;
+		T) cd "$c";stow "$ignore" -D -v --target="${B}" themes;;
+		r) cd "$c";doas stow "$ignore" -v --target=/root public themes;;
+		R) cd "$c";doas stow "$ignore" -D -v --target=/root public themes;;
+		h) hlp;exit;;
 	esac
-done
-
-cd "${a}"
-for f in *;do
-	if ! [ -e "${f}" ] && [ -h "${f}" ];then
-		rm "${f}"
-	fi
-done
-
-cd "${b}"
-for f in *;do
-	if ! [ -e "${a}/${f}" ];then
-		ln -s "${b}/${f}" "${a}/${f}"
-	fi
 done

@@ -1,8 +1,8 @@
 #!/bin/sh
-#2.1.0
-#2018-12-30
+#2.2.0
+#2019-01-19
 
-#Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
+#Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
 #This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,23 +23,26 @@ if ! [ -f "/usr/src/linux/usr/gen_init_cpio" ];then printf "Make sure the kernel
 logfile="/dev/null"
 comp="lz4"
 loglevel="1"
+extra_flags=""
 
-while getopts "vlxLh" OPT;do
+while getopts "vlxLhde" OPT;do
 	case "$OPT" in
-		v) logfile="/tmp/genkernel-initgen.log";shift;;
-		l) comp="lz4";shift;;
-		x) comp="xz";export XZ_OPT="-9e";shift;;
-		L)
-			if [ -n "${2}" ] && [ ${2} -ge "1" ] && [ "${2}" -le "5"  ] ;then
-				loglevel="${2}"
-			else
-				printf "loglevel not within bounds, using default value\n"
-			fi
-			shift;;
+		e)
+			extra_flags="${extra_flags} --lvm --luks --e2fsprogs"
+			;;
+		d)
+			extra_flags="${extra_flags} --debug-cleanup"
+			loglevel="5"
+			logfile="/tmp/genkernel-initgen.log"
+			;;
+		v) logfile="/tmp/genkernel-initgen.log";;
+		l) comp="lz4";;
+		x) comp="xz";export XZ_OPT="-9e";;
 		h)
 			printf "GENERAL\n"
+			printf " -d\textra verbose\n"
+			printf " -e\tlvm encryption support\n"
 			printf " -h\tprint this help\n"
-			printf " -L #\tset loglevel 1-5 [default : 1]\n"
 			printf " -v\tlog to /tmp/genkernel-initgen.log\n"
 			printf "\nCOMPRESSION\n"
 			printf " -l\tcompress initramfs using : lz4 [default]\n"
@@ -50,16 +53,15 @@ done
 
 genkernel initramfs \
 	--logfile=${logfile} \
-	--install \
 	--makeopts=-j$(($(nproc)+1)) \
 	--loglevel=${loglevel} \
 	--no-ramdisk-modules \
 	--busybox \
+	--do-keymap-auto \
+	--postclear \
+	--disklabel \
 	--compress-initramfs \
 	--compress-initramfs-type=${comp} \
-	--no-clean \
-	--no-mountboot \
-	--no-keymap \
 	--no-lvm \
 	--no-mdadm \
 	--no-nfs \
@@ -71,15 +73,12 @@ genkernel initramfs \
 	--no-ssh \
 	--no-luks \
 	--no-gpg \
+	--no-mountboot \
 	--no-unionfs \
 	--no-netboot \
 	--no-e2fsprogs \
 	--no-dmraid \
-	--postclear \
-	--no-splash \
-	--disklabel \
-	--strip=all \
 	--zfs \
 	--microcode \
 	--firmware \
-	--firmware-dir=/lib/firmware
+	--firmware-dir=/lib/firmware ${extra_flags}

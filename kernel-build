@@ -1,6 +1,6 @@
 #!/bin/sh
-#2.14.1
-#2018-01-12
+#2.14.2
+#2019-01-13
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -73,7 +73,7 @@ run_kmod_build="0"
 use_local_zfs_ebuild="0"
 
 if ! [ -e "${ksym}" ];then die "ERROR: ${ksym} is not a valid symlink";fi
-if ! [ -d "${storage}/{src,distfiles,config}" ];then mkdir -p "${storage}/{src,distfiles,config}";fi
+if ! [ -d "${storage}/config" ];then mkdir -p "${storage}/config";fi
 
 if ! [ -f "${kdir}/.config" ];then
 	if [ -f "/proc/config.gz" ];then
