@@ -1,8 +1,8 @@
 #!/bin/sh
-#2.4.0
-#2018-12-30
+#2.5.0
+#2019-01-20
 
-#Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
+#Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
 #This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -22,11 +22,14 @@
 #debug flags
 #make less shit
 
-num=$(ls -1A|wc -l)
-int=$(seq -w -s ' ' ${num})
-array="${int}"
-files=$(ls -1A|sort -V)
+#num=$(ls -1A|wc -l)
+#int=$(seq -w -s ' ' ${num})
+#array="${int}"
+#files=$(ls -1A|sort -V)
+
+array="$(seq -w -s ' ' $(ls -1A|wc -l))"
 mode="single"
+. $(dirname "$0")/colors.sh
 while getopts "Bh" OPT;do
 	case "$OPT" in
 		b) mode="batch";;
@@ -39,19 +42,20 @@ done
 
 case "${mode}" in
 	single)
-		for f in $files;do
+		#for f in $files;do
+		for f in $(ls -1A|sort -V);do
 			if [ -f "${f%%}" ];then
 				array1=$(echo "$array"|cut -d ' ' -f 1)
 				newname="${array1}.${f##*.}"
 				if ! [ -f "${newname}" ];then
 					mv -- "${f%%}" "${newname}"
 				else
-					a=$(md5sum "${f%%}")
-					b=$(md5sum "${newname}")
-					if [ "${a}" = "${b}" ];then
-						printf "Same File not renaming\n"
+					if [ "$(openssl sha1 ${f%%})" = "$(openssl sha1 ${newname})" ];then
+						printf "${YEL}Same File not renaming${NC}: ${f%%}\n"
 					else
-						printf "diferent files with same filename exist\n"
+						printf "${YEL}Diferent files with same filename would exist${NC}\n"
+						printf "${f%%}\n"
+						printf "${newname}\n"
 					fi
 				fi
 				array=$(echo "$array"|sed "s/[^ ]* //")

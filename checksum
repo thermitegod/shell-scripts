@@ -1,8 +1,8 @@
 #!/bin/sh
 #3.1.0
-#2018-12-30
+#2019-01-20
 
-#Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
+#Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
 #This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -18,14 +18,17 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 hlp(){
+	printf "ALGOS\n"
 	printf " -1\tsha1\n"
 	printf " -2\tsha224\n"
 	printf " -3\tsha256\n"
 	printf " -4\tsha384\n"
 	printf " -5\tsha512\n"
 	printf " -6\tmd5\n"
-	printf " -c\tforce checksum\n"
+	printf "GENERAL\n"
 	printf " -h\tprint this help\n"
+	printf "FORCE MODE\n"
+	printf " -c\tforce checksum\n"
 	printf " -r\tforce rename\n"
 }
 
@@ -46,10 +49,10 @@ done
 
 mode="${0##*/}"
 case "${mode}" in
-	checksum) find . -type f -print0 | nice -19 xargs --max-args=1 --max-procs=$(($(nproc)+1)) --null ${h};;
+	checksum) find . -type f -print0 | nice -19 xargs --max-args=1 --max-procs=$(($(nproc)+1)) --null openssl ${h};;
 	rename-checksum)
 		for f in *;do
-			if [ -f "${f}" ];then "${h}" "${f}" | sed -e 's/\([^ ]*\) \(.*\(\..*\)\)$/mv -v \2 \1\3/e';fi
+			if [ -f "${f}" ];then openssl "${h}" "${f}" | sed -e 's/\([^ ]*\) \(.*\(\..*\)\)$/mv -v \2 \1\3/e';fi
 		done
 		;;
 esac
