@@ -1,6 +1,6 @@
 #!/bin/sh
-#5.8.0
-#2019-01-08
+#5.9.0
+#2019-01-21
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -28,6 +28,7 @@ hlp(){
 	printf " -d\tDelete containers\n"
 	printf " -D\tDelete 'old-*' containers\n"
 	printf " -h\tPrint this help\n"
+	printf " -H\tprint file setu guide: ${container_info}\n"
 	printf " -r\tRestart\n"
 	printf " -s\tStart\n"
 	printf " -u\tUpdate, rename existing with 'old-*' prefix\n"
@@ -39,8 +40,17 @@ hlp(){
 	printf " -C\trutorrent cleanup only, remove *.torrent files in \$config/rutorrent/share/torrents/\n"
 	printf "\nOTHER\n"
 	printf " -e\tedit ${container_info}\n"
+	printf " -E\tcat ${container_info}\n"
 	printf " -p\tPrint limited container vars\n"
 	printf " -P\tPrint all container vars\n"
+}
+
+hlp2(){
+	printf "All containers are declared in '${container_info}' using the following space delimited format, subject to change\n"
+	printf "\n'container type' 'distro' 'IPV4 ending' 'limit cpu' 'limit cpu allowance' 'limit mem' 'container name' 'save location override, optional'\n"
+	printf "\nParsing of '${container_info}'\nSkips line if, line starts with '#' or if 'container name' is not set\ndont run any containers below a 'stop' line\n"
+	printf "\nNOTE: to not use limits, set them to '0'\n"
+	printf "\nexample:\n# this line will be skipped\nrutorrent gentoo 161 6 10%% 8192MB anime /mnt/anime/anime-working\nstop #nothing below this line will be run\n"
 }
 
 set_dirs(){
@@ -111,13 +121,6 @@ set_limits(){
 	if ! [ "${lim_mem}" = "0" ];then lxc config set "${fullname}" limits.memory "${lim_mem}";fi
 }
 
-remove_devices(){
-	#removes unneeded access to filesystem on gentoo containers
-	lxc config device remove "${fullname}" distfiles
-	lxc config device remove "${fullname}" packages
-	lxc config device remove "${fullname}" repos
-}
-
 rtorrent_clean_lock(){
 	get_dirs="1"
 	set_dirs
@@ -135,6 +138,7 @@ get_state(){
 }
 
 main_container(){
+	if [ -z "$(echo ${cname})" ];then return;fi #skip blank lines, TODO: need to find a better way to do these
 	if [ -n "$(echo ${ctype}|grep '\#')" ];then return;fi #skip comments
 	if [ -n "$(echo ${ctype}|grep 'stop')" ];then exit;fi #exit when 'stop' is read
 	case "${distro}" in
@@ -200,7 +204,13 @@ main_container(){
 			printf "Copying ${template} to ${fullname}\n"
 			lxc copy "${template}" "${fullname}"
 
-			if [ "${distro}" = "gentoo" ];then remove_devices;fi
+			if [ "${distro}" = "gentoo" ];then
+				#removes unneeded access to filesystem on gentoo containers
+				lxc config device remove "${fullname}" distfiles
+				lxc config device remove "${fullname}" packages
+				lxc config device remove "${fullname}" repos
+			fi
+
 			set_limits
 			set_dirs
 			set_ip
@@ -208,12 +218,15 @@ main_container(){
 			printf "\n"
 			;;
 		print)
+			get_state "${fullname}"
 			printf "Container Name\t: ${fullname}\n"
 			printf "Name\t\t: ${cname}\n"
 			printf "Template\t: ${ctype}\n"
 			printf "Distro\t\t: ${distro}\n"
 			if [ "${ctype}" = "transmission" ];then ip4="${ip4}:${transmission_port}";fi
 			printf "IPV4\t\t: 192.168.0.${ip4}\n"
+			if [ "${is_running}" = "1" ];then state="on";else state="off";fi
+			printf "On/Off\t\t: ${state}\n"
 			if [ "${verbose}" = "1" ];then
 				printf "Limit CPU\t: ${lim_cpu}\n"
 				printf "Limit CPU ALLOW\t: %s\n" "${lim_cpu_allow}"
@@ -245,7 +258,7 @@ container_info="${extra}/lxd-admin"
 lxclist=$(lxc list)
 
 if [ -z "${1}" ];then hlp;exit;fi
-while getopts "TRCDPZUcdrsuzphe" OPT;do
+while getopts "TRCDPZUHEcdrsuzphe" OPT;do
 	case "${OPT}" in
 		T) limit="1";limit_to="transmission";;
 		R) limit="1";limit_to="rutorrent";;
@@ -262,17 +275,13 @@ while getopts "TRCDPZUcdrsuzphe" OPT;do
 		p) act="print";;
 		P) act="print";get_dirs="1";verbose="1";;
 		h) hlp;exit;;
+		H) hlp2;exit;;
 		e) $EDITOR "${container_info}";exit;;
+		E) cat "${container_info}";exit;;
 	esac
 done
 
-if ! [ -f "${container_info}" ];then
-	printf "all containers are declared in '${container_info}' using the following space delimited format, subject to change\n"
-	printf "'container type' 'distro' 'IPV4 ending' 'limit cpu' 'limit cpu allowance' 'limit mem' 'container name' 'save location override, optional'\n"
-	printf "NOTE: to not use limits, set them to '0'\n"
-	printf "example: rutorrent gentoo 161 6 10%% 8192MB anime /mnt/anime/anime-working\n"
-	exit 1
-fi
+if ! [ -f "${container_info}" ];then hlp2;exit 1;fi
 
 while IFS=' ' read -r ctype distro ip4 lim_cpu lim_cpu_allow lim_mem cname save_override;do
 	main_container
