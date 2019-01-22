@@ -1,6 +1,6 @@
 #!/bin/sh
-#3.0.2
-#2019-01-18
+#3.1.0
+#2019-01-21
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -41,7 +41,7 @@ usage(){
 }
 
 die(){ /bin/echo -e "$*";exit 1; }
-test_file_list(){ if [ -f "${f%%}.7z" ];then file_list="${file_list} ${f%%}.7z";fi; }
+test_file_list(){ if [ -f "${f%%}.7z" ];then file_list="${file_list},${f%%}.7z";fi; }
 compress(){
 	case "${comp_type}" in
 		single)
@@ -70,6 +70,8 @@ compress(){
 			;;
 		test)
 			if [ "${f##*.}" = "7z" ] || [ "${f##*.}" = "zip" ];then
+				printf "${YEL}TEST${NC}\t$(echo ${f%%}|cut -c 1-80)\n"
+				printf "\033[A"
 				if [ -n "$(nice -19 7z t "${f%%}"|grep Ok)" ];then
 					printf "${GRE}PASSED${NC}\t${f%%}\n"
 					P=$((P+1))
@@ -140,12 +142,14 @@ else
 fi
 
 if [ "${test_post}" = "1" ] && [ "${orig_rm}" = "0" ];then
+	IFS=','
 	for f in ${file_list}; do
 		if [ -f "${f}" ];then
 			comp_type="test"
 			compress
 		fi
 	done
+	unset IFS
 fi
 
 if [ "${comp_type}" = "test" ] && [ "${test_post_fancy}" = "1" ];then
