@@ -1,6 +1,6 @@
 #!/bin/sh
-#5.0.0
-#2019-01-17
+#5.1.0
+#2019-01-21
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -18,7 +18,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 die(){ /bin/echo -e "\033[0;31m$*\033[m";exit 1; }
-test_file_list(){ if [ -f "${f%%}.zip" ];then file_list="${file_list} ${f%%}.zip";fi; }
+test_file_list(){ if [ -f "${f%%}.zip" ];then file_list="${file_list},${f%%}.zip";fi; }
 compress(){
 	case "${comp_type}" in
 		0)
@@ -108,10 +108,12 @@ else
 fi
 
 if [ "${test_post}" = "1" ] && [ "${orig_rm}" = "0" ];then
+	IFS=','
 	for f in ${file_list}; do
 		if [ -f "${f}" ];then
 			comp_type="test"
 			compress
 		fi
 	done
+	unset IFS
 fi
