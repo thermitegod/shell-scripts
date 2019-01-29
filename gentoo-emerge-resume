@@ -1,6 +1,6 @@
 #!/bin/sh
-#5.5.0
-#2018-01-06
+#5.6.0
+#2019-01-22
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -24,71 +24,68 @@ trap finish EXIT
 tmpdir=$(mktemp -d)
 chmod 755 "${tmpdir}"
 
-res_specific="0"
-date=$(date "+%F-%s")
-store="/mnt/data/backup/emerge-resume"
-resume="/var/cache/edb/mtimedb"
-mtime_zst="${date}-mtimedb.zst"
-user="brandon"
-group="${user}"
-
-bac(){
-	if ! [ -d "${store}" ]; then mkdir -p ${store} && chown ${user}:${group} ${store};fi
-	if [ -f "${store}/${mtime_zst}" ]; then rm ${store}/${mtime_zst};fi
-	cp ${resume} ${tmpdir}
-	cd ${tmpdir}
-	zstd ${mtime_zst}
-	mv ${mtime_zst} ${store}
-	chown ${user}:${group} ${store}/${mtime_zst}
-	printf "Finished backup of %s to %s\n" "${mtime_zst}" "${store}"
-}
-
-res(){
-	if ! [ -d "${store}" ]; then die "Run a backup first. Exiting.";fi
-	if [ -f "${resume}" ]; then rm ${resume};fi
-	if [ "${res_specific}" = "1" ];then
-		printf "Selected mtimedb to restore\n"
-		printf "==MUST== input full name\n"
-		cd "${store}"
-		ls -1A
-		read mtime_res
-	else
-		mtime_res=$(ls -1A|tail -n1)
-	fi
-
-	cp ${store}/${mtime_res} ${tmpdir}
-	cd ${tmpdir}
-	unzstd -d ${mtime_res}
-	printf " -h\tprint this help\n"
-	mv mtimedb ${resume}
-	rm ${mtime_res}
-	printf "Finished restore of %s to %s\n" "${mtime_res}" "${resume}"
-}
-
 hlp(){
 	printf " -b\tbackup\n"
-	printf " -r\trestore last <BROKEN>\n"
+	printf " -r\trestore last <wip>\n"
 	printf " -s\trestore selected\n"
 	printf " -l\tlist\n"
 	printf " -d\tdelete\n"
 	printf " -h\tprint this help\n"
 }
 
+bac(){
+	if ! [ -d "${storage}" ];then mkdir -p "${storage}" && chown "${user}:${group}" "${storage}";fi
+	cp "${mtimedb}" "${tmpdir}"
+	zstd "${tmpdir}/mtimedb"
+	mv "${tmpdir}/${mtime_zst}" "${storage}/${date}-${mtime_zst}"
+	chown "${user}:${group}"  "${storage}/${date}-${mtime_zst}"
+	printf "Finished backup of %s to %s\n" "${date}-${mtime_zst}" "${storage}"
+}
+
+res(){
+	if [ -z "$(ls -1A ${storage} 2>/dev/null)" ];then die "Run a backup first. Exiting.";fi
+	#if ! [ -d "$storage" ];then die "Run a backup first. Exiting.";fi
+	if [ "${res_specific}" = "1" ];then
+		printf "Selected mtimedb to restore\n"
+		printf "==MUST== input full name\n"
+		ls -1A "$storage"
+		printf "\n"
+		read mtime_res
+	else
+		mtime_res=$(ls -1A "${storage}"|tail -n1)
+	fi
+
+	cp "${storage}/${mtime_res}" "${tmpdir}"
+	unzstd "${tmpdir}/${mtime_res}"
+	mv "${tmpdir}/${mtime_res%%.*}" "${tmpdir}/mtimedb" #removes date prefix
+	if [ -f "${mtimedb}" ];then rm "${mtimedb}";fi
+	mv "${tmpdir}/mtimedb" "${mtimedb}"
+	printf "Finished restore of %s to %s\n" "${mtime_res}" "${mtimedb}"
+}
+
+res_specific="0"
+date=$(date "+%F-%s")
+storage="/mnt/data/backup/mtimedb"
+mtimedb="/var/cache/edb/mtimedb"
+mtime_zst="mtimedb.zst"
+user="brandon"
+group="$user"
+
 if [ -z "${1}" ];then hlp;exit;fi
 while getopts "brsldh" OPT;do
 	case "$OPT" in
 		b) bac;;
-		#r) res;;
+		#r) res_specific="0";res;;
 		r) die "Disabled, use -s";;
 		s) res_specific="1";res;;
 		l)
-			if ! [ -d "${store}" ]; then die "Run a backup first. Exiting.";fi
-			printf "Listing files in : ${store}\n"
-			ls -1A ${store}
+			if ! [ -d "${storage}" ]; then die "Run a backup first. Exiting.";fi
+			printf "Listing files in : ${storage}\n"
+			ls -1A ${storage}
 			;;
 		d)
-			if [ -d "${store}" ]; then
-				rm -rfv "${store}" || die
+			if [ -d "${storage}" ]; then
+				rm -rfv "${storage}" || die
 			else
 				printf "Nothing to delete\n"
 			fi

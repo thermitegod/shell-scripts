@@ -1,6 +1,6 @@
 #!/bin/sh
-#1.9.0
-#2019-01-20
+#2.0.0
+#2019-01-29
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -23,9 +23,11 @@
 
 mime_type_image(){
 	if [ -d "${f}" ];then return;fi
-	total=$((total+1))
+	total="$((total+1))"
 	mimeext=$(file -b --mime-type -- "${f%%}"|awk '{print $NF}' FS=/)
-	if ! [ "${mimeext}" = "jpeg" ] && ! [ "${mimeext}" = "png" ] && ! [ "${mimeext}" = "gif" ];then return;fi
+	if [ "${mimeext##*-}" = "bmp" ];then mimeext="bmp";fi
+	if ! [ "${mimeext}" = "jpeg" ] && ! [ "${mimeext}" = "png" ] && ! [ "${mimeext}" = "gif" ] && \
+		! [ "${mimeext}" = "tiff" ] && ! [ "${mimeext}" = "bmp" ];then return;fi
 	ext="${f##*.}"
 	if [ "${mimeext}" = "jpeg" ] && [ "${ext}" = "jpg" ];then return;fi
 	if ! [ "${mimeext}" = "${ext}" ];then
@@ -33,74 +35,57 @@ mime_type_image(){
 		if [ -f "${f%%.*}.${mimeext}" ] && [ -f "${f%%.*}.${ext}" ];then
 			if [ "${V}" = "1" ];then
 				if [ "$(openssl sha1 ${f%%.*}.${mimeext}|awk '{print $2}')" = "$(openssl sha1 ${f%%.*}.${ext}|awk '{print $2}')" ];then
-					printf "File collision is same file : ${f%%.*}.${mimeext} ${f%%.*}.${ext}\n"
-					#TODO
-					#remove wrong ext file, since they are the same?
+					if [ "${sha_coll_rm}" = "1" ];then rm "${f%%}";return;fi
+					printf "${YEL}File collision is same file${NC}: ${f%%.*}.${mimeext} ${f%%.*}.${ext}\n"
 				else
-					printf "File collision with different files : ${f%%.*}.${mimeext} ${f%%.*}.${ext}\n"
+					printf "${YEL}File collision with different files${NC}: ${f%%.*}.${mimeext} ${f%%.*}.${ext}\n"
 				fi
 			fi
-			coll=$((coll+1))
+			coll="$((coll+1))"
 			return
 		else
-			if [ "${V}" = "1" ];then printf "Mismatch : $(readlink -f ${f%%})\n";fi
+			if [ "${V}" = "1" ];then printf "${YEL}Mismatch${NC}: $(readlink -f ${f%%})\n";fi
 		fi
 		if [ "${listonly}" = "1" ];then return;fi
 		mv "${f%%}" "${f%%.*}.${mimeext}"
-		fixed=$((fixed+1))
+		fixed="$((fixed+1))"
 	fi
 }
 
-set_vars(){
-	total="0"
-	coll="0"
-	fixed="0"
-}
-
 hlp(){
+	printf "Correct incorrect file extensions based on mime type, supports: jpg,png,gif,tiff,bmp\n"
 	printf " -A\trun in all sub-dirs of \$PWD\n"
 	printf " -h\tprint this help\n"
 	printf " -I\trun in single dir only\n"
 	printf " -L\tlist only in \$PWD, no corrections\n"
+	printf " -r\tif two files collide with the same sha1 hash, remove the file with the incorrect file extension\n"
 	printf " -v\tverbose\n"
 }
 
+. $(dirname "$0")/colors.sh
 if [ -z "${1}" ];then hlp;exit;fi
-while getopts "AILvh" OPT;do
+while getopts "AILvhr" OPT;do
 	case "$OPT" in
-		A) mode="all";;
-		I) mode="correct";;
-		L) mode="list";;
+		A) mode="all_check";;
+		I) mode="check";listonly="0";;
+		L) mode="check";listonly="1";;
+		r) export sha_coll_rm="1";;
 		v) export V="1";;
 		h) hlp;exit;;
 	esac
 done
 
-while true;do
-	case "${mode}" in
-		correct)
-			listonly="0"
-			set_vars
-			for f in *;do mime_type_image;done
-			if [ "${V}" = "1" ] && ! [ "${total}" = "0" ];then
-				printf "Checked : ${total}\tCorrected : ${fixed}\tCollisions : ${coll}\tin : ${PWD}\n"
-			elif ! [ "${total}" = "0" ];then
-				printf "Checked : ${total}\tCorrected : ${fixed}\tCollisions : ${coll}\n"
-			fi
-			break;;
-		list)
-			listonly="1"
-			set_vars
-			for f in *;do mime_type_image;done
-			if [ "${V}" = "1" ] && ! [ "${total}" = "0" ];then
-				printf "Checked : ${total}\tCollisions : ${coll}\tin : ${PWD}\n"
-			elif ! [ "${total}" = "0" ];then
-				printf "Checked : ${total}\tCollisions : ${coll}\n"
-			fi
-			break;;
-		all)
-			#i give up on fixing this, if script renamed change below
-			find . -type d -type d \( ! -name . \) -exec sh -c 'cd "{}" && mime-correct -I' \;
-			break;;
-	esac
-done
+case "${mode}" in
+	check)
+		total="0"
+		coll="0"
+		fixed="0"
+		for f in *;do mime_type_image;done
+		if ! [ "${fixed}" = "0" ];then fixed_out="\t${YEL}Corrected${NC}: ${fixed}";else fixed_out="";fi
+		if ! [ "${coll}" = "0" ];then coll_out="\t${RED}Collision${NC}: ${coll}";else coll_out="";fi
+		if [ "${V}" = "1" ];then pwd_out="\tin: ${PWD}";else pwd_out="";fi
+		if ! [ "${total}" = "0" ];then printf "${GRE}Checked${NC}: ${total}${fixed_out}${coll_out}${pwd_out}\n";fi
+		;;
+	check_all) find . -path '*/*' -type d \( ! -name . \) -exec dash -c "cd '{}' && ${0} -I" \;;;
+esac
+

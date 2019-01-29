@@ -1,6 +1,6 @@
 #!/bin/sh
-#5.1.1
-#2019-01-05
+#5.2.0
+#2019-01-24
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -20,31 +20,23 @@
 #keeping it simple, since v2
 
 #TODO
-#debug statments
 #improve multi list
-
-debug="0"
-. $(dirname "$0")/utils.sh
-list_final="${extra}/sort-name-final"
-list_type="${extra}/sort-name-type"
-
-dest_final=$(head -n1 ${list_final}|sed -e "s/#//g")
-dest_type=$(head -n1 ${list_type}|sed -e "s/#//g")
-
-#defaults
-list_sort="${list_type}"
-dest="${dest_type}"
 
 main(){
 	while IFS=' ' read -r name override;do
 		name_sort
-	done < "${name_list}"
+	done < "${list_sort}"
 }
 
 name_sort(){
-	if [ -n "$(echo ${name}|grep '\#')" ];then exit;fi
+	if [ -n "$(echo ${name}|grep '\#')" ];then return;fi
 	arc=$(echo "${name}" | sed -e "s/\-/\*/g")
 	if [ -z "${override}" ];then dir="${name}/.";else dir="${override}/.";fi
+
+	if [ "${debug}" -ge "2" ];then printf "${BLU}\$name${NC}: ${name}\n";fi
+	if [ "${debug}" -ge "3" ];then printf "\t${CYA}\$arc${NC}: ${arc}\n";fi
+	if [ "${debug}" -ge "3" ];then printf "\t${CYA}\$dir${NC}: ${dir}\n";fi
+
 	case "${job_run}" in
 		dir_check) find . -maxdepth 1 -type f -iname "*${arc}*" -exec mkdir -p -- "${dest}/${dir}" \; -quit;;
 		sort_main) find . -maxdepth 1 -type f -iname "*${arc}*" -exec mv -n -- "{}" "${dest}/${dir}" \;;;
@@ -52,17 +44,36 @@ name_sort(){
 	esac
 }
 
-if ! [ -f "${list_sort}" ];then printf "missing: ${name_list}\nformat, line 1 must be save path:\n/path/to/save\nto-sort\nto-sort override\n";exit 1;fi
-while getopts "ETeftdh" OPT;do
+B="$(ls -1A|wc -l)"
+debug="0"
+. $(dirname "$0")/utils.sh
+. $(dirname "$0")/colors.sh
+print_sorted_total="1"
+
+list_final="${extra}/sort-name-final"
+list_type="${extra}/sort-name-type"
+dest_final=$(head -n1 ${list_final}|sed -e "s/#//g")
+dest_type=$(head -n1 ${list_type}|sed -e "s/#//g")
+
+#default
+list_sort="${list_type}"
+dest="${dest_type}"
+
+while getopts "ETefthd:" OPT;do
 	case "$OPT" in
 		f) list_sort="${list_final}";dest="${dest_final}";;
 		t) list_sort="${list_type}";dest="${dest_type}";;
-		d) debug="1";;
+		d)
+			case "${OPTARG}" in
+				1) debug="1";;
+				2) debug="2";;
+				3|*) debug="3";;
+			esac;;
 		T) dest="/tmp/test";;
 		E) $EDITOR "${list_final}";exit;;
 		e) $EDITOR "${list_type}";exit;;
 		h)
-			printf " -d\tDebug output\n"
+			printf " -d #\tDebug output, prints vars, levels [1,3]\n"
 			printf " -h\tPrint this help\n"
 			printf " -T\tUse test dir \"/tmp/test\"\n"
 			printf "\nEDIT\n"
@@ -75,8 +86,14 @@ while getopts "ETeftdh" OPT;do
 	esac
 done
 
-if [ "${debug}" = "1" ];then printf "\n*** Debug printouts enabled ***\n\n";fi
+if ! [ -f "${list_sort}" ];then
+	printf "missing: ${list_sort}\nformat, line 1 must be default save path:\n/path/to/save\nto-sort\nto-sort override\n"
+	exit 1
+fi
+
+if [ "${debug}" -ge "1" ];then printf "\n*** Debug printouts enabled ***\n\n";fi
 printf "Prerun info\n"
+printf "MODE\t\t: $(basename ${list_sort})\n"
 printf "Running from\t: ${PWD}\n"
 printf "Dest is\t\t: ${dest}\n\n"
 printf "Make sure everything has been processed correctly\n"
@@ -85,18 +102,28 @@ read confirm
 if echo "${confirm}"|grep -iq "^y" ;then
 	#all target dirs should exits before running
 	#otherwise you are going to have a bad time
-	if [ "${debug}" = "1" ];then printf "Debug: running dir_check\n";fi
+	if [ "${debug}" -ge "1" ];then printf "${YEL}Debug${NC}: running dir_check\n";fi
 	job_run="dir_check"
 	main
 	#move maches to dest
-	if [ "${debug}" = "1" ];then printf "Debug: running sort_main\n";fi
+	if [ "${debug}" -ge "1" ];then printf "${YEL}Debug${NC}: running sort_main\n";fi
 	job_run="sort_main"
 	main
 	#deal w/ name collisions in dest by sorting into $pwd, to be delt w/ manualy
-	if [ "${debug}" = "1" ];then printf "Debug: running sort_local\n";fi
+	if [ "${debug}" -ge "1" ];then printf "${YEL}Debug${NC}: running sort_local\n";fi
 	job_run="sort_local"
 	main
 else
 	printf "Did not confirm, Exiting.\n"
 	exit 1
+fi
+
+if [ "${print_sorted_total}" = "1" ];then
+	A="$(ls -1A|wc -l)"
+	T="$((B-A))"
+	if ! [ "${total}" = "0" ];then
+		printf "\n${YEL}BEFORE${NC}\t${B}\n"
+		printf "${YEL}AFTER${NC}\t${A}\n"
+		printf "${YEL}SORTED${NC}\t${T}\n"
+	fi
 fi

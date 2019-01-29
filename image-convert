@@ -1,8 +1,8 @@
 #!/bin/sh
-#4.0.1
-#2018-12-08
+#5.0.0
+#2019-01-29
 
-#Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
+#Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
 #This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -17,36 +17,75 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+#TODO
+#resize support
+
 hlp(){
-	printf "MODE=${mode}\n"
+	printf "GENERAL\n"
 	printf " -m\tdisable mime check\n"
+	printf "\nRESIZE Horizontal\n"
+	printf " -H 1\t2400x\n"
+	printf " -H 2\t1600x\n"
+	printf " -H 3\t1280x\n"
+	printf " -H 4\t980x\n"
+	printf " -H 5\t780x\n"
 	printf "\nCONVERT\n"
 	printf "\nSource jpg\n"
-	printf " -J1\tjpg > jpg : low  q=90\n"
-	printf " -J2\tjpg > jpg : mid  q=95\n"
-	printf " -J3\tjpg > jpg : high q=100\n"
+	printf " -J 1\tjpg > jpg : low  q=90\n"
+	printf " -J 2\tjpg > jpg : mid  q=95\n"
+	printf " -J 3\tjpg > jpg : high q=100\n"
 	printf "\nSource jpg\n"
-	printf " -j1\tjpg > png : low  q=7\n"
-	printf " -j2\tjpg > png : mid  q=8\n"
-	printf " -j3\tjpg > png : high q=9\n"
+	printf " -j 1\tjpg > png : low  q=7\n"
+	printf " -j 2\tjpg > png : mid  q=8\n"
+	printf " -j 3\tjpg > png : high q=9\n"
 	printf "\nSource png\n"
-	printf " -P1\tpng > png : low  q=7\n"
-	printf " -P2\tpng > png : mid  q=8\n"
-	printf " -P3\tpng > png : high q=9\n"
+	printf " -P 1\tpng > png : low  q=7\n"
+	printf " -P 2\tpng > png : mid  q=8\n"
+	printf " -P 3\tpng > png : high q=9\n"
 	printf "\nSource png\n"
-	printf " -p1\tpng > jpg : low  q=90\n"
-	printf " -p2\tpng > jpg : mid  q=95\n"
-	printf " -p3\tpng > jpg : high q=100\n"
+	printf " -p 1\tpng > jpg : low  q=90\n"
+	printf " -p 2\tpng > jpg : mid  q=95\n"
+	printf " -p 3\tpng > jpg : high q=100\n"
 }
 
-convert_main(){
+convert_resize(){
+	if [ "${mimecheck}" = "1" ];then mime-correct -I;fi
 	mkdir "${O}"
+	cvloc="cv_tmp";mkdir "${cvloc}";
 	for f in *;do
-		if [ -f "${f%.*}.${origext}" ];then
-			convert -quality ${qaul} "${f%%}" "${f%.*}.${newext}"
+		#read z
+		if [ -f "${f%%}" ];then
+			convert ${f%%} -resize "${size}"\> "${cvloc}/${f%%}"
 			mv "${f}" orig
 		fi
 	done
+	cd "${cvloc}";mv * ..;cd .. #what am i doing wrong
+	rm -rf ${cvloc}
+}
+
+
+convert_action(){
+	for f in *;do
+		if [ -f "${f%.*}.${origext}" ];then
+			convert -quality ${qual} "${f%%}" "${cvloc}/${f%.*}.${newext}"
+			mv "${f}" orig
+		fi
+	done
+}
+
+convert_main(){
+	if [ "${mimecheck}" = "1" ];then mime-correct -I;fi
+	mkdir "${O}"
+	if [ "${origext}" = "${newext}" ];then
+		cvloc="cv_tmp";mkdir "${cvloc}";
+		convert_action
+		cd "${cvloc}";mv * ..;cd .. #what am i doing wrong
+		#mv ${cvloc}/* ${cvloc}/..
+		rm -rf ${cvloc}
+	else
+		cvloc="."
+		convert_action
+	fi
 	if [ -d "${O}" ] && ! [ "$(ls -A ${O})" ];then rm -rf "${O}";fi
 }
 
@@ -55,106 +94,61 @@ mode="z"
 mimecheck="1"
 
 if [ -z "${1}" ];then hlp;exit;fi
-while true;do
-	case "${1}" in
-		-m) mimecheck="0";shift;;
-
-		-j1) mode="jpg2png-low";shift;;
-		-j2) mode="jpg2png-mid";shift;;
-		-j3) mode="jpg2png-high";shift;;
-
-		-J1) mode="jpg2jpg-low";shift;;
-		-J2) mode="jpg2jpg-mid";shift;;
-		-J3) mode="jpg2jpg-high";shift;;
-
-		-p1) mode="png2jpg-low";shift;;
-		-p2) mode="png2jpg-mid";shift;;
-		-p3) mode="png2jpg-high";shift;;
-
-		-P1) mode="png2png-low";shift;;
-		-P2) mode="png2png-mid";shift;;
-		-P3) mode="png2png-high";shift;;
-		-h) hlp;exit;;
-		*) break;;
+while getopts "P:p:J:j:H:hm" OPT;do
+	case "$OPT" in
+		j)
+			origext="jpg"
+			newext="png"
+			case "${OPTARG}" in
+				1) qual="7";; #jpg2png-low
+				2) qual="8";; #jpg2png-mid
+				3) qual="9";; #jpg2png-high
+			esac
+			convert_main
+			;;
+		J)
+			origext="jpg"
+			newext="jpg"
+			case "${OPTARG}" in
+				1) qual="90";; #jpg2jpg-low
+				2) qual="95";; #jpg2jpg-mid
+				3) qual="100";; #jpg2jpg-high
+			esac
+			convert_main
+			;;
+		p)
+			origext="png"
+			newext="jpg"
+			case "${OPTARG}" in
+				1) qual="90";; #png2jpg-low
+				2) qual="95";; #png2jpg-mid
+				3) qual="100";; #png2jpg-high
+			esac
+			convert_main
+			;;
+		P)
+			origext="png"
+			newext="png"
+			case "${OPTARG}" in
+				1) qual="7";; #png2png-low
+				2) qual="8";; #png2png-mid
+				3) qual="9";; #png2png-high
+			esac
+			convert_main
+			;;
+		H)
+			case "${OPTARG}" in
+				1) size="2400";;
+				2) size="1600";;
+				3) size="1280";;
+				4) size="980";;
+				5) size="780";;
+			esac
+			convert_resize
+			;;
+		m) mimecheck="0";shift;;
+		h) hlp;exit;;
 	esac
 done
+#shift $((OPTIND - 1))
 
-if [ "${mimecheck}" = "1" ];then mime-correct -A;fi
-
-case "${mode}" in
-	png2jpg-low)
-		origext="jpg"
-		newext="png"
-		qual="90"
-		convert_main
-		;;
-	png2jpg-mid)
-		origext="jpg"
-		newext="png"
-		qual="95"
-		convert_main
-		;;
-	png2jpg-high)
-		origext="jpg"
-		newext="png"
-		qual="100"
-		convert_main
-		;;
-
-	png2png-low)
-		origext="png"
-		newext="png"
-		qual="7"
-		convert_main
-		;;
-	png2png-mid)
-		origext="png"
-		newext="png"
-		qual="8"
-		convert_main
-		;;
-	png2png-high)
-		origext="png"
-		newext="png"
-		qual="9"
-		convert_main
-		;;
-
-	jpg2png-low)
-		origext="png"
-		newext="jpg"
-		qual="7"
-		convert_main
-		;;
-	jpg2png-mid)
-		origext="png"
-		newext="jpg"
-		qual="8"
-		convert_main
-		;;
-	jpg2png-high)
-		origext="png"
-		newext="jpg"
-		qual="9"
-		convert_main
-		;;
-
-	jpg2jpg-low)
-		origext="jpg"
-		newext="jpg"
-		qual="90"
-		convert_main
-		;;
-	jpg2jpg-mid)
-		origext="jpg"
-		newext="jpg"
-		qual="95"
-		convert_main
-		;;
-	jpg2jpg-high)
-		origext="jpg"
-		newext="jpg"
-		qual="100"
-		convert_main
-		;;
-esac
