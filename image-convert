@@ -1,6 +1,6 @@
 #!/bin/sh
-#5.0.0
-#2019-01-29
+#5.0.1
+#2019-01-31
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -18,135 +18,169 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #TODO
-#resize support
+#batch support --test
+
+convert_main(){
+	if [ "${batch}" = "1" ];then
+		batch="0"
+		nest_dir=$(find . -mindepth 2 -path '*/*' -type d)
+		if [ -n "${nest_dir}" ];then printf "Nested directories detected\n\n${nest_dir}\n\n";fi
+		if [ "${mimecheck}" = "1" ];then mime-correct -A;mimecheck="0";fi
+		for d in *;do
+			if [ -d "${d}" ];then
+				cd "${d}"
+				printf "Running in: ${d}\n"
+				convert_main "${1}"
+				cd ..
+			fi
+		done
+		exit
+	fi
+	if ! [ "${1}" = "size" ];then
+		if [ "${mimecheck}" = "1" ];then mime-correct -I;fi
+		mkdir "${O}"
+		cvloc="cv_tmp";mkdir "${cvloc}"
+	fi
+	for f in *;do
+		if [ -n "$(file -b --mime-type -- ${f%%}|grep image)" ];then
+			case "${1}" in
+				convert)
+					gm convert -quality ${qual} "${f%%}" "${cvloc}/${f%.*}.${newext}"
+					mv "${f}" "${O}"
+					;;
+				resize)
+					gm convert ${f%%} -resize "${size}"\> "${cvloc}/${f%%}"
+					mv "${f}" "${O}"
+					;;
+				size) gm identify -format "%wx%h" "${f%%}";;
+			esac
+		fi
+	done
+	if ! [ "${1}" = "size" ];then
+		mv ${cvloc}/* . #do not quote
+		rm -rf "${cvloc}"
+		if [ "${keep_orig}" = "0" ];then rm -rf "${O}"
+		elif [ -d "${O}" ] && ! [ "$(ls -A ${O})" ];then rm -rf "${O}"
+		fi
+	fi
+}
 
 hlp(){
 	printf "GENERAL\n"
+	printf " -B\tbatch, must come before other args\n"
+	printf " -b\tbatch, must come before other args, uses -r\n"
 	printf " -m\tdisable mime check\n"
-	printf "\nRESIZE Horizontal\n"
-	printf " -H 1\t2400x\n"
-	printf " -H 2\t1600x\n"
-	printf " -H 3\t1280x\n"
-	printf " -H 4\t980x\n"
-	printf " -H 5\t780x\n"
+	printf " -r\tdo not keep orig\n"
+	printf " -s\tget current image size in dir\n"
+	printf "\nRESIZE Width, keeps aspect\n"
+	printf " -W *\tuse value provided\n"
+	printf " -W 1\t2400x\n"
+	printf " -W 2\t1600x\n"
+	printf " -W 3\t1280x\n"
+	printf " -W 4\t980x\n"
+	printf " -W 5\t780x\n"
+	printf "\nRESIZE Hight, keeps aspect\n"
+	printf " -H *\tuse value provided, must prefix with 'x'\n"
+	printf " -H 1\tx2400\n"
+	printf " -H 2\tx1600\n"
+	printf " -H 3\tx1280\n"
+	printf " -H 4\tx980\n"
+	printf " -H 5\tx780\n"
+	printf "\nRESIZE Percent\n"
+	printf " -S *\tuse value provided, must append '%%'\n"
+	printf " -S 1\t90%%\n"
+	printf " -S 2\t80%%\n"
+	printf " -S 3\t70%%\n"
+	printf " -S 4\t60%%\n"
+	printf " -S 5\t50%%\n"
 	printf "\nCONVERT\n"
-	printf "\nSource jpg\n"
-	printf " -J 1\tjpg > jpg : low  q=90\n"
-	printf " -J 2\tjpg > jpg : mid  q=95\n"
-	printf " -J 3\tjpg > jpg : high q=100\n"
-	printf "\nSource jpg\n"
-	printf " -j 1\tjpg > png : low  q=7\n"
-	printf " -j 2\tjpg > png : mid  q=8\n"
-	printf " -j 3\tjpg > png : high q=9\n"
-	printf "\nSource png\n"
-	printf " -P 1\tpng > png : low  q=7\n"
-	printf " -P 2\tpng > png : mid  q=8\n"
-	printf " -P 3\tpng > png : high q=9\n"
-	printf "\nSource png\n"
-	printf " -p 1\tpng > jpg : low  q=90\n"
-	printf " -p 2\tpng > jpg : mid  q=95\n"
-	printf " -p 3\tpng > jpg : high q=100\n"
-}
-
-convert_resize(){
-	if [ "${mimecheck}" = "1" ];then mime-correct -I;fi
-	mkdir "${O}"
-	cvloc="cv_tmp";mkdir "${cvloc}";
-	for f in *;do
-		#read z
-		if [ -f "${f%%}" ];then
-			convert ${f%%} -resize "${size}"\> "${cvloc}/${f%%}"
-			mv "${f}" orig
-		fi
-	done
-	cd "${cvloc}";mv * ..;cd .. #what am i doing wrong
-	rm -rf ${cvloc}
-}
-
-
-convert_action(){
-	for f in *;do
-		if [ -f "${f%.*}.${origext}" ];then
-			convert -quality ${qual} "${f%%}" "${cvloc}/${f%.*}.${newext}"
-			mv "${f}" orig
-		fi
-	done
-}
-
-convert_main(){
-	if [ "${mimecheck}" = "1" ];then mime-correct -I;fi
-	mkdir "${O}"
-	if [ "${origext}" = "${newext}" ];then
-		cvloc="cv_tmp";mkdir "${cvloc}";
-		convert_action
-		cd "${cvloc}";mv * ..;cd .. #what am i doing wrong
-		#mv ${cvloc}/* ${cvloc}/..
-		rm -rf ${cvloc}
-	else
-		cvloc="."
-		convert_action
-	fi
-	if [ -d "${O}" ] && ! [ "$(ls -A ${O})" ];then rm -rf "${O}";fi
+	printf " -J [1-100]\tjpg > jpg : 100 quality=100 | 1 quality=1\n"
+	printf " -j [1-9]\tjpg > png : 9 quality=9 | 1 quality=1\n"
+	printf " -P [1-9]\tpng > png : 9 qualitl=9 | 1 quality=1\n"
+	printf " -p [1-100]\tpng > jpg : 100 quality=100 | 1 quality=1\n"
 }
 
 O="orig"
 mode="z"
+batch="0"
 mimecheck="1"
+keep_orig="1"
 
 if [ -z "${1}" ];then hlp;exit;fi
-while getopts "P:p:J:j:H:hm" OPT;do
+while getopts "P:p:J:j:H:W:S:hmsBbr" OPT;do
 	case "$OPT" in
 		j)
 			origext="jpg"
 			newext="png"
-			case "${OPTARG}" in
-				1) qual="7";; #jpg2png-low
-				2) qual="8";; #jpg2png-mid
-				3) qual="9";; #jpg2png-high
-			esac
-			convert_main
+			qual="${OPTARG}"
+			if [ "${qual}" -gt "9" ];then printf "exiting because of invalid range: ${OPTARG}\n";exit;fi
+			convert_main convert
 			;;
 		J)
 			origext="jpg"
 			newext="jpg"
-			case "${OPTARG}" in
-				1) qual="90";; #jpg2jpg-low
-				2) qual="95";; #jpg2jpg-mid
-				3) qual="100";; #jpg2jpg-high
-			esac
-			convert_main
+			qual="${OPTARG}"
+			if [ "${qual}" -gt "100" ];then printf "exiting because of invalid range: ${OPTARG}\n";exit;fi
+			convert_main convert
 			;;
 		p)
 			origext="png"
 			newext="jpg"
-			case "${OPTARG}" in
-				1) qual="90";; #png2jpg-low
-				2) qual="95";; #png2jpg-mid
-				3) qual="100";; #png2jpg-high
-			esac
-			convert_main
+			qual="${OPTARG}"
+			if [ "${qual}" -gt "100" ];then printf "exiting because of invalid range: ${OPTARG}\n";exit;fi
+			convert_main convert
 			;;
 		P)
 			origext="png"
 			newext="png"
-			case "${OPTARG}" in
-				1) qual="7";; #png2png-low
-				2) qual="8";; #png2png-mid
-				3) qual="9";; #png2png-high
-			esac
-			convert_main
+			qual="${OPTARG}"
+			if [ "${qual}" -gt "9" ];then printf "exiting because of invalid range: ${OPTARG}\n";exit;fi
+			convert_main convert
 			;;
-		H)
+		W)
 			case "${OPTARG}" in
 				1) size="2400";;
 				2) size="1600";;
 				3) size="1280";;
 				4) size="980";;
 				5) size="780";;
+				*) size="${OPTARG}";;
 			esac
-			convert_resize
+			convert_main resize
 			;;
-		m) mimecheck="0";shift;;
+		H)
+			case "${OPTARG}" in
+				1) size="x2400";;
+				2) size="x1600";;
+				3) size="x1280";;
+				4) size="x980";;
+				5) size="x780";;
+				*) size="${OPTARG}";;
+			esac
+			convert_main resize
+			;;
+		S)
+			case "${OPTARG}" in
+				1) size="90%";;
+				2) size="80%";;
+				3) size="70%";;
+				4) size="60%";;
+				5) size="50%";;
+				*) size="${OPTARG}";;
+			esac
+			convert_main resize
+			;;
+		B)
+			keep_orig="0"
+			batch="1"
+			;;
+		b)
+			keep_orig="0"
+			batch="1"
+			;;
+		r) keep_orig="0";;
+		s) convert_main size;;
+		m) mimecheck="0";;
 		h) hlp;exit;;
 	esac
 done
