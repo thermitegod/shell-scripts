@@ -1,6 +1,6 @@
 #!/bin/sh
-#4.2.0
-#2019-01-06
+#4.3.0
+#2019-02-02
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -39,27 +39,38 @@ while getopts "Bih" OPT;do
 done
 
 printf "Tmpdir: %s\n" "${tmpdir}"
-O="${PWD%%}/original"
-if ! [ -d "$O" ];then mkdir -p -- "$O";fi
-
 for f in *;do
 	mimetype=$(file -b --mime-type "${f%%}")
 	ext="${f##*.}"
-	if [ -f "${f%%}" ] && [ "${mimetype%%/*}" = "video" ] && ! [ "${ext}" = "mkv" ];then
-
-
-		if [ "${inc_iso}" = "1" ] && [ -f "${f%.*}.${iso}" ];then
-			find . -iname '*.iso' -exec 7z x -- "{}" \;
-			cd ./VIDEO_TS
-		fi
-
-		ffmpeg -hide_banner -i "${f}" -c:a copy -c:v copy -c:s copy "${tmpdir}/${f%%.*}.mkv" || die "ERROR: conversion failed for ${f%%}"
-
-		mv -i "${tmpdir}/${f%%.*}.mkv" "${PWD}" || die "ERROR: cannot move ${tmpdir}/${f%%.*}.mkv to ${PWD}"
-		mv -i "${f}" "${O}" || die "ERROR: cannot move ${PWD}/${f%%} to ${O}"
-
-		if [ "${inc_iso}" = "1" ] && [ -f "${f%%.*}.${iso}" ];then mv -i *.mkv ../;fi
-	fi
+	case "${ext}" in
+		iso|ISO)
+			if [ "${inc_iso}" = "1" ];then
+				find . -iname '*.iso' -exec 7z x -- "{}" \;
+				cd ./VIDEO_TS || die "VIDEO_TS does not exist, check that this is a video iso"
+				rm *BUP *IFO
+				find . -maxdepth 1 -type f -size +0k -size -5M -exec rm -- "{}" \;
+				for v in *;do
+					#will prefix all *.VOB files w/ iso name
+					ffmpeg -hide_banner -i "${v}" -c:a copy -c:v copy -c:s copy "${tmpdir}/${f%%.*}-${v%%}.mkv"
+						#|| die "ERROR: conversion failed for ${v%%}"
+				done
+				cd ..
+				mv -i "${tmpdir}/*.mkv" . || die "ERROR: cannot move ${tmpdir}/\*.mkv to ${PWD}"
+				rm -rf ./AUDIO_TS ./VIDEO_TS
+			fi
+			;;
+		*)
+			if [ "${mimetype%%/*}" = "video" ];then
+				O="${PWD%%}/original"
+				if ! [ -d "${O}" ];then mkdir -p "${O}";fi
+				ffmpeg -hide_banner -i "${f}" -c:a copy -c:v copy -c:s copy "${tmpdir}/${f%%.*}.mkv" \
+					|| die "ERROR: conversion failed for ${f%%}"
+				mv -i "${tmpdir}/${f%%.*}.mkv" "${PWD}" || die "ERROR: cannot move ${tmpdir}/${f%%.*}.mkv to ${PWD}"
+				mv -i "${f}" "${O}" || die "ERROR: cannot move ${PWD}/${f%%} to ${O}"
+				if [ -d "${O}" ] && ! [ "$(ls -A "$O")" ];then rm -rf "$O";fi
+			fi
+			;;
+		mkv) true;;
+	esac
 done
 
-if [ -d "${O}" ] && ! [ "$(ls -A "$O")" ];then rm -rf "$O";fi
