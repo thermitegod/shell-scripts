@@ -1,6 +1,6 @@
 #!/bin/sh
-#2.0.0
-#2019-01-29
+#2.0.1
+#2019-02-01
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -66,7 +66,7 @@ hlp(){
 if [ -z "${1}" ];then hlp;exit;fi
 while getopts "AILvhr" OPT;do
 	case "$OPT" in
-		A) mode="all_check";;
+		A) mode="check_all";;
 		I) mode="check";listonly="0";;
 		L) mode="check";listonly="1";;
 		r) export sha_coll_rm="1";;
