@@ -1,8 +1,8 @@
 #!/bin/sh
-#3.1.0
-#2018-06-12
+#3.2.0
+#2019-02-01
 
-#Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
+#Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
 #This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -22,14 +22,11 @@ trap 'exit 1' INT HUP QUIT TERM USR1
 trap finish EXIT
 tmpdir=$(mktemp -d)
 
-t=$(date +%s)
-i="${t}.png"
-
+i="$(date +%s).png"
 mode="${0##*/}"
 case "${mode}" in
-	snip) import "${tmpdir}/${i}";;
-	snip-root) import -window root "${tmpdir}/${i}";;
+	snip) gm import "${tmpdir}/${i}";;
+	snip-root) gm import -window root "${tmpdir}/${i}";;
 esac
-
 nice -19 optipng -o7 -strip all "${tmpdir}/${i}">/dev/null 2>&1
 mv "${tmpdir}/${i}" "${HOME}"
