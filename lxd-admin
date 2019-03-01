@@ -1,6 +1,6 @@
 #!/bin/sh
-#5.9.0
-#2019-01-21
+#5.10.0
+#2019-02-28
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -20,35 +20,45 @@
 #misc
 #lxc will not mount on symlinks, but can mount through them
 
+#TODO
+#condense main function
+#alpine auto setup, using guide in ~/docs. put in script, push script, exec in container
+#push rtorrent/transmission/php/lighttd config files too
+
 hlp(){
 	printf "\nCONTAINER, only use to limit actions to specified\n"
-	printf " -T\tOnly run on transmission, uses :${transmission_port} as port\n"
 	printf " -R\tOnly run on rutorrent\n"
+	printf " -T\tOnly run on transmission, uses :${transmission_port} as port\n"
 	printf "\nCONTAINER GENERAL\n"
 	printf " -d\tDelete containers\n"
-	printf " -D\tDelete 'old-*' containers\n"
+	printf " -D\tDelete '<timestamp>-*' containers\n"
 	printf " -h\tPrint this help\n"
-	printf " -H\tprint file setu guide: ${container_info}\n"
-	printf " -r\tRestart\n"
-	printf " -s\tStart\n"
-	printf " -u\tUpdate, rename existing with 'old-*' prefix\n"
+	printf " -H\tprint file setup guide: ${container_info}\n"
+	printf " -r\tRestart containers\n"
+	printf " -o\trename '<timestamp>-*' containers removing '<timestamp>-'\n"
+	printf " -O\trename containers with the prefix '<timestamp>-'\n"
+	printf " -s\tStart containers\n"
+	printf " -S\tStart '<timestamp>-*' containers\n"
+	printf " -u\tUpdate, rename existing with '<timestamp>-*' prefix\n"
 	printf " -U\tUpdate, delete existing instead of renaming\n"
-	printf " -z\tStop\n"
-	printf " -Z\tForce stop\n"
+	printf " -x\tStop '<timestamp>-*' containers\n"
+	printf " -X\tForce stop '<timestamp>-*' containers\n"
+	printf " -z\tStop containers\n"
+	printf " -Z\tForce stop containers\n"
 	printf "\nSPECIFIC, no other flags req\n"
 	printf " -c\trtorrent lockfile cleanup\n"
 	printf " -C\trutorrent cleanup only, remove *.torrent files in \$config/rutorrent/share/torrents/\n"
 	printf "\nOTHER\n"
 	printf " -e\tedit ${container_info}\n"
 	printf " -E\tcat ${container_info}\n"
-	printf " -p\tPrint limited container vars\n"
 	printf " -P\tPrint all container vars\n"
+	printf " -p\tPrint limited container vars\n"
 }
 
 hlp2(){
 	printf "All containers are declared in '${container_info}' using the following space delimited format, subject to change\n"
 	printf "\n'container type' 'distro' 'IPV4 ending' 'limit cpu' 'limit cpu allowance' 'limit mem' 'container name' 'save location override, optional'\n"
-	printf "\nParsing of '${container_info}'\nSkips line if, line starts with '#' or if 'container name' is not set\ndont run any containers below a 'stop' line\n"
+	printf "\nParsing of '${container_info}'\nSkips line if: line starts with '#', line is blank, or 'container name' is not set\nScript exits when a line that starts with 'stop' is read\n"
 	printf "\nNOTE: to not use limits, set them to '0'\n"
 	printf "\nexample:\n# this line will be skipped\nrutorrent gentoo 161 6 10%% 8192MB anime /mnt/anime/anime-working\nstop #nothing below this line will be run\n"
 }
@@ -137,6 +147,17 @@ get_state(){
 	fi
 }
 
+get_timestamp(){
+	if [ "${1}" = "user" ];then
+		printf "Enter timestamp to act on: \n"
+		read timestamp
+		if [ -z "$(echo ${lxclist}|grep ${timestamp})" ];then printf "Invalid timestamp\n";exit 1;fi
+	elif [ "${1}" = "clock" ];then
+		timestamp=$(date "+%s")
+	fi
+
+}
+
 main_container(){
 	if [ -z "$(echo ${cname})" ];then return;fi #skip blank lines, TODO: need to find a better way to do these
 	if [ -n "$(echo ${ctype}|grep '\#')" ];then return;fi #skip comments
@@ -154,10 +175,18 @@ main_container(){
 			get_state "${fullname}"
 			if [ "${is_running}" = "0" ];then return;fi
 			printf "Stopping container: ${fullname}\n";lxc stop "${fullname}" &;;
+		stopold)
+			get_state "${timestamp}-${fullname}"
+			if [ "${is_running}" = "0" ];then return;fi
+			printf "Stopping container: ${timestamp}-${fullname}\n";lxc stop "${timestamp}-${fullname}" &;;
 		start)
 			get_state "${fullname}"
 			if [ "${is_running}" = "1" ];then return;fi
-			printf "Starting container: ${fullname}\n";sleep 1;lxc start "${fullname}" &;;
+			printf "Starting container: ${fullname}\n";sleep .1;lxc start "${fullname}" &;;
+		startold)
+			get_state "${timestamp}-${fullname}"
+			if [ "${is_running}" = "1" ];then return;fi
+			printf "Starting container: ${timestamp}-${fullname}\n";sleep .1;lxc start "${timestamp}-${fullname}" &;;
 		delete)
 			get_state "${fullname}"
 			if [ "${is_running}" = "1" ];then printf "Must stop before deleting: ${fullname}\n";return;fi
@@ -169,11 +198,27 @@ main_container(){
 		deleteold)
 			get_state "${fullname}"
 			if [ "${is_running}" = "1" ];then printf "Must stop before deleting: ${fullname}\n";return;fi
-			printf "Deleting container: old-${fullname}\n";lxc delete "old-${fullname}" &;;
+			printf "Deleting container: ${timestamp}-${fullname}\n";lxc delete "${timestamp}-${fullname}" &;;
 		forcestop)
 			get_state "${fullname}"
 			if [ "${is_running}" = "0" ];then return;fi
 			printf "Force stopping container: ${fullname}\n";lxc stop --force "${fullname}" &;;
+		forcestopold)
+			get_state "${timestamp}-${fullname}"
+			if [ "${is_running}" = "0" ];then return;fi
+			printf "Force stopping container: ${timestamp}-${fullname}\n";lxc stop --force "${timestamp}-${fullname}" &;;
+		renameold)
+			if [ "$(echo ${lxclist}|grep ${timestamp}-${fullname})" ];then
+				printf "renaming: ${timestamp}-${fullname} to ${fullname}\n"
+				lxc rename "${timestamp}-${fullname}" "${fullname}" &
+			fi
+			;;
+		renametoold)
+			if [ "$(echo ${lxclist}|grep ${fullname})" ];then
+				printf "renaming: ${fullname} to ${timestamp}-${fullname}\n"
+				lxc rename "${fullname}" "${timestamp}-${fullname}" &
+			fi
+			;;
 		rt_cleanup_lock) rtorrent_clean_lock;;
 		ru_cleanup)
 			get_dirs="1"
@@ -194,8 +239,8 @@ main_container(){
 			printf "Update running for : ${fullname}\n"
 
 			if [ "$(echo ${lxclist}|grep ${fullname})" ] && [ "${update_keep_old}" = "1" ];then
-				printf "Renaming ${fullname} to old-${fullname}\n"
-				lxc rename "${fullname}" "old-${fullname}"
+				printf "Renaming ${fullname} to ${timestamp}-${fullname}\n"
+				lxc rename "${fullname}" "${timestamp}-${fullname}"
 			elif [ "$(echo ${lxclist}|grep ${fullname})" ] && [ "${update_keep_old}" = "0" ];then
 				printf "Deleting ${fullname}\n"
 				lxc delete "${fullname}"
@@ -258,18 +303,23 @@ container_info="${extra}/lxd-admin"
 lxclist=$(lxc list)
 
 if [ -z "${1}" ];then hlp;exit;fi
-while getopts "TRCDPZUHEcdrsuzphe" OPT;do
+while getopts "TRCDPZUHESOXxocdrsuzphe" OPT;do
 	case "${OPT}" in
 		T) limit="1";limit_to="transmission";;
 		R) limit="1";limit_to="rutorrent";;
 		c) act="rt_cleanup_lock";limit_to="rutorrent";;
 		C) act="ru_cleanup";limit_to="rutorrent";;
+		o) act="renameold";printf "Before starting containers consider running '$0 -c'\n";get_timestamp user;;
+		O) act="renametoold";printf "Before starting containers consider running '$0 -c'\n";get_timestamp clock;;
 		d) act="delete";;
-		D) act="deleteold";;
+		D) act="deleteold";get_timestamp user;;
 		r) act="restart";;
 		s) act="start";;
-		u) act="update";;
+		S) act="startold";get_timestamp user;;
+		u) act="update";get_timestamp clock;;
 		U) act="update";update_keep_old="0";;
+		x) act="stopold";get_timestamp user;;
+		X) act="forcestopold";get_timestamp user;;
 		z) act="stop";;
 		Z) act="forcestop";;
 		p) act="print";;
