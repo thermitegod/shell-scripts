@@ -21,8 +21,5 @@
 pip3 install --user flexget --upgrade
 pip3 install --user youtube-dl --upgrade
 
-#pip2
-pip2 install --user  czipfile --upgrade
-
 cache="${XDG_CACHE_HOME}/pip"
 if [ -d "${cache}" ];then rm -rf "${cache}";fi
