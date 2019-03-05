@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
 #1.0.0
 #2019-03-02
 
@@ -23,6 +23,7 @@
 #flags
 #everything else
 #will take backbone of lxd-admin for state checking and other qol things
+#make /root/setup-* in this script and push to container
 
 printf "Stoping master"
 lxd stop dev-gentoo-clang-minimal
