@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#2.0.0
-#2019-01-19
+#2.1.0
+#2019-03-24
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -20,14 +20,12 @@
 hlp(){
 	printf "STOW\n"
 	printf " -b\tstow files in ${B}/.bin/bin{-other},opt to /usr/local/bin\n"
-	printf " -p\tstow files in ${c}/{public,private} to ${B}\n"
-	printf " -t\tstow files in ${c}/themes to ${B}\n"
-	printf " -r\tstow files in ${c}/public to /root\n"
+	printf " -p\tstow files in ${c}/shell to ${B}\n"
+	printf " -r\tstow files in ${c}/shell to /root\n"
 	printf "\nUNSTOW\n"
 	printf " -B\tunstow files in ${B}/.bin/bin{-other},opt in /usr/local/bin\n"
-	printf " -P\tunstow files in ${c}/{public,private} in ${B}\n"
-	printf " -T\tstow files in ${c}/themes in ${B}\n"
-	printf " -R\tunstow files in ${c}/public in /root\n"
+	printf " -P\tunstow files in ${c}/shell in ${B}\n"
+	printf " -R\tunstow files in ${c}/shell in /root\n"
 	printf "\nGENERAL\n"
 	printf " -h\tprint this help\n"
 }
@@ -35,7 +33,7 @@ hlp(){
 ignore="--ignore=".git" --ignore=".gitignore""
 
 B="/home/brandon"
-c="${B}/documents/configs"
+c="${B}/.config"
 h="${B}/.bin"
 
 if [ -z "${1}" ];then hlp;exit;fi
@@ -43,12 +41,10 @@ while getopts "BPRTbprth" OPT;do
 	case "$OPT" in
 		b) cd "$h";doas stow "$ignore" -v --target=/usr/local/bin bin bin-other opt;;
 		B) cd "$h";doas stow "$ignore" -D -v --target=/usr/local/bin bin bin-other opt;;
-		p) cd "$c";stow "$ignore" -v --target="${B}" public private;;
-		P) cd "$c";stow "$ignore" -D -v --target="${B}" public private;;
-		t) cd "$c";stow "$ignore" -v --target="${B}" themes;;
-		T) cd "$c";stow "$ignore" -D -v --target="${B}" themes;;
-		r) cd "$c";doas stow "$ignore" -v --target=/root public themes;;
-		R) cd "$c";doas stow "$ignore" -D -v --target=/root public themes;;
+		p) cd "$c";stow "$ignore" -v --target="${B}" shell;;
+		P) cd "$c";stow "$ignore" -D -v --target="${B}" shell;;
+		r) cd "$c";doas stow "$ignore" -v --target=/root shell;;
+		R) cd "$c";doas stow "$ignore" -D -v --target=/root shell;;
 		h) hlp;exit;;
 	esac
 done
