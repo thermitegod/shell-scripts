@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#3.2.0
-#2019-02-01
+#3.2.1
+#2019-03-28
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -28,5 +28,5 @@ case "${mode}" in
 	snip) gm import "${tmpdir}/${i}";;
 	snip-root) gm import -window root "${tmpdir}/${i}";;
 esac
-nice -19 optipng -o7 -strip all "${tmpdir}/${i}">/dev/null 2>&1
+#nice -19 optipng -o7 -strip all "${tmpdir}/${i}">/dev/null 2>&1
 mv "${tmpdir}/${i}" "${HOME}"
