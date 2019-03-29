@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#5.0.1
-#2019-01-31
+#5.1.0
+#2019-03-28
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -18,7 +18,10 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #TODO
-#batch support --test
+#xargs
+#size target
+#acceptable size range
+#rezizing when w > h
 
 convert_main(){
 	if [ "${batch}" = "1" ];then
@@ -36,10 +39,11 @@ convert_main(){
 		done
 		exit
 	fi
-	if ! [ "${1}" = "size" ];then
+	if ! [ "${act}" = "get_size" ];then
 		if [ "${mimecheck}" = "1" ];then mime-correct -I;fi
-		mkdir "${O}"
-		cvloc="cv_tmp";mkdir "${cvloc}"
+		mkdir -p "${O}"
+		cvloc="cv_tmp"
+		mkdir -p "${cvloc}"
 	fi
 	for f in *;do
 		if [ -n "$(file -b --mime-type -- ${f%%}|grep image)" ];then
@@ -48,15 +52,39 @@ convert_main(){
 					gm convert -quality ${qual} "${f%%}" "${cvloc}/${f%.*}.${newext}"
 					mv "${f}" "${O}"
 					;;
+				convert_auto)
+					if [ "${newext}" = "jpg" ];then
+						qual="100"
+					else
+						qual="9"
+					fi
+					if [ "${debug}" = "1" ];then iter="1";fi
+					while true;do
+						if [ "${debug}" = "1" ];then printf "iter ${iter}\n";fi
+						gm convert -quality ${qual} "${f%%}" "${cvloc}/${f%.*}.${newext}"
+						test_size "${f%%}" "${cvloc}/${f%.*}.${newext}"
+						if [ "${new_smaller}" = "1" ];then
+							new_smaller="0"
+							printf "final qual is ${qual} for ${f}\n"
+							mv "${f}" "${O}"
+							break
+						fi
+						#runs when above if fails, so decrease $qual and try again
+						qual=$((qual - 1))
+						if [ "${debug}" = "1" ];then iter="$((iter + 1))";fi
+					done
+					;;
 				resize)
 					gm convert ${f%%} -resize "${size}"\> "${cvloc}/${f%%}"
 					mv "${f}" "${O}"
 					;;
-				size) gm identify -format "%wx%h" "${f%%}";;
+				get_size)
+					gm identify -format "%wx%h" "${f%%}"
+					;;
 			esac
 		fi
 	done
-	if ! [ "${1}" = "size" ];then
+	if ! [ "${1}" = "get_size" ];then
 		mv ${cvloc}/* . #do not quote
 		rm -rf "${cvloc}"
 		if [ "${keep_orig}" = "0" ];then rm -rf "${O}"
@@ -65,13 +93,38 @@ convert_main(){
 	fi
 }
 
+test_size(){
+	orig="${1}"
+	new="${2}"
+
+	if [ "${debug}" = "1" ];then
+		echo "filesize new  : $(du ${new}|awk '{print $1}')"
+		echo "filesize orig : $(du ${orig}|awk '{print $1}')"
+	fi
+
+	if [ "$(du ${orig}|awk '{print $1}')" -ge "$(du ${new}|awk '{print $1}')" ];then
+		new_smaller="1"
+	fi
+}
+
+get_mode(){
+	if ! [ "${qual}" = "0" ];then
+		act="convert"
+	else
+		act="convert_auto"
+	fi
+}
+
 hlp(){
 	printf "GENERAL\n"
-	printf " -B\tbatch, must come before other args\n"
-	printf " -b\tbatch, must come before other args, uses -r\n"
+	printf " -d\textra printouts\n"
 	printf " -m\tdisable mime check\n"
 	printf " -r\tdo not keep orig\n"
 	printf " -s\tget current image size in dir\n"
+	printf "\nBATCH\n"
+	printf " example, $0 -B -P 0\n"
+	printf " -B\tbatch, must come before other args\n"
+	printf " -b\tbatch, must come before other args, uses -r\n"
 	printf "\nRESIZE Width, keeps aspect\n"
 	printf " -W *\tuse value provided\n"
 	printf " -W 1\t2400x\n"
@@ -94,48 +147,50 @@ hlp(){
 	printf " -S 4\t60%%\n"
 	printf " -S 5\t50%%\n"
 	printf "\nCONVERT\n"
-	printf " -J [1-100]\tjpg > jpg : 100 quality=100 | 1 quality=1\n"
-	printf " -j [1-9]\tjpg > png : 9 quality=9 | 1 quality=1\n"
-	printf " -P [1-9]\tpng > png : 9 qualitl=9 | 1 quality=1\n"
-	printf " -p [1-100]\tpng > jpg : 100 quality=100 | 1 quality=1\n"
+	printf " -J [1-100]\tjpg > jpg : 100 quality=100 | 1 quality=1 | 0 sets auto mode\n"
+	printf " -j [1-9]  \tjpg > png : 9   quality=9   | 1 quality=1 | 0 sets auto mode\n"
+	printf " -P [1-9]  \tpng > png : 9   qualitl=9   | 1 quality=1 | 0 sets auto mode\n"
+	printf " -p [1-100]\tpng > jpg : 100 quality=100 | 1 quality=1 | 0 sets auto mode\n"
 }
 
 O="orig"
 mode="z"
 batch="0"
+debug="0"
 mimecheck="1"
 keep_orig="1"
+new_smaller="0"
 
 if [ -z "${1}" ];then hlp;exit;fi
-while getopts "P:p:J:j:H:W:S:hmsBbr" OPT;do
+while getopts "dP:p:J:j:H:W:S:hmsBbr" OPT;do
 	case "$OPT" in
 		j)
 			origext="jpg"
 			newext="png"
 			qual="${OPTARG}"
 			if [ "${qual}" -gt "9" ];then printf "exiting because of invalid range: ${OPTARG}\n";exit;fi
-			convert_main convert
+			get_mode
 			;;
 		J)
 			origext="jpg"
 			newext="jpg"
 			qual="${OPTARG}"
 			if [ "${qual}" -gt "100" ];then printf "exiting because of invalid range: ${OPTARG}\n";exit;fi
-			convert_main convert
+			get_mode
 			;;
 		p)
 			origext="png"
 			newext="jpg"
 			qual="${OPTARG}"
 			if [ "${qual}" -gt "100" ];then printf "exiting because of invalid range: ${OPTARG}\n";exit;fi
-			convert_main convert
+			get_mode
 			;;
 		P)
 			origext="png"
 			newext="png"
 			qual="${OPTARG}"
 			if [ "${qual}" -gt "9" ];then printf "exiting because of invalid range: ${OPTARG}\n";exit;fi
-			convert_main convert
+			get_mode
 			;;
 		W)
 			case "${OPTARG}" in
@@ -146,7 +201,7 @@ while getopts "P:p:J:j:H:W:S:hmsBbr" OPT;do
 				5) size="780";;
 				*) size="${OPTARG}";;
 			esac
-			convert_main resize
+			act="resize"
 			;;
 		H)
 			case "${OPTARG}" in
@@ -157,7 +212,7 @@ while getopts "P:p:J:j:H:W:S:hmsBbr" OPT;do
 				5) size="x780";;
 				*) size="${OPTARG}";;
 			esac
-			convert_main resize
+			act="resize"
 			;;
 		S)
 			case "${OPTARG}" in
@@ -168,7 +223,7 @@ while getopts "P:p:J:j:H:W:S:hmsBbr" OPT;do
 				5) size="50%";;
 				*) size="${OPTARG}";;
 			esac
-			convert_main resize
+			act="resize"
 			;;
 		B)
 			keep_orig="0"
@@ -179,10 +234,27 @@ while getopts "P:p:J:j:H:W:S:hmsBbr" OPT;do
 			batch="1"
 			;;
 		r) keep_orig="0";;
-		s) convert_main size;;
+		s) act="get_size";;
 		m) mimecheck="0";;
+		d) debug="1";;
 		h) hlp;exit;;
 	esac
 done
 #shift $((OPTIND - 1))
+
+case "${act}" in
+	convert)
+		convert_main convert
+		;;
+	convert_auto)
+		convert_main convert_auto
+		;;
+	resize)
+		convert_main resize
+		;;
+	get_size)
+		convert_main get_size
+		;;
+	*) printf "Nothing to do\n";exit;;
+esac
 
