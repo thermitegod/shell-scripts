@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#5.11.0
-#2019-03-03
+#5.11.1
+#2019-03-30
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -283,6 +283,7 @@ container_info="${extra}/lxd-admin"
 if [ -z "${1}" ];then hlp;exit;fi
 while getopts "O:TRCDPZUHESXLlxcdrsuzphe" OPT;do
 	case "${OPT}" in
+		O) catch_single="1";catch=${OPTARG};;
 		T) limit="1";limit_to="transmission";;
 		R) limit="1";limit_to="rutorrent";;
 		c) act="rt_cleanup_lock";limit_to="rutorrent";;
@@ -302,7 +303,6 @@ while getopts "O:TRCDPZUHESXLlxcdrsuzphe" OPT;do
 		P) act="print";get_dirs="1";verbose="1";;
 		L) act="restart_service_rtorrent";service="lighttpd";limit="1";limit_to="rutorrent";;
 		l) act="restart_service_rtorrent";service="rtorrent";limit="1";limit_to="rutorrent";;
-		A) catch_single="1";catch=${OPTARG};;
 		h) hlp;exit;;
 		H) hlp2;exit;;
 		e) $EDITOR "${container_info}";exit;;
