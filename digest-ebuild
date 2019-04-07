@@ -1,8 +1,8 @@
 #!/usr/bin/env sh
-#2.4.0
-#2018-12-30
+#2.5.0
+#2019-03-29
 
-#Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
+#Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
 #This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
 mode="single"
 while getopts "ah" OPT;do
 	case "$OPT" in
-		a) find . -maxdepth 2 -mindepth 2 -path '*/*' -type d -exec dash -c "cd '{}' && ${0}" \;;exit;;
+		a) find . -maxdepth 2 -mindepth 2 -path '*/*' -type d|while read dir;do cd "${dir}" && "${0}";done;exit;;
 		h)
 			printf " -a\trun for the entire repo\n"
 			printf " -h\tprint this help\n"

@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#4.3.0
-#2019-02-02
+#4.4.0
+#2019-03-29
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -32,7 +32,7 @@ hlp(){
 
 while getopts "Bih" OPT;do
 	case "$OPT" in
-		B) find . -maxdepth 1 -type d \( ! -name . \) -exec dash -c 'cd "{}" && ${0}' \;exit;;
+		B) find . -maxdepth 1 -type d \( ! -name . \)|while read dir;do cd "${dir}" && "${0}";done;exit;;
 		i) inc_iso="1";;
 		h) hlp;exit;;
 	esac
