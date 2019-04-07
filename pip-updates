@@ -1,8 +1,8 @@
 #!/usr/bin/env sh
-#1.2.0
-#2018-11-16
+#1.3.0
+#2019-04-07
 
-#Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
+#Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
 #This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -18,8 +18,9 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #pip3
-pip3 install --user flexget --upgrade
-pip3 install --user youtube-dl --upgrade
+pip3 install --user --upgrade flexget
+pip3 install --user --upgrade youtube-dl
+pip3 install --user --upgrade PyGObject-stubs
 
 cache="${XDG_CACHE_HOME}/pip"
 if [ -d "${cache}" ];then rm -rf "${cache}";fi
