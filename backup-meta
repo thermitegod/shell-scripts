@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#2.0.1
-#2019-01-06
+#2.0.2
+#2019-04-04
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -31,21 +31,21 @@ V=""
 
 dir_check(){ if ! [ -d "${target_dest}" ];then mkdir -p "${target_dest}";fi }
 move_finish(){
-	chown "${user}:${group}" "${tmpdir}/${target_zst}"
-	mv -iv "${tmpdir}/${target_zst}" "${target_dest}"
+	chown "${user}:${group}" "${tmpdir}/${target_comp}"
+	mv -iv "${tmpdir}/${target_comp}" "${target_dest}"
 }
 
 hlp(){
 	printf "\nGENERAL\n"
 	printf " -h\tprint this help\n"
-	printf " -v\tverbose\n"
+	printf " -v\tverbose tar\n"
 	printf " -x\tuse xz\n"
 	printf " -z\tuse zstd\n"
 	printf "\nCOMPRESS\n"
 	printf " -1\tchromium\n"
-	printf " -2\tuser-bin\n"
-	printf " -3\tuser-config\n"
-	printf " -4\tuser-local\n"
+	printf " -2\thome-bin\n"
+	printf " -3\thome-config\n"
+	printf " -4\thome-local\n"
 	printf " -5\tetc\n"
 	printf " -6\tvnstat\n"
 }
@@ -54,9 +54,9 @@ mode="${0##*/backup-}"
 while getopts "123456hvxz" OPT;do
 	case "$OPT" in
 		1) mode="chromium";;
-		2) mode="user-bin";;
-		3) mode="user-config";;
-		4) mode="user-local";;
+		2) mode="home-bin";;
+		3) mode="home-config";;
+		4) mode="home-local";;
 		5) mode="etc";;
 		6) mode="vnstat";;
 		v) V="v";;
@@ -78,15 +78,15 @@ case "${mode}" in
 		dir_check
 		cd "${target_source}"
 		for f in *chrom*;do
-			target_zst="${date}-${user}-${f}.tar.${E}"
+			target_comp="${date}-${user}-${f}.tar.${E}"
 			tar \
 				--exclude="${f}/Default/File System" \
-				--xattrs --sparse -${V}cf - "${f}" -P | "$C" "$A" >| "${tmpdir}/${target_zst}"
+				--xattrs --sparse -${V}cf - "${f}" -P | "$C" "$A" >| "${tmpdir}/${target_comp}"
 			move_finish
 		done
 		;;
-	user-config)
-		target_zst="${user}-config-${date}.tar.${E}"
+	home-config)
+		target_comp="${user}-config-${date}.tar.${E}"
 		target_source="${HOME}/.config"
 		target_dest="${backup_dir}/${user}/config"
 		dir_check
@@ -97,29 +97,29 @@ case "${mode}" in
 			--exclude="${target_source}/transmission/torrents/*" \
 			--exclude="${target_source}/kernel/src/*" \
 			--exclude="${target_source}/kernel/distfiles/*" \
-			--xattrs --sparse -${V}cf - "${target_source}" -P | "$C" "$A" >| "${tmpdir}/${target_zst}"
+			--xattrs --sparse -${V}cf - "${target_source}" -P | "$C" "$A" >| "${tmpdir}/${target_comp}"
 		;;
-	user-local)
-		target_zst="${user}-local-${date}.tar.${E}"
+	home-local)
+		target_comp="${user}-local-${date}.tar.${E}"
 		target_source="${HOME}/.local"
 		target_dest="${backup_dir}/${user}/local"
 		dir_check
 		tar \
 			--exclude="${target_source}/share/Trash/*" \
-			--xattrs --sparse -${V}cf - "${target_source}" -P | "$C" "$A" >| "${tmpdir}/${target_zst}"
+			--xattrs --sparse -${V}cf - "${target_source}" -P | "$C" "$A" >| "${tmpdir}/${target_comp}"
 		move_finish
 		;;
 	etc)
-		target_zst="etc-${date}.tar.${E}"
+		target_comp="etc-${date}.tar.${E}"
 		target_source="/etc"
 		target_dest="${backup_dir}/etc"
 		dir_check
 		tar \
-			--xattrs --sparse -${V}cf - "${target_source}" -P | "$C" "$A" >| "${tmpdir}/${target_zst}"
+			--xattrs --sparse -${V}cf - "${target_source}" -P | "$C" "$A" >| "${tmpdir}/${target_comp}"
 		move_finish
 		;;
-	user-bin)
-		target_zst="${date}-${user}-bin.tar.${E}"
+	home-bin)
+		target_comp="${date}-${user}-bin.tar.${E}"
 		target_source="${HOME}/.bin"
 		target_dest="${backup_dir}/${user}/bin"
 		dir_check
@@ -127,7 +127,7 @@ case "${mode}" in
 		cp -r "${target_source}" "${tmpdir}/bin"
 		cd "${tmpdir}"
 		tar \
-			--xattrs --sparse -${V}cf - "${target_source}" -P | "$C" "$A" >| "${tmpdir}/${target_zst}"
+			--xattrs --sparse -${V}cf - "${target_source}" -P | "$C" "$A" >| "${tmpdir}/${target_comp}"
 		rm -rf "${tmpdir}/bin"
 		move_finish
 		;;
