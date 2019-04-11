@@ -1,8 +1,8 @@
 #!/usr/bin/env sh
-#4.3.0
-#2018-12-20
+#4.4.0
+#2019-04-07
 
-#Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
+#Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
 #This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -20,9 +20,12 @@
 if [ "$(id -u)" -eq 0 ];then printf "Do not run as root\n";exit;fi
 
 launch(){
-	${ver} --user-data-dir="${data}"
-	cache="${XDG_CACHE_HOME}/${cachedir}/${data##*/}"
-	if [ -d "${cache}" ];then sleep 3;rm -rf "${cache}";fi
+	"${ver}" --user-data-dir="${data}" --no-proxy-server
+	#exit
+	if ! [ "${mode}" = "sandbox" ];then
+		cache="${XDG_CACHE_HOME}/${cachedir}/${data##*/}"
+		if [ -d "${cache}" ];then sleep 3;rm -rf "${cache}";fi
+	fi
 }
 
 #ver="chromium"
@@ -72,3 +75,4 @@ else
 	data="${config}-${E}"
 	launch
 fi
+
