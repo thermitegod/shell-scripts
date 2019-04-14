@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#4.4.0
-#2019-04-07
+#5.0.0
+#2019-04-13
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -21,7 +21,6 @@ if [ "$(id -u)" -eq 0 ];then printf "Do not run as root\n";exit;fi
 
 launch(){
 	"${ver}" --user-data-dir="${data}" --no-proxy-server
-	#exit
 	if ! [ "${mode}" = "sandbox" ];then
 		cache="${XDG_CACHE_HOME}/${cachedir}/${data##*/}"
 		if [ -d "${cache}" ];then sleep 3;rm -rf "${cache}";fi
@@ -29,41 +28,53 @@ launch(){
 }
 
 #ver="chromium"
-#cachedir="chromium"
-
 ver="google-chrome-unstable"
-cachedir="chrome"
 
-config="${HOME}/.config/chrome/${ver}"
+if [ "${ver}" = "chromium" ];then
+	cachedir="chromium"
+else
+	cachedir="chrome"
+fi
+
+profile_location="${HOME}/.config/chrome/${ver}"
 
 mode="${0##*/chromium-}"
 E="${mode}"
 
-while true;do
-	case "${1}" in
-		-e[0-9]) mode="main";E="ex${1##-e}";shift;;
-		-d) mode="main";E="default";shift;;
-		-s) mode="sandbox";shift;;
-		-c) ver="chromium";cachedir="chromium";shift;;
-		-g1) ver="google-chrome-unstable";cachedir="chrome";shift;;
-		-g2) ver="google-chrome-beta";cachedir="chrome";shift;;
-		-g3) ver="google-chrome";cachedir="chrome";shift;;
-		-h)
-			printf "PROFILE\n"
+while getopts "e:g:dsch" OPT;do
+	case "$OPT" in
+		e) E="ex${OPTARG}";shift;;
+		d) E="default";shift;;
+		s) mode="sandbox";shift;;
+		c) ver="chromium";cachedir="chromium";shift;;
+		g)
+			case "${OPTARG}" in
+				1) ver="google-chrome-unstable";cachedir="chrome";;
+				2) ver="google-chrome-beta";cachedir="chrome";;
+				3) ver="google-chrome";cachedir="chrome";;
+			esac
+			;;
+		h)
+			printf "INFO\n"
+			printf "Main way of launching profiles is through symlinks to this script\nprofile names must start with chromium-\n"
+			printf "ln -s $0 chromium-<name-of-profile>\n"
+			printf "flags are mainly for testing\n"
+			printf "\nPROFILES\n"
 			printf " -d\tdefault\n"
-			printf " -e#\tex#, where '#' is [0-9]\n"
+			printf " -e #\tex#, where '#' is [0-9]\n"
 			printf " -s\tsandbox, all data deleted on close\n"
-			printf "\nBROWSER\n"
+			printf "\nBROWSER, default is: ${ver}\n"
 			printf " -c\tchromium\n"
-			printf " -g1\tgoogle-chrome-unstable\n"
-			printf " -g2\tgoogle-chrome-beta\n"
-			printf " -g3\tgoogle-chrome\n"
+			printf " -g 1\tgoogle-chrome-unstable\n"
+			printf " -g 2\tgoogle-chrome-beta\n"
+			printf " -g 3\tgoogle-chrome\n"
 			printf "\nGENERAL\n"
 			printf " -h\tprint this help\n"
 			exit;;
 		*) break;;
 	esac
 done
+shift $((OPTIND - 1))
 
 if [ "${mode}" = "sandbox" ];then
 	finish(){ if [ -d "${data}" ];then rm --preserve-root -r "${data}";fi }
@@ -72,7 +83,7 @@ if [ "${mode}" = "sandbox" ];then
 	data=$(mktemp -d)
 	launch
 else
-	data="${config}-${E}"
+	data="${profile_location}-${E}"
 	launch
 fi
 
