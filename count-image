@@ -1,8 +1,8 @@
 #!/usr/bin/env sh
-#5.3.0
-#2018-12-30
+#5.4.0
+#2019-04-18
 
-#Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
+#Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
 #This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ mode="${0##*/}"
 case "${mode}" in
 	count-image) type="PNG JPG JPEG JPE GIF BMP ICO WEBM MP4 MKV";;
 	count-archive)
-		type="ZIP 7Z RAR CBR CBZ TAR GZ XZ"
+		type="ZIP 7Z RAR CBR CBZ CB7 TAR BZ2 GZ LZ4 LZO XZ ZST"
 		mode="archive"
 		;;
 esac
@@ -48,7 +48,7 @@ while getopts "lh" OPT;do
 			printf "MODE  : %s\n" "${mode}"
 			printf "TYPES : %s\n" "${type}"
 			printf " -h\tprint this help\n"
-			if [ "${mode}" = "archive" ];then printf " -l\tlist found archives\n";fi
+			printf " -l\tlist found archives, restricted to mode=archive\n"
 			exit;;
 	esac
 done
