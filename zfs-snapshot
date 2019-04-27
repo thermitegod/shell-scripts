@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#3.0.0
-#2019-04-07
+#3.1.0
+#2019-04-26
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -21,11 +21,12 @@ hlp(){
 	printf "GENERAL\n"
 	printf " -h\tprint this help\n"
 	printf "\nSNAPSHOT PRINTING\n"
+	printf " -a\tprint all snapshots\n"
+	printf " -d\tprint snapshots of storage/{anime,data} and torrents\n"
 	printf " -c\tprint snapshots of zroot/CACHE/torrents\n"
 	printf " -s\tprint snapshots of ssd-mirror/{MUSIC,KVM}\n"
 	printf " -u\tprint snapshots of zroot/HOME/*\n"
 	printf " -l\tprint snapshots of zroot/ROOT/gentoo{/var,/var/log}\n"
-	printf " -L\tprint snapshots of storage/{anime,data} and torrents\n"
 	printf "\nSNAPSHOT CREATION\n"
 	printf "\tformat  : pool/dataset@${S}\n"
 	printf " -m1\tSnapshot: zroot/ROOT/gentoo\n"
@@ -62,6 +63,7 @@ while true;do
 		-m6) "$ZFS" snapshot -r torrents@${S};shift;;
 		-m7) "$ZFS" snapshot -r zroot/CACHE/torrents@${S};shift;;
 		-B) shift;zfs send "${1}" | zstd -T0 >| "${1##*/}.zst";exit;;
+		-a) "$ZFS" list -t snapshot;shift;;
 		-c)
 			"$ZFS" list -t snapshot \
 				zroot/CACHE/torrents
@@ -78,7 +80,7 @@ while true;do
 				zroot/HOME/lxc \
 				zroot/HOME/sandbox
 			shift;;
-		-L)
+		-d)
 			"$ZFS" list -t snapshot \
 				storage/data \
 				storage/anime \
