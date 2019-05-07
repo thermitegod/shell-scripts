@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#3.1.0
-#2019-01-21
+#3.2.0
+#2019-05-06
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -22,8 +22,12 @@
 #m0=lzma2 is fast mode but produces samller archives, needs more testing
 #-m prefixes all options or -m0=lzma:a1:d25 for sub options
 
+#NOTICE: The compression profiles being used will probably use =LOTS= of ram
+
 usage(){
 	printf " default will compress file passed in \$1\n"
+	printf "\nGENERAL\n"
+	printf " -e\tprint extra info\n"
 	printf "\nPROFILES\n"
 	printf " -S\tSingle threaded, useful when hitting oom with multi\n"
 	printf " -M\tMultithreaded\n"
@@ -35,28 +39,32 @@ usage(){
 	printf " -P\tDisable post compression test\n"
 	printf " -R\tdelete after compressed, will test before deleting, disables post testing, works in all modes but test\n"
 	printf " -t\tTest file[s] passed in \$1\n"
-	printf " -T\tTest file[s] passed in \$1\n disable total output"
+	printf " -T\tTest file[s] passed in \$1 disable total output\n"
 	printf " -x\tcompress all files, delete original after compressed\n"
 	printf " -z\tcompress all directories, delete original after compressed\n"
 }
 
 die(){ /bin/echo -e "$*";exit 1; }
-test_file_list(){ if [ -f "${f%%}.7z" ];then file_list="${file_list},${f%%}.7z";fi; }
+test_file_list(){ if [ -f "${f%%}.7z" ];then file_list="${file_list}${delim}${f%%}.7z";fi; }
 compress(){
 	case "${comp_type}" in
 		single)
-			printf "\n${YEL}NOTICE\t: The compression profile being used will probably use over 10G of ram${NC}\n"
-			printf "${YEL}Profile\t: single${NC}\n"
-			printf "${YEL}File\t: ${f%%}${NC}\n"
+			if [ "${extra}" = "1" ];then
+				printf "\n"
+				printf "${YEL}Profile\t: single${NC}\n"
+				printf "${YEL}File\t: ${f%%}${NC}\n"
+			fi
 			nice -19 \
 				7z a -t7z -m0=lzma2 -md=1024m -mmf=bt4 -mmt=off -ms=off -myx=9 -mx=9 -mfb=276 \
 				-ms=on -mhc=on -mtm=off -mtc=off -mta=off "${f%%}.7z" "${f%%}" || die "${RED}Compression failed for${NC}: ${f%%}"
 			test_file_list
 			;;
 		multi)
-			printf "\n${YEL}NOTICE\t: The compression profile being used will probably use =LOTS= of ram${NC}\n"
-			printf "${YEL}Profile\t: multi${NC}\n"
-			printf "${YEL}File\t: ${f%%}${NC}\n"
+			if [ "${extra}" = "1" ];then
+				printf "\n"
+				printf "${YEL}Profile\t: multi${NC}\n"
+				printf "${YEL}File\t: ${f%%}${NC}\n"
+			fi
 			nice -19 \
 				7z a -t7z -m0=lzma2 -md=1024m -mmf=bt4 -mmt=on -mmtf=on -myx=9 -mx=9 -mfb=276 \
 				-mhc=on -ms=on -mtm=off -mtc=off -mta=off "${f%%}.7z" "${f%%}" || die "${RED}Compression failed for${NC}: ${f%%}"
@@ -94,6 +102,7 @@ compress(){
 
 P="0"
 F="0"
+extra="0"
 orig_rm="0"
 comp_dir="0"
 comp_file="0"
@@ -104,7 +113,9 @@ comp_type="multi"
 test_post_fancy="1"
 . $(dirname "$0")/colors.sh
 
-while getopts "SMTROtpdfhxz" OPT;do
+delim=",ßßß,"
+
+while getopts "SMTROetpdfhxz" OPT;do
 	case "$OPT" in
 		S) comp_type="single";;
 		M) comp_type="multi";;
@@ -117,6 +128,7 @@ while getopts "SMTROtpdfhxz" OPT;do
 		R) orig_rm="1";test_post="0";;
 		x) comp_file="1";orig_rm="1";;
 		z) comp_dir="1";orig_rm="1";;
+		e) extra="1";;
 		h) usage;exit;;
 	esac
 done
@@ -142,7 +154,7 @@ else
 fi
 
 if [ "${test_post}" = "1" ] && [ "${orig_rm}" = "0" ];then
-	IFS=','
+	IFS="${delim}"
 	for f in ${file_list}; do
 		if [ -f "${f}" ];then
 			comp_type="test"
