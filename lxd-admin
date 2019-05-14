@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#5.11.1
-#2019-03-30
+#6.0.0
+#2019-05-13
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -22,11 +22,9 @@
 
 #TODO
 #condense main function
-#alpine auto setup, using guide in ~/docs. put in script, push script, exec in container
-#push rtorrent/transmission/php/lighttd config files too
 
 hlp(){
-	printf "\nCONTAINER, only use to limit actions to specified\n"
+	printf "CONTAINER, only use to limit actions to specified\n"
 	printf " -R\tOnly run on rutorrent\n"
 	printf " -T\tOnly run on transmission, note: port is :${transmission_port}\n"
 	printf " -O\tOnly operate in the supplied container, requires full container name\n"
@@ -109,37 +107,6 @@ set_dirs(){
 	fi
 }
 
-set_ip(){
-	printf "Seting StaticIP to ${ip4}\n"
-	tmp=$(mktemp)
-	case "${distro}" in
-		alpine)
-			net="${fullname}/etc/network/interfaces"
-			printf "auto eth0\niface eth0 inet static\n\taddress ${ip4}\n\tnetmask ${ip4_netmask}\n\tgateway ${ip_gateway}\n">|"${tmp}"
-			;;
-		gentoo)
-			net="${fullname}/etc/conf.d/net"
-			printf "rc_keyword=\"-stop\"\nconfig_eth0=\"${ip4} netmask ${ip4_netmask} brd ${ip4_brd}\"\nroutes_eth0=\"default via ${ip4_gateway}\"\n">|"${tmp}"
-			;;
-	esac
-	lxc file push "${tmp}" "${net}"
-	if [ -f "${tmp}" ];then rm "${tmp}";fi
-}
-
-set_limits(){
-	if ! [ "${lim_cpu}" = "0" ];then lxc config set "${fullname}" limits.cpu "${lim_cpu}";fi
-	if ! [ "${lim_cpu_allow}" = "0" ];then lxc config set "${fullname}" limits.cpu.allowance "${lim_cpu_allow}";fi
-	if ! [ "${lim_mem}" = "0" ];then lxc config set "${fullname}" limits.memory "${lim_mem}";fi
-}
-
-rtorrent_clean_lock(){
-	get_dirs="1"
-	set_dirs
-	lock="${session}/rtorrent.lock"
-	if [ -f "${lock}" ];then rm -v "${lock}";fi
-	get_dirs="0"
-}
-
 get_state(){ if [ "$(lxc info ${1}|grep Running)" ];then is_running="1";fi; }
 
 main_container(){
@@ -150,7 +117,7 @@ main_container(){
 	case "${distro}" in
 		alpine) true;;
 		gentoo) true;;
-		*) printf "skipping non supported distro : ${distro}\n";return;;
+		*) printf "skipping non supported distro: ${distro}\n";return;;
 	esac
 	template="base-${distro}-${ctype}"
 	fullname="${ctype}-${cname}"
@@ -180,8 +147,21 @@ main_container(){
 			get_state "${fullname}"
 			if [ "${is_running}" = "0" ];then return;fi
 			printf "Force stopping container: ${fullname}\n";lxc stop --force "${fullname}" &;;
-		rt_cleanup_lock) rtorrent_clean_lock;;
-		restart_service_rutorrent)
+		rtorrent_clean_lock)
+			get_dirs="1"
+			set_dirs
+			lock="${session}/rtorrent.lock"
+			if [ -f "${lock}" ];then rm -v "${lock}";fi
+			get_dirs="0"
+			;;
+		rtorrent_clean_torrent)
+			#printf "Running cleanup for: "${fullname}"\n"
+			set_dirs
+			if ! [ "$(ls -1A ${rushare}/torrents|wc -l)" = "0" ];then
+				rm ${rushare}/torrents/*.torrent
+			fi
+			;;
+		rtorrent_restart_service)
 			get_state "${fullname}"
 			if [ "${is_running}" = "0" ];then return;fi
 			if [ "${service}" = "rtorrent" ];then
@@ -192,26 +172,30 @@ main_container(){
 				lxc exec "${fullname}" rc-service lighttpd restart >/dev/null 2>&1 &
 			fi
 			;;
-		ru_cleanup)
-			set_dirs
-			rm -v ${rushare}/torrents/*.torrent
-			;;
 		update)
+			get_state "${fullname}"
+			if [ "${is_running}" = "1" ];then
+				printf "Not updating running container: ${fullname}\n"
+				return
+			fi
+
 			get_state "${template}"
 			if [ "${is_running}" = "1" ];then
-				printf "Stopping: ${template}\n"
+				printf "Stopping running template: ${template}\n"
 				lxc stop "${template}"
 				printf "\n\n"
 			fi
 
-			printf "Update running for : ${fullname}\n"
+			printf "Update running for: ${fullname}\n"
 
-			if [ "$(echo ${lxclist}|grep ${fullname})" ] && [ "${update_keep_old}" = "1" ];then
-				printf "Renaming ${fullname} to ${old_prefix}-${fullname}\n"
-				lxc rename "${fullname}" "${old_prefix}-${fullname}"
-			elif [ "$(echo ${lxclist}|grep ${fullname})" ] && [ "${update_keep_old}" = "0" ];then
-				printf "Deleting ${fullname}\n"
-				lxc delete "${fullname}"
+			if [ "$(echo ${lxclist}|grep ${fullname})" ];then
+				if [ "${update_keep_old}" = "1" ];then
+					printf "Renaming ${fullname} to ${old_prefix}-${fullname}\n"
+					lxc rename "${fullname}" "${old_prefix}-${fullname}"
+				elif [ "${update_keep_old}" = "0" ];then
+					printf "Deleting ${fullname}\n"
+					lxc delete "${fullname}"
+				fi
 			fi
 
 			printf "Copying ${template} to ${fullname}\n"
@@ -224,10 +208,29 @@ main_container(){
 				lxc config device remove "${fullname}" repos
 			fi
 
-			set_limits
+			if ! [ "${lim_cpu}" = "0" ];then lxc config set "${fullname}" limits.cpu "${lim_cpu}";fi
+			if ! [ "${lim_cpu_allow}" = "0" ];then lxc config set "${fullname}" limits.cpu.allowance "${lim_cpu_allow}";fi
+			if ! [ "${lim_mem}" = "0" ];then lxc config set "${fullname}" limits.memory "${lim_mem}";fi
+
+			#clean rtorrent lock files
+			"${0}" -c -O "${fullname}"
+
+			printf "Seting StaticIP to: ${ip4}\n"
+			net_tmp=$(mktemp)
+			case "${distro}" in
+				alpine)
+					net="${fullname}/etc/network/interfaces"
+					printf "auto eth0\niface eth0 inet static\n\taddress ${ip4}\n\tnetmask ${ip4_netmask}\n\tgateway ${ip_gateway}\n">|"${net_tmp}"
+					;;
+				gentoo)
+					net="${fullname}/etc/conf.d/net"
+					printf "rc_keyword=\"-stop\"\nconfig_eth0=\"${ip4} netmask ${ip4_netmask} brd ${ip4_brd}\"\nroutes_eth0=\"default via ${ip4_gateway}\"\n">|"${net_tmp}"
+					;;
+			esac
+			lxc file push "${net_tmp}" "${net}"
+			if [ -f "${net_tmp}" ];then rm "${net_tmp}";fi
+
 			set_dirs
-			set_ip
-			rtorrent_clean_lock
 			printf "\n"
 			;;
 		print)
@@ -265,6 +268,7 @@ get_dirs="0"
 printonly="0"
 is_running="0"
 catch_single="0"
+
 update_keep_old="1"
 
 transmission_port="9091"
@@ -286,8 +290,8 @@ while getopts "O:TRCDPZUHESXLlxcdrsuzphe" OPT;do
 		O) catch_single="1";catch=${OPTARG};;
 		T) limit="1";limit_to="transmission";;
 		R) limit="1";limit_to="rutorrent";;
-		c) act="rt_cleanup_lock";limit_to="rutorrent";;
-		C) act="ru_cleanup";limit_to="rutorrent";get_dirs="1";;
+		c) act="rtorrent_clean_lock";limit_to="rutorrent";;
+		C) act="rtorrent_clean_torrent";limit_to="rutorrent";get_dirs="1";;
 		d) act="delete";;
 		D) act="delete";on_old="1";;
 		r) act="restart";;
@@ -301,8 +305,8 @@ while getopts "O:TRCDPZUHESXLlxcdrsuzphe" OPT;do
 		Z) act="forcestop";;
 		p) act="print";;
 		P) act="print";get_dirs="1";verbose="1";;
-		L) act="restart_service_rtorrent";service="lighttpd";limit="1";limit_to="rutorrent";;
-		l) act="restart_service_rtorrent";service="rtorrent";limit="1";limit_to="rutorrent";;
+		L) act="rtorrent_restart_service";service="lighttpd";limit="1";limit_to="rutorrent";;
+		l) act="rtorrent_restart_service";service="rtorrent";limit="1";limit_to="rutorrent";;
 		h) hlp;exit;;
 		H) hlp2;exit;;
 		e) $EDITOR "${container_info}";exit;;
