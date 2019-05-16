@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#2.1.0
-#2019-03-24
+#2.2.0
+#2019-05-15
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -30,8 +30,8 @@ mime_type_image(){
 		! [ "${mimeext}" = "tiff" ] && ! [ "${mimeext}" = "bmp" ];then return;fi
 	ext="${f##*.}"
 	if [ "${mimeext}" = "jpeg" ] && [ "${ext}" = "jpg" ];then return;fi
+	if [ "${mimeext}" = "jpeg" ];then mimeext="jpg";fi
 	if ! [ "${mimeext}" = "${ext}" ];then
-		if [ "${mimeext}" = "jpeg" ];then mimeext="jpg";fi
 		if [ -f "${f%%.*}.${mimeext}" ] && [ -f "${f%%.*}.${ext}" ];then
 			if [ "${V}" = "1" ];then
 				if [ "$(openssl sha1 ${f%%.*}.${mimeext}|awk '{print $2}')" = "$(openssl sha1 ${f%%.*}.${ext}|awk '{print $2}')" ];then
