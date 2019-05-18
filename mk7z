@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#3.2.0
-#2019-05-06
+#3.3.0
+#2019-05-17
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -52,7 +52,7 @@ compress(){
 			if [ "${extra}" = "1" ];then
 				printf "\n"
 				printf "${YEL}Profile\t: single${NC}\n"
-				printf "${YEL}File\t: ${f%%}${NC}\n"
+				printf "${YEL}File\t: %s${NC}\n" "${f%%}"
 			fi
 			nice -19 \
 				7z a -t7z -m0=lzma2 -md=1024m -mmf=bt4 -mmt=off -ms=off -myx=9 -mx=9 -mfb=276 \
@@ -63,7 +63,7 @@ compress(){
 			if [ "${extra}" = "1" ];then
 				printf "\n"
 				printf "${YEL}Profile\t: multi${NC}\n"
-				printf "${YEL}File\t: ${f%%}${NC}\n"
+				printf "${YEL}File\t: %s${NC}\n" "${f%%}"
 			fi
 			nice -19 \
 				7z a -t7z -m0=lzma2 -md=1024m -mmf=bt4 -mmt=on -mmtf=on -myx=9 -mx=9 -mfb=276 \
@@ -78,14 +78,14 @@ compress(){
 			;;
 		test)
 			if [ "${f##*.}" = "7z" ] || [ "${f##*.}" = "zip" ];then
-				printf "${YEL}TEST${NC}\t$(echo ${f%%}|cut -c 1-80)\n"
+				printf "${YEL}TEST${NC}\t%s\n" "$(echo "${f%%}"|cut -c 1-80)"
 				printf "\033[A"
 				if [ -n "$(nice -19 7z t "${f%%}"|grep Ok)" ];then
-					printf "${GRE}PASSED${NC}\t${f%%}\n"
+					printf "${GRE}PASSED${NC}\t%s\n" "${f%%}"
 					P=$((P+1))
 				else
-					printf "${f}\n">>failed.txt
-					printf "${RED}FAILED${NC}\t${f%%}\n"
+					printf "%s\n" "${f}">>failed.txt
+					printf "${RED}FAILED${NC}\t%s\n" "${f%%}"
 					F=$((F+1))
 				fi
 			fi;;
@@ -93,7 +93,7 @@ compress(){
 
 	if [ "$?" -eq 0 ] && ! [ "${comp_type}" = "test" ] && [ "${orig_rm}" = "1" ] && [ -f "${f%%}.7z" ];then
 		if [ -n "$(${0} -t "${f%%}.7z"|grep FAILED)" ];then
-			printf "${RED}FAILED${NC} test for: ${f%%}.7z\n${YEL}Not removing original${NC}: "${f%%}"\n"
+			printf "${RED}FAILED${NC} test for: %s.7z\n${YEL}Not removing original${NC}: %s\n" "${f%%}" "${f%%}"
 		else
 			rm -r "${f%%}"
 		fi
@@ -103,19 +103,22 @@ compress(){
 P="0"
 F="0"
 extra="0"
+total="0"
 orig_rm="0"
 comp_dir="0"
 comp_file="0"
+
 
 test_post="1"
 file_list=""
 comp_type="multi"
 test_post_fancy="1"
-. $(dirname "$0")/colors.sh
 
 delim=",ßßß,"
 
-while getopts "SMTROetpdfhxz" OPT;do
+. "$(dirname "$0")/colors.sh"
+
+while getopts "SMTROPetdfhxz" OPT;do
 	case "$OPT" in
 		S) comp_type="single";;
 		M) comp_type="multi";;
@@ -140,14 +143,14 @@ if [ -n "${1}" ];then
 		if [ -e "${f}" ];then
 			compress
 		else
-			printf "\n${RED}Input does not exist${NC}: ${1}\n\n"
+			printf "\n${RED}Input does not exist${NC}: %s\n\n" "${1}"
 		fi
 		if [ -n "${2}" ];then shift;else break;fi
 	done
-elif [ "${comp_dir}" = "1" ] || [ "${comp_files}" = "1" ];then
+elif [ "${comp_dir}" = "1" ] || [ "${comp_file}" = "1" ];then
 	for f in *; do
 		if [ "${comp_dir}" = "1" ] && [ -d "${f%%}" ];then compress;fi
-		if [ "${comp_files}" = "1" ] && [ -f "${f%%}" ];then compress;fi
+		if [ "${comp_file}" = "1" ] && [ -f "${f%%}" ];then compress;fi
 	done
 else
 	printf "\n${RED}No input files${NC}\n\n";exit
@@ -167,8 +170,8 @@ fi
 if [ "${comp_type}" = "test" ] && [ "${test_post_fancy}" = "1" ];then
 	T="$((P+F))"
 	if ! [ "${total}" = "0" ];then
-		printf "\n${YEL}TOTAL${NC} \t${T}\n"
-		if ! [ "${P}" = "0" ];then printf "${GRE}PASSED${NC}\t${P}\n";fi
-		if ! [ "${F}" = "0" ];then printf "${RED}FAILED${NC}\t${F}\n";fi
+		printf "\n${YEL}TOTAL${NC} \t%s\n" "${T}"
+		if ! [ "${P}" = "0" ];then printf "${GRE}PASSED${NC}\t%s\n" "${P}";fi
+		if ! [ "${F}" = "0" ];then printf "${RED}FAILED${NC}\t%s\n" "${F}";fi
 	fi
 fi

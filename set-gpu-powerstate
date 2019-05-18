@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#1.1.0
-#2019-01-10
+#1.2.0
+#2019-05-17
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -17,12 +17,15 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-if [ "$(id -u)" -ne 0 ];then printf "Requires root, exiting.\n";exit;fi
+die(){ /bin/echo -e "\033[0;31m$*\033[m";exit 1; }
+
+if [ "$(id -u)" -ne 0 ]; then die "Requires root, exiting.";fi
+
 state="auto"
 card=/sys/class/drm/card0/device/power_dpm_force_performance_level
 while getopts "acplh" OPT;do
 	case "$OPT" in
-		c) printf "Current power state is: $(cat $card)\n";exit;;
+		c) printf "Current power state is: %s\n" "$(cat "${card}")";exit;;
 		a) state="auto";;
 		p) state="high";;
 		l) state="low";;
@@ -38,6 +41,6 @@ while getopts "acplh" OPT;do
 	esac
 done
 
-if [ "$(cat $card)" = "$state" ];then printf "state '$state' is already active\n";exit;fi
-printf "current state is '%s', switching state to '%s'\n" "$(cat $card)" "$state"
-echo "$state" >| "$card"
+if [ "$(cat "${card}")" = "${state}" ];then printf "state '%s' is already active\n" "${state}";exit;fi
+printf "current state is '%s', switching state to '%s'\n" "$(cat "${card}")" "${state}"
+echo "${state}" >| "${card}"

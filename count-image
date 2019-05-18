@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#5.4.0
-#2019-04-18
+#5.5.0
+#2019-05-17
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -19,10 +19,10 @@
 
 arc_list() {
 	printf "List found [yn]? "
-	read confirm
+	read -r confirm
 	if echo "${confirm}" | grep -iq "^y" ;then
 		for f in ${type}; do
-			printf "Listing all of : ${f}\n"
+			printf "Listing all of : %s\n" "${f}"
 			find . -iname "*.${f}"
 		done
 	fi
@@ -55,9 +55,9 @@ done
 
 for f in ${type};do
 	cnt=$(find ${D} -type f -iname "*.${f}"|wc -l)
-	if ! [ "${cnt}" = "0" ];then printf "${f}\t: ${cnt}\n";fi
+	if ! [ "${cnt}" = "0" ];then printf "%s\t: %s\n" "${f}" "${cnt}";fi
 	count=$((cnt+count))
 done
 
-if ! [ "${count}" = "0" ];then printf "Total\t: ${count}\n";fi
+if ! [ "${count}" = "0" ];then printf "Total\t: %s\n" "${count}";fi
 if [ "${list}" = "1" ] && [ "${mode}" = "archive" ];then arc_list;fi

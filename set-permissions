@@ -1,8 +1,8 @@
 #!/usr/bin/env sh
-#2.1.0
-#2018-12-30
+#2.2.0
+#2019-05-17
 
-#Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
+#Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
 #This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -17,32 +17,30 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-hlp(){
-	printf "Will run in : $PWD\n"
-	printf " -a\t-d and -f\n"
-	printf " -d\tset 755 drwxr-xr-x | directories\n"
-	printf " -f\tset 644 -rw-r--r-- | files\n"
-	printf " -h\tprint this help\n"
-	printf " -x\tset 755 -rwxr-x-rx | files execute\n"
-	printf "\nCodes\n"
-	printf "0\t---\n"
-	printf "1\t--x\n"
-	printf "2\t-w-\n"
-	printf "3\t-wx\n"
-	printf "4\tr--\n"
-	printf "5\tr-x\n"
-	printf "6\trw-\n"
-	printf "7\trwx\n"
-}
-
-if [ -z "${1}" ];then hlp;exit;fi
+if [ -z "${1}" ];then "${0}" -h;exit;fi
 while getopts "adfxh" OPT;do
 	case "$OPT" in
 		a) mode="sane";;
 		d) mode="dir";;
 		f) mode="file";;
 		x) mode="ex";;
-		h) hlp;exit;;
+		h)
+			printf "Will run in : %s\n" "$PWD"
+			printf " -a\t-d and -f\n"
+			printf " -d\tset 755 drwxr-xr-x | directories\n"
+			printf " -f\tset 644 -rw-r--r-- | files\n"
+			printf " -h\tprint this help\n"
+			printf " -x\tset 755 -rwxr-x-rx | files execute\n"
+			printf "\nCodes\n"
+			printf "0\t---\n"
+			printf "1\t--x\n"
+			printf "2\t-w-\n"
+			printf "3\t-wx\n"
+			printf "4\tr--\n"
+			printf "5\tr-x\n"
+			printf "6\trw-\n"
+			printf "7\trwx\n"
+			exit;;
 	esac
 done
 

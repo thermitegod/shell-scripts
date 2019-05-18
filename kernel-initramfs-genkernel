@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#2.2.1
-#2019-01-29
+#2.3.0
+#2019-05-17
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -17,15 +17,18 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-if [ "$(id -u)" -ne 0 ];then printf "Requires root, exiting.\n";exit;fi
-if ! [ -f "/usr/src/linux/usr/gen_init_cpio" ];then printf "Make sure the kernel is build first\n";exit;fi
+die(){ /bin/echo -e "\033[0;31m$*\033[m";exit 1; }
+
+if [ "$(id -u)" -ne 0 ]; then die "Requires root, exiting.";fi
+
+if ! [ -f "/usr/src/linux/usr/gen_init_cpio" ];then die "Make sure the kernel is build first";fi
 
 logfile="/dev/null"
 comp="lz4"
 loglevel="1"
 extra_flags=""
 
-while getopts "vlxLhde" OPT;do
+while getopts "vlxhde" OPT;do
 	case "$OPT" in
 		e)
 			extra_flags="${extra_flags} --lvm --luks --e2fsprogs"

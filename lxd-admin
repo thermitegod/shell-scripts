@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#6.0.0
-#2019-05-13
+#6.1.0
+#2019-05-17
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -22,46 +22,6 @@
 
 #TODO
 #condense main function
-
-hlp(){
-	printf "CONTAINER, only use to limit actions to specified\n"
-	printf " -R\tOnly run on rutorrent\n"
-	printf " -T\tOnly run on transmission, note: port is :${transmission_port}\n"
-	printf " -O\tOnly operate in the supplied container, requires full container name\n"
-	printf "\nCONTAINER SERVICES\n"
-	printf " -L\trestart lighttpd limited to rutorrent containers\n"
-	printf " -l\trestart rtorrent limited to rutorrent containers\n"
-	printf "\nCONTAINER GENERAL\n"
-	printf " -d\tDelete containers\n"
-	printf " -D\tDelete '${old_prefix}' containers\n"
-	printf " -h\tPrint this help\n"
-	printf " -H\tprint file setup guide: ${container_info}\n"
-	printf " -r\tRestart containers\n"
-	printf " -s\tStart containers\n"
-	printf " -S\tStart '${old_prefix}' containers\n"
-	printf " -u\tUpdate, rename existing with '${old_prefix}' prefix\n"
-	printf " -U\tUpdate, delete existing instead of renaming\n"
-	printf " -x\tStop '${old_prefix}' containers\n"
-	printf " -X\tForce stop '${old_prefix}' containers\n"
-	printf " -z\tStop containers\n"
-	printf " -Z\tForce stop containers\n"
-	printf "\nSPECIFIC, no other flags req\n"
-	printf " -c\trtorrent lockfile cleanup\n"
-	printf " -C\trutorrent cleanup only, remove *.torrent files in \$config/rutorrent/share/torrents/\n"
-	printf "\nOTHER\n"
-	printf " -e\tedit ${container_info}\n"
-	printf " -E\tcat ${container_info}\n"
-	printf " -P\tPrint all container vars\n"
-	printf " -p\tPrint limited container vars\n"
-}
-
-hlp2(){
-	printf "All containers are declared in '${container_info}' using the following space delimited format, subject to change\n"
-	printf "\n'container type' 'distro' 'ipv4' 'limit cpu' 'limit cpu allowance' 'limit mem' 'container name' 'save location override, optional'\n"
-	printf "\nParsing of '${container_info}'\nSkips line if: line starts with '#', line is blank, or 'container name' is not set\nScript exits when a line that starts with 'stop' is read\n"
-	printf "\nNOTE: to not use limits, set them to '0'\n"
-	printf "\nexample:\n# this line will be skipped\nrutorrent gentoo 192.168.0.161 6 10%% 8192MB anime /mnt/anime/anime-working\nstop #nothing below this line will be run\n"
-}
 
 set_dirs(){
 	#not in container
@@ -107,17 +67,17 @@ set_dirs(){
 	fi
 }
 
-get_state(){ if [ "$(lxc info ${1}|grep Running)" ];then is_running="1";fi; }
+get_state(){ if [ "$(lxc info "${1}"|grep Running)" ];then is_running="1";fi; }
 
 main_container(){
 	#order matters here
-	if [ -n "$(echo ${ctype}|grep '\#')" ];then return;fi #skip comments
-	if [ -n "$(echo ${ctype}|grep stop)" ];then exit;fi #exit when 'stop' is read
-	if [ -z "$(echo ${cname})" ];then return;fi #skip blank lines, TODO: need to find a better way to do these
+	if [ -n "$(echo "${ctype}"|grep '\#')" ];then return;fi #skip comments
+	if [ -n "$(echo "${ctype}"|grep stop)" ];then exit;fi #exit when 'stop' is read
+	if [ -z "${cname}" ];then return;fi #skip blank lines, TODO: need to find a better way to do these
 	case "${distro}" in
 		alpine) true;;
 		gentoo) true;;
-		*) printf "skipping non supported distro: ${distro}\n";return;;
+		*) printf "skipping non supported distro: %s\n" "${distro}";return;;
 	esac
 	template="base-${distro}-${ctype}"
 	fullname="${ctype}-${cname}"
@@ -130,23 +90,23 @@ main_container(){
 		stop)
 			get_state "${fullname}"
 			if [ "${is_running}" = "0" ];then return;fi
-			printf "Stopping container: ${fullname}\n";lxc stop "${fullname}" &;;
+			printf "Stopping container: %s\n" "${fullname}";lxc stop "${fullname}" &;;
 		start)
 			get_state "${fullname}"
 			if [ "${is_running}" = "1" ];then return;fi
-			printf "Starting container: ${fullname}\n";sleep .1;lxc start "${fullname}" &;;
+			printf "Starting container: %s\n" "${fullname}";sleep .1;lxc start "${fullname}" &;;
 		delete)
 			get_state "${fullname}"
-			if [ "${is_running}" = "1" ];then printf "Must stop before deleting: ${fullname}\n";return;fi
-			printf "Deleteing container: ${fullname}\n";lxc delete "${fullname}" &;;
+			if [ "${is_running}" = "1" ];then printf "Must stop before deleting: %s\n" "${fullname}";return;fi
+			printf "Deleteing container: %s\n" "${fullname}";lxc delete "${fullname}" &;;
 		restart)
 			get_state "${fullname}"
 			if [ "${is_running}" = "0" ];then return;fi
-			printf "Restarting container: ${fullname}\n";lxc restart "${fullname}" &;;
+			printf "Restarting container: %s\n" "${fullname}";lxc restart "${fullname}" &;;
 		forcestop)
 			get_state "${fullname}"
 			if [ "${is_running}" = "0" ];then return;fi
-			printf "Force stopping container: ${fullname}\n";lxc stop --force "${fullname}" &;;
+			printf "Force stopping container: %s\n" "${fullname}";lxc stop --force "${fullname}" &;;
 		rtorrent_clean_lock)
 			get_dirs="1"
 			set_dirs
@@ -157,48 +117,48 @@ main_container(){
 		rtorrent_clean_torrent)
 			#printf "Running cleanup for: "${fullname}"\n"
 			set_dirs
-			if ! [ "$(ls -1A ${rushare}/torrents|wc -l)" = "0" ];then
-				rm ${rushare}/torrents/*.torrent
+			if ! [ "$(ls -1A "${rushare}"/torrents|wc -l)" = "0" ];then
+				rm "${rushare}"/torrents/*.torrent
 			fi
 			;;
 		rtorrent_restart_service)
 			get_state "${fullname}"
 			if [ "${is_running}" = "0" ];then return;fi
 			if [ "${service}" = "rtorrent" ];then
-				printf "\nRestarting rtorrent on: ${fullname}\n\n"
+				printf "\nRestarting rtorrent on: %s\n\n" "${fullname}"
 				lxc exec "${fullname}" rc-service rtorrent restart >/dev/null 2>&1 &
 			elif [ "${service}" = "lighttpd" ];then
-				printf "\nRestarting lighttpd on: ${fullname}\n\n"
+				printf "\nRestarting lighttpd on: %s\n\n" "${fullname}"
 				lxc exec "${fullname}" rc-service lighttpd restart >/dev/null 2>&1 &
 			fi
 			;;
 		update)
 			get_state "${fullname}"
 			if [ "${is_running}" = "1" ];then
-				printf "Not updating running container: ${fullname}\n"
+				printf "Not updating running container: %s\n" "${fullname}"
 				return
 			fi
 
 			get_state "${template}"
 			if [ "${is_running}" = "1" ];then
-				printf "Stopping running template: ${template}\n"
+				printf "Stopping running template: %s\n" "${template}"
 				lxc stop "${template}"
 				printf "\n\n"
 			fi
 
-			printf "Update running for: ${fullname}\n"
+			printf "Update running for: %s\n" "${fullname}"
 
-			if [ "$(echo ${lxclist}|grep ${fullname})" ];then
+			if [ "$(echo "${lxclist}"|grep "${fullname}")" ];then
 				if [ "${update_keep_old}" = "1" ];then
-					printf "Renaming ${fullname} to ${old_prefix}-${fullname}\n"
+					printf "Renaming %s to %s-%s\n" "${fullname}" "${old_prefix}" "${fullname}"
 					lxc rename "${fullname}" "${old_prefix}-${fullname}"
 				elif [ "${update_keep_old}" = "0" ];then
-					printf "Deleting ${fullname}\n"
+					printf "Deleting %s\n" "${fullname}"
 					lxc delete "${fullname}"
 				fi
 			fi
 
-			printf "Copying ${template} to ${fullname}\n"
+			printf "Copying %s to %s\n" "${template}" "${fullname}"
 			lxc copy "${template}" "${fullname}"
 
 			if [ "${distro}" = "gentoo" ];then
@@ -215,16 +175,16 @@ main_container(){
 			#clean rtorrent lock files
 			"${0}" -c -O "${fullname}"
 
-			printf "Seting StaticIP to: ${ip4}\n"
+			printf "Seting StaticIP to: %s\n" "${ip4}"
 			net_tmp=$(mktemp)
 			case "${distro}" in
 				alpine)
 					net="${fullname}/etc/network/interfaces"
-					printf "auto eth0\niface eth0 inet static\n\taddress ${ip4}\n\tnetmask ${ip4_netmask}\n\tgateway ${ip_gateway}\n">|"${net_tmp}"
+					printf "auto eth0\niface eth0 inet static\n\taddress %s\n\tnetmask %s\n\tgateway %s\n" "${ip4}" "${ip4_netmask}" "${ip4_gateway}">|"${net_tmp}"
 					;;
 				gentoo)
 					net="${fullname}/etc/conf.d/net"
-					printf "rc_keyword=\"-stop\"\nconfig_eth0=\"${ip4} netmask ${ip4_netmask} brd ${ip4_brd}\"\nroutes_eth0=\"default via ${ip4_gateway}\"\n">|"${net_tmp}"
+					printf "rc_keyword=\"-stop\"\nconfig_eth0=\"%s netmask %s brd %s\"\nroutes_eth0=\"default via $%s\"\n" "${ip4}" "${ip4_netmask}" "${ip4_brd}" "${ip4_gateway}">|"${net_tmp}"
 					;;
 			esac
 			lxc file push "${net_tmp}" "${net}"
@@ -235,25 +195,25 @@ main_container(){
 			;;
 		print)
 			get_state "${fullname}"
-			printf "Container Name\t: ${fullname}\n"
-			printf "Name\t\t: ${cname}\n"
-			printf "Template\t: ${ctype}\n"
-			printf "Distro\t\t: ${distro}\n"
+			printf "Container Name\t: %s\n" "${fullname}"
+			printf "Name\t\t: %s\n" "${cname}"
+			printf "Template\t: %s\n" "${ctype}"
+			printf "Distro\t\t: %s\n" "${distro}"
 			if [ "${ctype}" = "transmission" ];then ip4="${ip4}:${transmission_port}";fi
-			printf "IPV4\t\t: ${ip4}\n"
+			printf "IPV4\t\t: %s\n" "${ip4}"
 			if [ "${is_running}" = "1" ];then state="on";else state="off";fi
-			printf "On/Off\t\t: ${state}\n"
+			printf "On/Off\t\t: %s\n" "${state}"
 			if [ "${verbose}" = "1" ];then
-				printf "Limit CPU\t: ${lim_cpu}\n"
+				printf "Limit CPU\t: %s\n" "${lim_cpu}"
 				printf "Limit CPU ALLOW\t: %s\n" "${lim_cpu_allow}"
-				printf "Limit MEM\t: ${lim_mem}\n"
+				printf "Limit MEM\t: %s\n" "${lim_mem}"
 				set_dirs
-				printf "session\t\t: ${session}\n"
+				printf "session\t\t: %s\n" "${session}"
 				if [ "${ctype}" = "rutorrent" ];then
-					printf "rushare\t\t: ${rushare}\n"
-					printf "watch\t\t: ${watch}\n"
+					printf "rushare\t\t: %s\n" "${rushare}"
+					printf "watch\t\t: %s\n" "${watch}"
 				fi
-				printf "save\t\t: ${save}\n"
+				printf "save\t\t: %s\n" "${save}"
 				if [ -n "${save_override}" ];then printf "save override\t: active\n";fi
 			fi
 			printf "\n"
@@ -265,7 +225,6 @@ limit="0"
 on_old="0"
 verbose="0"
 get_dirs="0"
-printonly="0"
 is_running="0"
 catch_single="0"
 
@@ -281,10 +240,10 @@ limit_to="z"
 old_prefix="old"
 lxclist=$(lxc list)
 
-. $(dirname "$0")/utils.sh
+. "$(dirname "$0")/utils.sh"
 container_info="${extra}/lxd-admin"
 
-if [ -z "${1}" ];then hlp;exit;fi
+if [ -z "${1}" ];then "${0}" -h;exit;fi
 while getopts "O:TRCDPZUHESXLlxcdrsuzphe" OPT;do
 	case "${OPT}" in
 		O) catch_single="1";catch=${OPTARG};;
@@ -307,15 +266,51 @@ while getopts "O:TRCDPZUHESXLlxcdrsuzphe" OPT;do
 		P) act="print";get_dirs="1";verbose="1";;
 		L) act="rtorrent_restart_service";service="lighttpd";limit="1";limit_to="rutorrent";;
 		l) act="rtorrent_restart_service";service="rtorrent";limit="1";limit_to="rutorrent";;
-		h) hlp;exit;;
-		H) hlp2;exit;;
 		e) $EDITOR "${container_info}";exit;;
 		E) cat "${container_info}";exit;;
+		h)
+			printf "CONTAINER, only use to limit actions to specified\n"
+			printf " -R\tOnly run on rutorrent\n"
+			printf " -T\tOnly run on transmission, note: port is :%s\n" "${transmission_port}"
+			printf " -O\tOnly operate in the supplied container, requires full container name\n"
+			printf "\nCONTAINER SERVICES\n"
+			printf " -L\trestart lighttpd limited to rutorrent containers\n"
+			printf " -l\trestart rtorrent limited to rutorrent containers\n"
+			printf "\nCONTAINER GENERAL\n"
+			printf " -d\tDelete containers\n"
+			printf " -D\tDelete '%s' containers\n" "${old_prefix}"
+			printf " -h\tPrint this help\n"
+			printf " -H\tprint file setup guide: %s\n" "${container_info}"
+			printf " -r\tRestart containers\n"
+			printf " -s\tStart containers\n"
+			printf " -S\tStart '%s' containers\n" "${old_prefix}"
+			printf " -u\tUpdate, rename existing with '%s' prefix\n" "${old_prefix}"
+			printf " -U\tUpdate, delete existing instead of renaming\n"
+			printf " -x\tStop '%s' containers\n" "${old_prefix}"
+			printf " -X\tForce stop '%s' containers\n" "${old_prefix}"
+			printf " -z\tStop containers\n"
+			printf " -Z\tForce stop containers\n"
+			printf "\nSPECIFIC, no other flags req\n"
+			printf " -c\trtorrent lockfile cleanup\n"
+			printf " -C\trutorrent cleanup only, remove *.torrent files in \$config/rutorrent/share/torrents/\n"
+			printf "\nOTHER\n"
+			printf " -e\tedit %s\n" "${container_info}"
+			printf " -E\tcat %s\n" "${container_info}"
+			printf " -P\tPrint all container vars\n"
+			printf " -p\tPrint limited container vars\n"
+			exit;;
+		H)
+			printf "All containers are declared in '%s' using the following space delimited format, subject to change\n" "${container_info}"
+			printf "\n'container type' 'distro' 'ipv4' 'limit cpu' 'limit cpu allowance' 'limit mem' 'container name' 'save location override, optional'\n"
+			printf "\nParsing of '%s'\nSkips line if: line starts with '#', line is blank, or 'container name' is not set\nScript exits when a line that starts with 'stop' is read\n" "${container_info}"
+			printf "\nNOTE: to not use limits, set them to '0'\n"
+			printf "\nexample:\n# this line will be skipped\nrutorrent gentoo 192.168.0.161 6 10%% 8192MB anime /mnt/anime/anime-working\nstop #nothing below this line will be run\n"
+			exit;;
 	esac
 done
 shift $((OPTIND - 1))
 
-if ! [ -f "${container_info}" ];then hlp2;exit 1;fi
+if ! [ -f "${container_info}" ];then "${0}" -H;exit 1;fi
 
 while IFS=' ' read -r ctype distro ip4 lim_cpu lim_cpu_allow lim_mem cname save_override;do
 	main_container

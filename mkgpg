@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#3.9.0
-#2019-04-11
+#3.10.0
+#2019-05-17
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -23,13 +23,13 @@
 compress(){
 	case "${comp_crypt}" in
 		0)
-			printf "Encrypting : ${f%%}\n"
+			printf "Encrypting : %s\n" "${f%%}"
 			nice -19 gpg --yes --batch -e -r "${user}" "${f%%}"
 			if [ "${comp_rm}" = "1" ];then rm -r "${f%%}";fi
 			;;
 		1)
-			printf "Decrypting : ${f%%}\n"
-			#printf "Output     : ${f%%.*}\n"
+			printf "Decrypting : %s\n" "${f%%}"
+			#printf "Output     : %s\n" "${f%%.*}"
 			nice -19 gpg --output "${f%%.*}" --decrypt "${f%%}"
 			;;
 	esac
@@ -66,7 +66,7 @@ if [ -n "${1}" ];then
 		if [ -e "${f}" ];then
 			compress
 		else
-			printf "\nInput is none existent : ${1}\n\n"
+			printf "\nInput is none existent : %s\n\n" "${1}"
 		fi
 		if [ -n "${2}" ];then shift;else break;fi
 	done

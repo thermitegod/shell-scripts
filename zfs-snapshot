@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#3.1.0
-#2019-04-26
+#3.2.0
+#2019-05-17
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -17,51 +17,19 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-hlp(){
-	printf "GENERAL\n"
-	printf " -h\tprint this help\n"
-	printf "\nSNAPSHOT PRINTING\n"
-	printf " -a\tprint all snapshots\n"
-	printf " -d\tprint snapshots of storage/{anime,data} and torrents\n"
-	printf " -c\tprint snapshots of zroot/CACHE/torrents\n"
-	printf " -s\tprint snapshots of ssd-mirror/{MUSIC,KVM}\n"
-	printf " -u\tprint snapshots of zroot/HOME/*\n"
-	printf " -l\tprint snapshots of zroot/ROOT/gentoo{/var,/var/log}\n"
-	printf "\nSNAPSHOT CREATION\n"
-	printf "\tformat  : pool/dataset@${S}\n"
-	printf " -m1\tSnapshot: zroot/ROOT/gentoo\n"
-	printf " -m2\tSnapshot: zroot/HOME/brandon\n"
-	printf " -m3\tSnapshot: storage/anime\n"
-	printf " -m4\tSnapshot: storage/data\n"
-	printf " -m5\tSnapshot: ssd-mirror/KVM\n"
-	printf " -m6\tSnapshot: torrents/\n"
-	printf " -m7\tSnapshot: zroot/CACHE/torrents\n"
-	printf "\nBACKUP\n"
-	printf " -B\texport snapshot passed in \$1\n"
-	printf "\nCREATION\n"
-	printf "zfs create -o mountpoint=/mnt pool/dataset\n"
-	printf "\nMISC\n"
-	printf "zfs send pool/dataset@snapshot | zstd -T0 >| /tmp/backup.zst\n"
-	printf "unzstd -c backup.zst | zfs receive pool/newdataset\n\n"
-	printf "zfs set mountpoint=/newmount pool/dataset\n\n"
-	printf "zfs snapshot -r zroot/ROOT/gentoo@<type>-<date>\n"
-	printf "zfs rollback -r <pool/dataset@snapshot>\n"
-	printf "zfs destroy <pool/dataset@snapshot>\n"
-	printf "zfs list -t snapshot\n"
-}
-
 S="manual-$(date +%F-%H%M)"
 ZFS="/sbin/zfs"
-if [ -z "${1}" ];then hlp;exit;fi
+
+if [ -z "${1}" ];then "${0}" -h;exit;fi
 while true;do
 	case "${1}" in
-		-m1) "$ZFS" snapshot -r zroot/ROOT/gentoo@${S};shift;;
-		-m2) "$ZFS" snapshot -r zroot/HOME/brandon@${S};shift;;
-		-m3) "$ZFS" snapshot -r storage/anime@${S};shift;;
-		-m4) "$ZFS" snapshot -r storage/data@${S};shift;;
-		-m5) "$ZFS" snapshot -r ssd-mirror/KVM@${S};shift;;
-		-m6) "$ZFS" snapshot -r torrents@${S};shift;;
-		-m7) "$ZFS" snapshot -r zroot/CACHE/torrents@${S};shift;;
+		-m1) "$ZFS" snapshot -r "zroot/ROOT/gentoo@${S}";shift;;
+		-m2) "$ZFS" snapshot -r "zroot/HOME/brandon@${S}";shift;;
+		-m3) "$ZFS" snapshot -r "storage/anime@${S}";shift;;
+		-m4) "$ZFS" snapshot -r "storage/data@${S}";shift;;
+		-m5) "$ZFS" snapshot -r "ssd-mirror/KVM@${S}";shift;;
+		-m6) "$ZFS" snapshot -r "torrents@${S}";shift;;
+		-m7) "$ZFS" snapshot -r "zroot/CACHE/torrents@${S}";shift;;
 		-B) shift;zfs send "${1}" | zstd -T0 >| "${1##*/}.zst";exit;;
 		-a) "$ZFS" list -t snapshot;shift;;
 		-c)
@@ -92,7 +60,38 @@ while true;do
 				zroot/ROOT/gentoo/var \
 				zroot/ROOT/gentoo/var/log
 			shift;;
-		-h) hlp;exit;;
+		-h)
+			printf "GENERAL\n"
+			printf " -h\tprint this help\n"
+			printf "\nSNAPSHOT PRINTING\n"
+			printf " -a\tprint all snapshots\n"
+			printf " -d\tprint snapshots of storage/{anime,data} and torrents\n"
+			printf " -c\tprint snapshots of zroot/CACHE/torrents\n"
+			printf " -s\tprint snapshots of ssd-mirror/{MUSIC,KVM}\n"
+			printf " -u\tprint snapshots of zroot/HOME/*\n"
+			printf " -l\tprint snapshots of zroot/ROOT/gentoo{/var,/var/log}\n"
+			printf "\nSNAPSHOT CREATION\n"
+			printf "\tformat  : pool/dataset@%s\n" "${S}"
+			printf " -m1\tSnapshot: zroot/ROOT/gentoo\n"
+			printf " -m2\tSnapshot: zroot/HOME/brandon\n"
+			printf " -m3\tSnapshot: storage/anime\n"
+			printf " -m4\tSnapshot: storage/data\n"
+			printf " -m5\tSnapshot: ssd-mirror/KVM\n"
+			printf " -m6\tSnapshot: torrents/\n"
+			printf " -m7\tSnapshot: zroot/CACHE/torrents\n"
+			printf "\nBACKUP\n"
+			printf " -B\texport snapshot passed in \$1\n"
+			printf "\nCREATION\n"
+			printf "zfs create -o mountpoint=/mnt pool/dataset\n"
+			printf "\nMISC\n"
+			printf "zfs send pool/dataset@snapshot | zstd -T0 >| /tmp/backup.zst\n"
+			printf "unzstd -c backup.zst | zfs receive pool/newdataset\n\n"
+			printf "zfs set mountpoint=/newmount pool/dataset\n\n"
+			printf "zfs snapshot -r zroot/ROOT/gentoo@<type>-<date>\n"
+			printf "zfs rollback -r <pool/dataset@snapshot>\n"
+			printf "zfs destroy <pool/dataset@snapshot>\n"
+			printf "zfs list -t snapshot\n"
+			exit;;
 		*) break;;
 	esac
 done

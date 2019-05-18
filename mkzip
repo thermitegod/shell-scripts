@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#5.2.0
-#2019-05-10
+#5.3.0
+#2019-05-17
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -41,7 +41,7 @@ compress(){
 
 	if [ "$?" -eq 0 ] && ! [ "${comp_type}" = "test" ] && [ "${orig_rm}" = "1" ] && [ -f "${f%%}.zip" ];then
 		if [ -n "$(${0} -t "${f%%}.zip"|grep FAILED)" ];then
-			printf "Test FAILED for: ${f%%}.7z\nNot removing original: "${f%%}"\n"
+			printf "Test FAILED for: %s.7z\nNot removing original: %s\n" "${f%%}" "${f%%}"
 		else
 			rm -r "${f%%}"
 		fi
@@ -96,7 +96,7 @@ if [ -n "${1}" ];then
 		if [ -e "${f}" ];then
 			compress
 		else
-			printf "\nInput is none existent : ${1}\n\n"
+			printf "\nInput is none existent : %s\n\n" "${1}"
 		fi
 		if [ -n "${2}" ];then shift;else break;fi
 	done

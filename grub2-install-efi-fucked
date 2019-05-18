@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#2.0.0
-#2019-02-17
+#2.1.0
+#2019-05-17
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -29,10 +29,11 @@ while getopts "hm" OPT;do
 done
 
 g=$(grub-install --target=x86_64-efi --efi-directory=/boot/efi)
-. $(dirname "$0")/colors.sh
+
+. "$(dirname "$0")/colors.sh"
 printf "\n${BYEL}Someone fucked up the boot loader again${NC}\n\n"
 
-if [ "$(echo ${g}|grep error)" ];then
+if [ "$(echo "${g}"|grep error)" ];then
 	printf "${RED}==================${NC}\n"
 	printf "${RED}= Error stopping =${NC}\n"
 	printf "${RED}==================${NC}\n\n"
@@ -40,8 +41,8 @@ if [ "$(echo ${g}|grep error)" ];then
 	exit 1
 else
 	printf "${g}\n\n"
-	if [ "${mkconfig}" = "1" ] && [ -x $(dirname "$0")/kernel-grub ];then
-		$(dirname "$0")/kernel-grub
+	if [ "${mkconfig}" = "1" ] && [ -x "$(dirname "$0")/kernel-grub" ];then
+		"$(dirname "$0")"/kernel-grub
 	elif [ "${mkconfig}" = "1" ];then
 		grub-mkconfig -o /boot/grub/grub.cfg
 	fi

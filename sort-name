@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#5.2.0
-#2019-01-24
+#5.3.0
+#2019-05-17
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -29,13 +29,13 @@ main(){
 }
 
 name_sort(){
-	if [ -n "$(echo ${name}|grep '\#')" ];then return;fi
+	if [ -n "$(echo "${name}"|grep '\#')" ];then return;fi
 	arc=$(echo "${name}" | sed -e "s/\-/\*/g")
 	if [ -z "${override}" ];then dir="${name}/.";else dir="${override}/.";fi
 
-	if [ "${debug}" -ge "2" ];then printf "${BLU}\$name${NC}: ${name}\n";fi
-	if [ "${debug}" -ge "3" ];then printf "\t${CYA}\$arc${NC}: ${arc}\n";fi
-	if [ "${debug}" -ge "3" ];then printf "\t${CYA}\$dir${NC}: ${dir}\n";fi
+	if [ "${debug}" -ge "2" ];then printf "${BLU}\$name${NC}: %s\n" "${name}";fi
+	if [ "${debug}" -ge "3" ];then printf "\t${CYA}\$arc${NC}: %s\n" "${arc}";fi
+	if [ "${debug}" -ge "3" ];then printf "\t${CYA}\$dir${NC}: %s\n" "${dir}";fi
 
 	case "${job_run}" in
 		dir_check) find . -maxdepth 1 -type f -iname "*${arc}*" -exec mkdir -p -- "${dest}/${dir}" \; -quit;;
@@ -46,14 +46,17 @@ name_sort(){
 
 B="$(ls -1A|wc -l)"
 debug="0"
-. $(dirname "$0")/utils.sh
-. $(dirname "$0")/colors.sh
+total="0"
+
+. "$(dirname "$0")/utils.sh"
+. "$(dirname "$0")/colors.sh"
+
 print_sorted_total="1"
 
 list_final="${extra}/sort-name-final"
 list_type="${extra}/sort-name-type"
-dest_final=$(head -n1 ${list_final}|sed -e "s/#//g")
-dest_type=$(head -n1 ${list_type}|sed -e "s/#//g")
+dest_final="$(head -n1 "${list_final}"|sed -e "s/#//g")"
+dest_type=$(head -n1 "${list_type}"|sed -e "s/#//g")
 
 #default
 list_sort="${list_type}"
@@ -77,8 +80,8 @@ while getopts "ETefthd:" OPT;do
 			printf " -h\tPrint this help\n"
 			printf " -T\tUse test dir \"/tmp/test\"\n"
 			printf "\nEDIT\n"
-			printf " -e\tedit ${list_type}\n"
-			printf " -E\tedit ${list_final}\n"
+			printf " -e\tedit %s\n" "${list_type}"
+			printf " -E\tedit %s\n" "${list_final}"
 			printf "\nLIST\n"
 			printf " -f\trun final sort\n"
 			printf " -t\trun type sort\n"
@@ -87,18 +90,18 @@ while getopts "ETefthd:" OPT;do
 done
 
 if ! [ -f "${list_sort}" ];then
-	printf "missing: ${list_sort}\nformat, line 1 must be default save path:\n/path/to/save\nto-sort\nto-sort override\n"
+	printf "missing: %s\nformat, line 1 must be default save path:\n/path/to/save\nto-sort\nto-sort override\n" "${list_sort}"
 	exit 1
 fi
 
 if [ "${debug}" -ge "1" ];then printf "\n*** Debug printouts enabled ***\n\n";fi
 printf "Prerun info\n"
-printf "MODE\t\t: $(basename ${list_sort})\n"
-printf "Running from\t: ${PWD}\n"
-printf "Dest is\t\t: ${dest}\n\n"
+printf "MODE\t\t: %s\n" "$(basename "${list_sort}")"
+printf "Running from\t: %s\n" "${PWD}"
+printf "Dest is\t\t: %s\n\n" "${dest}"
 printf "Make sure everything has been processed correctly\n"
-printf "Confirm run of '${0}' [yn]?\n"
-read confirm
+printf "Confirm run of '%s' [yn]?\n" "${0}"
+read -r confirm
 if echo "${confirm}"|grep -iq "^y" ;then
 	#all target dirs should exits before running
 	#otherwise you are going to have a bad time
@@ -122,8 +125,8 @@ if [ "${print_sorted_total}" = "1" ];then
 	A="$(ls -1A|wc -l)"
 	T="$((B-A))"
 	if ! [ "${total}" = "0" ];then
-		printf "\n${YEL}BEFORE${NC}\t${B}\n"
-		printf "${YEL}AFTER${NC}\t${A}\n"
-		printf "${YEL}SORTED${NC}\t${T}\n"
+		printf "\n${YEL}BEFORE${NC}\t%s\n" "${B}"
+		printf "${YEL}AFTER${NC}\t%s\n" "${A}"
+		printf "${YEL}SORTED${NC}\t%s\n" "${T}"
 	fi
 fi

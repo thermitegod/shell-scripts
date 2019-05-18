@@ -1,8 +1,8 @@
 #!/usr/bin/env sh
-#5.2.0
-#2018-12-30
+#5.3.0
+#2019-05-17
 
-#Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
+#Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
 #This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -22,26 +22,24 @@ tst="0"
 frm="0"
 fls="0"
 
-hlp() {
-	printf " -h\tprint this help\n"
-	printf " -l\tList found\n"
-	printf " -r\tRemove found\n"
-	printf " -t\tUse test dir '/tmp/test'\n"
-	printf " -z\tDisable 'zzz' matching\n"
-}
-
-if [ -z "${1}" ];then hlp;exit;fi
+if [ -z "${1}" ];then "${0}" -h;exit;fi
 while getopts "rltzh" OPT;do
 	case "$OPT" in
 		r) frm="1";;
 		l) fls="1";;
 		t) tst="1";;
 		z) zzz="0";;
-		h) hlp;exit;;
+		h)
+			printf " -h\tprint this help\n"
+			printf " -l\tList found\n"
+			printf " -r\tRemove found\n"
+			printf " -t\tUse test dir '/tmp/test'\n"
+			printf " -z\tDisable 'zzz' matching\n"
+			exit;;
 	esac
 done
 
-if [ ${tst} = "0" ];then
+if [ "${tst}" = "0" ];then
 	d="/mnt/data/hentai-processing/credits"
 else
 	d="/tmp/test/credits"
@@ -50,7 +48,7 @@ fi
 find_credits(){
 	if [ "${fls}" = "1" ];then
 		j=$(find . -iname "${1}" -exec ls -1A -- "{}" \;)
-		if ! [ -z "${j}" ];then printf "*** Found 'POSSIBLE' credit files ***\n${j}\n";fi
+		if [ -n "${j}" ];then printf "*** Found 'POSSIBLE' credit files ***\n%s\n" "${j}";fi
 	fi
 	if [ "${frm}" = "1" ];then
 		find . -type f -iname "${1}" -exec mv -v -- "{}" "${d}" \;
@@ -59,7 +57,7 @@ find_credits(){
 
 find_credits *credit*.j*pg
 find_credits *credit*.png
-if [ ${zzz} = "1" ] || [ "${fls}" = "1" ];then
+if [ "${zzz}" = "1" ] || [ "${fls}" = "1" ];then
 	find_credits *zzz*.j*pg
 	find_credits *zzz*.png
 fi

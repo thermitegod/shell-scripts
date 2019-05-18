@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#2.7.0
-#2019-03-29
+#2.8.0
+#2019-05-17
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -17,10 +17,14 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-array="$(seq -w -s ' ' $(ls -1A|wc -l))"
+die(){ /bin/echo -e "\033[0;31m$*\033[m";exit 1; }
+
+array="$(seq -w -s ' ' "$(ls -1A|wc -l)")"
 mode="single"
 V="1"
-. $(dirname "$0")/colors.sh
+
+. "$(dirname "$0")/colors.sh"
+
 while getopts "v:bh" OPT;do
 	case "$OPT" in
 		b) mode="batch";;
@@ -46,20 +50,20 @@ case "${mode}" in
 				newname="${array1}.${f##*.}"
 				if ! [ -f "${newname}" ];then
 					mv -- "${f%%}" "${newname}"
-					if [ "${V}" -ge "2" ];then printf "${GRE}renamed${NC}: ${f%%}" "${newname}\n";fi
+					if [ "${V}" -ge "2" ];then printf "${GRE}renamed${NC}: %s %s\n" "${f%%}" "${newname}";fi
 				else
-					if [ "$(openssl sha1 ${f%%}|awk '{print $2}')" = "$(openssl sha1 ${newname}|awk '{print $2}')" ];then
-						if [ "${V}" -ge "1" ];then printf "${YEL}Same File not renaming${NC}: ${f%%}\n";fi
+					if [ "$(openssl sha1 "${f%%}"|awk '{print $2}')" = "$(openssl sha1 "${newname}"|awk '{print $2}')" ];then
+						if [ "${V}" -ge "1" ];then printf "${YEL}Same File not renaming${NC}: %s" "${f%%}";fi
 					else
 						if [ "${V}" -ge "1" ];then
 							printf "${YEL}Diferent files with same filename would exist${NC}\n"
-							printf "\tORIG:${f%%}\nNEW:\t${newname}\n"
+							printf "\nORIG:\t%s\nNEW:\t%s\n" "${f%%}" "${newname}"
 						fi
 					fi
 				fi
-				array=$(echo "$array"|sed "s/[^ ]* //")
+				array=$(echo "${array}"|sed "s/[^ ]* //")
 			fi
 		done
 		;;
-	batch) find . -path '*/*' -type d \( ! -name . \)|while read dir;do cd "${dir}" && "${0}";done;;
+	batch) find . -path '*/*' -type d \( ! -name . \)|while read -r dir;do cd "${dir}" || die && "${0}";done;;
 esac

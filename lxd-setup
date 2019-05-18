@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#1.1.0
-#2019-03-05
+#1.2.0
+#2019-05-14
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -44,13 +44,17 @@ printf "starting subs\n"
 lxc start base-gentoo-rutorrent
 lxc start base-gentoo-transmission
 
-printf "rutorrent, enter to continue\n"
+sleep 2
+
+printf "\nrutorrent, enter to continue\n"
 read z;unset z
 lxc exec base-gentoo-rutorrent /root/setup-rutorrent.sh
 
-printf "transmission, enter to continue\n"
+printf "\ntransmission, enter to continue\n"
 read z;unset z
 lxc exec base-gentoo-transmission /root/setup-transmission.sh
+
+sleep 2
 
 printf "stoping subs\n"
 lxc stop base-gentoo-rutorrent

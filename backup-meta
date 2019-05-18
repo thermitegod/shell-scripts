@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#2.0.2
-#2019-04-04
+#2.1.0
+#2019-05-17
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -16,6 +16,8 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+die(){ /bin/echo -e "\033[0;31m$*\033[m";exit 1; }
 
 finish() { if [ -d "${tmpdir}" ];then rm --preserve-root -r "${tmpdir}";fi }
 trap 'exit 1' INT HUP QUIT TERM USR1
@@ -35,34 +37,32 @@ move_finish(){
 	mv -iv "${tmpdir}/${target_comp}" "${target_dest}"
 }
 
-hlp(){
-	printf "\nGENERAL\n"
-	printf " -h\tprint this help\n"
-	printf " -v\tverbose tar\n"
-	printf " -x\tuse xz\n"
-	printf " -z\tuse zstd\n"
-	printf "\nCOMPRESS\n"
-	printf " -1\tchromium\n"
-	printf " -2\thome-bin\n"
-	printf " -3\thome-config\n"
-	printf " -4\thome-local\n"
-	printf " -5\tetc\n"
-	printf " -6\tvnstat\n"
-}
-
 mode="${0##*/backup-}"
 while getopts "123456hvxz" OPT;do
 	case "$OPT" in
 		1) mode="chromium";;
-		2) mode="home-bin";;
-		3) mode="home-config";;
-		4) mode="home-local";;
+		2) mode="user-bin";;
+		3) mode="user-config";;
+		4) mode="user-local";;
 		5) mode="etc";;
 		6) mode="vnstat";;
 		v) V="v";;
 		x) comp="xz";;
 		z) comp="zstd";;
-		h) hlp;exit;;
+		h)
+			printf "\nGENERAL\n"
+			printf " -h\tprint this help\n"
+			printf " -v\tverbose tar\n"
+			printf " -x\tuse xz\n"
+			printf " -z\tuse zstd\n"
+			printf "\nCOMPRESS\n"
+			printf " -1\tchromium\n"
+			printf " -2\tuser-bin\n"
+			printf " -3\tuser-config\n"
+			printf " -4\tuser-local\n"
+			printf " -5\tetc\n"
+			printf " -6\tvnstat\n"
+			exit;;
 	esac
 done
 
@@ -76,7 +76,7 @@ case "${mode}" in
 		target_source="${HOME}/.config/chrome"
 		target_dest="${backup_dir}/${user}/chromium-profiles/${date}"
 		dir_check
-		cd "${target_source}"
+		cd "${target_source}" || die
 		for f in *chrom*;do
 			target_comp="${date}-${user}-${f}.tar.${E}"
 			tar \
@@ -85,7 +85,18 @@ case "${mode}" in
 			move_finish
 		done
 		;;
-	home-config)
+	user-bin)
+		target_comp="${date}-${user}-bin.tar.${E}"
+		target_source="${HOME}/.bin"
+		target_dest="${backup_dir}/${user}/bin"
+		dir_check
+		mkdir "${tmpdir}"/bin
+		cd "${tmpdir}" || die
+		tar \
+			--xattrs --sparse -${V}cf - "${target_source}" -P | "$C" "$A" >| "${tmpdir}/${target_comp}"
+		move_finish
+		;;
+	user-config)
 		target_comp="${user}-config-${date}.tar.${E}"
 		target_source="${HOME}/.config"
 		target_dest="${backup_dir}/${user}/config"
@@ -99,7 +110,7 @@ case "${mode}" in
 			--exclude="${target_source}/kernel/distfiles/*" \
 			--xattrs --sparse -${V}cf - "${target_source}" -P | "$C" "$A" >| "${tmpdir}/${target_comp}"
 		;;
-	home-local)
+	user-local)
 		target_comp="${user}-local-${date}.tar.${E}"
 		target_source="${HOME}/.local"
 		target_dest="${backup_dir}/${user}/local"
@@ -118,19 +129,6 @@ case "${mode}" in
 			--xattrs --sparse -${V}cf - "${target_source}" -P | "$C" "$A" >| "${tmpdir}/${target_comp}"
 		move_finish
 		;;
-	home-bin)
-		target_comp="${date}-${user}-bin.tar.${E}"
-		target_source="${HOME}/.bin"
-		target_dest="${backup_dir}/${user}/bin"
-		dir_check
-		mkdir "${tmpdir}"/bin
-		cp -r "${target_source}" "${tmpdir}/bin"
-		cd "${tmpdir}"
-		tar \
-			--xattrs --sparse -${V}cf - "${target_source}" -P | "$C" "$A" >| "${tmpdir}/${target_comp}"
-		rm -rf "${tmpdir}/bin"
-		move_finish
-		;;
 	vnstat)
 		year=$(date "+%Y")
 		month=$(date "+%m")
@@ -140,5 +138,6 @@ case "${mode}" in
 		mkdir -p "${target_dest}/${year}/${month}/${day}"
 		cp "${target_source}" "${target_dest}/${year}/${month}/${day}"
 		;;
-	meta) hlp;exit;;
+	meta) "${0}" -h;exit;;
+	*) printf "Invalid\n"
 esac

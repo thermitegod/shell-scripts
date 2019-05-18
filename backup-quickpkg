@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#4.7.1
-#2019-01-06
+#4.8.0
+#2019-05-17
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -28,14 +28,6 @@ trap finish EXIT
 tmpdir=$(mktemp -d)
 chmod 755 "$tmpdir"
 
-date=$(date +%F-%H%M)
-user="brandon"
-group="${user}"
-data="/mnt/data/backup/gentoo"
-mode="z"
-comp="zstd"
-v=""
-
 comp(){
 	target_zst="${date}-${name}.tar.${E}"
 	target_dest="${data}/${name}"
@@ -45,21 +37,15 @@ comp(){
 	mv -i "${tmpdir}/${target_zst}" "${target_dest}"
 }
 
-hlp(){
-	printf "\nGENERAL\n"
-	printf " -h\tprint this help\n"
-	printf " -v\tverbose\n"
-	printf " -x\tuse xz\n"
-	printf " -z\tuse zstd\n"
-	printf "\nCOMPRESS\n"
-	printf " -a\teverything\n"
-	printf " -1\tpackages\n"
-	printf " -2\trepos\n"
-	printf " -3\tportage etc\n"
-	printf " -4\tportage world\n"
-}
+date=$(date +%F-%H%M)
+user="brandon"
+group="${user}"
+data="/mnt/data/backup/gentoo"
+mode="z"
+comp="zstd"
+V=""
 
-if [ -z "${1}" ];then hlp;exit;fi
+if [ -z "${1}" ];then "${0}" -h;exit;fi
 while getopts "1234ahvxz" OPT;do
 	case "$OPT" in
 		1) mode="packages";;
@@ -70,7 +56,19 @@ while getopts "1234ahvxz" OPT;do
 		v) V="v";;
 		x) comp="xz";;
 		z) comp="zstd";;
-		h) hlp;exit;;
+		h)
+			printf "\nGENERAL\n"
+			printf " -h\tprint this help\n"
+			printf " -v\tverbose\n"
+			printf " -x\tuse xz\n"
+			printf " -z\tuse zstd\n"
+			printf "\nCOMPRESS\n"
+			printf " -a\teverything\n"
+			printf " -1\tpackages\n"
+			printf " -2\trepos\n"
+			printf " -3\tportage etc\n"
+			printf " -4\tportage world\n"
+			exit;;
 	esac
 done
 

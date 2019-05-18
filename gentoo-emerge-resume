@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#5.6.0
-#2019-01-22
+#5.7.0
+#2019-05-17
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -24,15 +24,6 @@ trap finish EXIT
 tmpdir=$(mktemp -d)
 chmod 755 "${tmpdir}"
 
-hlp(){
-	printf " -b\tbackup\n"
-	printf " -r\trestore last <wip>\n"
-	printf " -s\trestore selected\n"
-	printf " -l\tlist\n"
-	printf " -d\tdelete\n"
-	printf " -h\tprint this help\n"
-}
-
 bac(){
 	if ! [ -d "${storage}" ];then mkdir -p "${storage}" && chown "${user}:${group}" "${storage}";fi
 	cp "${mtimedb}" "${tmpdir}"
@@ -43,14 +34,14 @@ bac(){
 }
 
 res(){
-	if [ -z "$(ls -1A ${storage} 2>/dev/null)" ];then die "Run a backup first. Exiting.";fi
+	if [ -z "$(ls -1A "${storage}" 2>/dev/null)" ];then die "Run a backup first. Exiting.";fi
 	#if ! [ -d "$storage" ];then die "Run a backup first. Exiting.";fi
 	if [ "${res_specific}" = "1" ];then
 		printf "Selected mtimedb to restore\n"
 		printf "==MUST== input full name\n"
 		ls -1A "$storage"
 		printf "\n"
-		read mtime_res
+		read -r mtime_res
 	else
 		mtime_res=$(ls -1A "${storage}"|tail -n1)
 	fi
@@ -71,7 +62,7 @@ mtime_zst="mtimedb.zst"
 user="brandon"
 group="$user"
 
-if [ -z "${1}" ];then hlp;exit;fi
+if [ -z "${1}" ];then "${0}" -h;exit;fi
 while getopts "brsldh" OPT;do
 	case "$OPT" in
 		b) bac;;
@@ -80,7 +71,7 @@ while getopts "brsldh" OPT;do
 		s) res_specific="1";res;;
 		l)
 			if ! [ -d "${storage}" ]; then die "Run a backup first. Exiting.";fi
-			printf "Listing files in : ${storage}\n"
+			printf "Listing files in : %s\n" "${storage}"
 			ls -1A ${storage}
 			;;
 		d)
@@ -90,6 +81,13 @@ while getopts "brsldh" OPT;do
 				printf "Nothing to delete\n"
 			fi
 			;;
-		h) hlp;exit;;
+		h)
+			printf " -b\tbackup\n"
+			printf " -r\trestore last <wip>\n"
+			printf " -s\trestore selected\n"
+			printf " -l\tlist\n"
+			printf " -d\tdelete\n"
+			printf " -h\tprint this help\n"
+			exit;;
 	esac
 done

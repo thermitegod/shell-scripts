@@ -1,8 +1,8 @@
 #!/usr/bin/env sh
-#3.0.1
-#2018-10-26
+#3.1.0
+#2019-05-17
 
-#Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
+#Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
 #This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -17,28 +17,12 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-hlp(){
-	printf "Sort files by size \n"
-	printf " -a\tsort everything\n"
-	printf " -h\tprint this help\n"
-	printf " -l\tprint number of each file size\n"
-	printf "\nSORT\n"
-	printf " -m10\tSort less than 10M\n"
-	printf " -m100\tSort less than 100M\n"
-	printf " -m150\tSort less than 150M\n"
-	printf " -m200\tSort less than 200M\n"
-	printf " -m500\tSort less than 500M\n"
-	printf " -g1\tSort less than 1G\n"
-	printf " -g10\tSort less than 10G\n"
-	printf " -g100\tSort less than 100G\n"
-}
-
 file_sort(){
-	find . -maxdepth 1 -type f -size +${lower} -size -${upper} -exec mkdir -p "${upper}" \; -quit
-	find . -maxdepth 1 -type f -size +${lower} -size -${upper} -exec mv -i -- "{}" "${upper}" \;
+	find . -maxdepth 1 -type f -size +"${lower}" -size -"${upper}" -exec mkdir -p "${upper}" \; -quit
+	find . -maxdepth 1 -type f -size +"${lower}" -size -"${upper}" -exec mv -i -- "{}" "${upper}" \;
 }
 
-if [ -z "${1}" ];then hlp;exit;fi
+if [ -z "${1}" ];then "${0}" -h;exit;fi
 while true;do
 	case "${1}" in
 		-a) mode="all";shift;;
@@ -51,11 +35,25 @@ while true;do
 		-g10) mode="less10G";shift;;
 		-g100) mode="less100G";shift;;
 		-l) count-size;exit;;
-		-h) hlp;exit;;
+		-h)
+			printf "Sort files by size \n"
+			printf " -a\tsort everything\n"
+			printf " -h\tprint this help\n"
+			printf " -l\tprint number of each file size\n"
+			printf "\nSORT\n"
+			printf " -m10\tSort less than 10M\n"
+			printf " -m100\tSort less than 100M\n"
+			printf " -m150\tSort less than 150M\n"
+			printf " -m200\tSort less than 200M\n"
+			printf " -m500\tSort less than 500M\n"
+			printf " -g1\tSort less than 1G\n"
+			printf " -g10\tSort less than 10G\n"
+			printf " -g100\tSort less than 100G\n"
+			exit;;
 		*) break;;
 	esac
 done
-if [ -n "${1}" ];then D="${1}";else D=".";fi
+
 case "${mode}" in
 	less10M)
 		lower="0k"

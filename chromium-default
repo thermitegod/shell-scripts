@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#5.1.0
-#2019-04-26
+#5.2.0
+#2019-05-17
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -17,7 +17,9 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-if [ "$(id -u)" -eq 0 ];then printf "Do not run as root\n";exit;fi
+die(){ /bin/echo -e "\033[0;31m$*\033[m";exit 1; }
+
+if [ "$(id -u)" -eq 0 ];then die "Do not run as root";fi
 
 launch(){
 	"${ver}" --user-data-dir="${data}" --no-proxy-server
@@ -59,13 +61,13 @@ while getopts "e:g:dsch" OPT;do
 		h)
 			printf "INFO\n"
 			printf "Main way of launching profiles is through symlinks to this script\nprofile names must start with chromium-\n"
-			printf "ln -s $0 chromium-<name-of-profile>\n"
+			printf "ln -s %s chromium-<name-of-profile>\n" "${0}"
 			printf "flags are mainly for testing\n"
 			printf "\nPROFILES\n"
 			printf " -d\tdefault\n"
 			printf " -e #\tex#, where '#' is [0-9]\n"
 			printf " -s\tsandbox, all data deleted on close\n"
-			printf "\nBROWSER, default is: ${ver}\n"
+			printf "\nBROWSER, default is: %s\n" "${ver}"
 			printf " -c\tchromium\n"
 			printf " -g 1\tgoogle-chrome-unstable\n"
 			printf " -g 2\tgoogle-chrome-beta\n"

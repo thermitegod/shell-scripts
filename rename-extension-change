@@ -1,8 +1,8 @@
 #!/usr/bin/env sh
-#3.0.0
-#2018-03-26
+#3.1.0
+#2019-05-17
 
-#Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
+#Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
 #This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 
 ls -1A
 printf "Current Extension: \n"
-read extold
+read -r extold
 
 if [ "${extold}" = "cbr" ];then
 	extnew="rar"
@@ -27,15 +27,15 @@ elif [ "${extold}" = "cbz" ];then
 	extnew="zip"
 else
 	printf "New Extension: \n"
-	read extnew
+	read -r extnew
 fi
 
 printf "Changing *.%s to *.%s\n" "${extold}" "${extnew}"
 printf "Confirm rename [yn] \n"
-read confirm
+read -r confirm
 
 if echo "${confirm}" | grep -iq "^y";then
-	for f in *.${extold};do
+	for f in *."${extold}";do
 		mv "${f}" "${f%.*}.${extnew}"
 	done
 else

@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#1.2.0
-#2019-01-17
+#1.3.0
+#2019-05-17
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -20,7 +20,8 @@
 die(){ /bin/echo -e "$*";exit 1; }
 if [ "$(id -u)" -ne 0 ];then die "Requires root, exiting";fi
 
-. $(dirname "$0")/colors.sh
+. "$(dirname "$0")/colors.sh"
+
 tape="/dev/st0"
 
 t_rewind(){ mt -f "$tape" rewind; }
@@ -34,10 +35,10 @@ t_list(){ tar -tf "${tape}"; }
 t_cdloc(){
 	#dont tar unneeded paths
 	if [ -d "${target}" ];then
-		cd "${target}/.."
+		cd "${target}/.." || die
 	elif [ -f "${target}" ];then
-		target="$(dirname ${target})"
-		cd "${target}"
+		target="$(dirname "${target}")"
+		cd "${target}" || die
 	else
 		printf "not a file or directory\n"
 	fi
@@ -45,7 +46,7 @@ t_cdloc(){
 
 t_confirm_erase(){
 	printf "Erase current tape: y/n\n"
-	read confirm
+	read -r confirm
 	if echo "${confirm}" | grep -iq "^y" ;then
 		t_erase
 	else
@@ -81,40 +82,13 @@ t_verify(){
 	tar -tvf "${tape}"
 }
 
-hlp(){
-	printf " Tape drive is : %s\n" "$tape"
-	printf " -b\tbackup \$1 at end of last backup on $tape\n"
-	printf " -B\tbackup \$1 at start, overwriting existing, on $tape\n"
-	printf " -e\teject tape\n"
-	printf " -g\trestore from begining of $tape to \$1\n"
-	printf " -h\tPrint this help\n"
-	printf " -l\tlist contents of $tape\n"
-	printf " -L\tprint web links\n"
-	printf " -r\trewind tape\n"
-	printf " -R\ttape retensioning <only for tape read errors>\n"
-	printf " -s\tdrive status\n"
-	printf " -v\tverify files on current tape\n"
-	printf " -z\terase/rewind tape\n"
-	printf " -Z\terase/rewind/eject tape\n"
-}
-
-links(){
-	printf "https://www.cyberciti.biz/hardware/unix-linux-basic-tape-management-commands\n"
-	printf "https://www.cyberciti.biz/faq/unix-verify-tape-backup\n"
-	printf "https://www.cyberciti.biz/faq/linux-tape-backup-with-mt-and-tar-command-howto\n"
-	printf "https://community.hpe.com/t5/StoreEver-Tape-Storage/determining-free-space-on-tape-under-Linux/td-p/3624568\n"
-	printf "\n"
-}
-
-if [ -z "${1}" ];then hlp;exit;fi
+if [ -z "${1}" ];then "${0}" -h;exit;fi
 while getopts "B:b:eg:hHlRrsvZz" OPT;do
 	case "$OPT" in
 		b) target="$OPTARG";t_backup;;
 		B) target="$OPTARG";t_backup_overwrite;;
 		e) t_eject;;
 		g) target="$OPTARG";t_restore;;
-		h) hlp;exit;;
-		H) links;;
 		l) t_list;;
 		R) t_reten;;
 		r) t_rewind;;
@@ -122,6 +96,28 @@ while getopts "B:b:eg:hHlRrsvZz" OPT;do
 		v) t_verify;;
 		z) t_confirm_erase;t_rewind;;
 		Z) t_confirm_erase;t_rewind;t_eject;;
+		h)
+			printf " Tape drive is : %s\n" "${tape}"
+			printf " -b\tbackup \$1 at end of last backup on %s\n" "${tape}"
+			printf " -B\tbackup \$1 at start, overwriting existing, on %s\n" "${tape}"
+			printf " -e\teject tape\n"
+			printf " -g\trestore from begining of %s to \$1\n" "${tape}"
+			printf " -h\tPrint this help\n"
+			printf " -l\tlist contents of %s\n" "${tape}"
+			printf " -L\tprint web links\n"
+			printf " -r\trewind tape\n"
+			printf " -R\ttape retensioning <only for tape read errors>\n"
+			printf " -s\tdrive status\n"
+			printf " -v\tverify files on current tape\n"
+			printf " -z\terase/rewind tape\n"
+			printf " -Z\terase/rewind/eject tape\n"
+			exit;;
+		H)
+			printf "https://www.cyberciti.biz/hardware/unix-linux-basic-tape-management-commands\n"
+			printf "https://www.cyberciti.biz/faq/unix-verify-tape-backup\n"
+			printf "https://www.cyberciti.biz/faq/linux-tape-backup-with-mt-and-tar-command-howto\n"
+			printf "https://community.hpe.com/t5/StoreEver-Tape-Storage/determining-free-space-on-tape-under-Linux/td-p/3624568\n"
+			exit;;
 	esac
 done
 shift $((OPTIND - 1))

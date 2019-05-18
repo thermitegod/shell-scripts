@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#2.15.0
-#2019-05-10
+#2.16.0
+#2019-05-17
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -86,11 +86,11 @@ if ! [ -f "${kdir}/.config" ];then
 	fi
 fi
 
-if [ -n "$(grep CONFIG_MODULES=y ${kdir}/.config)" ];then use_modules="1";else use_modules="0";fi
+if [ "$(grep CONFIG_MODULES=y "${kdir}"/.config)" ];then use_modules="1";else use_modules="0";fi
 
-case "$(echo ${kdir##*/}|grep rc)" in
-	*rc*) kver="$(echo ${kdir##*/linux-}|sed s'/.$//')";;
-	*) kver="$(echo ${kdir##*/linux-}|awk 'BEGIN{FS=OFS="."} NF--')";;
+case "$(echo "${kdir##*/}"|grep rc)" in
+	*rc*) kver="$(echo "${kdir##*/linux-}"|sed s'/.$//')";;
+	*) kver="$(echo "${kdir##*/linux-}"|awk 'BEGIN{FS=OFS="."} NF--')";;
 esac
 
 switch_kconf="${storage}/config/${kver}-config"
@@ -141,8 +141,8 @@ done
 #which are not needed at runtime if zfs is build into the kernel.
 while [ "${run_kernel_bump}" = "1" ];do
 	if ! [ -f "${switch_kconf}" ];then cp "${kdir}/.config" "${switch_kconf}";fi
-	c1=$(grep -s CONFIG_MODULES=y ${switch_kconf})
-	c2=$(grep -s CONFIG_KALLSYMS=y ${switch_kconf})
+	c1=$(grep -s CONFIG_MODULES=y "${switch_kconf}")
+	c2=$(grep -s CONFIG_KALLSYMS=y "${switch_kconf}")
 	if [ "${run_zfs_build}" = "1" ] && [ -z "${c1}" ] || [ -z "${c2}" ];then
 		printf "\nRequired option[s] located at:\n"
 		if [ -z "${c1}" ];then printf "\n[*] Enable loadable module support\n";fi
@@ -169,11 +169,11 @@ case "${use_zfs_version}" in
 		kmod="zfs-kmod" #build path
 		;;
 	release)
-		Z=$(ls -1A --ignore=*9999* ${port}/sys-fs/zfs|sort -V|tail -n1)
-		zver=$(echo ${Z%%.ebuild}|awk '{print $NF}' FS=-) #clean up filename
+		Z="$(ls -1A --ignore=*9999* "${port}"/sys-fs/zfs|sort -V|tail -n1)"
+		zver="$(echo "${Z%%.ebuild}"|awk '{print $NF}' FS=-)" #clean up filename
 		unset Z
 		kmod="zfs" #build path
-		if [ "${use_distdir}" = "0" ];then export DISTDIR="${storage}/distfiles";fi #keep sources on eclean-dist
+		if [ "${use_distdir}" = "0" ];then export DISTDIR="${storage}"/distfiles;fi #keep sources on eclean-dist
 		;;
 esac
 
@@ -187,19 +187,19 @@ if ! [ -d "${kmod_src}" ] && [ "${run_zfs_build}" = "1" ];then run_kmod_build="1
 
 if [ "${run_intro}" = "1" ];then
 	printf "\n"
-	printf "kernel             : ${kdir}\n"
-	printf "Install Kernel     : ${run_kernel_install}\n"
-	printf "ZFS version        : ${zver}\n"
-	printf "ZFS local ebuild   : ${use_local_zfs_ebuild}\n"
-	printf "Configure kmod     : ${run_kmod_build}\n"
-	printf "Enable modules     : ${use_modules}\n"
-	printf "Running emerge     : ${run_emerge}\n"
+	printf "kernel             : %s\n" "${kdir}"
+	printf "Install Kernel     : %s\n" "${run_kernel_install}"
+	printf "ZFS version        : %s\n" "${zver}"
+	printf "ZFS local ebuild   : %s\n" "${use_local_zfs_ebuild}"
+	printf "Configure kmod     : %s\n" "${run_kmod_build}"
+	printf "Enable modules     : %s\n" "${use_modules}"
+	printf "Running emerge     : %s\n" "${run_emerge}"
 	if [ "${intro_extra}" = "1" ];then
 		printf "\nEXTRA\n"
-		printf "Make opts          : $(($(nproc)+1))\n"
-		printf "PORTDIR            : ${port}\n"
-		printf "kver               : ${kver}\n"
-		printf "Tempdir            : ${tmpdir}\n"
+		printf "Make opts          : %s\n" "$(($(nproc)+1))"
+		printf "PORTDIR            : %s\n" "${port}"
+		printf "kver               : %s\n" "${kver}"
+		printf "Tempdir            : %s\n" "${tmpdir}"
 		printf "\n"
 		eselect kernel list
 	fi
@@ -210,7 +210,7 @@ fi
 
 if [ "${run_zfs_build}" = "1" ];then
 	zver_path="${zver}"
-	if [ "$(echo ${zver}|grep rc)" ];then
+	if [ "$(echo "${zver}"|grep rc)" ];then
 		zver="${zver%%_rc*}"
 	fi
 
@@ -232,7 +232,7 @@ if [ "${run_zfs_build}" = "1" ];then
 			ebuild "${port}/sys-fs/zfs-kmod/zfs-kmod-${zver_path}.ebuild" clean configure
 		cd "${tmpdir}/portage/sys-fs/zfs-kmod-${zver_path}/work/${kmod}-${zver}" || die
 		./copy-builtin "${kdir}" || die
-		cd ..
+		cd .. || die
 		tar -cf - "${kmod}-${zver}" -P | zstd -T0 >| "${archive}" || die "ERROR: did not compress zfs work dir"
 		mv "${archive}" "${kmod_src}"
 		chown -R "${user}:${group}" "${kmod_src}"

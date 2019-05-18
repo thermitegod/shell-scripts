@@ -1,8 +1,8 @@
 #!/usr/bin/env sh
-#4.8.0
-#2018-12-30
+#4.9.0
+#2019-05-17
 
-#Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
+#Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
 #This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,31 +24,17 @@ txt="0"
 json="0"
 other="0"
 
-hlp(){
-	printf "General\n"
-	printf " -h\tprint this help\n"
-	printf " -l\tprint all files matching search patterns\n"
-	printf " -r\tRemove enabled pattern files\n"
-	printf " -R\tRemove all pattern files\n"
-	printf "Patterns\n"
-	printf " -A\tEnable ALL patterns\n"
-	printf " -j\tEnable json\n"
-	printf " -o\tEnable md5/nfo/svf/bridgesort/padding_file\n"
-	printf " -t\tEnable txt\n"
-	printf " -u\tEnable url/mht/htm/html\n"
-}
-
 find_junk(){
 	case "${act}" in
 		ls)
-			j=$(find . -iname ${1} -exec ls -1A -- "{}" \;)
-			if [ -n "${j}" ];then printf "*** Found ${1} files ***\n${j}\n";fi
+			j="$(find . -iname "${1}" -exec ls -1A -- "{}" \;)"
+			if [ -n "${j}" ];then printf "*** Found %s files ***\n%s\n" "${1}" "${j}";fi
 			;;
 		rm) find . -type f -iname "${1}" -exec trash-put -- "{}" \;;;
 	esac
 }
 
-if [ -z "${1}" ];then hlp;exit;fi
+if [ -z "${1}" ];then "${0}" -h;exit;fi
 while getopts "ARrltjuoh" OPT;do
 	case "$OPT" in
 		r) act="rm";;
@@ -59,7 +45,19 @@ while getopts "ARrltjuoh" OPT;do
 		j) json="1";;
 		u) url="1";;
 		o) other="1";;
-		h) hlp;exit;;
+		h)
+			printf "General\n"
+			printf " -h\tprint this help\n"
+			printf " -l\tprint all files matching search patterns\n"
+			printf " -r\tRemove enabled pattern files\n"
+			printf " -R\tRemove all pattern files\n"
+			printf "Patterns\n"
+			printf " -A\tEnable ALL patterns\n"
+			printf " -j\tEnable json\n"
+			printf " -o\tEnable md5/nfo/svf/bridgesort/padding_file\n"
+			printf " -t\tEnable txt\n"
+			printf " -u\tEnable url/mht/htm/html\n"
+			exit;;
 	esac
 done
 

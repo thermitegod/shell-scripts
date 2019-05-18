@@ -1,8 +1,8 @@
 #!/usr/bin/env sh
-#2.4.0
-#2018-12-30
+#2.5.0
+#2019-05-17
 
-#Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
+#Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
 #This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -22,52 +22,50 @@
 
 mode="z"
 
-hlp(){
-	printf " -a\tExtract audio track\n"
-	printf " -h\tprint this help\n"
-	printf " -s\tExtract sub track\n"
-	printf " -v\tExtract video track\n"
-}
-
-if [ -z "${1}" ];then hlp;exit;fi
+if [ -z "${1}" ];then "${0}" -h;exit;fi
 while getopts "asvh" OPT;do
 	case "$OPT" in
 		a) mode="aud";;
 		s) mode="sub";;
 		v) mode="vid";;
-		h) hlp;exit;;
+		h)
+			printf " -a\tExtract audio track\n"
+			printf " -h\tprint this help\n"
+			printf " -s\tExtract sub track\n"
+			printf " -v\tExtract video track\n"
+			exit;;
 	esac
 done
 
 case "${mode}" in
 	aud)
-		find . -type f -name '*.mkv' | while read filename; do
-			mkvmerge -i "${filename}" | grep 'audio' | while read subline; do
-				tracknumber=`echo ${subline} | egrep -o "[0-9]{1,2}" | head -1`
-				subtitlename=${filename%.*}
-				`mkvextract tracks "${filename}" ${tracknumber}:"${subtitlename}.flac" > /dev/null 2>&1`
+		find . -type f -name '*.mkv' | while read -r filename; do
+			mkvmerge -i "${filename}" | grep "audio" | while read -r subline; do
+				tracknumber="$(echo "${subline}" | grep -E -o "[0-9]{1,2}" | head -1)"
+				subtitlename="${filename%.*}"
+				mkvextract tracks "${filename}" "${tracknumber}:${subtitlename}.flac" > /dev/null 2>&1
 				printf "Done extracting flac from %s\n" "${filename}"
 			done
 		done
 		;;
 	sub)
 		printf "Sub extract will break if more than one track exists\n"
-		find . -type f -name '*.mkv' | while read filename; do
-			mkvmerge -i "${filename}" | grep 'subtitles' | while read subline; do
-				tracknumber=`echo ${subline} | egrep -o "[0-9]{1,2}" | head -1`
-				subtitlename=${filename%.*}
-				`mkvextract tracks "${filename}" ${tracknumber}:"${subtitlename}.ssa" > /dev/null 2>&1`
+		find . -type f -name '*.mkv' | while read -r filename; do
+			mkvmerge -i "${filename}" | grep "subtitles" | while read -r subline; do
+				tracknumber="$(echo "${subline}" | grep -E -o "[0-9]{1,2}" | head -1)"
+				subtitlename="${filename%.*}"
+				mkvextract tracks "${filename}" "${tracknumber}:${subtitlename}.ssa" > /dev/null 2>&1
 				#mv "${subtitlename}.ssa" "${PWD}"/ssa
 				printf "Done extracting ssa from %s\n" "${filename}"
 			done
 		done
 		;;
 	vid)
-		find "$DIR" -type f -name '*.mkv' | while read filename; do
-			mkvmerge -i "${filename}" | grep 'video' | while read subline; do
-				tracknumber=`echo ${subline} | egrep -o "[0-9]{1,2}" | head -1`
-				subtitlename=${filename%.*}
-				`mkvextract tracks "${filename}" ${tracknumber}:"${subtitlename}.mkv" > /dev/null 2>&1`
+		find "$DIR" -type f -name '*.mkv' | while read -r filename; do
+			mkvmerge -i "${filename}" | grep 'video' | while read -r subline; do
+				tracknumber="$(echo "${subline}" | grep -E -o "[0-9]{1,2}" | head -1)"
+				subtitlename="${filename%.*}"
+				mkvextract tracks "${filename}" "${tracknumber}:${subtitlename}.mkv" > /dev/null 2>&1
 				printf "Done extracting flac from %s\n" "${filename}"
 			done
 		done

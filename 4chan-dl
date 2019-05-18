@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#2.2.0
-#2019-04-26
+#2.3.0
+#2019-05-17
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -18,7 +18,9 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #TODO
-#merge {4,8}-chan-dl
+#merge {4,8}chan-dl
+
+die(){ /bin/echo -e "\033[0;31m$*\033[m";exit 1; }
 
 w(){
 	wget -r -H -D i.4cdn.org --hsts-file=/tmp/wget-hsts --https-only -e robots=off \
@@ -27,19 +29,21 @@ w(){
 }
 
 dl(){
-	if [ -n "$(echo ${board}|grep '\#')" ];then return;fi #skip comments
-	if [ -n "$(echo ${board}|grep 'stop')" ];then exit;fi #exit when 'stop' is read as first argument
+	if [ -n "$(echo "${board}"|grep '\#')" ];then return;fi #skip comments
+	if [ -n "$(echo "${board}"|grep 'stop')" ];then exit;fi #exit when 'stop' is read as first argument
 	loc="${dir}/${board}/${save}"
 	url="https://boards.4chan.org/${board}/thread"
 	if ! [ -d "${loc}" ];then mkdir -p "${loc}";fi
 	cd "${loc}" || exit 1
-	printf "Downloading ${board} ${thread} ${save}\n"
+	printf "Downloading %s %s %s\n" "${board}" "${thread}" "${save}"
 	link_get="${url}/${thread}"
 	w
 }
 
-dir="${HOME}/downloads/chan/4chan"
-. $(dirname "$0")/utils.sh
+#dir="${HOME}/downloads/chan/4chan"
+dir="${XDG_DOWNLOAD_DIR}/chan/4chan"
+
+. "$(dirname "$0")/utils.sh"
 thread_list="${extra}/4chan-dl"
 
 while getopts "beh" OPT;do
@@ -51,18 +55,18 @@ while getopts "beh" OPT;do
 			exit;;
 		e) $EDITOR "${thread_list}";exit;;
 		h)
-			printf "Example: ${0} <save dir> <link>\n"
+			printf "Example: %s <save dir> <link>\n" "${0}"
 			printf " -b\trun batch file\n"
-			printf " -e\tedit ${thread_list}\n"
+			printf " -e\tedit $s\n" "${thread_list}"
 			printf " -h\tPrint this help\n"
 			exit;;
 	esac
 done
 
-if [ -z "${1}" ] || [ -z "${2}" ];then printf "Example: ${0} <save dir> <link>\n";exit;fi
+if [ -z "${1}" ] || [ -z "${2}" ];then printf "Example: %s  <save dir> <link>\n" "${0}";exit;fi
 
 if ! [ -d "./${1}" ];then mkdir "./${1}";fi
-cd "${1}"
+cd "${1}" || die
 link_get="${2}"
 w
 

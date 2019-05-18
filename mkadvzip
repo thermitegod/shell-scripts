@@ -1,8 +1,8 @@
 #!/usr/bin/env sh
-#3.3.0
-#2018-12-30
+#3.4.0
+#2019-05-17
 
-#Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
+#Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
 #This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -38,13 +38,13 @@ if [ ${advall} = "1" ];then
 		bf2=$(du -h|tail -n1)
 	fi
 
-	find . -type f -iname "*.zip" -print0 | nice -19 xargs --max-args=1 --max-procs=$(nproc) --null advzip -z -4
+	find . -type f -iname "*.zip" -print0 | nice -19 xargs --max-args=1 --max-procs="$(nproc)" --null advzip -z -4
 
 	if [ ${verbose} = "1" ];then
 		af1=$(du|tail -n1)
 		af2=$(du -h|tail -n1)
-		printf "Before : ${bf1}\t${bf2}\n"
-		printf "After  : ${af1}\t${af2}\n"
+		printf "Before : %s\t%s\n" "${bf1}" "${bf2}"
+		printf "After  : %s\t%s\n" "${af1}" "${af2}"
 	fi
 else
 	if [ -z "$1" ]; then

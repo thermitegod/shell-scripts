@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#6.1.0
-#2019-01-18
+#6.2.0
+#2019-05-17
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -21,12 +21,17 @@ die(){ /bin/echo -e "\033[0;31m$*\033[m";exit 1; }
 compress(){
 	if [ -d "${f%%}" ] && ! [ "${comp_type}" = "status" ];then comp_type="dir";fi
 	case "${comp_type}" in
-		status) tar --xattrs -${V}Scf - "${f%%}" -P | pv -s $(du -sb "${f%%}" | awk '{print $1}') | "$C" "$A" >| "${f%%}.tar.${E}" || die "Compression failed for: ${f%%}";;
-		dir) tar --xattrs -${V}Scf - "${f%%}" -P | "$C" "$A" >| "${f%%}.tar.${E}" || die "Compression failed for: ${f%%}";;
+		status)
+			tar --xattrs -${V}Scf - "${f%%}" -P | \
+				pv -s "$(du -sb "${f%%}" | awk '{print $1}')" | \
+				"$C" "$A" >| "${f%%}.tar.${E}" || die "Compression failed for: ${f%%}";;
+		dir)
+			tar --xattrs -${V}Scf - "${f%%}" -P | \
+				"$C" "$A" >| "${f%%}.tar.${E}" || die "Compression failed for: ${f%%}";;
 		file) "$C" "$A" "${f%%}" || die "Compression failed for: ${f%%}";;
 	esac
 
-	if [ "${comp_rm}" = "1" ];then rm -r "${f%%}";fi
+	if [ "${orig_rm}" = "1" ];then rm -r "${f%%}";fi
 }
 
 orig_rm="0"
@@ -88,7 +93,7 @@ if [ -n "${1}" ];then
 		if [ -e "${f}" ];then
 			compress
 		else
-			printf "\nInput is none existent : ${1}\n\n"
+			printf "\nInput is none existent : %s\n\n" "${1}"
 		fi
 		if [ -n "${2}" ];then shift;else break;fi
 	done

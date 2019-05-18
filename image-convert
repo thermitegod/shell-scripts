@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#5.1.0
-#2019-03-28
+#5.2.0
+#2019-05-17
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -23,18 +23,20 @@
 #acceptable size range
 #rezizing when w > h
 
+die(){ /bin/echo -e "\033[0;31m$*\033[m";exit 1; }
+
 convert_main(){
 	if [ "${batch}" = "1" ];then
 		batch="0"
-		nest_dir=$(find . -mindepth 2 -path '*/*' -type d)
-		if [ -n "${nest_dir}" ];then printf "Nested directories detected\n\n${nest_dir}\n\n";fi
+		nest_dir="$(find . -mindepth 2 -path '*/*' -type d)"
+		if [ -n "${nest_dir}" ];then printf "Nested directories detected\n\n%s\n\n" "${nest_dir}";fi
 		if [ "${mimecheck}" = "1" ];then mime-correct -A;mimecheck="0";fi
 		for d in *;do
 			if [ -d "${d}" ];then
-				cd "${d}"
-				printf "Running in: ${d}\n"
+				cd "${d}" || die
+				printf "Running in: %s\n" "${d}"
 				convert_main "${1}"
-				cd ..
+				cd .. || die
 			fi
 		done
 		exit
@@ -60,12 +62,12 @@ convert_main(){
 					fi
 					if [ "${debug}" = "1" ];then iter="1";fi
 					while true;do
-						if [ "${debug}" = "1" ];then printf "iter ${iter}\n";fi
+						if [ "${debug}" = "1" ];then printf "iter %s\n" "${iter}";fi
 						gm convert -quality ${qual} "${f%%}" "${cvloc}/${f%.*}.${newext}"
 						test_size "${f%%}" "${cvloc}/${f%.*}.${newext}"
 						if [ "${new_smaller}" = "1" ];then
 							new_smaller="0"
-							printf "final qual is ${qual} for ${f}\n"
+							printf "final qual is %s for %s\n" "${qual}" "${f}"
 							mv "${f}" "${O}"
 							break
 						fi
@@ -75,7 +77,7 @@ convert_main(){
 					done
 					;;
 				resize)
-					gm convert ${f%%} -resize "${size}"\> "${cvloc}/${f%%}"
+					gm convert "${f%%}" -resize "${size}"\> "${cvloc}/${f%%}"
 					mv "${f}" "${O}"
 					;;
 				get_size)
@@ -102,7 +104,7 @@ test_size(){
 		echo "filesize orig : $(du ${orig}|awk '{print $1}')"
 	fi
 
-	if [ "$(du ${orig}|awk '{print $1}')" -ge "$(du ${new}|awk '{print $1}')" ];then
+	if [ "$(du "${orig}"|awk '{print $1}')" -ge "$(du "${new}"|awk '{print $1}')" ];then
 		new_smaller="1"
 	fi
 }
@@ -115,44 +117,6 @@ get_mode(){
 	fi
 }
 
-hlp(){
-	printf "GENERAL\n"
-	printf " -d\textra printouts\n"
-	printf " -m\tdisable mime check\n"
-	printf " -r\tdo not keep orig\n"
-	printf " -s\tget current image size in dir\n"
-	printf "\nBATCH\n"
-	printf " example, $0 -B -P 0\n"
-	printf " -B\tbatch, must come before other args\n"
-	printf " -b\tbatch, must come before other args, uses -r\n"
-	printf "\nRESIZE Width, keeps aspect\n"
-	printf " -W *\tuse value provided\n"
-	printf " -W 1\t2400x\n"
-	printf " -W 2\t1600x\n"
-	printf " -W 3\t1280x\n"
-	printf " -W 4\t980x\n"
-	printf " -W 5\t780x\n"
-	printf "\nRESIZE Hight, keeps aspect\n"
-	printf " -H *\tuse value provided, must prefix with 'x'\n"
-	printf " -H 1\tx2400\n"
-	printf " -H 2\tx1600\n"
-	printf " -H 3\tx1280\n"
-	printf " -H 4\tx980\n"
-	printf " -H 5\tx780\n"
-	printf "\nRESIZE Percent\n"
-	printf " -S *\tuse value provided, must append '%%'\n"
-	printf " -S 1\t90%%\n"
-	printf " -S 2\t80%%\n"
-	printf " -S 3\t70%%\n"
-	printf " -S 4\t60%%\n"
-	printf " -S 5\t50%%\n"
-	printf "\nCONVERT\n"
-	printf " -J [1-100]\tjpg > jpg : 100 quality=100 | 1 quality=1 | 0 sets auto mode\n"
-	printf " -j [1-9]  \tjpg > png : 9   quality=9   | 1 quality=1 | 0 sets auto mode\n"
-	printf " -P [1-9]  \tpng > png : 9   qualitl=9   | 1 quality=1 | 0 sets auto mode\n"
-	printf " -p [1-100]\tpng > jpg : 100 quality=100 | 1 quality=1 | 0 sets auto mode\n"
-}
-
 O="orig"
 mode="z"
 batch="0"
@@ -161,35 +125,35 @@ mimecheck="1"
 keep_orig="1"
 new_smaller="0"
 
-if [ -z "${1}" ];then hlp;exit;fi
+if [ -z "${1}" ];then "${0}" -h;exit;fi
 while getopts "dP:p:J:j:H:W:S:hmsBbr" OPT;do
 	case "$OPT" in
 		j)
 			origext="jpg"
 			newext="png"
 			qual="${OPTARG}"
-			if [ "${qual}" -gt "9" ];then printf "exiting because of invalid range: ${OPTARG}\n";exit;fi
+			if [ "${qual}" -gt "9" ];then printf "exiting because of invalid range: %s\n" "${OPTARG}";exit;fi
 			get_mode
 			;;
 		J)
 			origext="jpg"
 			newext="jpg"
 			qual="${OPTARG}"
-			if [ "${qual}" -gt "100" ];then printf "exiting because of invalid range: ${OPTARG}\n";exit;fi
+			if [ "${qual}" -gt "100" ];then printf "exiting because of invalid range: %s\n" "${OPTARG}";exit;fi
 			get_mode
 			;;
 		p)
 			origext="png"
 			newext="jpg"
 			qual="${OPTARG}"
-			if [ "${qual}" -gt "100" ];then printf "exiting because of invalid range: ${OPTARG}\n";exit;fi
+			if [ "${qual}" -gt "100" ];then printf "exiting because of invalid range: %s\n" "${OPTARG}";exit;fi
 			get_mode
 			;;
 		P)
 			origext="png"
 			newext="png"
 			qual="${OPTARG}"
-			if [ "${qual}" -gt "9" ];then printf "exiting because of invalid range: ${OPTARG}\n";exit;fi
+			if [ "${qual}" -gt "9" ];then printf "exiting because of invalid range: %s\n" "${OPTARG}";exit;fi
 			get_mode
 			;;
 		W)
@@ -237,7 +201,43 @@ while getopts "dP:p:J:j:H:W:S:hmsBbr" OPT;do
 		s) act="get_size";;
 		m) mimecheck="0";;
 		d) debug="1";;
-		h) hlp;exit;;
+		h)
+			printf "GENERAL\n"
+			printf " -d\textra printouts\n"
+			printf " -m\tdisable mime check\n"
+			printf " -r\tdo not keep orig\n"
+			printf " -s\tget current image size in dir\n"
+			printf "\nBATCH\n"
+			printf " example, %s -B -P 0\n" "${0}"
+			printf " -B\tbatch, must come before other args\n"
+			printf " -b\tbatch, must come before other args, uses -r\n"
+			printf "\nRESIZE Width, keeps aspect\n"
+			printf " -W *\tuse value provided\n"
+			printf " -W 1\t2400x\n"
+			printf " -W 2\t1600x\n"
+			printf " -W 3\t1280x\n"
+			printf " -W 4\t980x\n"
+			printf " -W 5\t780x\n"
+			printf "\nRESIZE Hight, keeps aspect\n"
+			printf " -H *\tuse value provided, must prefix with 'x'\n"
+			printf " -H 1\tx2400\n"
+			printf " -H 2\tx1600\n"
+			printf " -H 3\tx1280\n"
+			printf " -H 4\tx980\n"
+			printf " -H 5\tx780\n"
+			printf "\nRESIZE Percent\n"
+			printf " -S *\tuse value provided, must append '%%'\n"
+			printf " -S 1\t90%%\n"
+			printf " -S 2\t80%%\n"
+			printf " -S 3\t70%%\n"
+			printf " -S 4\t60%%\n"
+			printf " -S 5\t50%%\n"
+			printf "\nCONVERT\n"
+			printf " -J [1-100]\tjpg > jpg : 100 quality=100 | 1 quality=1 | 0 sets auto mode\n"
+			printf " -j [1-9]  \tjpg > png : 9   quality=9   | 1 quality=1 | 0 sets auto mode\n"
+			printf " -P [1-9]  \tpng > png : 9   qualitl=9   | 1 quality=1 | 0 sets auto mode\n"
+			printf " -p [1-100]\tpng > jpg : 100 quality=100 | 1 quality=1 | 0 sets auto mode\n"
+			exit;;
 	esac
 done
 #shift $((OPTIND - 1))
