@@ -37,7 +37,7 @@ mount_in_chroot(){
 	chroot "${ch}" mount /tmp
 	chroot "${ch}" mount /run
 	chroot "${ch}" mount /usr/src
-	chroot "${ch}" mount /var/cache
+	#chroot "${ch}" mount /var/cache
 }
 
 mount_bind(){
@@ -49,9 +49,9 @@ mount_bind(){
 	if ! [ -d "${ch}/${pkg}" ];then mkdir -p "${ch}/${pkg}";fi
 	if ! [ -d "${ch}/${dist}" ];then mkdir -p "${ch}/${dist}";fi
 
-	mount --bind "${dist}" "${ch}/${dist}"
-	mount --bind "${pkg}" "${ch}/${pkg}"
-	mount --bind "${repos}" "${ch}/${repos}"
+	mount --rbind "${pkg}" "${ch}/${pkg}"
+	mount --rbind "${repos}" "${ch}/${repos}"
+	mount --rbind "${dist}" "${ch}/${dist}"
 }
 
 shell_check(){
