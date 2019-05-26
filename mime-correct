@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#2.3.0
-#2019-05-17
+#2.4.0
+#2019-05-25
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -59,7 +59,7 @@ while getopts "AILvhr" OPT;do
 	case "$OPT" in
 		A) mode="check_all";;
 		I) mode="check";listonly="0";;
-		L) mode="check";listonly="1";;
+		L) mode="check";listonly="1";sha_coll_rm="0";;
 		r) export sha_coll_rm="1";;
 		v) export V="1";;
 		h)
