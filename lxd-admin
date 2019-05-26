@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#6.1.0
-#2019-05-17
+#6.1.1
+#2019-05-25
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -184,7 +184,7 @@ main_container(){
 					;;
 				gentoo)
 					net="${fullname}/etc/conf.d/net"
-					printf "rc_keyword=\"-stop\"\nconfig_eth0=\"%s netmask %s brd %s\"\nroutes_eth0=\"default via $%s\"\n" "${ip4}" "${ip4_netmask}" "${ip4_brd}" "${ip4_gateway}">|"${net_tmp}"
+					printf "rc_keyword=\"-stop\"\nconfig_eth0=\"%s netmask %s brd %s\"\nroutes_eth0=\"default via %s\"\n" "${ip4}" "${ip4_netmask}" "${ip4_brd}" "${ip4_gateway}">|"${net_tmp}"
 					;;
 			esac
 			lxc file push "${net_tmp}" "${net}"
