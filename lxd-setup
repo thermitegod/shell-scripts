@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#1.2.0
-#2019-05-14
+#1.3.0
+#2019-05-27
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -40,18 +40,18 @@ printf "copying master to subs\n"
 lxc copy dev-gentoo-clang-minimal base-gentoo-rutorrent
 lxc copy dev-gentoo-clang-minimal base-gentoo-transmission
 
-printf "starting subs\n"
+printf "starting subs\n\n"
 lxc start base-gentoo-rutorrent
 lxc start base-gentoo-transmission
 
 sleep 2
 
-printf "\nrutorrent, enter to continue\n"
-read z;unset z
+read -p "rutorrent, enter to continue: " z;unset z
 lxc exec base-gentoo-rutorrent /root/setup-rutorrent.sh
 
-printf "\ntransmission, enter to continue\n"
-read z;unset z
+printf "\n"
+
+read -p "transmission, enter to continue: " z;unset z
 lxc exec base-gentoo-transmission /root/setup-transmission.sh
 
 sleep 2

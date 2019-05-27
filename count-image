@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#5.5.0
-#2019-05-17
+#5.6.0
+#2019-05-27
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -17,16 +17,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-arc_list() {
-	printf "List found [yn]? "
-	read -r confirm
-	if echo "${confirm}" | grep -iq "^y" ;then
-		for f in ${type}; do
-			printf "Listing all of : %s\n" "${f}"
-			find . -iname "*.${f}"
-		done
-	fi
-}
+#TODO
+#use mimetype for sorting
 
 mode="${0##*/}"
 case "${mode}" in
@@ -52,12 +44,23 @@ while getopts "lh" OPT;do
 			exit;;
 	esac
 done
+shift $((OPTIND - 1))
 
 for f in ${type};do
-	cnt=$(find ${D} -type f -iname "*.${f}"|wc -l)
+	#cnt=$(find ${D} -type f -iname "*.${f}"|wc -l)
+	cnt=$(find . -type f -iname "*.${f}"|wc -l)
 	if ! [ "${cnt}" = "0" ];then printf "%s\t: %s\n" "${f}" "${cnt}";fi
 	count=$((cnt+count))
 done
 
 if ! [ "${count}" = "0" ];then printf "Total\t: %s\n" "${count}";fi
-if [ "${list}" = "1" ] && [ "${mode}" = "archive" ];then arc_list;fi
+
+if [ "${list}" = "1" ] && [ "${mode}" = "archive" ];then
+	read -r -p "List found [yn]? " confirm
+	if echo "${confirm}" | grep -iq "^y" ;then
+		for f in ${type}; do
+			printf "Listing all of: %s\n" "${f}"
+			find . -iname "*.${f}"
+		done
+	fi
+fi

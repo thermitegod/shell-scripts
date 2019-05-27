@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#5.3.0
-#2019-05-17
+#5.4.0
+#2019-05-27
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -30,7 +30,7 @@ main(){
 
 name_sort(){
 	if [ -n "$(echo "${name}"|grep '\#')" ];then return;fi
-	arc=$(echo "${name}" | sed -e "s/\-/\*/g")
+	arc="$(echo "${name}" | sed -e "s/\-/\*/g")"
 	if [ -z "${override}" ];then dir="${name}/.";else dir="${override}/.";fi
 
 	if [ "${debug}" -ge "2" ];then printf "${BLU}\$name${NC}: %s\n" "${name}";fi
@@ -100,8 +100,8 @@ printf "MODE\t\t: %s\n" "$(basename "${list_sort}")"
 printf "Running from\t: %s\n" "${PWD}"
 printf "Dest is\t\t: %s\n\n" "${dest}"
 printf "Make sure everything has been processed correctly\n"
-printf "Confirm run of '%s' [yn]?\n" "${0}"
-read -r confirm
+printf "\nRunning script is: '%s'\n" "${0}"
+read -r -p "Confirm run [yn]? " confirm
 if echo "${confirm}"|grep -iq "^y" ;then
 	#all target dirs should exits before running
 	#otherwise you are going to have a bad time

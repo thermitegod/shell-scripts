@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 #2.18.0
-#2019-05-24
+#2019-05-27
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -125,7 +125,7 @@ while getopts "BCEbdgrceIimplxzvh" OPT;do
 		v) intro_extra="1";;
 		z) run_zfs_build="1";run_kernel_build="0";run_kernel_post="0";;
 		C) clean_kernel_src="0";;
-		E) $EDITOR "${extra}/kernel-build";;
+		E) $EDITOR "${extra}/kernel-build";exit;;
 		h)
 			printf "GENERAL\n"
 			printf " -b\tforce run_kernel_bump=0\n"
@@ -162,8 +162,7 @@ while [ "${run_kernel_bump}" = "1" ];do
 		printf "\nRequired option[s] located at:\n"
 		if [ -z "${c1}" ];then printf "\n[*] Enable loadable module support\n";fi
 		if [ -z "${c2}" ];then printf "\nGeneral setup  --->\n\t[*] Configure standard kernel features (expert users)  --->\n\t\t[*] Load all symbols for debugging/ksymoops\n\n";fi
-		printf "Enter to config switch config : "
-		read z;unset z
+		read -p "Enter to config switch config: " z;unset z
 		if [ -f "${switch_kconf}" ];then rm "${switch_kconf}";fi
 		cdkdir
 		make nconfig
@@ -219,8 +218,7 @@ if [ "${run_intro}" = "1" ];then
 		eselect kernel list
 	fi
 	printf "\n"
-	printf "Enter to start kernel build. "
-	read z;unset z
+	read -p "Enter to start kernel build " z;unset z
 fi
 
 if [ "${run_zfs_build}" = "1" ];then

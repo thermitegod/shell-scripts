@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#3.1.0
-#2019-05-17
+#3.2.0
+#2019-05-27
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -18,21 +18,18 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 ls -1A
-printf "Current Extension: \n"
-read -r extold
+read -r -p "Current Extension: " extold
 
 if [ "${extold}" = "cbr" ];then
 	extnew="rar"
 elif [ "${extold}" = "cbz" ];then
 	extnew="zip"
 else
-	printf "New Extension: \n"
-	read -r extnew
+	read -r -p "New Extension: " extnew
 fi
 
 printf "Changing *.%s to *.%s\n" "${extold}" "${extnew}"
-printf "Confirm rename [yn] \n"
-read -r confirm
+read -r -p "Confirm rename [yn] " confirm
 
 if echo "${confirm}" | grep -iq "^y";then
 	for f in *."${extold}";do
