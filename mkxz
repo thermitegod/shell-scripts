@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#6.2.0
-#2019-05-17
+#6.3.0
+#2019-05-30
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -18,17 +18,22 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 die(){ /bin/echo -e "\033[0;31m$*\033[m";exit 1; }
+
 compress(){
 	if [ -d "${f%%}" ] && ! [ "${comp_type}" = "status" ];then comp_type="dir";fi
 	case "${comp_type}" in
 		status)
 			tar --xattrs -${V}Scf - "${f%%}" -P | \
 				pv -s "$(du -sb "${f%%}" | awk '{print $1}')" | \
-				"$C" "$A" >| "${f%%}.tar.${E}" || die "Compression failed for: ${f%%}";;
+				$C >| "${f%%}.tar.${E}" || die "Compression failed for: ${f%%}"
+			;;
 		dir)
 			tar --xattrs -${V}Scf - "${f%%}" -P | \
-				"$C" "$A" >| "${f%%}.tar.${E}" || die "Compression failed for: ${f%%}";;
-		file) "$C" "$A" "${f%%}" || die "Compression failed for: ${f%%}";;
+				$C >| "${f%%}.tar.${E}" || die "Compression failed for: ${f%%}"
+			;;
+		file)
+			$C "${f%%}" || die "Compression failed for: ${f%%}"
+			;;
 	esac
 
 	if [ "${orig_rm}" = "1" ];then rm -r "${f%%}";fi
@@ -44,7 +49,6 @@ mode="${0##*/mk}"
 
 while getopts "BGXSLZdfsxzvh" OPT;do
 	case "$OPT" in
-
 		d) comp_dir="1";comp_type="dir";;
 		f) comp_files="1";;
 		s) orig_rm="1";;
@@ -78,15 +82,31 @@ while getopts "BGXSLZdfsxzvh" OPT;do
 done
 shift $((OPTIND - 1))
 
+#$C compression command
+#$E file extension
 case "${mode}" in
-	bz2) C="bzip2";A="-k";E="bz2";;
-	lz4) C="lz4";A="-k";E="lz4";;
-	gz) C="gzip";A="-k";E="gz";;
-	xz) C="xz";A="-e9";E="xz";export XZ_OPT="-9e";;
-	zst) C="zstd";A="-T0";E="zst";;
+	bz2)
+		C="bzip2 -k"
+		E="bz2"
+		;;
+	lz4)
+		C="lz4 -k"
+		E="lz4"
+		;;
+	gz)
+		C="gzip -k"
+		E="gz"
+		;;
+	xz)
+		C="xz -k -e9"
+		E="xz"
+		;;
+	zst)
+		C="zstd -T0"
+		E="zst"
+		;;
 esac
 
-if [ -z "${C}" ];then printf "No compresion format set\n";exit 1;fi
 if [ -n "${1}" ];then
 	while true;do
 		f="${1%%}"
