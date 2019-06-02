@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#1.5.0
-#2019-05-27
+#1.6.0
+#2019-05-28
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -44,11 +44,15 @@ else
 	read -r -p "Enter ELF path: " elf
 fi
 
+if ! [ -f "${elf}" ];then
+	die "Entered file does not exist"
+fi
+
 fileinfo="$(file "${elf}")"
 if [ -z "$(echo "${fileinfo}"|grep ELF)" ];then
-	die "Entered file is not marked as ELF\n"
+	die "Entered file is not marked as ELF"
 elif [ -n "$(echo "${fileinfo}"|grep statically)" ];then
-	die "Entered ELF file statically linked\n"
+	die "Entered ELF file statically linked"
 fi
 
 case "${mode}" in
