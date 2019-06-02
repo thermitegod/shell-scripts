@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#2.18.0
-#2019-05-27
+#2.19.0
+#2019-06-01
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -40,6 +40,11 @@
 ###if preconfigured kmod_zfs sources exist###
 #moves saved work in tar.zst file to /usr/src/linux
 #builds kernel
+
+#TODO
+#add comments for all niche cases in script
+#expand script config file to be actually useful
+#print all vars when die() is called
 
 die(){ /bin/echo -e "\033[0;31m$*\033[m";exit 1; }
 if [ "$(id -u)" -ne 0 ];then die "Requires root";fi
@@ -183,17 +188,14 @@ case "${use_zfs_version}" in
 		kmod="zfs-kmod" #build path
 		;;
 	release)
-		Z="$(ls -1A --ignore=*9999* "${port}"/sys-fs/zfs|sort -V|tail -n1)"
-		zver="$(echo "${Z%%.ebuild}"|awk '{print $NF}' FS=-)" #clean up filename
-		unset Z
+		Z="$(ls -1A --ignore=*9999* "${port}"/sys-fs/zfs-kmod|sort -V|tail -n1)"
+		zver="$(echo "${Z%%.ebuild}"|sed 's/^.\{9\}//')" #clean up filename
 		kmod="zfs" #build path
 		if [ "${use_distdir}" = "0" ];then export DISTDIR="${storage}"/distfiles;fi #keep sources on eclean-dist
 		;;
 esac
 
-if ! [ -d "${port}/sys-fs/zfs" ];then die "ERROR: missing directory ${port}/sys-fs/zfs";fi
 if ! [ -d "${port}/sys-fs/zfs-kmod" ];then die "ERROR: missing directory ${port}/sys-fs/zfs-kmod";fi
-if ! [ -f "${port}/sys-fs/zfs/zfs-${zver}.ebuild" ];then die "ERROR: missing zfs-${zver}.ebuild";fi
 if ! [ -f "${port}/sys-fs/zfs-kmod/zfs-kmod-${zver}.ebuild" ];then die "ERROR: missing zfs-kmod-${zver}.ebuild";fi
 
 kmod_src="${storage}/src/${kver}/${zver}"
@@ -223,8 +225,13 @@ fi
 
 if [ "${run_zfs_build}" = "1" ];then
 	zver_path="${zver}"
+
 	if [ "$(echo "${zver}"|grep rc)" ];then
 		zver="${zver%%_rc*}"
+	fi
+
+	if [ "$(echo "${zver}"|grep "\-r")" ];then
+		zver="${zver%%-r*}"
 	fi
 
 	archive="zfs-${zver}.tar.zst"
@@ -274,12 +281,17 @@ fi
 
 if [ "${run_kernel_post}" = "1" ];then
 	if [ "${run_emerge}" = "1" ];then
-		if [ "${run_kmod_build}" = "1" ] && [ "${use_zfs_version}" = "git" ];then
-			#always rebuild zfs when building git
-			emerge --ignore-default-opts --oneshot --quiet sys-fs/zfs
-		elif [ "${run_kmod_build}" = "1" ] && [ "${use_zfs_version}" = "release" ];then
-			#only builds on non-git and on version bump
-			emerge --ignore-default-opts --oneshot --quiet --update sys-fs/zfs
+		if [ "${run_kmod_build}" = "1" ];then
+			case "${use_zfs_version}" in
+				git)
+					#always rebuild zfs when building git
+					emerge --ignore-default-opts --oneshot --quiet sys-fs/zfs
+					;;
+				release)
+					#only builds on non-git and on version bump
+					emerge --ignore-default-opts --oneshot --quiet --update sys-fs/zfs
+					;;
+			esac
 		fi
 		if [ "${use_modules}" = "1" ];then emerge --ignore-default-opts --oneshot --jobs @module-rebuild;fi
 	fi
