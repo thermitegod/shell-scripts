@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#3.3.0
-#2019-05-17
+#3.4.0
+#2019-05-30
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -23,26 +23,6 @@
 #-m prefixes all options or -m0=lzma:a1:d25 for sub options
 
 #NOTICE: The compression profiles being used will probably use =LOTS= of ram
-
-usage(){
-	printf " default will compress file passed in \$1\n"
-	printf "\nGENERAL\n"
-	printf " -e\tprint extra info\n"
-	printf "\nPROFILES\n"
-	printf " -S\tSingle threaded, useful when hitting oom with multi\n"
-	printf " -M\tMultithreaded\n"
-	printf " -O\tOld profile for testing\n"
-	printf "\nOTHER\n"
-	printf " -d\tcompress all directories\n"
-	printf " -f\tcompress all files\n"
-	printf " -h\tprint this help\n"
-	printf " -P\tDisable post compression test\n"
-	printf " -R\tdelete after compressed, will test before deleting, disables post testing, works in all modes but test\n"
-	printf " -t\tTest file[s] passed in \$1\n"
-	printf " -T\tTest file[s] passed in \$1 disable total output\n"
-	printf " -x\tcompress all files, delete original after compressed\n"
-	printf " -z\tcompress all directories, delete original after compressed\n"
-}
 
 die(){ /bin/echo -e "$*";exit 1; }
 test_file_list(){ if [ -f "${f%%}.7z" ];then file_list="${file_list}${delim}${f%%}.7z";fi; }
@@ -132,7 +112,25 @@ while getopts "SMTROPetdfhxz" OPT;do
 		x) comp_file="1";orig_rm="1";;
 		z) comp_dir="1";orig_rm="1";;
 		e) extra="1";;
-		h) usage;exit;;
+		h)
+			printf " default will compress file passed in \$1\n"
+			printf "\nGENERAL\n"
+			printf " -e\tprint extra info\n"
+			printf "\nPROFILES\n"
+			printf " -S\tSingle threaded, useful when hitting oom with multi\n"
+			printf " -M\tMultithreaded\n"
+			printf " -O\tOld profile for testing\n"
+			printf "\nOTHER\n"
+			printf " -d\tcompress all directories\n"
+			printf " -f\tcompress all files\n"
+			printf " -h\tprint this help\n"
+			printf " -P\tDisable post compression test\n"
+			printf " -R\tdelete after compressed, will test before deleting, disables post testing, works in all modes but test\n"
+			printf " -t\tTest file[s] passed in \$1\n"
+			printf " -T\tTest file[s] passed in \$1 disable total output\n"
+			printf " -x\tcompress all files, delete original after compressed\n"
+			printf " -z\tcompress all directories, delete original after compressed\n"
+			exit;;
 	esac
 done
 shift $((OPTIND - 1))
