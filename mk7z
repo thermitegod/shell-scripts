@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#3.4.0
-#2019-05-30
+#3.5.0
+#2019-06-19
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -25,39 +25,45 @@
 #NOTICE: The compression profiles being used will probably use =LOTS= of ram
 
 die(){ /bin/echo -e "$*";exit 1; }
+
+die_failed(){ die "${RED}Compression failed for${NC}: ${f%%}"; }
+
 test_file_list(){ if [ -f "${f%%}.7z" ];then file_list="${file_list}${delim}${f%%}.7z";fi; }
+
+extra_info(){
+	if [ "${extra}" = "1" ];then
+		printf "\n"
+		printf "${YEL}Profile\t: %s${NC}\n" "${comp_type}"
+		printf "${YEL}File\t: %s${NC}\n" "${f%%}"
+	fi
+}
+
 compress(){
 	case "${comp_type}" in
 		single)
-			if [ "${extra}" = "1" ];then
-				printf "\n"
-				printf "${YEL}Profile\t: single${NC}\n"
-				printf "${YEL}File\t: %s${NC}\n" "${f%%}"
-			fi
+			extra_info
 			nice -19 \
 				7z a -t7z -m0=lzma2 -md=1024m -mmf=bt4 -mmt=off -ms=off -myx=9 -mx=9 -mfb=276 \
-				-ms=on -mhc=on -mtm=off -mtc=off -mta=off "${f%%}.7z" "${f%%}" || die "${RED}Compression failed for${NC}: ${f%%}"
+				-ms=on -mhc=on -mtm=off -mtc=off -mta=off "${f%%}.7z" "${f%%}" || die_failed
 			test_file_list
 			;;
 		multi)
-			if [ "${extra}" = "1" ];then
-				printf "\n"
-				printf "${YEL}Profile\t: multi${NC}\n"
-				printf "${YEL}File\t: %s${NC}\n" "${f%%}"
-			fi
+			extra_info
 			nice -19 \
 				7z a -t7z -m0=lzma2 -md=1024m -mmf=bt4 -mmt=on -mmtf=on -myx=9 -mx=9 -mfb=276 \
-				-mhc=on -ms=on -mtm=off -mtc=off -mta=off "${f%%}.7z" "${f%%}" || die "${RED}Compression failed for${NC}: ${f%%}"
+				-mhc=on -ms=on -mtm=off -mtc=off -mta=off "${f%%}.7z" "${f%%}" || die_failed
 			test_file_list
 			;;
 		old)
+			extra_info
 			nice -19 \
 				7z a -t7z -m0=lzma2 -md=1024m -mmf=bt4 -mmt=off -myx=9 -mx=9 -mfb=276 -ms=on \
-				"${f%%}.7z" "${f%%}" || die "${RED}Compression failed for${NC}: ${f%%}"
+				"${f%%}.7z" "${f%%}" || die_failed
 			test_file_list
 			;;
 		test)
 			if [ "${f##*.}" = "7z" ] || [ "${f##*.}" = "zip" ];then
+				#limits line length to 80, does not like line wraping
 				printf "${YEL}TEST${NC}\t%s\n" "$(echo "${f%%}"|cut -c 1-80)"
 				printf "\033[A"
 				if [ -n "$(nice -19 7z t "${f%%}"|grep Ok)" ];then
@@ -67,6 +73,12 @@ compress(){
 					printf "%s\n" "${f}">>failed.txt
 					printf "${RED}FAILED${NC}\t%s\n" "${f%%}"
 					F=$((F+1))
+
+					if [ "${move_failed_file}" = "1" ];then
+						failed_dir="$(dirname "${f%%}")/mk7z-failed"
+						if ! [ -d "${failed_dir}" ];then mkdir "${failed_dir}";fi
+						mv "${f%%}" "${failed_dir}"
+					fi
 				fi
 			fi;;
 	esac
@@ -82,12 +94,14 @@ compress(){
 
 P="0"
 F="0"
+
 extra="0"
 total="0"
 orig_rm="0"
 comp_dir="0"
 comp_file="0"
 
+move_failed_file="0"
 
 test_post="1"
 file_list=""
@@ -112,6 +126,7 @@ while getopts "SMTROPetdfhxz" OPT;do
 		x) comp_file="1";orig_rm="1";;
 		z) comp_dir="1";orig_rm="1";;
 		e) extra="1";;
+		e) move_failed_file="0";;
 		h)
 			printf " default will compress file passed in \$1\n"
 			printf "\nGENERAL\n"
@@ -121,6 +136,7 @@ while getopts "SMTROPetdfhxz" OPT;do
 			printf " -M\tMultithreaded\n"
 			printf " -O\tOld profile for testing\n"
 			printf "\nOTHER\n"
+			printf " -E\tMove files that fail tests to subdirectory, requires flags -t or -T\n"
 			printf " -d\tcompress all directories\n"
 			printf " -f\tcompress all files\n"
 			printf " -h\tprint this help\n"
