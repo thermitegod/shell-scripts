@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#3.2.0
-#2019-05-17
+#3.3.0
+#2019-06-06
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -45,7 +45,6 @@ while true;do
 			"$ZFS" list -t snapshot \
 				zroot/HOME/brandon \
 				zroot/HOME/root \
-				zroot/HOME/lxc \
 				zroot/HOME/sandbox
 			shift;;
 		-d)
@@ -91,6 +90,7 @@ while true;do
 			printf "zfs rollback -r <pool/dataset@snapshot>\n"
 			printf "zfs destroy <pool/dataset@snapshot>\n"
 			printf "zfs list -t snapshot\n"
+			printf "zfs list -r pool\n"
 			exit;;
 		*) break;;
 	esac
