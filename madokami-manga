@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#7.8.0
-#2019-06-29
+#7.8.1
+#2019-06-30
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -24,7 +24,6 @@ dl(){
 		--level=2 \
 		-e robots=off \
 		--no-parent \
-		--no-host-directories \
 		--timestamping \
 		--max-redirect 0 \
 		--no-host-directories \
@@ -37,7 +36,7 @@ dl(){
 		"${link}"
 }
 
-publishing(){ while read -r link;do dl done < "${links}"; }
+publishing(){ while read -r link;do dl;done < "${links}"; }
 
 . "$(dirname "$0")/utils.sh"
 . "${extra}/madokami-user-pass.sh" # exports $mado_user $mado_pass
