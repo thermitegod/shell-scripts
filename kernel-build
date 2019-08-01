@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#2.19.0
-#2019-06-01
+#2.20.0
+#2019-07-10
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -31,22 +31,35 @@
 
 ###What this script does, basically###
 
-###if no preconfigured kmod_zfs sources exist###
-#runs configure phase on kmod-zfs ebuild
+###if no preconfigured sources exist for ebuild sys-fs/zfs-kmod###
+#runs configure phase on sys-fs/zfs-kmod ebuild
 #saves work/ to tar.zst file in $kmod_src
 #installs configured kmod-zfs to /usr/src/linux
-#builds kernel
+#build kernel
 
-###if preconfigured kmod_zfs sources exist###
+###if preconfigured sources exist for ebuild sys-fs/zfs-kmod###
 #moves saved work in tar.zst file to /usr/src/linux
-#builds kernel
+#build kernel
 
 #TODO
 #add comments for all niche cases in script
 #expand script config file to be actually useful
-#print all vars when die() is called
+#change order
+#	grep mod support from /proc/config.gz
+#	get /proc/config.gz based on flag, move bellow flag handling
+#multi build kernels
+#	multi kernel build - debug and regular, from one invocation
+#	single build, either debug or regular
 
-die(){ /bin/echo -e "\033[0;31m$*\033[m";exit 1; }
+die(){
+	/bin/echo -e "\033[0;31m$*\033[m"
+	if [ "${print_vars}" = "1" ];then
+		read -r -p "Press enter to print all vars. " X;unset X
+		set
+	fi
+	exit 1
+}
+
 if [ "$(id -u)" -ne 0 ];then die "Requires root";fi
 
 finish(){ if [ -d "${tmpdir}" ];then rm --preserve-root -r "${tmpdir}";fi; }
@@ -73,6 +86,7 @@ run_kernel_install="1"
 
 clean_kernel_src="1"
 
+print_vars="0"
 intro_extra="0"
 use_distdir="0"
 run_kmod_build="0"
@@ -105,15 +119,16 @@ fi
 if [ "$(grep CONFIG_MODULES=y "${kdir}"/.config)" ];then use_modules="1";else use_modules="0";fi
 
 case "$(echo "${kdir##*/}"|grep rc)" in
-	*rc*) kver="$(echo "${kdir##*/linux-}"|sed s'/.$//')";;
-	*) kver="$(echo "${kdir##*/linux-}"|awk 'BEGIN{FS=OFS="."} NF--')";;
+	*rc*) kver="$(echo "${kdir##*/linux-}"|sed s'/.$//')";; #rc kernel
+	*) kver="$(echo "${kdir##*/linux-}"|awk 'BEGIN{FS=OFS="."} NF--')";; #release kernel
 esac
 
 switch_kconf="${storage}/config/${kver}-config"
 if [ -f "${switch_kconf}" ];then run_kernel_bump="0";else run_kernel_bump="1";fi
 
-while getopts "BCEbdgrceIimplxzvh" OPT;do
+while getopts "BCEDbdgrceIimplxzvh" OPT;do
 	case "$OPT" in
+		D) print_vars="1";;
 		B) run_kernel_bump="1";;
 		b) run_kernel_bump="0";;
 		d) use_distdir="1";;
@@ -132,6 +147,8 @@ while getopts "BCEbdgrceIimplxzvh" OPT;do
 		C) clean_kernel_src="0";;
 		E) $EDITOR "${extra}/kernel-build";exit;;
 		h)
+			printf "DEBUG\n"
+			printf " -D\tIf script exits with die() print all shell variables\n"
 			printf "GENERAL\n"
 			printf " -b\tforce run_kernel_bump=0\n"
 			printf " -B\tforce run_kernel_bump=1\n"
@@ -177,6 +194,8 @@ while [ "${run_kernel_bump}" = "1" ];do
 	fi
 done
 
+#repo locations
+#https://github.com/thermitegod/etc-portage/tree/master/repos.conf
 case "${use_local_zfs_ebuild}" in
 	0) port="$(grep location /etc/portage/repos.conf/gentoo.conf|awk '{print $3}')";;
 	1) port="$(grep location /etc/portage/repos.conf/local.conf|awk '{print $3}')";;
@@ -227,11 +246,11 @@ if [ "${run_zfs_build}" = "1" ];then
 	zver_path="${zver}"
 
 	if [ "$(echo "${zver}"|grep rc)" ];then
-		zver="${zver%%_rc*}"
+		zver="${zver%%_rc*}" #rc ebuilds
 	fi
 
 	if [ "$(echo "${zver}"|grep "\-r")" ];then
-		zver="${zver%%-r*}"
+		zver="${zver%%-r*}" #rev bump ebuilds
 	fi
 
 	archive="zfs-${zver}.tar.zst"
