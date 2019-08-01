@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#1.4.0
-#2019-05-27
+#1.4.1
+#2019-07-15
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -96,20 +96,22 @@ while getopts "B:b:eg:hHlRrsvZz" OPT;do
 		z) t_confirm_erase;t_rewind;;
 		Z) t_confirm_erase;t_rewind;t_eject;;
 		h)
+			printf "\nTAPE\n"
 			printf " Tape drive is : %s\n" "${tape}"
 			printf " -b\tbackup \$1 at end of last backup on %s\n" "${tape}"
 			printf " -B\tbackup \$1 at start, overwriting existing, on %s\n" "${tape}"
 			printf " -e\teject tape\n"
 			printf " -g\trestore from begining of %s to \$1\n" "${tape}"
-			printf " -h\tPrint this help\n"
 			printf " -l\tlist contents of %s\n" "${tape}"
-			printf " -L\tprint web links\n"
 			printf " -r\trewind tape\n"
 			printf " -R\ttape retensioning <only for tape read errors>\n"
 			printf " -s\tdrive status\n"
 			printf " -v\tverify files on current tape\n"
 			printf " -z\terase/rewind tape\n"
 			printf " -Z\terase/rewind/eject tape\n"
+			printf "\nGENERAL\n"
+			printf " -h\tPrint this help\n"
+			printf " -H\tprint web links\n"
 			exit;;
 		H)
 			printf "https://www.cyberciti.biz/hardware/unix-linux-basic-tape-management-commands\n"
