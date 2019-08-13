@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#4.10.0
-#2019-05-17
+#4.11.0
+#2019-08-10
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -19,21 +19,27 @@
 
 mimecheck="1"
 V="0"
+opt_level="5"
+#5 is basically the same as 7, only 7 takes 80-100%~ longer for savings in the low double digit bytes, if at all.
+
 mode="${0##*/}"
-while getopts "vmjpgh" OPT;do
+while getopts "vmjpghx" OPT;do
 	case "$OPT" in
 		v) V="1";;
 		m) mimecheck="0";;
 		j) mode="optimize-jpg";;
 		p) mode="optimize-png";;
 		g) mode="optimize-gif";;
+		x) opt_level="7";;
 		h)
-			printf "MODE=%s\n" "${mode}"
+			printf "MODE: Current is: %s\n" "${mode}"
 			printf " -g\tforce mode=gif\n"
-			printf " -h\tprint this help\n"
 			printf " -j\tforce mode=jpg\n"
-			printf " -m\tdisanle mime check\n"
 			printf " -p\tforce mode=png\n"
+			printf "\nGENERAL\n"
+			printf " -h\tprint this help\n"
+			printf " -m\tdisanle mime check\n"
+			printf " -x\tpng only, use -o7 instead of -o5\n"
 			printf " -v\tPrint change in dir size\n"
 			exit;;
 	esac
@@ -48,18 +54,18 @@ case "${mode}" in
 			nice -19 xargs --max-args=1 --max-procs="$(nproc)" --null jpegoptim --strip-all --preserve --preserve-perms
 		;;
 	optimize-png)
-
 		find . -type f -iname '*.png' -print0 | \
-			nice -19 xargs --max-args=1 --max-procs="$(nproc)" --null optipng -o7 -strip all -preserve
+			nice -19 xargs --max-args=1 --max-procs="$(nproc)" --null optipng -o${opt_level} -strip all -preserve
 		;;
 	optimize-gif)
 		find . -type f -iname '*.gif' -print0 | \
 			nice -19 xargs --max-args=1 --max-procs="$(nproc)" --null gifsicle -bO3 -V
 		;;
 	optimize-all)
-		optimize-gif -m
-		optimize-jpg -m
-		optimize-png -m
+		#mimecheck will run during inital, dont run on subsequent
+		"${0}" -m -g
+		"${0}" -m -j
+		"${0}" -m -p
 		;;
 esac
 
