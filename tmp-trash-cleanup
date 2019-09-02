@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#1.0.0
-#2018-05-29
+#2.0.0
+#2018-08-30
 
 #Copyright (C) 2018 Brandon Zorn, brandonzorn@cock.li
 #
@@ -17,7 +17,29 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+#auto clean the /tmp trash dir since it is on a tmpfs
+#other trash locations can be delt w/ manually
+
 T="/tmp/.Trash-1000"
-if [ -d "${T}" ];then
-	rm -rf "${T}"
-fi
+
+while getopts "hsr" OPT;do
+	case "$OPT" in
+		r)
+			if [ -d "${T:=/tmp/.Trash-1000}" ];then
+				rm -rf "${T}"
+			fi
+			exit;;
+		s)
+			size="$(du -h "${T}"|tail -n1|awk '{print $1}')"
+			printf "Trash is: %s\n" "${size}"
+			exit;;
+		h)
+			printf "TRASH: Trash dir is: %s\n" "${T}"
+			printf " -s\tPrint size of trash dir\n"
+			printf " -r\tRemove trash dir\n"
+			printf "\nGENERAL\n"
+			printf " -h\tPrint this help\n"
+			exit;;
+	esac
+done
+
