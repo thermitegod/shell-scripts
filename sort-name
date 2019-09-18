@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#5.4.0
-#2019-05-27
+#5.5.0
+#2019-09-15
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -20,6 +20,8 @@
 
 #TODO
 #improve multi list
+
+die(){ /bin/echo -e "\033[0;31m$*\033[m";exit 1; }
 
 main(){
 	while IFS=' ' read -r name override;do
@@ -90,7 +92,7 @@ done
 
 if ! [ -f "${list_sort}" ];then
 	printf "missing: %s\nformat, line 1 must be default save path:\n/path/to/save\nto-sort\nto-sort override\n" "${list_sort}"
-	exit 1
+	die
 fi
 
 if [ "${debug}" -ge "1" ];then printf "\n*** Debug printouts enabled ***\n\n";fi
@@ -117,7 +119,7 @@ if echo "${confirm}"|grep -iq "^y" ;then
 	main
 else
 	printf "Did not confirm, Exiting.\n"
-	exit 1
+	die
 fi
 
 if [ "${print_sorted_total}" = "1" ];then

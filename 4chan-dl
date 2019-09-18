@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#2.3.0
-#2019-05-17
+#2.4.0
+#2019-09-15
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -33,7 +33,7 @@ dl(){
 	loc="${dir}/${board}/${save}"
 	url="https://boards.4chan.org/${board}/thread"
 	if ! [ -d "${loc}" ];then mkdir -p "${loc}";fi
-	cd "${loc}" || exit 1
+	cd "${loc}" || die
 	printf "Downloading %s %s %s\n" "${board}" "${thread}" "${save}"
 	link_get="${url}/${thread}"
 	w
