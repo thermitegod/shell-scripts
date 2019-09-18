@@ -102,7 +102,7 @@ orig_rm="0"
 comp_dir="0"
 comp_file="0"
 
-move_failed_file="0"
+move_failed_file="1"
 
 test_post="1"
 file_list=""
@@ -113,7 +113,7 @@ delim=",ßßß,"
 
 . "$(dirname "$0")/colors.sh"
 
-while getopts "SMTROPetdfhxz" OPT;do
+while getopts "SMTROPEetdfhxz" OPT;do
 	case "$OPT" in
 		S) comp_type="single";;
 		M) comp_type="multi";;
@@ -127,7 +127,7 @@ while getopts "SMTROPetdfhxz" OPT;do
 		x) comp_file="1";orig_rm="1";;
 		z) comp_dir="1";orig_rm="1";;
 		e) extra="1";;
-		e) move_failed_file="0";;
+		E) move_failed_file="0";;
 		h)
 			printf " default will compress file passed in \$1\n"
 			printf "\nGENERAL\n"
@@ -137,7 +137,7 @@ while getopts "SMTROPetdfhxz" OPT;do
 			printf " -M\tMultithreaded\n"
 			printf " -O\tOld profile for testing\n"
 			printf "\nOTHER\n"
-			printf " -E\tMove files that fail tests to subdirectory, requires flags -t or -T\n"
+			printf " -E\tDisable moving files that fail tests to subdirectory\n"
 			printf " -d\tcompress all directories\n"
 			printf " -f\tcompress all files\n"
 			printf " -h\tprint this help\n"
