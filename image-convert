@@ -24,7 +24,8 @@
 
 die(){ /bin/echo -e "\033[0;31m$*\033[m";exit 1; }
 
-convert_main(){
+convert_main()
+{
 	if [ "${batch}" = "1" ];then
 		batch="0"
 		nest_dir="$(find . -mindepth 2 -path '*/*' -type d)"
@@ -94,7 +95,8 @@ convert_main(){
 	fi
 }
 
-test_size(){
+test_size()
+{
 	orig="${1}"
 	new="${2}"
 
@@ -108,7 +110,8 @@ test_size(){
 	fi
 }
 
-get_mode(){
+get_mode()
+{
 	if ! [ "${qual}" = "0" ];then
 		act="convert"
 	else

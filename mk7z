@@ -29,7 +29,8 @@ die_failed(){ die "${RED}Compression failed for${NC}: ${f%%}"; }
 
 test_file_list(){ if [ -f "${f%%}.7z" ];then file_list="${file_list}${delim}${f%%}.7z";fi; }
 
-extra_info(){
+extra_info()
+{
 	if [ "${extra}" = "1" ];then
 		printf "\n"
 		printf "${YEL}Profile\t: %s${NC}\n" "${comp_type}"
@@ -37,7 +38,8 @@ extra_info(){
 	fi
 }
 
-compress(){
+compress()
+{
 	case "${comp_type}" in
 		single)
 			extra_info

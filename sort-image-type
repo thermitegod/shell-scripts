@@ -16,7 +16,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-final() {
+final()
+{
 	d="${1}"
 	dest="${PWD}"
 	case "${job_run}" in
@@ -29,7 +30,8 @@ final() {
 	esac
 }
 
-final_all() {
+final_all()
+{
 	final jpg
 	final png
 	final gif

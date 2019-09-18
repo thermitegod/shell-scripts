@@ -24,7 +24,8 @@ trap 'exit 1' INT HUP QUIT TERM USR1
 trap finish EXIT
 tmpdir=$(mktemp -d)
 
-clean(){
+clean()
+{
 	mv .config "${tmpdir}"
 	make distclean
 	mv "${tmpdir}"/.config .

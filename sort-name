@@ -23,13 +23,15 @@
 
 die(){ /bin/echo -e "\033[0;31m$*\033[m";exit 1; }
 
-main(){
+main()
+{
 	while IFS=' ' read -r name override;do
 		name_sort
 	done < "${list_sort}"
 }
 
-name_sort(){
+name_sort()
+{
 	if [ -n "$(echo "${name}"|grep '\#')" ];then return;fi
 	arc="$(echo "${name}" | sed -e "s/\-/\*/g")"
 	if [ -z "${override}" ];then dir="${name}/.";else dir="${override}/.";fi

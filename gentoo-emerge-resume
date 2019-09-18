@@ -23,7 +23,8 @@ trap finish EXIT
 tmpdir=$(mktemp -d)
 chmod 755 "${tmpdir}"
 
-bac(){
+bac()
+{
 	if ! [ -d "${storage}" ];then mkdir -p "${storage}" && chown "${user}:${group}" "${storage}";fi
 	cp "${mtimedb}" "${tmpdir}"
 	zstd "${tmpdir}/mtimedb"
@@ -32,7 +33,8 @@ bac(){
 	printf "Finished backup of %s to %s\n" "${date}-${mtime_zst}" "${storage}"
 }
 
-res(){
+res()
+{
 	if [ -z "$(ls -1A "${storage}" 2>/dev/null)" ];then die "Run a backup first. Exiting.";fi
 	#if ! [ -d "$storage" ];then die "Run a backup first. Exiting.";fi
 	if [ "${res_specific}" = "1" ];then
@@ -69,12 +71,12 @@ while getopts "brsldh" OPT;do
 		r) die "Disabled, use -s";;
 		s) res_specific="1";res;;
 		l)
-			if ! [ -d "${storage}" ]; then die "Run a backup first. Exiting.";fi
+			if ! [ -d "${storage}" ];then die "Run a backup first. Exiting.";fi
 			printf "Listing files in : %s\n" "${storage}"
 			ls -1A ${storage}
 			;;
 		d)
-			if [ -d "${storage}" ]; then
+			if [ -d "${storage}" ];then
 				rm -rfv "${storage}" || die
 			else
 				printf "Nothing to delete\n"

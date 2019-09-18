@@ -20,7 +20,8 @@ die(){ /bin/echo -e "\033[0;31m$*\033[m";exit 1; }
 
 if [ "$(id -u)" -eq 0 ];then die "Do not run as root";fi
 
-launch(){
+launch()
+{
 	"${ver}" --user-data-dir="${data}" --no-proxy-server
 	if ! [ "${mode}" = "sandbox" ];then
 		cache="${XDG_CACHE_HOME}/${cachedir}/${data##*/}"

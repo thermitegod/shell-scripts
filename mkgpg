@@ -19,7 +19,8 @@
 #TODO
 #diffrent keys for encrypting
 
-compress(){
+compress()
+{
 	case "${comp_crypt}" in
 		0)
 			printf "Encrypting : %s\n" "${f%%}"

@@ -20,7 +20,8 @@ fork="0"
 extra_args=""
 batch_links="/tmp/ytdl-batch.txt"
 
-dl(){
+dl()
+{
 	printf "downloading : %s\n" "${link}"
 	youtube-dl \
 		--geo-bypass \
@@ -34,7 +35,8 @@ dl(){
 	printf "downloaded : %s\n" "${link}"
 }
 
-batch(){
+batch()
+{
 	c="1"
 	while read -r link;do
 		printf "\n"

@@ -44,7 +44,8 @@ else
 	d="/tmp/test/credits"
 fi
 
-find_credits(){
+find_credits()
+{
 	if [ "${fls}" = "1" ];then
 		j=$(find . -iname "${1}" -exec ls -1A -- "{}" \;)
 		if [ -n "${j}" ];then printf "*** Found 'POSSIBLE' credit files ***\n%s\n" "${j}";fi

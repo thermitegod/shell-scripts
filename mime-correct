@@ -20,7 +20,8 @@
 #collision -- same filename when corrected
 #mismatch -- wrong file extension
 
-mime_type_image(){
+mime_type_image()
+{
 	if [ -d "${f}" ];then return;fi
 	total="$((total+1))"
 	mimeext=$(file -b --mime-type -- "${f%%}"|awk '{print $NF}' FS=/)

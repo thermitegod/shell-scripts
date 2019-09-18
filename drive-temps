@@ -18,7 +18,7 @@
 
 die(){ /bin/echo -e "\033[0;31m$*\033[m";exit 1; }
 
-if [ "$(id -u)" -ne 0 ]; then die "Requires root, exiting.";fi
+if [ "$(id -u)" -ne 0 ];then die "Requires root, exiting.";fi
 
 for f in /dev/disk/by-id/ata-*;do
 	if ! [ "$(echo "${f}"|grep part)" ];then

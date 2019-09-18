@@ -16,7 +16,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-file_count(){
+file_count()
+{
 	cnt="$(find "${D}" -maxdepth 1 -type f -size +"${lower}" -size -"${upper}" | wc -l)"
 	if ! [ "${cnt}" = "0" ];then printf "%s-%s  \t: %s\n" "${lower}" "${upper}" "${cnt}";fi
 	unset cnt lower upper

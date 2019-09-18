@@ -22,7 +22,8 @@
 #TODO
 #condense main function
 
-set_dirs(){
+set_dirs()
+{
 	#not in container
 	storage="/mnt/torrents"
 	config="${storage}/.config/${cname}"
@@ -68,7 +69,8 @@ set_dirs(){
 
 get_state(){ if [ "$(lxc info "${1}"|grep Running)" ];then is_running="1";fi; }
 
-main_container(){
+main_container()
+{
 	#order matters here
 	if [ -n "$(echo "${ctype}"|grep '\#')" ];then return;fi #skip comments
 	if [ -n "$(echo "${ctype}"|grep stop)" ];then exit;fi #exit when 'stop' is read

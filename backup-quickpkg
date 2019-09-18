@@ -21,13 +21,14 @@
 
 die(){ /bin/echo -e "\033[0;31m$*\033[m";exit 1; }
 if [ "$(id -u)" -ne 0 ];then die "Requires root, exiting.";fi
-finish() { if [ -d "${tmpdir}" ];then rm --preserve-root -r "${tmpdir}";fi }
+finish(){ if [ -d "${tmpdir}" ];then rm --preserve-root -r "${tmpdir}";fi }
 trap 'exit 1' INT HUP QUIT TERM USR1
 trap finish EXIT
 tmpdir=$(mktemp -d)
 chmod 755 "$tmpdir"
 
-comp(){
+comp()
+{
 	target_zst="${date}-${name}.tar.${E}"
 	target_dest="${data}/${name}"
 	if ! [ -d "${target_dest}" ];then mkdir -p "${target_dest}";fi

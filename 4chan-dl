@@ -21,13 +21,15 @@
 
 die(){ /bin/echo -e "\033[0;31m$*\033[m";exit 1; }
 
-w(){
+w()
+{
 	wget -r -H -D i.4cdn.org --hsts-file=/tmp/wget-hsts --https-only -e robots=off \
 		--user-agent=Mozilla -nc -nd --accept=jpg,jpeg,png,gif,webm,mp4,pdf \
 		-R "*s.jpg","*.html" "${link_get}"
 }
 
-dl(){
+dl()
+{
 	if [ -n "$(echo "${board}"|grep '\#')" ];then return;fi #skip comments
 	if [ -n "$(echo "${board}"|grep 'stop')" ];then exit;fi #exit when 'stop' is read as first argument
 	loc="${dir}/${board}/${save}"

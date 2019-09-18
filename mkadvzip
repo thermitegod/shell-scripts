@@ -46,7 +46,7 @@ if [ ${advall} = "1" ];then
 		printf "After  : %s\t%s\n" "${af1}" "${af2}"
 	fi
 else
-	if [ -z "$1" ]; then
+	if [ -z "$1" ];then
 		printf "Nothing to compress\n"
 		exit
 	fi

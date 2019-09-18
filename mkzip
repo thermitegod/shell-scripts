@@ -18,7 +18,8 @@
 
 die(){ /bin/echo -e "\033[0;31m$*\033[m";exit 1; }
 test_file_list(){ if [ -f "${f%%}.zip" ];then file_list="${file_list}${delim}${f%%}.zip";fi; }
-compress(){
+compress()
+{
 	case "${comp_type}" in
 		0)
 			nice -19 zip -rv -9 --junk-paths "${f%%}.zip" "${f%%}" || die "Compression failed for: ${f%%}"

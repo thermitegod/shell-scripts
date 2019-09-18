@@ -18,7 +18,7 @@
 
 die(){ /bin/echo -e "\033[0;31m$*\033[m";exit 1; }
 
-finish() { if [ -d "${tmpdir}" ];then rm --preserve-root -r "${tmpdir}";fi }
+finish(){ if [ -d "${tmpdir}" ];then rm --preserve-root -r "${tmpdir}";fi }
 trap 'exit 1' INT HUP QUIT TERM USR1
 trap finish EXIT
 tmpdir=$(mktemp -d)
@@ -31,7 +31,8 @@ comp="zstd"
 V=""
 
 dir_check(){ if ! [ -d "${target_dest}" ];then mkdir -p "${target_dest}";fi }
-move_finish(){
+move_finish()
+{
 	chown "${user}:${group}" "${tmpdir}/${target_comp}"
 	mv -iv "${tmpdir}/${target_comp}" "${target_dest}"
 }

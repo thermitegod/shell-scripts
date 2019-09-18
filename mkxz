@@ -18,7 +18,8 @@
 
 die(){ /bin/echo -e "\033[0;31m$*\033[m";exit 1; }
 
-compress(){
+compress()
+{
 	if [ -d "${f%%}" ] && ! [ "${comp_type}" = "status" ];then comp_type="dir";fi
 	case "${comp_type}" in
 		status)

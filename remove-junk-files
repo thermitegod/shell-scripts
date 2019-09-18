@@ -23,7 +23,8 @@ txt="0"
 json="0"
 other="0"
 
-find_junk(){
+find_junk()
+{
 	case "${act}" in
 		ls)
 			j="$(find . -iname "${1}" -exec ls -1A -- "{}" \;)"

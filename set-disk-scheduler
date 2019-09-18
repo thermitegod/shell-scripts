@@ -18,7 +18,7 @@
 
 die(){ /bin/echo -e "\033[0;31m$*\033[m";exit 1; }
 
-if [ "$(id -u)" -ne 0 ]; then die "Requires root, exiting.";fi
+if [ "$(id -u)" -ne 0 ];then die "Requires root, exiting.";fi
 
 debug="0"
 sched="mq-deadline"
