@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#3.3.1
-#2019-07-24
+#4.0.0
+#2019-09-15
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -20,44 +20,47 @@ S="manual-$(date +%F-%H%M)"
 ZFS="/sbin/zfs"
 
 if [ -z "${1}" ];then "${0}" -h;exit;fi
-while true;do
-	case "${1}" in
-		-m1) "$ZFS" snapshot -r "zroot/ROOT/gentoo@${S}";shift;;
-		-m2) "$ZFS" snapshot -r "zroot/HOME/brandon@${S}";shift;;
-		-m3) "$ZFS" snapshot -r "storage/anime@${S}";shift;;
-		-m4) "$ZFS" snapshot -r "storage/data@${S}";shift;;
-		-m5) "$ZFS" snapshot -r "ssd-mirror/KVM@${S}";shift;;
-		-m6) "$ZFS" snapshot -r "torrents@${S}";shift;;
-		-m7) "$ZFS" snapshot -r "zroot/CACHE/torrents@${S}";shift;;
-		-B) shift;zfs send "${1}" | zstd -T0 >| "${1##*/}.zst";exit;;
-		-a) "$ZFS" list -t snapshot;shift;;
-		-c)
+while getopts "m:B:acsudlh" OPT;do
+	case "$OPT" in
+		m)
+			case "$OPTARG" in
+				1) "$ZFS" snapshot -r "zroot/ROOT/gentoo@${S}";;
+				2) "$ZFS" snapshot -r "zroot/HOME/brandon@${S}";;
+				3) "$ZFS" snapshot -r "storage/anime@${S}";;
+				4) "$ZFS" snapshot -r "storage/data@${S}";;
+				5) "$ZFS" snapshot -r "ssd-mirror/KVM@${S}";;
+				6) "$ZFS" snapshot -r "torrents@${S}";;
+				7) "$ZFS" snapshot -r "zroot/CACHE/torrents@${S}";;
+			esac;;
+		B) "$ZFS" send "${OPTARG}" | zstd -T0 >| "${OPTARG##*/}.zst";;
+		a) "$ZFS" list -t snapshot;;
+		c)
 			"$ZFS" list -t snapshot \
 				zroot/CACHE/torrents
-			shift;;
-		-s)
+			;;
+		s)
 			"$ZFS" list -t snapshot \
 				ssd-mirror/MUSIC \
 				ssd-mirror/KVM
-			shift;;
-		-u)
+			;;
+		u)
 			"$ZFS" list -t snapshot \
 				zroot/HOME/brandon \
 				zroot/HOME/root \
 				zroot/HOME/sandbox
-			shift;;
-		-d)
+			;;
+		d)
 			"$ZFS" list -t snapshot \
 				storage/data \
 				storage/anime \
 				torrents
-			shift;;
-		-l)
+			;;
+		l)
 			"$ZFS" list -t snapshot \
 				zroot/ROOT/gentoo \
 				zroot/ROOT/gentoo/var
-			shift;;
-		-h)
+			;;
+		h)
 			printf "GENERAL\n"
 			printf " -h\tprint this help\n"
 			printf "\nSNAPSHOT PRINTING\n"
@@ -67,15 +70,16 @@ while true;do
 			printf " -s\tprint snapshots of ssd-mirror/{MUSIC,KVM}\n"
 			printf " -u\tprint snapshots of zroot/HOME/*\n"
 			printf " -l\tprint snapshots of zroot/ROOT/gentoo{/var,/var/log}\n"
-			printf "\nSNAPSHOT CREATION\n"
-			printf "\tformat  : pool/dataset@%s\n" "${S}"
-			printf " -m1\tSnapshot: zroot/ROOT/gentoo\n"
-			printf " -m2\tSnapshot: zroot/HOME/brandon\n"
-			printf " -m3\tSnapshot: storage/anime\n"
-			printf " -m4\tSnapshot: storage/data\n"
-			printf " -m5\tSnapshot: ssd-mirror/KVM\n"
-			printf " -m6\tSnapshot: torrents/\n"
-			printf " -m7\tSnapshot: zroot/CACHE/torrents\n"
+			printf "\nDATASET SNAPSHOTS\n"
+			printf "\tformat: pool/dataset@%s\n\n" "${S}"
+			printf " -m {1..7}\n"
+			printf "\t1 :zroot/ROOT/gentoo\n"
+			printf "\t2 :zroot/HOME/brandon\n"
+			printf "\t3 :storage/anime\n"
+			printf "\t4 :storage/data\n"
+			printf "\t5 :ssd-mirror/KVM\n"
+			printf "\t6 :torrents/\n"
+			printf "\t7 :zroot/CACHE/torrents\n"
 			printf "\nBACKUP\n"
 			printf " -B\texport snapshot passed in \$1\n"
 			printf "\nCREATION\n"
@@ -90,6 +94,5 @@ while true;do
 			printf "zfs list -t snapshot\n"
 			printf "zfs list -r pool\n"
 			exit;;
-		*) break;;
 	esac
 done
