@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#5.3.0
-#2019-05-17
+#5.4.0
+#2019-09-23
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -17,47 +17,51 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 zzz="1"
-tst="0"
-frm="0"
-fls="0"
+act="ls"
+
+d="/mnt/data/hentai-processing/credits"
+
+find_credits()
+{
+	case "${act}" in
+		ls)
+			j=$(find . -iname "${1}" -exec ls -1A -- "{}" \;)
+			if [ -n "${j}" ];then printf "\n\n\nFound 'POSSIBLE' credit files\n\n%s\n" "${j}";fi
+			;;
+		mv)
+			#overwrites same filenames
+			find . -type f -iname "${1}" -exec mv -v -- "{}" "${d}" \;
+			;;
+		trash)
+			find . -type f -iname "${1}" -exec trash-put -- "{}" "${d}" \;
+			;;
+	esac
+}
 
 if [ -z "${1}" ];then "${0}" -h;exit;fi
-while getopts "rltzh" OPT;do
+while getopts "Tmltzh" OPT;do
 	case "$OPT" in
-		r) frm="1";;
-		l) fls="1";;
-		t) tst="1";;
+		m) act="mv";;
+		l) act="ls";;
+		t) act="trash";;
+		T) d="/tmp/test/credits";;
 		z) zzz="0";;
 		h)
+			printf "GENERAL\n"
 			printf " -h\tprint this help\n"
-			printf " -l\tList found\n"
-			printf " -r\tRemove found\n"
-			printf " -t\tUse test dir '/tmp/test'\n"
+			printf " -T\tUse test dir '/tmp/test'\n"
 			printf " -z\tDisable 'zzz' matching\n"
+			printf "\nACTIONS\n"
+			printf " -l\tList found\n"
+			printf " -m\Move found\n"
+			printf " -t\Trash found\n"
 			exit;;
 	esac
 done
 
-if [ "${tst}" = "0" ];then
-	d="/mnt/data/hentai-processing/credits"
-else
-	d="/tmp/test/credits"
-fi
-
-find_credits()
-{
-	if [ "${fls}" = "1" ];then
-		j=$(find . -iname "${1}" -exec ls -1A -- "{}" \;)
-		if [ -n "${j}" ];then printf "*** Found 'POSSIBLE' credit files ***\n%s\n" "${j}";fi
-	fi
-	if [ "${frm}" = "1" ];then
-		find . -type f -iname "${1}" -exec mv -v -- "{}" "${d}" \;
-	fi
-}
-
 find_credits *credit*.j*pg
 find_credits *credit*.png
-if [ "${zzz}" = "1" ] || [ "${fls}" = "1" ];then
+if [ "${zzz}" = "1" ] || [ "${act}" = "ls" ];then
 	find_credits *zzz*.j*pg
 	find_credits *zzz*.png
 fi
