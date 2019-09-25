@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#5.2.0
-#2019-05-17
+#5.3.0
+#2019-09-25
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -65,8 +65,8 @@ convert_main()
 						if [ "${debug}" = "1" ];then printf "iter %s\n" "${iter}";fi
 						gm convert -quality ${qual} "${f%%}" "${cvloc}/${f%.*}.${newext}"
 						test_size "${f%%}" "${cvloc}/${f%.*}.${newext}"
-						if [ "${new_smaller}" = "1" ];then
-							new_smaller="0"
+						if [ "${new_is_smaller}" = "1" ];then
+							new_is_smaller="0"
 							printf "final qual is %s for %s\n" "${qual}" "${f}"
 							mv "${f}" "${O}"
 							break
@@ -101,12 +101,12 @@ test_size()
 	new="${2}"
 
 	if [ "${debug}" = "1" ];then
-		echo "filesize new  : $(du ${new}|awk '{print $1}')"
-		echo "filesize orig : $(du ${orig}|awk '{print $1}')"
+		printf "filesize new  : $(du ${new}|awk '{print $1}')\n"
+		printf "filesize orig : $(du ${orig}|awk '{print $1}')\n"
 	fi
 
 	if [ "$(du "${orig}"|awk '{print $1}')" -ge "$(du "${new}"|awk '{print $1}')" ];then
-		new_smaller="1"
+		new_is_smaller="1"
 	fi
 }
 
@@ -125,7 +125,7 @@ batch="0"
 debug="0"
 mimecheck="1"
 keep_orig="1"
-new_smaller="0"
+new_is_smaller="0"
 
 if [ -z "${1}" ];then "${0}" -h;exit;fi
 while getopts "dP:p:J:j:H:W:S:hmsBbr" OPT;do
@@ -192,7 +192,7 @@ while getopts "dP:p:J:j:H:W:S:hmsBbr" OPT;do
 			act="resize"
 			;;
 		B)
-			keep_orig="0"
+			keep_orig="1"
 			batch="1"
 			;;
 		b)
@@ -235,10 +235,12 @@ while getopts "dP:p:J:j:H:W:S:hmsBbr" OPT;do
 			printf " -S 4\t60%%\n"
 			printf " -S 5\t50%%\n"
 			printf "\nCONVERT\n"
-			printf " -J [1-100]\tjpg > jpg : 100 quality=100 | 1 quality=1 | 0 sets auto mode\n"
-			printf " -j [1-9]  \tjpg > png : 9   quality=9   | 1 quality=1 | 0 sets auto mode\n"
-			printf " -P [1-9]  \tpng > png : 9   qualitl=9   | 1 quality=1 | 0 sets auto mode\n"
-			printf " -p [1-100]\tpng > jpg : 100 quality=100 | 1 quality=1 | 0 sets auto mode\n"
+			printf "value of '0' sets auto mode\n"
+			printf "quality ranges, higher is better quality, JPG: 1-100, PNG:1-9\n"
+			printf " -J [1-100]\tjpg > jpg\n"
+			printf " -j [1-9]  \tjpg > png\n"
+			printf " -P [1-9]  \tpng > png\n"
+			printf " -p [1-100]\tpng > jpg\n"
 			exit;;
 	esac
 done
