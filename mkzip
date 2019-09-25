@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#5.3.0
-#2019-05-17
+#5.4.0
+#2019-09-25
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -24,10 +24,12 @@ compress()
 		0)
 			nice -19 zip -rv -9 --junk-paths "${f%%}.zip" "${f%%}" || die "Compression failed for: ${f%%}"
 			test_file_list
+			break
 			;;
 		1)
 			nice -19 zip -rv -9 "${f%%}.zip" "${f%%}" || die "Compression failed for: ${f%%}"
 			test_file_list
+			break
 			;;
 		test)
 			if [ "${f##*.}" = "zip" ];then
@@ -36,7 +38,9 @@ compress()
 					1) mk7z -T "${f%%}";;
 				esac
 				return
-			fi;;
+			fi
+			break
+			;;
 	esac
 
 	if [ "$?" -eq 0 ] && ! [ "${comp_type}" = "test" ] && [ "${orig_rm}" = "1" ] && [ -f "${f%%}.zip" ];then

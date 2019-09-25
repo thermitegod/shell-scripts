@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#6.3.0
-#2019-05-30
+#6.4.0
+#2019-09-25
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -26,13 +26,16 @@ compress()
 			tar --xattrs -${V}Scf - "${f%%}" -P | \
 				pv -s "$(du -sb "${f%%}" | awk '{print $1}')" | \
 				$C >| "${f%%}.tar.${E}" || die "Compression failed for: ${f%%}"
+			break
 			;;
 		dir)
 			tar --xattrs -${V}Scf - "${f%%}" -P | \
 				$C >| "${f%%}.tar.${E}" || die "Compression failed for: ${f%%}"
+			break
 			;;
 		file)
 			$C "${f%%}" || die "Compression failed for: ${f%%}"
+			break
 			;;
 	esac
 
@@ -88,22 +91,27 @@ case "${mode}" in
 	bz2)
 		C="bzip2 -k"
 		E="bz2"
+		break
 		;;
 	lz4)
 		C="lz4 -k"
 		E="lz4"
+		break
 		;;
 	gz)
 		C="gzip -k"
 		E="gz"
+		break
 		;;
 	xz)
 		C="xz -k -e9"
 		E="xz"
+		break
 		;;
 	zst)
 		C="zstd -T0"
 		E="zst"
+		break
 		;;
 esac
 

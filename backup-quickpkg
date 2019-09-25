@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#4.8.0
-#2019-05-17
+#4.9.0
+#2019-09-25
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -73,8 +73,8 @@ while getopts "1234ahvxz" OPT;do
 done
 
 case "${comp}" in
-	zstd) C="zstd";A="-T0";E="zst";;
-	xz) C="xz";A="-e9";E="xz";;
+	zstd) C="zstd";A="-T0";E="zst";break;;
+	xz) C="xz";A="-e9";E="xz";break;;
 esac
 
 case ${mode} in
@@ -87,26 +87,31 @@ case ${mode} in
 		quickpkg --include-config=y "*/*"
 		chown -R "${user}:${group}" "${tmpdir}"
 		mv -i "${work}" "${target_dest}"
+		break
 		;;
 	repos)
 		name="repos"
 		target_dir="/var/db/repos"
 		comp
+		break
 		;;
 	portage_etc)
 		name="portage-etc"
 		target_dir="/etc/portage"
 		comp
+		break
 		;;
 	portage_world)
 		name="portage-world"
 		target_dir="/var/lib/portage"
 		comp
+		break
 		;;
 	all)
 		"$0" -2 &
 		"$0" -3 &
 		"$0" -4 &
 		"$0" -1
+		break
 		;;
 esac

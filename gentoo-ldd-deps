@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#1.7.0
-#2019-07-15
+#1.8.0
+#2019-09-25
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -55,8 +55,21 @@ elif [ -n "$(echo "${fileinfo}"|grep statically)" ];then
 fi
 
 case "${mode}" in
-	list) main;;
-	list_sort) main|awk '{print $1}'|sort -u;;
-	list_nover) main|awk '{print $1}'|sort -u|sed 's/-r[0-9]//;s/-[^-]*$//';;
-	list_emerge) main|awk '{print $1}'|sort -u|sed 's/-r[0-9]//;s/-[^-]*$//'|awk '$1=$1' ORS=' ';echo;;
+	list)
+		main
+		break
+		;;
+	list_sort)
+		main|awk '{print $1}'|sort -u
+		break
+		;;
+	list_nover)
+		main|awk '{print $1}'|sort -u|sed 's/-r[0-9]//;s/-[^-]*$//'
+		break
+		;;
+	list_emerge)
+		main|awk '{print $1}'|sort -u|sed 's/-r[0-9]//;s/-[^-]*$//'|awk '$1=$1' ORS=' '
+		echo
+		break
+		;;
 esac

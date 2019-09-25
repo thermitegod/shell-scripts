@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#2.1.0
-#2019-05-17
+#2.2.0
+#2019-09-25
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -67,8 +67,8 @@ while getopts "123456hvxz" OPT;do
 done
 
 case "${comp}" in
-	zstd) C="zstd";A="-T0";E="zst";;
-	xz) C="xz";A="-e9";E="xz";;
+	zstd) C="zstd";A="-T0";E="zst";break;;
+	xz) C="xz";A="-e9";E="xz";break;;
 esac
 
 case "${mode}" in
@@ -84,6 +84,7 @@ case "${mode}" in
 				--xattrs --sparse -${V}cf - "${f}" -P | "$C" "$A" >| "${tmpdir}/${target_comp}"
 			move_finish
 		done
+		break
 		;;
 	user-bin)
 		target_comp="${date}-${user}-bin.tar.${E}"
@@ -95,6 +96,7 @@ case "${mode}" in
 		tar \
 			--xattrs --sparse -${V}cf - "${target_source}" -P | "$C" "$A" >| "${tmpdir}/${target_comp}"
 		move_finish
+		break
 		;;
 	user-config)
 		target_comp="${user}-config-${date}.tar.${E}"
@@ -109,6 +111,7 @@ case "${mode}" in
 			--exclude="${target_source}/kernel/src/*" \
 			--exclude="${target_source}/kernel/distfiles/*" \
 			--xattrs --sparse -${V}cf - "${target_source}" -P | "$C" "$A" >| "${tmpdir}/${target_comp}"
+		break
 		;;
 	user-local)
 		target_comp="${user}-local-${date}.tar.${E}"
@@ -119,6 +122,7 @@ case "${mode}" in
 			--exclude="${target_source}/share/Trash/*" \
 			--xattrs --sparse -${V}cf - "${target_source}" -P | "$C" "$A" >| "${tmpdir}/${target_comp}"
 		move_finish
+		break
 		;;
 	etc)
 		target_comp="etc-${date}.tar.${E}"
@@ -128,6 +132,7 @@ case "${mode}" in
 		tar \
 			--xattrs --sparse -${V}cf - "${target_source}" -P | "$C" "$A" >| "${tmpdir}/${target_comp}"
 		move_finish
+		break
 		;;
 	vnstat)
 		year=$(date "+%Y")
@@ -137,7 +142,7 @@ case "${mode}" in
 		target_dest="${backup_dir}/vnstat-database"
 		mkdir -p "${target_dest}/${year}/${month}/${day}"
 		cp "${target_source}" "${target_dest}/${year}/${month}/${day}"
+		break
 		;;
 	meta) "${0}" -h;exit;;
-	*) printf "Invalid\n"
 esac

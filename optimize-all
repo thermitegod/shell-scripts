@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#4.11.0
-#2019-08-10
+#4.12.0
+#2019-09-25
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -51,20 +51,24 @@ case "${mode}" in
 	optimize-jpg)
 		find . -type f -iname '*.jp**' -print0 | \
 			nice -19 xargs --max-args=1 --max-procs="$(nproc)" --null jpegoptim --strip-all --preserve --preserve-perms
+		break
 		;;
 	optimize-png)
 		find . -type f -iname '*.png' -print0 | \
 			nice -19 xargs --max-args=1 --max-procs="$(nproc)" --null optipng -o${opt_level} -strip all -preserve
+		break
 		;;
 	optimize-gif)
 		find . -type f -iname '*.gif' -print0 | \
 			nice -19 xargs --max-args=1 --max-procs="$(nproc)" --null gifsicle -bO3 -V
+		break
 		;;
 	optimize-all)
 		#mimecheck will run during inital, dont run on subsequent
 		"${0}" -m -g
 		"${0}" -m -j
 		"${0}" -m -p
+		break
 		;;
 esac
 

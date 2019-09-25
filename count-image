@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#5.6.0
-#2019-05-27
+#5.7.0
+#2019-09-25
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -21,10 +21,14 @@
 
 mode="${0##*/}"
 case "${mode}" in
-	count-image) type="PNG JPG JPEG JPE GIF BMP ICO WEBM MP4 MKV";;
+	count-image)
+		type="PNG JPG JPEG JPE GIF BMP ICO WEBM MP4 MKV"
+		break
+		;;
 	count-archive)
 		type="ZIP 7Z RAR CBR CBZ CB7 TAR BZ2 GZ LZ4 LZO XZ ZST"
 		mode="archive"
+		break
 		;;
 esac
 

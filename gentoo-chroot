@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#5.7.0
-#2019-05-17
+#5.8.0
+#2019-09-25
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -88,8 +88,8 @@ unset ch
 read ch_loc
 
 case "${ch_loc}" in
-	1) ch_1;;
-	2) ch_2;;
+	1) ch_1;break;;
+	2) ch_2;break;;
 	*) die "INVALID"
 esac
 
@@ -100,6 +100,10 @@ case "${setup}" in
 		mount_in_chroot
 		if [ "${mountbind}" = "1" ];then mount_bind;fi
 		chroot "${ch}" /bin/${S}
+		break
 		;;
-	bind) mount_bind;;
+	bind)
+		mount_bind
+		break
+		;;
 esac

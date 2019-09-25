@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#7.8.1
-#2019-06-30
+#7.9.0
+#2019-09-25
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -79,14 +79,17 @@ case "${mode}" in
 		x=$(echo "${w}"|sed -e 's/%20/ /g')
 		printf "save path: %s/%s\n" "${save}" "${x}"
 		if [ "${symlink}" = "1" ];then ln -sv "${save}/${x}" "${symdir}/${x}";fi
+		break
 		;;
 	madokami-manga-publishing)
 		links="${mangalinks}"
 		publishing
+		break
 		;;
 	madokami-novels-publishing)
 		save="${d}/novel"
 		links="${novellinks}"
 		publishing
+		break
 		;;
 esac

@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#1.2.1
-#2018-12-08
+#1.3.0
+#2019-09-25
 
 #original posted on lainchan
 #modified by, Brandon Zorn, brandonzorn@cock.li
@@ -17,9 +17,9 @@ ssd_dev_3;printf "3: ${SSD_DEVICE}\n"
 read device
 
 case "$device" in
-	1) ssd_dev_1;;
-	2) ssd_dev_2;;
-	3) ssd_dev_3;;
+	1) ssd_dev_1;break;;
+	2) ssd_dev_2;break;;
+	3) ssd_dev_3;break;;
 	*) printf "INVALID\n";exit;;
 esac
 

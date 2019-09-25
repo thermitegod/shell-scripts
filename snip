@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#3.2.1
-#2019-03-28
+#3.3.0
+#2019-09-25
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -24,8 +24,14 @@ tmpdir=$(mktemp -d)
 i="$(date +%s).png"
 mode="${0##*/}"
 case "${mode}" in
-	snip) gm import "${tmpdir}/${i}";;
-	snip-root) gm import -window root "${tmpdir}/${i}";;
+	snip)
+		gm import "${tmpdir}/${i}"
+		break
+		;;
+	snip-root)
+		gm import -window root "${tmpdir}/${i}"
+		break
+		;;
 esac
 #nice -19 optipng -o7 -strip all "${tmpdir}/${i}">/dev/null 2>&1
 mv "${tmpdir}/${i}" "${HOME}"

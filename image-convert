@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-#5.3.0
+#5.4.0
 #2019-09-25
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
@@ -160,34 +160,34 @@ while getopts "dP:p:J:j:H:W:S:hmsBbr" OPT;do
 			;;
 		W)
 			case "${OPTARG}" in
-				1) size="2400";;
-				2) size="1600";;
-				3) size="1280";;
-				4) size="980";;
-				5) size="780";;
-				*) size="${OPTARG}";;
+				1) size="2400";break;;
+				2) size="1600";break;;
+				3) size="1280";break;;
+				4) size="980";break;;
+				5) size="780";break;;
+				*) size="${OPTARG}";break;;
 			esac
 			act="resize"
 			;;
 		H)
 			case "${OPTARG}" in
-				1) size="x2400";;
-				2) size="x1600";;
-				3) size="x1280";;
-				4) size="x980";;
-				5) size="x780";;
-				*) size="${OPTARG}";;
+				1) size="x2400";break;;
+				2) size="x1600";break;;
+				3) size="x1280";break;;
+				4) size="x980";break;;
+				5) size="x780";break;;
+				*) size="${OPTARG}";break;;
 			esac
 			act="resize"
 			;;
 		S)
 			case "${OPTARG}" in
-				1) size="90%";;
-				2) size="80%";;
-				3) size="70%";;
-				4) size="60%";;
-				5) size="50%";;
-				*) size="${OPTARG}";;
+				1) size="90%";break;;
+				2) size="80%";break;;
+				3) size="70%";break;;
+				4) size="60%";break;;
+				5) size="50%";break;;
+				*) size="${OPTARG}";break;;
 			esac
 			act="resize"
 			;;
@@ -249,16 +249,19 @@ done
 case "${act}" in
 	convert)
 		convert_main convert
+		break
 		;;
 	convert_auto)
 		convert_main convert_auto
+		break
 		;;
 	resize)
 		convert_main resize
+		break
 		;;
 	get_size)
 		convert_main get_size
+		break
 		;;
-	*) printf "Nothing to do\n";exit;;
 esac
 

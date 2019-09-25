@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#2.5.0
-#2019-05-17
+#2.6.0
+#2019-09-25
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -46,6 +46,7 @@ case "${mode}" in
 				printf "Done extracting flac from %s\n" "${filename}"
 			done
 		done
+		break
 		;;
 	sub)
 		printf "Sub extract will break if more than one track exists\n"
@@ -58,6 +59,7 @@ case "${mode}" in
 				printf "Done extracting ssa from %s\n" "${filename}"
 			done
 		done
+		break
 		;;
 	vid)
 		find "$DIR" -type f -name '*.mkv' | while read -r filename; do
@@ -68,6 +70,7 @@ case "${mode}" in
 				printf "Done extracting flac from %s\n" "${filename}"
 			done
 		done
+		break
 		;;
 	*) printf "something is wrong\n";exit;;
 esac

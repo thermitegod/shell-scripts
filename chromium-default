@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#5.2.1
-#2019-05-22
+#5.3.0
+#2019-09-25
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -51,9 +51,9 @@ while getopts "e:g:dsch" OPT;do
 		c) ver="chromium";cachedir="chromium";shift;;
 		g)
 			case "${OPTARG}" in
-				1) ver="google-chrome-unstable";;
-				2) ver="google-chrome-beta";;
-				3) ver="google-chrome";;
+				1) ver="google-chrome-unstable";break;;
+				2) ver="google-chrome-beta";break;;
+				3) ver="google-chrome";break;;
 				*) die "Invalid, exiting"
 			esac
 			cachedir="chrome"

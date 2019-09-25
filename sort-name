@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#5.5.0
-#2019-09-15
+#5.6.0
+#2019-09-25
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -41,9 +41,18 @@ name_sort()
 	if [ "${debug}" -ge "3" ];then printf "\t${CYA}\$dir${NC}: %s\n" "${dir}";fi
 
 	case "${job_run}" in
-		dir_check) find . -maxdepth 1 -type f -iname "*${arc}*" -exec mkdir -p -- "${dest}/${dir}" \; -quit;;
-		sort_main) find . -maxdepth 1 -type f -iname "*${arc}*" -exec mv -n -- "{}" "${dest}/${dir}" \;;;
-		sort_local) find . -maxdepth 1 -type f -iname "*${arc}*" -exec mkdir -p -- "${PWD}/${dir}" \; -exec mv -i -- "{}" "${PWD}/${dir}" \;;;
+		dir_check)
+			find . -maxdepth 1 -type f -iname "*${arc}*" -exec mkdir -p -- "${dest}/${dir}" \; -quit
+			break
+			;;
+		sort_main)
+			find . -maxdepth 1 -type f -iname "*${arc}*" -exec mv -n -- "{}" "${dest}/${dir}" \;
+			break
+			;;
+		sort_local)
+			find . -maxdepth 1 -type f -iname "*${arc}*" -exec mkdir -p -- "${PWD}/${dir}" \; -exec mv -i -- "{}" "${PWD}/${dir}" \;
+			break
+			;;
 	esac
 }
 
@@ -71,9 +80,9 @@ while getopts "ETefthd:" OPT;do
 		t) list_sort="${list_type}";dest="${dest_type}";;
 		d)
 			case "${OPTARG}" in
-				1) debug="1";;
-				2) debug="2";;
-				3|*) debug="3";;
+				1) debug="1";break;;
+				2) debug="2";break;;
+				3|*) debug="3";break;;
 			esac;;
 		T) dest="/tmp/test";;
 		E) $EDITOR "${list_final}";exit;;

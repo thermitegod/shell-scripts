@@ -1,30 +1,32 @@
 #!/usr/bin/env sh
-#1.6.0
-#2019-05-17
+#1.7.0
+#2019-09-25
+
 #original unknown
 #modified by, Brandon Zorn, brandonzorn@cock.li
+
 while true;do
 	if [ -f "${1}" ];then
 		case "${1}" in
-			*.tgz|*.tbz2) tar xvf "${1}";;
-			*.txz) tar xvJf "${1}";;
-			*.tar.bz2) tar xvjf "${1}";;
-			*.tar.gz) tar xvzf "${1}";;
-			*.tar.xz) tar xvJf "${1}";;
-			*.tar.zst) zstd -dc "${1}"|tar xvf -;;
-			*.tar.lz4) lz4 -dc "${1}"|tar xvf -;;
-			*.tar.lzma) tarlzma xvf "${1}";;
-			*.tar.lrz) lrzuntar "${1}";;
-			*.rar|*.RAR) unrar "${1}";;
-			*.gz) gunzip -k "${1}";;
-			*.xz) unxz -k "${1}";;
-			*.bz2) bzip2 -dk "${1}";;
-			*.zst) unzstd -d "${1}";;
-			*.tar) tar xvf "${1}";;
-			*.zip) unzip "${1}";;
-			*7z|*.iso|*.ISO) 7z x "${1}";;
-			*.cbz|*.cbr) 7z x "${1}" -o"${1}";;
-			*) printf "cannot extract: %s\n" "${1}";;
+			*.tgz|*.tbz2) tar xvf "${1}";break;;
+			*.txz) tar xvJf "${1}";break;;
+			*.tar.bz2) tar xvjf "${1}";break;;
+			*.tar.gz) tar xvzf "${1}";break;;
+			*.tar.xz) tar xvJf "${1}";break;;
+			*.tar.zst) zstd -dc "${1}"|tar xvf -;break;;
+			*.tar.lz4) lz4 -dc "${1}"|tar xvf -;break;;
+			*.tar.lzma) tarlzma xvf "${1}";break;;
+			*.tar.lrz) lrzuntar "${1}";break;;
+			*.rar|*.RAR) unrar "${1}";break;;
+			*.gz) gunzip -k "${1}";break;;
+			*.xz) unxz -k "${1}";break;;
+			*.bz2) bzip2 -dk "${1}";break;;
+			*.zst) unzstd -d "${1}";break;;
+			*.tar) tar xvf "${1}";break;;
+			*.zip) unzip "${1}";break;;
+			*7z|*.iso|*.ISO) 7z x "${1}";break;;
+			*.cbz|*.cbr) 7z x "${1}" -o"${1}";break;;
+			*) printf "cannot extract: %s\n" "${1}";break;;
 		esac
 	else
 		printf "not a valid file: %s\n" "${1}"

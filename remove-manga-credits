@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#5.4.0
-#2019-09-23
+#5.5.0
+#2019-09-25
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -27,13 +27,16 @@ find_credits()
 		ls)
 			j=$(find . -iname "${1}" -exec ls -1A -- "{}" \;)
 			if [ -n "${j}" ];then printf "\n\n\nFound 'POSSIBLE' credit files\n\n%s\n" "${j}";fi
+			break
 			;;
 		mv)
 			#overwrites same filenames
 			find . -type f -iname "${1}" -exec mv -v -- "{}" "${d}" \;
+			break
 			;;
 		trash)
 			find . -type f -iname "${1}" -exec trash-put -- "{}" "${d}" \;
+			break
 			;;
 	esac
 }

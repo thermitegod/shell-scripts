@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#1.4.0
-#2019-05-17
+#1.5.0
+#2019-09-25
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -30,6 +30,12 @@ while getopts "bh" OPT;do
 done
 
 case "${mode}" in
-	single) split2flac -of '@track - @title.@ext' ./;;
-	batch) find . -maxdepth 1 -type d \( ! -name . \)|while read -r dir;do cd "${dir}" || die && "${0}";done;;
+	single)
+		split2flac -of '@track - @title.@ext' ./
+		break
+		;;
+	batch)
+		find . -maxdepth 1 -type d \( ! -name . \)|while read -r dir;do cd "${dir}" || die && "${0}";done
+		break
+		;;
 esac
