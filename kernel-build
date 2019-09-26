@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#2.21.0
-#2019-09-25
+#2.22.0
+#2019-09-27
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -43,9 +43,6 @@
 #TODO
 #add comments for all niche cases in script
 #expand script config file to be actually useful
-#change order
-#	grep mod support from /proc/config.gz
-#	get /proc/config.gz based on flag, move bellow flag handling
 #multi build kernels
 #	multi kernel build - debug and regular, from one invocation
 #	single build, either debug or regular
@@ -71,6 +68,8 @@ chmod 755 "${tmpdir}"
 msc(){ make syncconfig; }
 cdkdir(){ cd "${kdir}" || die "ERROR: can not cd into kenrel directory"; }
 
+. "$(dirname "$0")/utils.sh"
+
 user="brandon"
 group="${user}"
 storage="/home/${user}/.config/kernel"
@@ -88,55 +87,17 @@ clean_kernel_src="1"
 
 print_vars="0"
 intro_extra="0"
+use_modules="0"
 use_distdir="0"
 run_kmod_build="0"
+force_bump_check="0"
 use_local_zfs_ebuild="0"
-
-. "$(dirname "$0")/utils.sh"
-if [ -f "${extra}/kernel-build" ];then
-	#file must be one line with either 'git' or 'release'
-	#this will be changed
-	use_zfs_version="$(cat "${extra}/kernel-build")"
-else
-	#printf "No config file\n"
-	use_zfs_version="git"
-fi
-
-if ! [ -e "${ksym}" ];then die "ERROR: ${ksym} is not a valid symlink";fi
-if ! [ -d "${storage}/config" ];then mkdir -p "${storage}/config";fi
-
-if ! [ -f "${kdir}/.config" ];then
-	if [ -f "/proc/config.gz" ];then
-		printf "WARNING: no kernel config found, using config from running kernel\n"
-		zcat /proc/config.gz >| /usr/src/linux/.config || die
-		cdkdir
-		msc
-	else
-		die "ERROR: no config in kenrel directory and no running config is available"
-	fi
-fi
-
-if [ "$(grep CONFIG_MODULES=y "${kdir}"/.config)" ];then use_modules="1";else use_modules="0";fi
-
-case "$(echo "${kdir##*/}"|grep rc)" in
-	*rc*) #rc kernel
-		kver="$(echo "${kdir##*/linux-}"|sed s'/.$//')"
-		break
-		;;
-	*) #release kernel
-		kver="$(echo "${kdir##*/linux-}"|awk 'BEGIN{FS=OFS="."} NF--')"
-		break
-		;;
-esac
-
-switch_kconf="${storage}/config/${kver}-config"
-if [ -f "${switch_kconf}" ];then run_kernel_bump="0";else run_kernel_bump="1";fi
 
 while getopts "BCEDbdgrceIimplxzvh" OPT;do
 	case "$OPT" in
 		D) print_vars="1";;
-		B) run_kernel_bump="1";;
-		b) run_kernel_bump="0";;
+		B) run_kernel_bump="1";force_bump_check="1";;
+		b) run_kernel_bump="0";force_bump_check="1";;
 		d) use_distdir="1";;
 		c) run_kmod_build="1";;
 		e) run_emerge="0";;
@@ -179,6 +140,48 @@ while getopts "BCEDbdgrceIimplxzvh" OPT;do
 			exit;;
 	esac
 done
+
+if ! [ -f "${kdir}/.config" ];then
+	die "ERROR: no config in kenrel directory"
+fi
+
+if [ "${use_modules}" = "0" ];then
+	if [ "$(grep CONFIG_MODULES=y "${kdir}"/.config)" ];then
+		use_modules="1"
+	fi
+fi
+
+if [ -f "${extra}/kernel-build" ];then
+	#file must be one line with either 'git' or 'release'
+	#this will be changed
+	use_zfs_version="$(cat "${extra}/kernel-build")"
+else
+	#printf "No config file\n"
+	use_zfs_version="git"
+fi
+
+if ! [ -e "${ksym}" ];then die "ERROR: ${ksym} is not a valid symlink";fi
+if ! [ -d "${storage}/config" ];then mkdir -p "${storage}/config";fi
+
+case "$(echo "${kdir##*/}"|grep rc)" in
+	*rc*) #rc kernel
+		kver="$(echo "${kdir##*/linux-}"|sed s'/.$//')"
+		break
+		;;
+	*) #release kernel
+		kver="$(echo "${kdir##*/linux-}"|awk 'BEGIN{FS=OFS="."} NF--')"
+		break
+		;;
+esac
+
+switch_kconf="${storage}/config/${kver}-config"
+if [ "${force_bump_check}" = "0" ];then #allows flags to overwrite
+	if [ -f "${switch_kconf}" ];then
+		run_kernel_bump="0"
+	else
+		run_kernel_bump="1"
+	fi
+fi
 
 #CONFIG_MODULES and CONFIG_KALLSYMS are required to build kmod
 #which are not needed at runtime if zfs is build into the kernel.
@@ -299,7 +302,10 @@ fi
 if [ "${run_kernel_build}" = "1" ];then
 	cdkdir
 	msc
-	nice -19 make -j$(($(nproc)+1)) || die "ERROR: kernel build failed"
+	#force bfd linker to fix vdso undef when default linker is gold
+	#https://bugs.gentoo.org/694612
+	#https://bugzilla.kernel.org/show_bug.cgi?id=204951
+	nice -19 make -j$(($(nproc)+1)) LD=ld.bfd || die "ERROR: kernel build failed"
 	if [ "${run_kernel_install}" = "1" ];then
 		if [ "${use_modules}" = "1" ];then make modules_install;fi
 		make install
