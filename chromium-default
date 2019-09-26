@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-#5.3.0
+#5.4.0
 #2019-09-25
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
@@ -20,24 +20,12 @@ die(){ /bin/echo -e "\033[0;31m$*\033[m";exit 1; }
 
 if [ "$(id -u)" -eq 0 ];then die "Do not run as root";fi
 
-launch()
-{
-	"${ver}" --user-data-dir="${data}" --no-proxy-server
-	if ! [ "${mode}" = "sandbox" ];then
-		cache="${XDG_CACHE_HOME}/${cachedir}/${data##*/}"
-		if [ -d "${cache}" ];then sleep 3;rm -rf "${cache}";fi
-	fi
-}
+finish(){ if [ -d "${data}" ];then rm --preserve-root -r "${data}";fi }
 
 #ver="chromium"
 ver="google-chrome-unstable"
 
-if [ "${ver}" = "chromium" ];then
-	cachedir="chromium"
-else
-	cachedir="chrome"
-fi
-
+#profile gets appended
 profile_location="${HOME}/.config/chrome/${ver}"
 
 mode="${0##*/chromium-}"
@@ -48,7 +36,7 @@ while getopts "e:g:dsch" OPT;do
 		e) E="ex${OPTARG}";shift;;
 		d) E="default";shift;;
 		s) mode="sandbox";shift;;
-		c) ver="chromium";cachedir="chromium";shift;;
+		c) ver="chromium";shift;;
 		g)
 			case "${OPTARG}" in
 				1) ver="google-chrome-unstable";break;;
@@ -56,16 +44,16 @@ while getopts "e:g:dsch" OPT;do
 				3) ver="google-chrome";break;;
 				*) die "Invalid, exiting"
 			esac
-			cachedir="chrome"
 			;;
 		h)
 			printf "INFO\n"
-			printf "Main way of launching profiles is through symlinks to this script\nprofile names must start with chromium-\n"
+			printf "Main way of launching profiles is through symlinks to this script\n"
+			printf "profile names must start with 'chromium-'\n"
 			printf "ln -s %s chromium-<name-of-profile>\n" "${0}"
 			printf "flags are mainly for testing\n"
 			printf "\nPROFILES\n"
 			printf " -d\tdefault\n"
-			printf " -e #\tex#, where '#' is [0-9]\n"
+			printf " -e #\tex#, where '#' is any number\n"
 			printf " -s\tsandbox, all data deleted on close\n"
 			printf "\nBROWSER, default is: %s\n" "${ver}"
 			printf " -c\tchromium\n"
@@ -75,19 +63,31 @@ while getopts "e:g:dsch" OPT;do
 			printf "\nGENERAL\n"
 			printf " -h\tprint this help\n"
 			exit;;
-		*) break;;
 	esac
 done
 shift $((OPTIND - 1))
 
-if [ "${mode}" = "sandbox" ];then
-	finish(){ if [ -d "${data}" ];then rm --preserve-root -r "${data}";fi }
-	trap 'exit 1' INT HUP QUIT TERM USR1
-	trap finish EXIT
-	data=$(mktemp -d)
-	launch
-else
-	data="${profile_location}-${E}"
-	launch
-fi
+case "${ver}" in
+	chromium) cachedir="chromium";break;;
+	*) cachedir="chrome";break;;
+esac
 
+case "${mode}" in
+	sandbox)
+		trap 'exit 1' INT HUP QUIT TERM USR1
+		trap finish EXIT
+		data=$(mktemp -d)
+		break
+		;;
+	*)
+		data="${profile_location}-${E}"
+		break
+		;;
+esac
+
+"${ver}" --user-data-dir="${data}"
+
+if ! [ "${mode}" = "sandbox" ];then
+	cache="${XDG_CACHE_HOME}/${cachedir}/${data##*/}"
+	if [ -d "${cache}" ];then sleep 3;rm -rf "${cache}";fi
+fi
