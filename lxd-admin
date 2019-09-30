@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#6.2.0
-#2019-09-25
+#7.0.0
+#2019-09-29
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -81,18 +81,29 @@ main_container()
 	if [ -n "$(echo "${ctype}"|grep '\#')" ];then return;fi #skip comments
 	if [ -n "$(echo "${ctype}"|grep stop)" ];then exit;fi #exit when 'stop' is read
 	if [ -z "${cname}" ];then return;fi #skip blank lines, TODO: need to find a better way to do these
+
 	case "${distro}" in
 		alpine) true;break;;
 		gentoo) true;break;;
 		*) printf "skipping non supported distro: %s\n" "${distro}";return;;
 	esac
+
 	template="base-${distro}-${ctype}"
 	fullname="${ctype}-${cname}"
 	if [ "${catch_single}" = "1" ];then
 		if ! [ "${catch}" = "${fullname}" ];then return;fi
 	fi
+
 	if [ "${on_old}" = "1" ];then fullname="${old_prefix}-${fullname}";fi
-	if [ "${limit}" = "1" ] && ! [ "${limit_to}" = "${ctype}" ];then return;fi
+
+	if [ "${limit_ctype}" = "1" ];then
+		if ! [ "${limit_to}" = "${ctype}" ];then return;fi
+	fi
+
+	if [ "${limit_level}" = "1" ];then
+		if ! [ "${level_limit}" = "${level}" ];then return;fi
+	fi
+
 	case "${act}" in
 		stop)
 			get_state "${fullname}"
@@ -101,6 +112,7 @@ main_container()
 			break
 			;;
 		start)
+			if [ "${autostart}" = "0" ];then return;fi
 			get_state "${fullname}"
 			if [ "${is_running}" = "1" ];then return;fi
 			printf "Starting container: %s\n" "${fullname}";sleep .1;lxc start "${fullname}" &
@@ -140,16 +152,11 @@ main_container()
 			fi
 			break
 			;;
-		rtorrent_restart_service)
+		restart_service)
 			get_state "${fullname}"
 			if [ "${is_running}" = "0" ];then return;fi
-			if [ "${service}" = "rtorrent" ];then
-				printf "\nRestarting rtorrent on: %s\n\n" "${fullname}"
-				lxc exec "${fullname}" rc-service rtorrent restart >/dev/null 2>&1 &
-			elif [ "${service}" = "lighttpd" ];then
-				printf "\nRestarting lighttpd on: %s\n\n" "${fullname}"
-				lxc exec "${fullname}" rc-service lighttpd restart >/dev/null 2>&1 &
-			fi
+			printf "\nRestarting %s on: %s\n\n"  "${servive}" "${fullname}"
+			lxc exec "${fullname}" rc-service "${service}" restart >/dev/null 2>&1 &
 			break
 			;;
 		update)
@@ -226,7 +233,9 @@ main_container()
 			printf "IPV4\t\t: %s\n" "${ip4}"
 			if [ "${is_running}" = "1" ];then state="on";else state="off";fi
 			printf "On/Off\t\t: %s\n" "${state}"
+			printf "Autostart\t: %s\n" "${autostart}"
 			if [ "${verbose}" = "1" ];then
+				printf "Level\t\t: %s\n" "${level}"
 				printf "Limit CPU\t: %s\n" "${lim_cpu}"
 				printf "Limit CPU ALLOW\t: %s\n" "${lim_cpu_allow}"
 				printf "Limit MEM\t: %s\n" "${lim_mem}"
@@ -245,12 +254,15 @@ main_container()
 	esac
 }
 
-limit="0"
 on_old="0"
 verbose="0"
 get_dirs="0"
 is_running="0"
 catch_single="0"
+
+limit_to="z"
+limit_ctype="0"
+limit_level="0"
 
 update_keep_old="1"
 
@@ -260,7 +272,6 @@ ip4_brd="192.168.0.255"
 ip4_gateway="192.168.0.1"
 ip4_netmask="255.255.255.0"
 
-limit_to="z"
 old_prefix="old"
 lxclist=$(lxc list)
 
@@ -268,28 +279,25 @@ lxclist=$(lxc list)
 container_info="${extra}/lxd-admin"
 
 if [ -z "${1}" ];then "${0}" -h;exit;fi
-while getopts "O:TRCDPZUHESXLlxcdrsuzphe" OPT;do
+while getopts "O:l:TRCPZUHEScdrsuzpheo" OPT;do
 	case "${OPT}" in
 		O) catch_single="1";catch=${OPTARG};;
-		T) limit="1";limit_to="transmission";;
-		R) limit="1";limit_to="rutorrent";;
+		T) limit_ctype="1";limit_to="transmission";;
+		R) limit_ctype="1";limit_to="rutorrent";;
+		o) on_old="1";;
 		c) act="rtorrent_clean_lock";limit_to="rutorrent";;
 		C) act="rtorrent_clean_torrent";limit_to="rutorrent";get_dirs="1";;
 		d) act="delete";;
-		D) act="delete";on_old="1";;
 		r) act="restart";;
 		s) act="start";;
-		S) act="start";on_old="1";;
 		u) act="update";;
 		U) act="update";update_keep_old="0";;
-		x) act="stop";on_old="1";;
-		X) act="forcestop";on_old="1";;
 		z) act="stop";;
 		Z) act="forcestop";;
 		p) act="print";;
 		P) act="print";get_dirs="1";verbose="1";;
-		L) act="rtorrent_restart_service";service="lighttpd";limit="1";limit_to="rutorrent";;
-		l) act="rtorrent_restart_service";service="rtorrent";limit="1";limit_to="rutorrent";;
+		S) act="restart_service";service="${OPTARG}";;
+		l) level_limit="${OPTARG}";limit_level="1";;
 		e) $EDITOR "${container_info}";exit;;
 		E) cat "${container_info}";exit;;
 		h)
@@ -297,21 +305,18 @@ while getopts "O:TRCDPZUHESXLlxcdrsuzphe" OPT;do
 			printf " -R\tOnly run on rutorrent\n"
 			printf " -T\tOnly run on transmission, note: port is :%s\n" "${transmission_port}"
 			printf " -O\tOnly operate in the supplied container, requires full container name\n"
+			printf " -o\tOnly operate on containers with '%s' prefix\n" "${old_prefix}"
+			printf " -l #\tOnly operate on cantainers in this level\n"
 			printf "\nCONTAINER SERVICES\n"
-			printf " -L\trestart lighttpd limited to rutorrent containers\n"
-			printf " -l\trestart rtorrent limited to rutorrent containers\n"
+			printf " -S\trestart service passed as arg\n"
 			printf "\nCONTAINER GENERAL\n"
 			printf " -d\tDelete containers\n"
-			printf " -D\tDelete '%s' containers\n" "${old_prefix}"
 			printf " -h\tPrint this help\n"
 			printf " -H\tprint file setup guide: %s\n" "${container_info}"
 			printf " -r\tRestart containers\n"
 			printf " -s\tStart containers\n"
-			printf " -S\tStart '%s' containers\n" "${old_prefix}"
 			printf " -u\tUpdate, rename existing with '%s' prefix\n" "${old_prefix}"
 			printf " -U\tUpdate, delete existing instead of renaming\n"
-			printf " -x\tStop '%s' containers\n" "${old_prefix}"
-			printf " -X\tForce stop '%s' containers\n" "${old_prefix}"
 			printf " -z\tStop containers\n"
 			printf " -Z\tForce stop containers\n"
 			printf "\nSPECIFIC, no other flags req\n"
@@ -325,10 +330,10 @@ while getopts "O:TRCDPZUHESXLlxcdrsuzphe" OPT;do
 			exit;;
 		H)
 			printf "All containers are declared in '%s' using the following space delimited format, subject to change\n" "${container_info}"
-			printf "\n'container type' 'distro' 'ipv4' 'limit cpu' 'limit cpu allowance' 'limit mem' 'container name' 'save location override, optional'\n"
+			printf "\n'container type' 'distro' 'autostart' 'level'  'ipv4' 'limit cpu' 'limit cpu allowance' 'limit mem' 'container name' 'save location override, optional'\n"
 			printf "\nParsing of '%s'\nSkips line if: line starts with '#', line is blank, or 'container name' is not set\nScript exits when a line that starts with 'stop' is read\n" "${container_info}"
 			printf "\nNOTE: to not use limits, set them to '0'\n"
-			printf "\nexample:\n# this line will be skipped\nrutorrent gentoo 192.168.0.161 6 10%% 8192MB anime /mnt/anime/anime-working\nstop #nothing below this line will be run\n"
+			printf "\nexample:\n# this line will be skipped\nrutorrent gentoo 1 1 192.168.0.161 6 10%% 8192MB anime /mnt/anime/anime-working\nstop #nothing below this line will be run\n"
 			exit;;
 	esac
 done
@@ -336,7 +341,7 @@ shift $((OPTIND - 1))
 
 if ! [ -f "${container_info}" ];then "${0}" -H;exit 1;fi
 
-while IFS=' ' read -r ctype distro ip4 lim_cpu lim_cpu_allow lim_mem cname save_override;do
+while IFS=' ' read -r ctype distro autostart level ip4 lim_cpu lim_cpu_allow lim_mem cname save_override;do
 	main_container
 done < "${container_info}"
 
