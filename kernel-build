@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#2.22.0
-#2019-09-27
+#2.22.1
+#2019-10-01
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -116,26 +116,26 @@ while getopts "BCEDbdgrceIimplxzvh" OPT;do
 		h)
 			printf "DEBUG\n"
 			printf " -D\tIf script exits with die() print all shell variables\n"
-			printf "GENERAL\n"
+			printf "\nGENERAL\n"
 			printf " -b\tforce run_kernel_bump=0\n"
 			printf " -B\tforce run_kernel_bump=1\n"
 			printf " -E\tEdit config file\n"
 			printf " -h\tprint this help\n"
 			printf " -I\tdisable intro\n"
-			printf " -v\textra vars in intro\n"
+			printf " -v\tprint extra vars in intro\n"
 			printf "\nZFS\n"
 			printf " -c\tbuild kmod even if preconfigured sources exist\n"
 			printf " -d\tuse \$DISTDIR from make.conf\n"
-			printf " -e\tdisable running emerge in post\n"
 			printf " -g\tuse git ebuild\n"
 			printf " -r\tuse release ebuild\n"
-			printf " -l\tuse local repo in PORTDIR_OVERLAY\n"
+			printf " -l\tuse local repo in \$PORTDIR_OVERLAY\n"
 			printf "\nKERNEL BUILDING\n"
 			printf " -C\tdisable cleaning kenrel kernel source dir\n"
-			printf " -i\tbuild kernel but do not install or run post\n"
-			printf " -m\tenable module build\n"
-			printf " -p\tdisable post actions\n"
-			printf " -x\tdisable zfs build, all checks must still pass, script becomes fancy 'make;make install'\n"
+			printf " -e\tdisable running emerge in post\n"
+			printf " -i\tbuild kernel but do not install or run post, implies -p\n"
+			printf " -m\tforce enable module build\n"
+			printf " -p\tdisable post, emerge, initramfs, and grub configure\n"
+			printf " -x\tdisable zfs build, all zfs checks must still pass, becomes fancy 'make;make install'\n"
 			printf " -z\tonly run zfs build, will install zfs into kenrel tree\n"
 			exit;;
 	esac
