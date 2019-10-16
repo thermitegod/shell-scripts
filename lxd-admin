@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#7.0.0
-#2019-09-29
+#7.1.0
+#2019-10-05
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -21,6 +21,7 @@
 
 #TODO
 #condense main function
+#portability
 
 set_dirs()
 {
@@ -40,12 +41,12 @@ set_dirs()
 					break
 					;;
 				gentoo)
-					var="/var/www/localhost/htdocs/rutorrent/share";
+					var="/var/www/localhost/htdocs/rutorrent/share"
 					break
 					;;
 			esac
 			rushare="${config}/rutorrent/share"
-			setbase="/home/brandon"
+			setbase="/home/${user}"
 			inside_data="${setbase}/rtorrent/data"
 			inside_watch="${setbase}/rtorrent/watch"
 			inside_session="${setbase}/rtorrent/session"
@@ -77,24 +78,28 @@ get_state(){ if [ "$(lxc info "${1}"|grep Running)" ];then is_running="1";fi; }
 
 main_container()
 {
+	#TODO: need to find a better way to do this
 	#order matters here
 	if [ -n "$(echo "${ctype}"|grep '\#')" ];then return;fi #skip comments
 	if [ -n "$(echo "${ctype}"|grep stop)" ];then exit;fi #exit when 'stop' is read
-	if [ -z "${cname}" ];then return;fi #skip blank lines, TODO: need to find a better way to do these
+	if [ -z "${cname}" ];then return;fi #skip blank lines
 
 	case "${distro}" in
-		alpine) true;break;;
-		gentoo) true;break;;
+		alpine) break;;
+		gentoo) break;;
 		*) printf "skipping non supported distro: %s\n" "${distro}";return;;
 	esac
 
 	template="base-${distro}-${ctype}"
 	fullname="${ctype}-${cname}"
+
+	if [ "${on_old}" = "1" ];then
+		fullname="${old_prefix}-${fullname}"
+	fi
+
 	if [ "${catch_single}" = "1" ];then
 		if ! [ "${catch}" = "${fullname}" ];then return;fi
 	fi
-
-	if [ "${on_old}" = "1" ];then fullname="${old_prefix}-${fullname}";fi
 
 	if [ "${limit_ctype}" = "1" ];then
 		if ! [ "${limit_to}" = "${ctype}" ];then return;fi
@@ -137,6 +142,8 @@ main_container()
 			break
 			;;
 		rtorrent_clean_lock)
+			get_state "${fullname}"
+			if [ "${is_running}" = "1" ];then printf "Not cleaning lock on running: %s\n" "${fullname}";return;fi
 			get_dirs="1"
 			set_dirs
 			lock="${session}/rtorrent.lock"
@@ -200,7 +207,9 @@ main_container()
 			if ! [ "${lim_mem}" = "0" ];then lxc config set "${fullname}" limits.memory "${lim_mem}";fi
 
 			#clean rtorrent lock files
-			"${0}" -c -O "${fullname}"
+			if [ "${ctype}" = "rutorrent" ];then
+				"${0}" -c -O "${fullname}"
+			fi
 
 			printf "Seting StaticIP to: %s\n" "${ip4}"
 			net_tmp=$(mktemp)
@@ -272,6 +281,8 @@ ip4_brd="192.168.0.255"
 ip4_gateway="192.168.0.1"
 ip4_netmask="255.255.255.0"
 
+user="brandon"
+
 old_prefix="old"
 lxclist=$(lxc list)
 
@@ -337,7 +348,7 @@ while getopts "O:l:TRCPZUHEScdrsuzpheo" OPT;do
 			exit;;
 	esac
 done
-shift $((OPTIND - 1))
+#shift $((OPTIND - 1))
 
 if ! [ -f "${container_info}" ];then "${0}" -H;exit 1;fi
 
