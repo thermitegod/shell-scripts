@@ -4,3 +4,6 @@ remove-ja*
 set-n*
 tmux-l*
 tra*
+
+utils/private.py
+utils/__pycache__
