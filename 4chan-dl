@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#2.4.0
-#2019-09-15
+#3.0.0
+#2019-10-16
 
 #Copyright (C) 2018,2019 Brandon Zorn, brandonzorn@cock.li
 #
@@ -16,42 +16,37 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#TODO
-#merge {4,8}chan-dl
-
 die(){ /bin/echo -e "\033[0;31m$*\033[m";exit 1; }
 
-w()
-{
-	wget -r -H -D i.4cdn.org --hsts-file=/tmp/wget-hsts --https-only -e robots=off \
-		--user-agent=Mozilla -nc -nd --accept=jpg,jpeg,png,gif,webm,mp4,pdf \
-		-R "*s.jpg","*.html" "${link_get}"
-}
+dl(){ 4chan-dl.py -d "${save}" -t 32 -url "${link_get}"; }
 
-dl()
+dl_batch()
 {
 	if [ -n "$(echo "${board}"|grep '\#')" ];then return;fi #skip comments
 	if [ -n "$(echo "${board}"|grep 'stop')" ];then exit;fi #exit when 'stop' is read as first argument
-	loc="${dir}/${board}/${save}"
 	url="https://boards.4chan.org/${board}/thread"
-	if ! [ -d "${loc}" ];then mkdir -p "${loc}";fi
-	cd "${loc}" || die
-	printf "Downloading %s %s %s\n" "${board}" "${thread}" "${save}"
 	link_get="${url}/${thread}"
-	w
+	save="${dir}/${board}/${save_dir}"
+	#printf "Downloading %s %s %s\n" "${board}" "${thread}" "${save_dir}"
+	dl
 }
 
-#dir="${HOME}/downloads/chan/4chan"
-dir="${XDG_DOWNLOAD_DIR}/chan/4chan"
-
 . "$(dirname "$0")/utils.sh"
-thread_list="${extra}/4chan-dl"
+
+mode="${0##*/}"
+if [ "${mode}" = "4chan-dl" ];then
+	thread_list="${extra}/4chan-dl"
+	dir="${XDG_DOWNLOAD_DIR}/chan/4chan"
+else
+	thread_list="${extra}/8chan-dl"
+	dir="${XDG_DOWNLOAD_DIR}/chan/8chan"
+fi
 
 while getopts "beh" OPT;do
 	case "$OPT" in
 		b)
-			while read -r board thread save;do
-				dl
+			while read -r board thread save_dir;do
+				dl_batch
 			done < "${thread_list}"
 			exit;;
 		e) $EDITOR "${thread_list}";exit;;
@@ -64,10 +59,9 @@ while getopts "beh" OPT;do
 	esac
 done
 
-if [ -z "${1}" ] || [ -z "${2}" ];then printf "Example: %s  <save dir> <link>\n" "${0}";exit;fi
+if [ -z "${1}" ] || [ -z "${2}" ];then printf "Example: %s <save dir> <link>\n" "${0}";exit;fi
 
-if ! [ -d "./${1}" ];then mkdir "./${1}";fi
-cd "${1}" || die
+save="${1}"
 link_get="${2}"
-w
+dl
 
