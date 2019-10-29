@@ -3,7 +3,7 @@
 #2019-09-25
 
 #original unknown
-#modified by, Brandon Zorn, brandonzorn@cock.li
+#modified by, Brandon Zorn <brandonzorn@cock.li>
 
 while true;do
 	if [ -f "${1}" ];then

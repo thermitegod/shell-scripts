@@ -3,7 +3,7 @@
 #2019-09-25
 
 #original posted on lainchan
-#modified by, Brandon Zorn, brandonzorn@cock.li
+#modified by, Brandon Zorn <brandonzorn@cock.li>
 
 ssd_dev_1(){ SSD_DEVICE="/dev/disk/by-id/wwn-0x5002538da007852e" ; }
 ssd_dev_2(){ SSD_DEVICE="/dev/disk/by-id/wwn-0x5002538d417e53d6" ; }
