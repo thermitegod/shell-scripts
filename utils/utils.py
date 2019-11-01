@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 1.2.0
+# 1.3.0
 # 2019-10-31
 
 
@@ -32,9 +32,10 @@ def not_implemented():
     exit('Not implemented')
 
 
-def edit_conf(path):
+def edit_conf(path, e=True):
     run_cmd(f'{os.environ.get("EDITOR")} {path}')
-    exit(0)
+    if e:
+        exit(0)
 
 
 def get_extra_dir():
@@ -51,7 +52,6 @@ def hash_compare_sha1(file1, file2):
 
     if hash[0] == hash[1]:
         return True
-
     return False
 
 
