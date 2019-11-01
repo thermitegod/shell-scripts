@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
-# 1.1.0
-# 2019-10-23
+# 1.2.0
+# 2019-10-31
 
 
 import os
-import os.path
 import shlex
 import subprocess
 import sys
@@ -54,3 +53,8 @@ def hash_compare_sha1(file1, file2):
         return True
 
     return False
+
+
+def link_check(link):
+    if not link[:4] == 'http':
+        exit(f'Invalid URL: {link}')
