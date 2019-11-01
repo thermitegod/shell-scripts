@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 8.0.0
-# 2019-10-28
+# 8.1.0
+# 2019-10-31
 
 # Copyright (C) 2018,2019 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -30,9 +30,7 @@ save_path_full = None
 
 def dl(link, symlink=False):
     global save_path_full
-    if not link[:4] == 'http':
-        print('not a valid url')
-        return
+    utils.link_check(link)
 
     link_cut = link.split('/')[-1]
     save_path_full = f'{save_path}/{link_cut}'.replace('%20', ' ').replace('%21', '!')
