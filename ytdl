@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 5.1.0
-# 2019-10-31
+# 5.2.0
+# 2019-11-02
 
 # Copyright (C) 2018,2019 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -20,20 +20,25 @@ import argparse
 import os
 import pyperclip
 
-
 from utils import utils
 
 args = None
 
 
 def dl(link):
-    cmd = 'youtube-dl --geo-bypass --no-overwrites --no-call-home --yes-playlist ' \
-          '--audio-format best --audio-quality 0 --no-check-certificate'
+    cmd = 'youtube-dl ' \
+          '--geo-bypass ' \
+          '--no-overwrites ' \
+          '--no-call-home ' \
+          '--yes-playlist ' \
+          '--audio-format best ' \
+          '--audio-quality 0 ' \
+          '--no-check-certificate '
 
     if args.audio:
-        cmd += ' --extract-audio'
+        cmd += '--extract-audio '
 
-    cmd += ' ' + link
+    cmd += link
 
     print('\ndownloading: ', link)
     utils.run_cmd(cmd)

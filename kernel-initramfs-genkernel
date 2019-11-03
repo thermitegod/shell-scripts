@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 3.2.0
-# 2019-10-23
+# 3.3.1
+# 2019-11-06
 
 # Copyright (C) 2018,2019 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -48,25 +48,25 @@ def main():
     if not os.path.isfile('/usr/src/linux/usr/gen_init_cpio'):
         exit('Make sure the kernel is build first')
 
-    cmd = '/usr/bin/genkernel initramfs'
-    cmd += f' --makeopts=-j{multiprocessing.cpu_count()}'
-    cmd += ' --no-mdadm --no-nfs --no-dmraid --no-btrfs --no-multipath --no-iscsi --no-hyperv'
-    cmd += ' --no-ssh --no-gpg --no-mountboot --no-unionfs --no-netboot --no-dmraid'
-    cmd += ' --no-ramdisk-modules --busybox --no-keymap --postclear --disklabel'
-    cmd += f' --compress-initramfs --compress-initramfs-type={args.compression}'
-    cmd += ' --zfs'
-    cmd += ' --microcode --firmware --firmware-dir=/lib/firmware'
-    cmd += f' --loglevel={args.loglevel}'
+    cmd = '/usr/bin/genkernel initramfs ' \
+          f'--makeopts=-j{multiprocessing.cpu_count()} ' \
+          '--no-mdadm --no-nfs --no-dmraid --no-btrfs --no-multipath --no-iscsi --no-hyperv ' \
+          '--no-ssh --no-gpg --no-mountboot --no-unionfs --no-netboot --no-dmraid ' \
+          '--no-ramdisk-modules --busybox --no-keymap --postclear --disklabel ' \
+          f'--compress-initramfs --compress-initramfs-type={args.compression} ' \
+          '--zfs ' \
+          '--microcode --firmware --firmware-dir=/lib/firmware ' \
+          f'--loglevel={args.loglevel} '
 
     if args.encrypt:
-        cmd += ' --lvm --luks --e2fsprogs'
+        cmd += '--lvm --luks --e2fsprogs '
     else:
-        cmd += ' --no-lvm --no-luks --no-e2fsprogs'
+        cmd += '--no-lvm --no-luks --no-e2fsprogs '
 
     if args.logfile:
-        cmd += ' --logfile=/tmp/genkernel-initgen.log'
+        cmd += '--logfile=/tmp/genkernel-initgen.log '
     else:
-        cmd += ' --logfile=/dev/null'
+        cmd += '--logfile=/dev/null '
 
     utils.run_cmd(cmd)
 

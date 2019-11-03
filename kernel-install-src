@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 3.1.0
-# 2019-10-23
+# 3.2.0
+# 2019-11-02
 
 # Copyright (C) 2018,2019 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -37,19 +37,19 @@ def main():
 
     utils.is_root()
 
-    cmd = 'emerge --ignore-default-opts --oneshot'
+    cmd = 'emerge --ignore-default-opts --oneshot '
 
     if args.verbose:
-        cmd += ' --verbose'
+        cmd += '--verbose '
     else:
-        cmd += ' --quiet'
+        cmd += '--quiet '
 
     if args.git:
-        cmd += ' sys-kernel/git-sources'
+        cmd += 'sys-kernel/git-sources'
     elif args.vanilla:
-        cmd += ' sys-kernel/vanilla-sources'
+        cmd += 'sys-kernel/vanilla-sources'
     else:
-        cmd += ' sys-kernel/gentoo-sources'
+        cmd += 'sys-kernel/gentoo-sources'
 
     utils.run_cmd(cmd)
 
