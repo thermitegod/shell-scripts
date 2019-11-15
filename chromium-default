@@ -76,5 +76,5 @@ def main():
         utils.run_cmd(cmd)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

@@ -305,5 +305,5 @@ def main():
         time.sleep(float(update_interval))
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
