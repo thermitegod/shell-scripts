@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 5.0.0
-# 2019-11-09
+# 5.1.0
+# 2019-11-15
 
 # Copyright (C) 2018,2019 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -18,39 +18,31 @@
 
 import argparse
 import os
-from datetime import date
+import time
 
 from utils import utils
 
 
 def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
-    parser.add_argument('-l', '--list',
-                        choices=['0', '1', '2', '3', '4', '5', '6', '7'],
-                        # default=0,
-                        help='0: all\n'
-                             '1: zroot/ROOT/gentoo\n'
-                             '2: zroot/HOME/brandon\n'
-                             '3: storage/anime\n'
-                             '4: storage/data\n'
-                             '5: ssd-mirror/KVM\n'
-                             '6: torrents\n'
-                             '7: zroot/CACHE/torrents\n')
-    parser.add_argument('-m', '--snapshot',
-                        choices=['1', '2', '3', '4', '5', '6', '7'],
-                        # default=1,
-                        help='1: zroot/ROOT/gentoo\n'
-                             '2: zroot/HOME/brandon\n'
-                             '3: storage/anime\n'
-                             '4: storage/data\n'
-                             '5: ssd-mirror/KVM\n'
-                             '6: torrents\n'
-                             '7: zroot/CACHE/torrents\n')
     parser.add_argument('-B', '--export',
                         help='export passed snapshot')
     parser.add_argument('-e', '--extra',
                         action='store_true',
                         help='Print extra info and exit')
+    group1 = parser.add_argument_group('Valid pools',
+                                       '0: all [list only]\n'
+                                       '1: zroot/ROOT/gentoo [list adds /var]\n'
+                                       '2: zroot/HOME/brandon\n'
+                                       '3: storage/anime\n'
+                                       '4: storage/data\n'
+                                       '5: ssd-mirror/KVM\n'
+                                       '6: torrents\n'
+                                       '7: zroot/CACHE/torrents\n')
+    group1.add_argument('-l', '--list',
+                        choices=['0', '1', '2', '3', '4', '5', '6', '7'])
+    group1.add_argument('-m', '--snapshot',
+                        choices=['1', '2', '3', '4', '5', '6', '7'])
     args = parser.parse_args()
 
     if args.extra:
@@ -66,63 +58,46 @@ def main():
         print('zfs list -r pool')
         exit(0)
 
+    selected_pool = None
+    cmd = 'zfs '
+
     if args.list:
-        cmd = 'zfs list -t snapshot '
-
-        if args.list == '1':
-            cmd += 'zroot/ROOT/gentoo ' \
-                   'zroot/ROOT/gentoo/var'
-        elif args.list == '2':
-            cmd += 'zroot/HOME/brandon'
-        elif args.list == '3':
-            cmd += 'storage/anime'
-        elif args.list == '4':
-            cmd += 'storage/data'
-        elif args.list == '5':
-            cmd += 'ssd-mirror/KVM'
-        elif args.list == '6':
-            cmd += 'torrents'
-        elif args.list == '7':
-            cmd += 'zroot/CACHE/torrents'
-
-        utils.run_cmd(cmd)
-        exit(0)
+        cmd += 'list -t snapshot '
+        selected_pool = args.list
 
     if args.snapshot:
         utils.is_root()
+        cmd += 'snapshot -r '
+        selected_pool = args.snapshot
 
-        time = date.today()
-        time = time.strftime('%F-%H%M')
-
-        cmd = 'zfs snapshot -r '
-
-        if args.snapshot == '1':
+    if selected_pool:
+        if selected_pool == '1':
             cmd += 'zroot/ROOT/gentoo'
-        elif args.snapshot == '2':
+            if args.list:
+                cmd += ' zroot/ROOT/gentoo/var'
+        elif selected_pool == '2':
             cmd += 'zroot/HOME/brandon'
-        elif args.snapshot == '3':
+        elif selected_pool == '3':
             cmd += 'storage/anime'
-        elif args.snapshot == '4':
+        elif selected_pool == '4':
             cmd += 'storage/data'
-        elif args.snapshot == '5':
+        elif selected_pool == '5':
             cmd += 'ssd-mirror/KVM'
-        elif args.snapshot == '6':
+        elif selected_pool == '6':
             cmd += 'torrents'
-        elif args.snapshot == '7':
+        elif selected_pool == '7':
             cmd += 'zroot/CACHE/torrents'
-        else:
-            exit('fallback hit')
 
-        cmd += f'@{time}'
+        if args.snapshot:
+            snapshot_time = time.strftime('%F-%H%M', time.localtime())
+            cmd += f'@manual-{snapshot_time}'
         utils.run_cmd(cmd)
-        exit(0)
 
     if args.export:
         utils.is_root()
         target = args.export
-        cmd = f'sh -c "zfs send {target} | zstd -T0 >| {os.path.basename(target)}.zst"'
+        cmd = f'sh -c "zfs send {target} | zstd -T0 >| {os.getcwd()}/{os.path.basename(target)}.zst"'
         utils.run_cmd(cmd)
-        exit(0)
 
 
 if __name__ == '__main__':
