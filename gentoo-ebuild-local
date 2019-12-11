@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#1.0.0
-#2019-12-04
+#1.1.0
+#2019-12-05
 
 #Copyright (C) 2019 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -24,7 +24,7 @@ no_live="1"
 edit="0"
 pkg=""
 
-while getopts "f:leh" OPT;do
+while getopts "f:Elehx" OPT;do
 	case "$OPT" in
 		l)
 			no_live="0"
@@ -32,14 +32,23 @@ while getopts "f:leh" OPT;do
 		e)
 			edit="1"
 			;;
+		E)
+			die "WIP"
+			edit_only="1"
+			;;
 		f)
 			pkg="${OPTARG}"
+			;;
+		x)
+			pkg="$(xclip -o)"
 			;;
 		h)
 			printf "GENERAL\n"
 			printf " -h\tPrint this help\n"
 			printf " -e\tedit ebuild once copied\n"
+			#printf " -E\tonly edit the ebuild in local repo\n"
 			printf " -f\tcopy ebuild from gentoo repo to local repo\n"
+			printf " -x\tcopy ebuild from gentoo repo to local repo, get pkg from clipboard\n"
 			printf " -l\tcopy live ebuild from gentoo repo to local repo\n"
 			exit;;
 	esac
