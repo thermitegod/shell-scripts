@@ -153,7 +153,7 @@ main_container()
 		restart_service)
 			get_state "${fullname}"
 			if [ "${is_running}" = "0" ];then return;fi
-			printf "\nRestarting %s on: %s\n\n"  "${servive}" "${fullname}"
+			printf "\nRestarting %s on: %s\n\n"  "${service}" "${fullname}"
 			lxc exec "${fullname}" rc-service "${service}" restart >/dev/null 2>&1 &
 			;;
 		update)

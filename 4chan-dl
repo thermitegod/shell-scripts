@@ -53,7 +53,7 @@ while getopts "beh" OPT;do
 		h)
 			printf "Example: %s <save dir> <link>\n" "${0}"
 			printf " -b\trun batch file\n"
-			printf " -e\tedit $s\n" "${thread_list}"
+			printf " -e\tedit %s\n" "${thread_list}"
 			printf " -h\tPrint this help\n"
 			exit;;
 		*) printf "Showing help\n\n";"${0}" -h;;
