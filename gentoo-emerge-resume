@@ -90,5 +90,6 @@ while getopts "brsldh" OPT;do
 			printf " -d\tdelete\n"
 			printf " -h\tprint this help\n"
 			exit;;
+		*) printf "Showing help\n\n";"${0}" -h;;
 	esac
 done

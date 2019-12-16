@@ -24,6 +24,7 @@ while getopts "dh" OPT;do
 			printf " -d\tdaily files timestamped\n"
 			printf " -h\tPrint this help\n"
 			exit;;
+		*) printf "Showing help\n\n";"${0}" -h;;
 	esac
 done
 
@@ -37,10 +38,8 @@ case "$mode" in
 		d="${HOME}/documents/internet"
 		if ! [ -d "${d}" ];then mkdir -p "${d}";fi
 		printf "%s %s : %s\n" "${date_day}" "${date_time}" "${ip}" >> "${d}/${date_day}.txt"
-		break
 		;;
 	once)
 		printf "%s %s : %s\n" "${date_day}" "${date_time}" "${ip}"
-		break
 		;;
 esac

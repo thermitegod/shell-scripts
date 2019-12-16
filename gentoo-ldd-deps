@@ -33,6 +33,7 @@ while getopts "lneh" OPT;do
 			printf " -l\tPrint sorted with versions\n"
 			printf " -n\tPrint sorted no version list, package.*\n"
 			exit;;
+		*) printf "Showing help\n\n";"${0}" -h;;
 	esac
 done
 shift $((OPTIND - 1))
@@ -57,19 +58,15 @@ fi
 case "${mode}" in
 	list)
 		main
-		break
 		;;
 	list_sort)
 		main|awk '{print $1}'|sort -u
-		break
 		;;
 	list_nover)
 		main|awk '{print $1}'|sort -u|sed 's/-r[0-9]//;s/-[^-]*$//'
-		break
 		;;
 	list_emerge)
 		main|awk '{print $1}'|sort -u|sed 's/-r[0-9]//;s/-[^-]*$//'|awk '$1=$1' ORS=' '
 		echo
-		break
 		;;
 esac

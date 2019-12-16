@@ -24,13 +24,13 @@ while getopts "m:B:acsudlh" OPT;do
 	case "$OPT" in
 		m)
 			case "$OPTARG" in
-				1) "$ZFS" snapshot -r "zroot/ROOT/gentoo@${S}";break;;
-				2) "$ZFS" snapshot -r "zroot/HOME/brandon@${S}";break;;
-				3) "$ZFS" snapshot -r "storage/anime@${S}";break;;
-				4) "$ZFS" snapshot -r "storage/data@${S}";break;;
-				5) "$ZFS" snapshot -r "ssd-mirror/KVM@${S}";break;;
-				6) "$ZFS" snapshot -r "torrents@${S}";break;;
-				7) "$ZFS" snapshot -r "zroot/CACHE/torrents@${S}";break;;
+				1) "$ZFS" snapshot -r "zroot/ROOT/gentoo@${S}";;
+				2) "$ZFS" snapshot -r "zroot/HOME/brandon@${S}";;
+				3) "$ZFS" snapshot -r "storage/anime@${S}";;
+				4) "$ZFS" snapshot -r "storage/data@${S}";;
+				5) "$ZFS" snapshot -r "ssd-mirror/KVM@${S}";;
+				6) "$ZFS" snapshot -r "torrents@${S}";;
+				7) "$ZFS" snapshot -r "zroot/CACHE/torrents@${S}";;
 			esac;;
 		B) "$ZFS" send "${OPTARG}" | zstd -T0 >| "${OPTARG##*/}.zst";;
 		a) "$ZFS" list -t snapshot;;
@@ -94,5 +94,6 @@ while getopts "m:B:acsudlh" OPT;do
 			printf "zfs list -t snapshot\n"
 			printf "zfs list -r pool\n"
 			exit;;
+		*) printf "Showing help\n\n";"${0}" -h;;
 	esac
 done

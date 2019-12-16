@@ -38,11 +38,9 @@ set_dirs()
 			case "${distro}" in
 				alpine)
 					var="/usr/share/webapps/rutorrent/share"
-					break
 					;;
 				gentoo)
 					var="/var/www/localhost/htdocs/rutorrent/share"
-					break
 					;;
 			esac
 			rushare="${config}/rutorrent/share"
@@ -84,9 +82,9 @@ main_container()
 	if [ -n "$(echo "${ctype}"|grep stop)" ];then exit;fi #exit when 'stop' is read
 	if [ -z "${cname}" ];then return;fi #skip blank lines
 
-	case "${distro}" in
-		alpine) break;;
-		gentoo) break;;
+	case "${distro}" in #make less shit
+		alpine) a="1";;
+		gentoo) a="1";;
 		*) printf "skipping non supported distro: %s\n" "${distro}";return;;
 	esac
 
@@ -114,32 +112,27 @@ main_container()
 			get_state "${fullname}"
 			if [ "${is_running}" = "0" ];then return;fi
 			printf "Stopping container: %s\n" "${fullname}";lxc stop "${fullname}" &
-			break
 			;;
 		start)
 			if [ "${autostart}" = "0" ];then return;fi
 			get_state "${fullname}"
 			if [ "${is_running}" = "1" ];then return;fi
 			printf "Starting container: %s\n" "${fullname}";sleep .1;lxc start "${fullname}" &
-			break
 			;;
 		delete)
 			get_state "${fullname}"
 			if [ "${is_running}" = "1" ];then printf "Must stop before deleting: %s\n" "${fullname}";return;fi
 			printf "Deleteing container: %s\n" "${fullname}";lxc delete "${fullname}" &
-			break
 			;;
 		restart)
 			get_state "${fullname}"
 			if [ "${is_running}" = "0" ];then return;fi
 			printf "Restarting container: %s\n" "${fullname}";lxc restart "${fullname}" &
-			break
 			;;
 		forcestop)
 			get_state "${fullname}"
 			if [ "${is_running}" = "0" ];then return;fi
 			printf "Force stopping container: %s\n" "${fullname}";lxc stop --force "${fullname}" &
-			break
 			;;
 		rtorrent_clean_lock)
 			get_state "${fullname}"
@@ -149,7 +142,6 @@ main_container()
 			lock="${session}/rtorrent.lock"
 			if [ -f "${lock}" ];then rm -v "${lock}";fi
 			get_dirs="0"
-			break
 			;;
 		rtorrent_clean_torrent)
 			#printf "Running cleanup for: "${fullname}"\n"
@@ -157,14 +149,12 @@ main_container()
 			if ! [ "$(ls -1A "${rushare}"/torrents|wc -l)" = "0" ];then
 				rm "${rushare}"/torrents/*.torrent
 			fi
-			break
 			;;
 		restart_service)
 			get_state "${fullname}"
 			if [ "${is_running}" = "0" ];then return;fi
 			printf "\nRestarting %s on: %s\n\n"  "${servive}" "${fullname}"
 			lxc exec "${fullname}" rc-service "${service}" restart >/dev/null 2>&1 &
-			break
 			;;
 		update)
 			get_state "${fullname}"
@@ -217,12 +207,10 @@ main_container()
 				alpine)
 					net="${fullname}/etc/network/interfaces"
 					printf "auto eth0\niface eth0 inet static\n\taddress %s\n\tnetmask %s\n\tgateway %s\n" "${ip4}" "${ip4_netmask}" "${ip4_gateway}">|"${net_tmp}"
-					break
 					;;
 				gentoo)
 					net="${fullname}/etc/conf.d/net"
 					printf "rc_keyword=\"-stop\"\nconfig_eth0=\"%s netmask %s brd %s\"\nroutes_eth0=\"default via %s\"\n" "${ip4}" "${ip4_netmask}" "${ip4_brd}" "${ip4_gateway}">|"${net_tmp}"
-					break
 					;;
 			esac
 			lxc file push "${net_tmp}" "${net}"
@@ -230,7 +218,6 @@ main_container()
 
 			set_dirs
 			printf "\n"
-			break
 			;;
 		print)
 			get_state "${fullname}"
@@ -258,7 +245,6 @@ main_container()
 				if [ -n "${save_override}" ];then printf "save override\t: active\n";fi
 			fi
 			printf "\n"
-			break
 			;;
 	esac
 }
@@ -346,6 +332,7 @@ while getopts "O:l:TRCPZUHEScdrsuzpheo" OPT;do
 			printf "\nNOTE: to not use limits, set them to '0'\n"
 			printf "\nexample:\n# this line will be skipped\nrutorrent gentoo 1 1 192.168.0.161 6 10%% 8192MB anime /mnt/anime/anime-working\nstop #nothing below this line will be run\n"
 			exit;;
+		*) printf "Showing help\n\n";"${0}" -h;;
 	esac
 done
 #shift $((OPTIND - 1))

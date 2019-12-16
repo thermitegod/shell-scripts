@@ -61,6 +61,7 @@ while getopts "dleh" OPT;do
 			printf " -h\tprint this help\n"
 			printf " -l\tsymlink to %s\n" "${symdir}"
 			exit;;
+		*) printf "Showing help\n\n";"${0}" -h;;
 	esac
 done
 shift $((OPTIND - 1))
@@ -79,17 +80,14 @@ case "${mode}" in
 		x=$(echo "${w}"|sed -e 's/%20/ /g')
 		printf "save path: %s/%s\n" "${save}" "${x}"
 		if [ "${symlink}" = "1" ];then ln -sv "${save}/${x}" "${symdir}/${x}";fi
-		break
 		;;
 	madokami-manga-publishing)
 		links="${mangalinks}"
 		publishing
-		break
 		;;
 	madokami-novels-publishing)
 		save="${d}/novel"
 		links="${novellinks}"
 		publishing
-		break
 		;;
 esac

@@ -45,6 +45,7 @@ while getopts "hsr" OPT;do
 			printf "\nGENERAL\n"
 			printf " -h\tPrint this help\n"
 			exit;;
+		*) printf "Showing help\n\n";"${0}" -h;;
 	esac
 done
 

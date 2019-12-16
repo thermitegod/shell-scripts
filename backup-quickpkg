@@ -69,12 +69,13 @@ while getopts "1234ahvxz" OPT;do
 			printf " -3\tportage etc\n"
 			printf " -4\tportage world\n"
 			exit;;
+		*) printf "Showing help\n\n";"${0}" -h;;
 	esac
 done
 
 case "${comp}" in
-	zstd) C="zstd";A="-T0";E="zst";break;;
-	xz) C="xz";A="-e9";E="xz";break;;
+	zstd) C="zstd";A="-T0";E="zst";;
+	xz) C="xz";A="-e9";E="xz";;
 esac
 
 case ${mode} in
@@ -87,31 +88,26 @@ case ${mode} in
 		quickpkg --include-config=y "*/*"
 		chown -R "${user}:${group}" "${tmpdir}"
 		mv -i "${work}" "${target_dest}"
-		break
 		;;
 	repos)
 		name="repos"
 		target_dir="/var/db/repos"
 		comp
-		break
 		;;
 	portage_etc)
 		name="portage-etc"
 		target_dir="/etc/portage"
 		comp
-		break
 		;;
 	portage_world)
 		name="portage-world"
 		target_dir="/var/lib/portage"
 		comp
-		break
 		;;
 	all)
 		"$0" -2 &
 		"$0" -3 &
 		"$0" -4 &
 		"$0" -1
-		break
 		;;
 esac

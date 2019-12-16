@@ -51,6 +51,7 @@ while getopts "f:Elehx" OPT;do
 			printf " -x\tcopy ebuild from gentoo repo to local repo, get pkg from clipboard\n"
 			printf " -l\tcopy live ebuild from gentoo repo to local repo\n"
 			exit;;
+		*) printf "Showing help\n\n";"${0}" -h;;
 	esac
 done
 shift $((OPTIND - 1))

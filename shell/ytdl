@@ -61,6 +61,7 @@ while getopts "abefrh" OPT;do
 			printf " -h\tprint this help\n"
 			printf " -r\tremove %s\n" "${batch_links}"
 			exit;;
+		*) printf "Showing help\n\n";"${0}" -h;;
 	esac
 done
 shift $((OPTIND - 1))

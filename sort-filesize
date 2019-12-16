@@ -32,18 +32,18 @@ while getopts "m:g:alh" OPT;do
 		a) mode="all";;
 		m)
 			case "${OPTARG}" in
-				10) mode="less10M";break;;
-				100) mode="less100M";break;;
-				150) mode="less150M";break;;
-				200) mode="less200M";break;;
-				500) mode="less500M";break;;
+				10) mode="less10M";;
+				100) mode="less100M";;
+				150) mode="less150M";;
+				200) mode="less200M";;
+				500) mode="less500M";;
 			esac
 			;;
 		g)
 			case "${OPTARG}" in
-				1) mode="less1G";break;;
-				10) mode="less10G";break;;
-				100) mode="less100G";break;;
+				1) mode="less1G";;
+				10) mode="less10G";;
+				100) mode="less100G";;
 			esac
 			;;
 		l) count-size;exit;;
@@ -64,6 +64,7 @@ while getopts "m:g:alh" OPT;do
 			printf "\t10 : Sort less than 10G\n"
 			printf "\t100: Sort less than 100G\n"
 			exit;;
+		*) printf "Showing help\n\n";"${0}" -h;;
 	esac
 done
 
@@ -72,49 +73,41 @@ case "${mode}" in
 		lower="0k"
 		upper="10M"
 		file_sort
-		break
 		;;
 	less100M)
 		lower="10M"
 		upper="100M"
 		file_sort
-		break
 		;;
 	less150M)
 		lower="100M"
 		upper="150M"
 		file_sort
-		break
 		;;
 	less200M)
 		lower="150M"
 		upper="200M"
 		file_sort
-		break
 		;;
 	less500M)
 		lower="200M"
 		upper="500M"
 		file_sort
-		break
 		;;
 	less1G)
 		lower="500M"
 		upper="1G"
 		file_sort
-		break
 		;;
 	less10G)
 		lower="1G"
 		upper="10G"
 		file_sort
-		break
 		;;
 	less100G)
 		lower="10G"
 		upper="100G"
 		file_sort
-		break
 		;;
 	all)
 		"${0}" -m 10
@@ -125,6 +118,5 @@ case "${mode}" in
 		"${0}" -g 1
 		"${0}" -g 10
 		"${0}" -g 100
-		break
 		;;
 esac

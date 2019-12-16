@@ -26,6 +26,7 @@ while getopts "hm" OPT;do
 			printf " -h\tPrint this help\n"
 			printf " -m\tupdate grub.cfg\n"
 			exit;;
+		*) printf "Showing help\n\n";"${0}" -h;;
 	esac
 done
 

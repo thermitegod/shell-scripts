@@ -25,6 +25,7 @@ while getopts "Bh" OPT;do
 			printf " -B\tEnable batch mode\n"
 			printf " -h\tPrint this help\n"
 			exit;;
+		*) printf "Showing help\n\n";"${0}" -h;;
 	esac
 done
 

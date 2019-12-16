@@ -27,6 +27,7 @@ while getopts "ah" OPT;do
 			printf " -a\trun for the entire repo\n"
 			printf " -h\tprint this help\n"
 			exit;;
+		*) printf "Showing help\n\n";"${0}" -h;;
 	esac
 done
 

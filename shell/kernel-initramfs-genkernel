@@ -50,6 +50,7 @@ while getopts "vlxhde" OPT;do
 			printf " -l\tcompress initramfs using : lz4 [default]\n"
 			printf " -x\tcompress initramfs using : xz \n"
 			exit;;
+		*) printf "Showing help\n\n";"${0}" -h;;
 	esac
 done
 

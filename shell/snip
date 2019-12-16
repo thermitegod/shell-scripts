@@ -26,11 +26,9 @@ mode="${0##*/}"
 case "${mode}" in
 	snip)
 		gm import "${tmpdir}/${i}"
-		break
 		;;
 	snip-root)
 		gm import -window root "${tmpdir}/${i}"
-		break
 		;;
 esac
 #nice -19 optipng -o7 -strip all "${tmpdir}/${i}">/dev/null 2>&1

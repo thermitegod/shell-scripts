@@ -41,6 +41,7 @@ while getopts "vmjpghx" OPT;do
 			printf " -x\tpng only, use -o7 instead of -o5\n"
 			printf " -v\tPrint change in dir size\n"
 			exit;;
+		*) printf "Showing help\n\n";"${0}" -h;;
 	esac
 done
 
@@ -51,24 +52,20 @@ case "${mode}" in
 	optimize-jpg)
 		find . -type f -iname '*.jp**' -print0 | \
 			nice -19 xargs --max-args=1 --max-procs="$(nproc)" --null jpegoptim --strip-all --preserve --preserve-perms
-		break
 		;;
 	optimize-png)
 		find . -type f -iname '*.png' -print0 | \
 			nice -19 xargs --max-args=1 --max-procs="$(nproc)" --null optipng -o${opt_level} -strip all -preserve
-		break
 		;;
 	optimize-gif)
 		find . -type f -iname '*.gif' -print0 | \
 			nice -19 xargs --max-args=1 --max-procs="$(nproc)" --null gifsicle -bO3 -V
-		break
 		;;
 	optimize-all)
 		#mimecheck will run during inital, dont run on subsequent
 		"${0}" -m -g
 		"${0}" -m -j
 		"${0}" -m -p
-		break
 		;;
 esac
 

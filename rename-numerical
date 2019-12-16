@@ -38,6 +38,7 @@ while getopts "v:bh" OPT;do
 			printf " -h\tPrint this help\n"
 			printf " -v\tverbose level [0-2]\n"
 			exit;;
+		*) printf "Showing help\n\n";"${0}" -h;;
 	esac
 done
 
@@ -63,10 +64,8 @@ case "${mode}" in
 				array=$(echo "${array}"|sed "s/[^ ]* //")
 			fi
 		done
-		break
 		;;
 	batch)
 		find . -path '*/*' -type d \( ! -name . \)|while read -r dir;do cd "${dir}" || die && "${0}";done
-		break
 		;;
 esac

@@ -32,6 +32,7 @@ while getopts "Bih" OPT;do
 			printf " -h\tPrint this help\n"
 			printf " -i\tInclude iso files\n"
 			exit;;
+		*) printf "Showing help\n\n";"${0}" -h;;
 	esac
 done
 
@@ -55,7 +56,6 @@ for f in *;do
 				mv -i "${tmpdir}/*.mkv" . || die "ERROR: cannot move ${tmpdir}/\*.mkv to ${PWD}"
 				rm -rf -- ./AUDIO_TS ./VIDEO_TS
 			fi
-			break
 			;;
 		mkv) true;;
 		*)
@@ -68,7 +68,6 @@ for f in *;do
 				mv -i "${f}" "${O}" || die "ERROR: cannot move ${PWD}/${f%%} to ${O}"
 				if [ -d "${O}" ] && ! [ "$(ls -A "$O")" ];then rm -rf "$O";fi
 			fi
-			break
 			;;
 	esac
 done

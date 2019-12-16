@@ -24,12 +24,10 @@ compress()
 		0)
 			nice -19 zip -rv -9 --junk-paths "${f%%}.zip" "${f%%}" || die "Compression failed for: ${f%%}"
 			test_file_list
-			break
 			;;
 		1)
 			nice -19 zip -rv -9 "${f%%}.zip" "${f%%}" || die "Compression failed for: ${f%%}"
 			test_file_list
-			break
 			;;
 		test)
 			if [ "${f##*.}" = "zip" ];then
@@ -39,7 +37,6 @@ compress()
 				esac
 				return
 			fi
-			break
 			;;
 	esac
 
@@ -90,6 +87,7 @@ while getopts "TZFDPRtdfszh" OPT;do
 			printf " -z\tcompress all directories, delete original after compressed, junk path\n"
 			printf " -Z\tcompress all directories, delete original after compressed, dont junk path\n"
 			exit;;
+		*) printf "Showing help\n\n";"${0}" -h;;
 	esac
 done
 shift $((OPTIND - 1))

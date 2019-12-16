@@ -40,6 +40,7 @@ while getopts "adfxh" OPT;do
 			printf "6\trw-\n"
 			printf "7\trwx\n"
 			exit;;
+		*) printf "Showing help\n\n";"${0}" -h;;
 	esac
 done
 
@@ -48,18 +49,14 @@ case "${mode}" in
 	sane)
 		nice -19 find . -type d -exec chmod 755 -- "{}" \;
 		nice -19 find . -type f -exec chmod 644 -- "{}" \;
-		break
 		;;
 	dir)
 		nice -19 find . -type d -exec chmod 755 -- "{}" \;
-		break
 		;;
 	file)
 		nice -19 find . -type f -exec chmod 644 -- "{}" \;
-		break
 		;;
 	ex)
 		nice -19 find . -type f -exec chmod 755 -- "{}" \;
-		break
 		;;
 esac

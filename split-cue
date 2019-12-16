@@ -27,6 +27,7 @@ while getopts "bh" OPT;do
 			printf " -b\tBatch mode\n"
 			printf " -h\tPrint this help\n"
 			exit;;
+		*) printf "Showing help\n\n";"${0}" -h;;
 	esac
 done
 
@@ -38,10 +39,8 @@ case "${mode}" in
 			cuebreakpoints "${f%.*}".cue | shnsplit -t "%n-%t" -o flac "${f%.*}".flac
 			#mv "${f%.*}".flac ../
 		done
-		break
 		;;
 	batch)
 		find . -maxdepth 1 -type d \( ! -name . \)|while read -r dir;do cd "${dir}" || die && "${0}";done
-		break
 		;;
 esac

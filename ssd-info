@@ -17,9 +17,9 @@ ssd_dev_3;printf "3: ${SSD_DEVICE}\n"
 read device
 
 case "$device" in
-	1) ssd_dev_1;break;;
-	2) ssd_dev_2;break;;
-	3) ssd_dev_3;break;;
+	1) ssd_dev_1;;
+	2) ssd_dev_2;;
+	3) ssd_dev_3;;
 	*) printf "INVALID\n";exit;;
 esac
 

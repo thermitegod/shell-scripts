@@ -57,6 +57,7 @@ while getopts "ADRMTOtrzmh" OPT;do
 			printf " -t\tDisable time total\n"
 			printf " -z\tDisable zzz matching in credits\n"
 			exit;;
+		*) printf "Showing help\n\n";"${0}" -h;;
 	esac
 done
 
@@ -117,10 +118,10 @@ if [ "${optimize}" = "1" ];then
 fi
 
 case "${archivetype}" in
-	1) mkzip -zP;break;;
-	2) mkzip -ZP;break;;
-	3) mk7z -zP;break;;
-	*) mkzip -zP;break;;
+	1) mkzip -zP;;
+	2) mkzip -ZP;;
+	3) mk7z -zP;;
+	*) mkzip -zP;;
 esac
 
 if [ "${comp_advzip}" = "1" ] && ! [ "${archivetype}" = "3" ];then

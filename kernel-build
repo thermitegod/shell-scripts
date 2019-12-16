@@ -138,6 +138,7 @@ while getopts "BCEDbdgrceIimplxzvh" OPT;do
 			printf " -x\tdisable zfs build, all zfs checks must still pass, becomes fancy 'make;make install'\n"
 			printf " -z\tonly run zfs build, will install zfs into kenrel tree\n"
 			exit;;
+		*) printf "Showing help\n\n";"${0}" -h;;
 	esac
 done
 
@@ -166,11 +167,9 @@ if ! [ -d "${storage}/config" ];then mkdir -p "${storage}/config";fi
 case "$(echo "${kdir##*/}"|grep rc)" in
 	*rc*) #rc kernel
 		kver="$(echo "${kdir##*/linux-}"|sed s'/.$//')"
-		break
 		;;
 	*) #release kernel
 		kver="$(echo "${kdir##*/linux-}"|awk 'BEGIN{FS=OFS="."} NF--')"
-		break
 		;;
 esac
 
@@ -206,22 +205,20 @@ done
 #repo locations
 #https://github.com/thermitegod/etc-portage/tree/master/repos.conf
 case "${use_local_zfs_ebuild}" in
-	0) port="$(grep location /etc/portage/repos.conf/gentoo.conf|awk '{print $3}')";break;;
-	1) port="$(grep location /etc/portage/repos.conf/local.conf|awk '{print $3}')";break;;
+	0) port="$(grep location /etc/portage/repos.conf/gentoo.conf|awk '{print $3}')";;
+	1) port="$(grep location /etc/portage/repos.conf/local.conf|awk '{print $3}')";;
 esac
 
 case "${use_zfs_version}" in
 	git)
 		zver="9999"
 		kmod="zfs-kmod" #build path
-		break
 		;;
 	release)
 		Z="$(ls -1A --ignore=*9999* "${port}"/sys-fs/zfs-kmod|sort -V|tail -n1)"
 		zver="$(echo "${Z%%.ebuild}"|sed 's/^.\{9\}//')" #clean up filename
 		kmod="zfs" #build path
 		if [ "${use_distdir}" = "0" ];then export DISTDIR="${storage}"/distfiles;fi #keep sources on eclean-dist
-		break
 		;;
 esac
 
@@ -319,12 +316,10 @@ if [ "${run_kernel_post}" = "1" ];then
 				git)
 					#always rebuild zfs when building git
 					emerge --ignore-default-opts --oneshot --quiet sys-fs/zfs
-					break
 					;;
 				release)
 					#only builds on non-git and on version bump
 					emerge --ignore-default-opts --oneshot --quiet --update sys-fs/zfs
-					break
 					;;
 			esac
 		fi

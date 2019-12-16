@@ -55,5 +55,6 @@ while getopts "rcCh" OPT;do
 			printf " -h\tprint this help\n"
 			printf " -r\tremove all /usr/src/linux*\n"
 			exit;;
+		*) printf "Showing help\n\n";"${0}" -h;;
 	esac
 done

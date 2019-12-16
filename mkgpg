@@ -26,13 +26,11 @@ compress()
 			printf "Encrypting : %s\n" "${f%%}"
 			nice -19 gpg --yes --batch -e -r "${user}" "${f%%}"
 			if [ "${comp_rm}" = "1" ];then rm -r "${f%%}";fi
-			break
 			;;
 		1)
 			printf "Decrypting : %s\n" "${f%%}"
 			#printf "Output     : %s\n" "${f%%.*}"
 			nice -19 gpg --output "${f%%.*}" --decrypt "${f%%}"
-			break
 			;;
 	esac
 }
@@ -58,6 +56,7 @@ while getopts "dfsxlh" OPT;do
 			printf " -s\tgpg \$1, delete after gpg\n"
 			printf " -x\tgpg all files, delete original after gpg\n"
 			exit;;
+		*) printf "Showing help\n\n";"${0}" -h;;
 	esac
 done
 shift $((OPTIND - 1))

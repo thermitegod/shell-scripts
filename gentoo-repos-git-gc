@@ -63,6 +63,7 @@ while getopts "Lhrlg" OPT;do
 			printf " -L\trun for all git repos in layman\n"
 			printf " -r\trun in gentoo repo\n"
 			exit;;
+		*) printf "Showing help\n\n";"${0}" -h;;
 	esac
 done
 

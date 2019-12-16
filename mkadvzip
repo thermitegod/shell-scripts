@@ -27,6 +27,7 @@ while getopts "aqh" OPT;do
 			printf " -h\tprint this help\n"
 			printf " -q\tquiet\n"
 			exit;;
+		*) printf "Showing help\n\n";"${0}" -h;;
 	esac
 done
 shift $((OPTIND - 1))

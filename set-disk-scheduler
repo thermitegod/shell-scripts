@@ -41,6 +41,7 @@ while getopts "dpsh" OPT;do
 			printf " -p\tPrint current scheduler\n"
 			printf " -s\tset disk scheduler\n"
 			exit;;
+		*) printf "Showing help\n\n";"${0}" -h;;
 	esac
 done
 
@@ -50,11 +51,9 @@ for f in ${disks};do
 		set)
 			echo $sched >| "/sys/block/${f}/queue/scheduler"
 			if [ "${debug}" = "1" ];then printf "scheduler set to [%s] for /sys/block/%s\n" "${sched}" "${f}";fi
-			break
 			;;
 		print)
 			printf "Scheduler is \"$(cat "/sys/block/${f}/queue/scheduler")\" for %s\n" "${f}"
-			break
 			;;
 	esac
 done

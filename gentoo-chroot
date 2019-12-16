@@ -76,6 +76,7 @@ while getopts "Abh" OPT;do
 			printf " -b\tDont mount binds\n"
 			printf " -h\tprint this help\n"
 			exit;;
+		*) printf "Showing help\n\n";"${0}" -h;;
 	esac
 done
 
@@ -87,8 +88,8 @@ unset ch
 read ch_loc
 
 case "${ch_loc}" in
-	1) ch_1;break;;
-	2) ch_2;break;;
+	1) ch_1;;
+	2) ch_2;;
 	*) die "INVALID"
 esac
 
@@ -99,10 +100,8 @@ case "${setup}" in
 		mount_in_chroot
 		if [ "${mountbind}" = "1" ];then mount_bind;fi
 		chroot "${ch}" /bin/${S}
-		break
 		;;
 	bind)
 		mount_bind
-		break
 		;;
 esac

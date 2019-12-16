@@ -26,16 +26,13 @@ compress()
 			tar --xattrs -${V}Scf - "${f%%}" -P | \
 				pv -s "$(du -sb "${f%%}" | awk '{print $1}')" | \
 				$C >| "${f%%}.tar.${E}" || die "Compression failed for: ${f%%}"
-			break
 			;;
 		dir)
 			tar --xattrs -${V}Scf - "${f%%}" -P | \
 				$C >| "${f%%}.tar.${E}" || die "Compression failed for: ${f%%}"
-			break
 			;;
 		file)
 			$C "${f%%}" || die "Compression failed for: ${f%%}"
-			break
 			;;
 	esac
 
@@ -81,6 +78,7 @@ while getopts "BGXSLZdfsxzvh" OPT;do
 			printf " -X\tuse xz\n"
 			printf " -Z\tuse zstd\n"
 			exit;;
+		*) printf "Showing help\n\n";"${0}" -h;;
 	esac
 done
 shift $((OPTIND - 1))
@@ -91,27 +89,22 @@ case "${mode}" in
 	bz2)
 		C="bzip2 -k"
 		E="bz2"
-		break
 		;;
 	lz4)
 		C="lz4 -k"
 		E="lz4"
-		break
 		;;
 	gz)
 		C="gzip -k"
 		E="gz"
-		break
 		;;
 	xz)
 		C="xz -k -e9"
 		E="xz"
-		break
 		;;
 	zst)
 		C="zstd -T0"
 		E="zst"
-		break
 		;;
 esac
 

@@ -79,6 +79,7 @@ while getopts "f:ahpw" OPT;do
 			printf " -f\tspecify package.* file, args are file ext (env,use,mask)\n"
 			printf " -w\tcheck world file\n"
 			exit;;
+		*) printf "Showing help\n\n";"${0}" -h;;
 	esac
 done
 shift $((OPTIND - 1))

@@ -47,7 +47,6 @@ compress()
 				7z a -t7z -m0=lzma2 -md=1024m -mmf=bt4 -mmt=off -ms=off -myx=9 -mx=9 -mfb=276 \
 				-ms=on -mhc=on -mtm=off -mtc=off -mta=off "${f%%}.7z" "${f%%}" || die_failed
 			test_file_list
-			break
 			;;
 		multi)
 			extra_info
@@ -55,7 +54,6 @@ compress()
 				7z a -t7z -m0=lzma2 -md=1024m -mmf=bt4 -mmt=on -mmtf=on -myx=9 -mx=9 -mfb=276 \
 				-mhc=on -ms=on -mtm=off -mtc=off -mta=off "${f%%}.7z" "${f%%}" || die_failed
 			test_file_list
-			break
 			;;
 		old)
 			extra_info
@@ -63,7 +61,6 @@ compress()
 				7z a -t7z -m0=lzma2 -md=1024m -mmf=bt4 -mmt=off -myx=9 -mx=9 -mfb=276 -ms=on \
 				"${f%%}.7z" "${f%%}" || die_failed
 			test_file_list
-			break
 			;;
 		test)
 			if [ "${f##*.}" = "7z" ] || [ "${f##*.}" = "zip" ];then
@@ -85,7 +82,6 @@ compress()
 					fi
 				fi
 			fi
-			break
 			;;
 	esac
 
@@ -153,6 +149,7 @@ while getopts "SMTROPEetdfhxz" OPT;do
 			printf " -x\tcompress all files, delete original after compressed\n"
 			printf " -z\tcompress all directories, delete original after compressed\n"
 			exit;;
+		*) printf "Showing help\n\n";"${0}" -h;;
 	esac
 done
 shift $((OPTIND - 1))

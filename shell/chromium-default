@@ -39,9 +39,9 @@ while getopts "e:g:dsch" OPT;do
 		c) ver="chromium";shift;;
 		g)
 			case "${OPTARG}" in
-				1) ver="google-chrome-unstable";break;;
-				2) ver="google-chrome-beta";break;;
-				3) ver="google-chrome";break;;
+				1) ver="google-chrome-unstable";;
+				2) ver="google-chrome-beta";;
+				3) ver="google-chrome";;
 				*) die "Invalid, exiting"
 			esac
 			;;
@@ -63,13 +63,14 @@ while getopts "e:g:dsch" OPT;do
 			printf "\nGENERAL\n"
 			printf " -h\tprint this help\n"
 			exit;;
+		*) printf "Showing help\n\n";"${0}" -h;;
 	esac
 done
 shift $((OPTIND - 1))
 
 case "${ver}" in
-	chromium) cachedir="chromium";break;;
-	*) cachedir="chrome";break;;
+	chromium) cachedir="chromium";;
+	*) cachedir="chrome";;
 esac
 
 case "${mode}" in
@@ -77,11 +78,9 @@ case "${mode}" in
 		trap 'exit 1' INT HUP QUIT TERM USR1
 		trap finish EXIT
 		data=$(mktemp -d)
-		break
 		;;
 	*)
 		data="${profile_location}-${E}"
-		break
 		;;
 esac
 

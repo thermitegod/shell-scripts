@@ -23,11 +23,9 @@ final()
 	case "${job_run}" in
 		dir_check)
 			find . -maxdepth 1 -type f -iname "*.${d}" -exec mkdir -p "${dest}/${d}" \; -quit
-			break
 			;;
 		loop_main)
 			find . -maxdepth 1 -type f -iname "*.${d}" -exec mv -i -- "{}" "${dest}/${d}" \;
-			break
 			;;
 	esac
 }

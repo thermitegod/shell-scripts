@@ -71,6 +71,7 @@ while getopts "AILvhr" OPT;do
 			printf " -r\tif two files collide with the same sha1 hash, remove the file with the incorrect file extension\n"
 			printf " -v\tverbose\n"
 			exit;;
+		*) printf "Showing help\n\n";"${0}" -h;;
 	esac
 done
 
@@ -84,11 +85,9 @@ case "${mode}" in
 		if ! [ "${coll}" = "0" ];then coll_out="\t${RED}Collision${NC}: ${coll}";else coll_out="";fi
 		if [ "${V}" = "1" ];then pwd_out="\tin: ${PWD}";else pwd_out="";fi
 		if ! [ "${total}" = "0" ];then printf "${GRE}Checked${NC}: ${total}${fixed_out}${coll_out}${pwd_out}\n";fi
-		break
 		;;
 	check_all)
 		find "$(pwd)" -path '*/*' -type d \( ! -name . \)|while read -r dir;do cd "${dir}" && "${0}" -I;done
-		break
 		;;
 esac
 

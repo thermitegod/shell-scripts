@@ -45,5 +45,6 @@ while getopts "BPRbprh" OPT;do
 			printf "\nGENERAL\n"
 			printf " -h\tprint this help\n"
 			exit;;
+		*) printf "Showing help\n\n";"${0}" -h;;
 	esac
 done

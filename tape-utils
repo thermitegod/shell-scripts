@@ -124,6 +124,7 @@ while getopts "B:b:eg:hHlRrsvZz" OPT;do
 			printf "https://www.cyberciti.biz/faq/linux-tape-backup-with-mt-and-tar-command-howto\n"
 			printf "https://community.hpe.com/t5/StoreEver-Tape-Storage/determining-free-space-on-tape-under-Linux/td-p/3624568\n"
 			exit;;
+		*) printf "Showing help\n\n";"${0}" -h;;
 	esac
 done
 shift $((OPTIND - 1))

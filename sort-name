@@ -43,15 +43,12 @@ name_sort()
 	case "${job_run}" in
 		dir_check)
 			find . -maxdepth 1 -type f -iname "*${arc}*" -exec mkdir -p -- "${dest}/${dir}" \; -quit
-			break
 			;;
 		sort_main)
 			find . -maxdepth 1 -type f -iname "*${arc}*" -exec mv -n -- "{}" "${dest}/${dir}" \;
-			break
 			;;
 		sort_local)
 			find . -maxdepth 1 -type f -iname "*${arc}*" -exec mkdir -p -- "${PWD}/${dir}" \; -exec mv -i -- "{}" "${PWD}/${dir}" \;
-			break
 			;;
 	esac
 }
@@ -80,9 +77,9 @@ while getopts "ETefthd:" OPT;do
 		t) list_sort="${list_type}";dest="${dest_type}";;
 		d)
 			case "${OPTARG}" in
-				1) debug="1";break;;
-				2) debug="2";break;;
-				3|*) debug="3";break;;
+				1) debug="1";;
+				2) debug="2";;
+				3|*) debug="3";;
 			esac;;
 		T) dest="/tmp/test";;
 		E) $EDITOR "${list_final}";exit;;
@@ -98,6 +95,7 @@ while getopts "ETefthd:" OPT;do
 			printf " -f\trun final sort\n"
 			printf " -t\trun type sort\n"
 			exit;;
+		*) printf "Showing help\n\n";"${0}" -h;;
 	esac
 done
 

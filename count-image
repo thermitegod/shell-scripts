@@ -23,12 +23,10 @@ mode="${0##*/}"
 case "${mode}" in
 	count-image)
 		type="PNG JPG JPEG JPE GIF BMP ICO WEBM MP4 MKV"
-		break
 		;;
 	count-archive)
 		type="ZIP 7Z RAR CBR CBZ CB7 TAR BZ2 GZ LZ4 LZO XZ ZST"
 		mode="archive"
-		break
 		;;
 esac
 
@@ -45,6 +43,7 @@ while getopts "lh" OPT;do
 			printf " -h\tprint this help\n"
 			printf " -l\tlist found archives, restricted to mode=archive\n"
 			exit;;
+		*) printf "Showing help\n\n";"${0}" -h;;
 	esac
 done
 shift $((OPTIND - 1))

@@ -35,6 +35,7 @@ while getopts "Vvgh" OPT;do
 			printf " -g\tinstall sys-kernel/git-sources\n"
 			printf " -v\tinstall sys-kernel/vanilla-sources\n"
 			exit;;
+		*) printf "Showing help\n\n";"${0}" -h;;
 	esac
 done
 
