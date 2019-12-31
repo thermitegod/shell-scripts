@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 5.1.0
-# 2019-11-15
+# 5.2.0
+# 2019-12-21
 
 # Copyright (C) 2018,2019 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -32,7 +32,7 @@ def main():
                         help='Print extra info and exit')
     group1 = parser.add_argument_group('Valid pools',
                                        '0: all [list only]\n'
-                                       '1: zroot/ROOT/gentoo [list adds /var]\n'
+                                       '1: zroot/ROOT/gentoo [list adds /var/{db/pkg}]\n'
                                        '2: zroot/HOME/brandon\n'
                                        '3: storage/anime\n'
                                        '4: storage/data\n'
@@ -40,8 +40,10 @@ def main():
                                        '6: torrents\n'
                                        '7: zroot/CACHE/torrents\n')
     group1.add_argument('-l', '--list',
+                        metavar='POOLS',
                         choices=['0', '1', '2', '3', '4', '5', '6', '7'])
     group1.add_argument('-m', '--snapshot',
+                        metavar='POOLS',
                         choices=['1', '2', '3', '4', '5', '6', '7'])
     args = parser.parse_args()
 
@@ -74,6 +76,7 @@ def main():
         if selected_pool == '1':
             cmd += 'zroot/ROOT/gentoo'
             if args.list:
+                cmd += ' zroot/ROOT/pkg'
                 cmd += ' zroot/ROOT/gentoo/var'
         elif selected_pool == '2':
             cmd += 'zroot/HOME/brandon'
