@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#2.2.0
-#2019-09-15
+#2.3.0
+#2019-12-23
 
 #Copyright (C) 2018,2019 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -48,5 +48,5 @@ else
 	elif [ "${mkconfig}" = "1" ];then
 		grub-mkconfig -o /boot/grub/grub.cfg
 	fi
-	[ -x /usr/sbin/efibootmgr ] && printf "\n${YEL}Check below is correct${NC}\n";/usr/sbin/efibootmgr
+	[ -x /usr/sbin/efibootmgr ] && printf "\n${YEL}Check below is correct${NC}\n" && /usr/sbin/efibootmgr
 fi
