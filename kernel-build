@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#2.22.1
-#2019-10-01
+#2.23.0
+#2019-12-31
 
 #Copyright (C) 2018,2019 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -65,7 +65,12 @@ trap finish EXIT
 tmpdir=$(mktemp -d)
 chmod 755 "${tmpdir}"
 
-msc(){ make syncconfig; }
+#force bfd linker to fix vdso undef when default linker is gold
+#https://bugs.gentoo.org/694612
+#https://bugzilla.kernel.org/show_bug.cgi?id=204951
+kmake="nice -19 make -j$(($(nproc)+1)) LD=ld.bfd"
+
+msc(){ ${kmake} syncconfig; }
 cdkdir(){ cd "${kdir}" || die "ERROR: can not cd into kenrel directory"; }
 
 . "$(dirname "$0")/utils.sh"
@@ -195,7 +200,7 @@ while [ "${run_kernel_bump}" = "1" ];do
 		read -p "Enter to config switch config: " z;unset z
 		if [ -f "${switch_kconf}" ];then rm "${switch_kconf}";fi
 		cdkdir
-		make nconfig
+		${kmake} nconfig
 		cp .config "${switch_kconf}"
 		chown "${user}:${group}" "${switch_kconf}"
 	else break
@@ -270,7 +275,7 @@ if [ "${run_zfs_build}" = "1" ];then
 			mv .config "${tmpdir}"
 			cp "${switch_kconf}" .config
 		fi
-		make prepare
+		${kmake} prepare
 
 		export PORTAGE_TMPDIR="${tmpdir}"
 		if [ -d "${kmod_src}" ];then rm --preserve-root -r "${kmod_src}";fi
@@ -299,13 +304,10 @@ fi
 if [ "${run_kernel_build}" = "1" ];then
 	cdkdir
 	msc
-	#force bfd linker to fix vdso undef when default linker is gold
-	#https://bugs.gentoo.org/694612
-	#https://bugzilla.kernel.org/show_bug.cgi?id=204951
-	nice -19 make -j$(($(nproc)+1)) LD=ld.bfd || die "ERROR: kernel build failed"
+	${kmake} || die "ERROR: kernel build failed"
 	if [ "${run_kernel_install}" = "1" ];then
-		if [ "${use_modules}" = "1" ];then make modules_install;fi
-		make install
+		if [ "${use_modules}" = "1" ];then ${kmake} modules_install;fi
+		${kmake} install
 	fi
 fi
 
