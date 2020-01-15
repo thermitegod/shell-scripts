@@ -1,8 +1,8 @@
 #!/usr/bin/env sh
-#2.23.0
-#2019-12-31
+#2.24.0
+#2019-01-14
 
-#Copyright (C) 2018,2019 Brandon Zorn <brandonzorn@cock.li>
+#Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
 #This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License version 3
@@ -65,11 +65,6 @@ trap finish EXIT
 tmpdir=$(mktemp -d)
 chmod 755 "${tmpdir}"
 
-#force bfd linker to fix vdso undef when default linker is gold
-#https://bugs.gentoo.org/694612
-#https://bugzilla.kernel.org/show_bug.cgi?id=204951
-kmake="nice -19 make -j$(($(nproc)+1)) LD=ld.bfd"
-
 msc(){ ${kmake} syncconfig; }
 cdkdir(){ cd "${kdir}" || die "ERROR: can not cd into kenrel directory"; }
 
@@ -80,6 +75,8 @@ group="${user}"
 storage="/home/${user}/.config/kernel"
 ksym="/usr/src/linux"
 kdir="$(readlink -f ${ksym})"
+
+cc_use_clang="1"
 
 run_intro="1"
 run_emerge="1"
@@ -98,8 +95,9 @@ run_kmod_build="0"
 force_bump_check="0"
 use_local_zfs_ebuild="0"
 
-while getopts "BCEDbdgrceIimplxzvh" OPT;do
+while getopts "BCEDGbdgrceIimplxzvh" OPT;do
 	case "$OPT" in
+		G) cc_use_clang="0";;
 		D) print_vars="1";;
 		B) run_kernel_bump="1";force_bump_check="1";;
 		b) run_kernel_bump="0";force_bump_check="1";;
@@ -135,6 +133,7 @@ while getopts "BCEDbdgrceIimplxzvh" OPT;do
 			printf " -r\tuse release ebuild\n"
 			printf " -l\tuse local repo in \$PORTDIR_OVERLAY\n"
 			printf "\nKERNEL BUILDING\n"
+			printf " -G\tbuild kernel using gcc [default: clang]\n"
 			printf " -C\tdisable cleaning kenrel kernel source dir\n"
 			printf " -e\tdisable running emerge in post\n"
 			printf " -i\tbuild kernel but do not install or run post, implies -p\n"
@@ -150,6 +149,20 @@ done
 if ! [ -f "${kdir}/.config" ];then
 	die "ERROR: no config in kenrel directory"
 fi
+
+if [ "${cc_use_clang}" = "1" ];then
+	#ld.lld only works when clang is the compiler otherwise fails with
+	#error: init sections too big!
+	CC="clang"
+	LD="ld.lld"
+else
+	#force bfd since gold is not supported
+	#https://bugs.gentoo.org/694612
+	#https://bugzilla.kernel.org/show_bug.cgi?id=204951
+	CC="gcc"
+	LD="ld.bfd"
+fi
+kmake="nice -19 make -j$(($(nproc)+1)) CC=${CC} LD=${LD}"
 
 if [ "${use_modules}" = "0" ];then
 	if [ "$(grep CONFIG_MODULES=y "${kdir}"/.config)" ];then
@@ -236,6 +249,7 @@ if ! [ -d "${kmod_src}" ] && [ "${run_zfs_build}" = "1" ];then run_kmod_build="1
 if [ "${run_intro}" = "1" ];then
 	printf "\n"
 	printf "kernel             : %s\n" "${kdir}"
+	printf "compiler/linker    : %s\n" "${CC}/${LD}"
 	printf "Install Kernel     : %s\n" "${run_kernel_install}"
 	printf "ZFS version        : %s\n" "${zver}"
 	printf "ZFS local ebuild   : %s\n" "${use_local_zfs_ebuild}"
