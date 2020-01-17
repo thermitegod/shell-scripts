@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-# 8.1.0
-# 2019-10-31
+# 8.2.0
+# 2019-01-17
 
-# Copyright (C) 2018,2019 Brandon Zorn <brandonzorn@cock.li>
+# Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
 # This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License version 3
@@ -20,16 +20,13 @@ import argparse
 import os
 import pyperclip
 
-
 from utils import utils
 from utils import private
 
 save_path = '/mnt/data/'
-save_path_full = None
 
 
 def dl(link, symlink=False):
-    global save_path_full
     utils.link_check(link)
 
     link_cut = link.split('/')[-1]
@@ -52,10 +49,10 @@ def dl(link, symlink=False):
           '--hsts-file=/tmp/wget-hsts ' \
           f'{link}'
 
-    print('downloading: ', link)
+    print(f'downloading: {link}')
     utils.run_cmd(cmd)
-    print('downloaded: ', link)
-    print('save path:  ', save_path_full)
+    print(f'downloaded: {link}')
+    print(f'save path:  {save_path_full}')
 
     if symlink:
         if not os.path.exists(save_path_full) and not os.path.islink(save_path_full):
@@ -85,7 +82,7 @@ def main():
 
     if mode == 'madokami-novels-publishing':
         extra += '/madokami-novels'
-    else:
+    elif mode == 'madokami-manga-publishing':
         extra += '/madokami-manga'
 
     if args.edit:
