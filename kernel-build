@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#2.24.0
-#2019-01-14
+#2.25.0
+#2019-01-17
 
 #Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -22,7 +22,7 @@
 #>=linux-4.17.0 : >=zfs-0.8.0 / git | 1.x.x script for previous support
 
 #storage dirs - need to exist
-#/home/${user}/.config/kernel/{config,distfiles,src}
+#${XDG_DATA_DIRS}/kernel/{config,distfiles,src}
 
 #assumptions
 #/usr/src/linux is real source or symlink to real source
@@ -68,11 +68,9 @@ chmod 755 "${tmpdir}"
 msc(){ ${kmake} syncconfig; }
 cdkdir(){ cd "${kdir}" || die "ERROR: can not cd into kenrel directory"; }
 
-. "$(dirname "$0")/utils.sh"
+storage="${XDG_DATA_HOME}/kernel"
+settings="${XDG_CONFIG_HOME}/kernel/config"
 
-user="brandon"
-group="${user}"
-storage="/home/${user}/.config/kernel"
 ksym="/usr/src/linux"
 kdir="$(readlink -f ${ksym})"
 
@@ -115,7 +113,7 @@ while getopts "BCEDGbdgrceIimplxzvh" OPT;do
 		v) intro_extra="1";;
 		z) run_zfs_build="1";run_kernel_build="0";run_kernel_post="0";;
 		C) clean_kernel_src="0";;
-		E) $EDITOR "${extra}/kernel-build";exit;;
+		E) $EDITOR "${settings}";exit;;
 		h)
 			printf "DEBUG\n"
 			printf " -D\tIf script exits with die() print all shell variables\n"
@@ -170,10 +168,10 @@ if [ "${use_modules}" = "0" ];then
 	fi
 fi
 
-if [ -f "${extra}/kernel-build" ];then
+if [ -f "${settings}" ];then
 	#file must be one line with either 'git' or 'release'
 	#this will be changed
-	use_zfs_version="$(cat "${extra}/kernel-build")"
+	use_zfs_version="$(cat "${settings}")"
 else
 	#printf "No config file\n"
 	use_zfs_version="git"
@@ -215,7 +213,6 @@ while [ "${run_kernel_bump}" = "1" ];do
 		cdkdir
 		${kmake} nconfig
 		cp .config "${switch_kconf}"
-		chown "${user}:${group}" "${switch_kconf}"
 	else break
 	fi
 done
@@ -301,7 +298,6 @@ if [ "${run_zfs_build}" = "1" ];then
 		cd .. || die
 		tar -cf - "${kmod}-${zver}" -P | zstd -T0 >| "${archive}" || die "ERROR: did not compress zfs work dir"
 		mv "${archive}" "${kmod_src}"
-		chown -R "${user}:${group}" "${kmod_src}"
 
 		if [ "${use_modules}" = "0" ];then
 			rm "${kdir}/.config"
