@@ -24,12 +24,12 @@ import hashlib
 
 
 def is_root():
-    if os.geteuid() is not 0:
+    if os.geteuid() != 0:
         exit('Requires root, exiting')
 
 
 def is_not_root():
-    if os.geteuid() is 0:
+    if os.geteuid() == 0:
         exit('Do not run as root, exiting')
 
 
