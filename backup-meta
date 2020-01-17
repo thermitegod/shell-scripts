@@ -1,8 +1,8 @@
 #!/usr/bin/env sh
-#2.2.0
-#2019-09-25
+#2.3.0
+#2020-01-17
 
-#Copyright (C) 2018,2019 Brandon Zorn <brandonzorn@cock.li>
+#Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
 #This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License version 3
@@ -74,7 +74,7 @@ esac
 
 case "${mode}" in
 	chromium)
-		target_source="${HOME}/.config/chrome"
+		target_source="${XDG_CONFIG_HOME}/chrome"
 		target_dest="${backup_dir}/${user}/chromium-profiles/${date}"
 		dir_check
 		cd "${target_source}" || die
@@ -99,7 +99,7 @@ case "${mode}" in
 		;;
 	user-config)
 		target_comp="${user}-config-${date}.tar.${E}"
-		target_source="${HOME}/.config"
+		target_source="${XDG_CONFIG_HOME}"
 		target_dest="${backup_dir}/${user}/config"
 		dir_check
 		tar \
@@ -134,7 +134,7 @@ case "${mode}" in
 		year=$(date "+%Y")
 		month=$(date "+%m")
 		day=$(date "+%d")
-		target_source="${HOME}/.config/vnstat/vnstat.db"
+		target_source="${XDG_CONFIG_HOME}/vnstat/vnstat.db"
 		target_dest="${backup_dir}/vnstat-database"
 		mkdir -p "${target_dest}/${year}/${month}/${day}"
 		cp "${target_source}" "${target_dest}/${year}/${month}/${day}"

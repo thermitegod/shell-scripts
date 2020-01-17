@@ -52,7 +52,7 @@ def edit_conf(path, e=True):
 
 
 def get_extra_dir():
-    return os.path.join(os.environ.get('HOME'), '.bin/bin-extra')
+    return os.path.join(os.environ['XDG_DATA_HOME'], 'shell')
 
 
 def hash_compare_sha1(file1, file2):

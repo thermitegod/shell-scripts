@@ -1,8 +1,8 @@
 #!/usr/bin/env sh
-#5.6.0
-#2019-09-25
+#5.7.0
+#2019-01-17
 
-#Copyright (C) 2018,2019 Brandon Zorn <brandonzorn@cock.li>
+#Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
 #This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License version 3
@@ -57,13 +57,12 @@ B="$(ls -1A|wc -l)"
 debug="0"
 total="0"
 
-. "$(dirname "$0")/utils.sh"
 . "$(dirname "$0")/colors.sh"
 
 print_sorted_total="1"
 
-list_final="${extra}/sort-name-final"
-list_type="${extra}/sort-name-type"
+list_final="${XDG_DATA_HOME}/shell/sort-name-final"
+list_type="${XDG_DATA_HOME}/shell/sort-name-type"
 dest_final="$(head -n1 "${list_final}"|sed -e "s/#//g")"
 dest_type=$(head -n1 "${list_type}"|sed -e "s/#//g")
 

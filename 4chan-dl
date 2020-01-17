@@ -1,8 +1,8 @@
 #!/usr/bin/env sh
-#3.0.0
-#2019-10-16
+#3.1.0
+#2019-01-17
 
-#Copyright (C) 2018,2019 Brandon Zorn <brandonzorn@cock.li>
+#Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
 #This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License version 3
@@ -31,14 +31,12 @@ dl_batch()
 	dl
 }
 
-. "$(dirname "$0")/utils.sh"
-
 mode="${0##*/}"
 if [ "${mode}" = "4chan-dl" ];then
-	thread_list="${extra}/4chan-dl"
+	thread_list="${XDG_DATA_HOME}/shell/4chan-dl"
 	dir="${XDG_DOWNLOAD_DIR}/chan/4chan"
 else
-	thread_list="${extra}/8chan-dl"
+	thread_list="${XDG_DATA_HOME}/shell/8chan-dl"
 	dir="${XDG_DOWNLOAD_DIR}/chan/8chan"
 fi
 
