@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#2.25.0
-#2019-01-17
+#2.26.0
+#2019-01-25
 
 #Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -88,7 +88,7 @@ clean_kernel_src="1"
 print_vars="0"
 intro_extra="0"
 use_modules="0"
-use_distdir="0"
+use_distdir="1"
 run_kmod_build="0"
 force_bump_check="0"
 use_local_zfs_ebuild="0"
@@ -99,7 +99,7 @@ while getopts "BCEDGbdgrceIimplxzvh" OPT;do
 		D) print_vars="1";;
 		B) run_kernel_bump="1";force_bump_check="1";;
 		b) run_kernel_bump="0";force_bump_check="1";;
-		d) use_distdir="1";;
+		d) use_distdir="0";;
 		c) run_kmod_build="1";;
 		e) run_emerge="0";;
 		g) use_zfs_version="git";;
@@ -126,7 +126,7 @@ while getopts "BCEDGbdgrceIimplxzvh" OPT;do
 			printf " -v\tprint extra vars in intro\n"
 			printf "\nZFS\n"
 			printf " -c\tbuild kmod even if preconfigured sources exist\n"
-			printf " -d\tuse \$DISTDIR from make.conf\n"
+			printf " -d\tuse \$XDG_DATA_DIR/kenrel/distfiles as \$DISTDIR, does not work with FEATURES=userfetch\n"
 			printf " -g\tuse git ebuild\n"
 			printf " -r\tuse release ebuild\n"
 			printf " -l\tuse local repo in \$PORTDIR_OVERLAY\n"
