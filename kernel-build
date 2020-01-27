@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#2.27.0
-#2019-01-26
+#2.28.0
+#2019-01-27
 
 #Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -180,12 +180,13 @@ fi
 if ! [ -e "${ksym}" ];then die "ERROR: ${ksym} is not a valid symlink";fi
 if ! [ -d "${storage}/config" ];then mkdir -p "${storage}/config";fi
 
+kver_full="$(echo "${kdir##*/linux-}")"
 case "$(echo "${kdir##*/}"|grep rc)" in
 	*rc*) #rc kernel
-		kver="$(echo "${kdir##*/linux-}"|sed s'/.$//')"
+		kver="$(echo "${kver_full}"|sed s'/.$//')"
 		;;
 	*) #release kernel
-		kver="$(echo "${kdir##*/linux-}"|awk 'BEGIN{FS=OFS="."} NF--')"
+		kver="$(echo "${kver_full}"|awk 'BEGIN{FS=OFS="."} NF--')"
 		;;
 esac
 
@@ -258,6 +259,7 @@ if [ "${run_intro}" = "1" ];then
 		printf "Make opts          : %s\n" "$(($(nproc)+1))"
 		printf "PORTDIR            : %s\n" "${port}"
 		printf "kver               : %s\n" "${kver}"
+		printf "kver_full          : %s\n" "${kver_full}"
 		printf "Tempdir            : %s\n" "${tmpdir}"
 		printf "\n"
 		eselect kernel list
@@ -337,7 +339,7 @@ if [ "${run_kernel_post}" = "1" ];then
 		fi
 		if [ "${use_modules}" = "1" ];then emerge --ignore-default-opts --oneshot --jobs @module-rebuild;fi
 	fi
-	kernel-initramfs-genkernel
+	kernel-initramfs-dracut -k "${kver_full}"
 	kernel-grub
 	if [ "${clean_kernel_src}" = "1" ];then kernel-clean-src -c;fi
 fi
