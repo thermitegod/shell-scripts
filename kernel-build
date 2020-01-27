@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#2.26.0
-#2019-01-25
+#2.27.0
+#2019-01-26
 
 #Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -74,7 +74,7 @@ settings="${XDG_CONFIG_HOME}/kernel/config"
 ksym="/usr/src/linux"
 kdir="$(readlink -f ${ksym})"
 
-cc_use_clang="1"
+cc_use_clang="0"
 
 run_intro="1"
 run_emerge="1"
@@ -95,7 +95,7 @@ use_local_zfs_ebuild="0"
 
 while getopts "BCEDGbdgrceIimplxzvh" OPT;do
 	case "$OPT" in
-		G) cc_use_clang="0";;
+		G) cc_use_clang="1";;
 		D) print_vars="1";;
 		B) run_kernel_bump="1";force_bump_check="1";;
 		b) run_kernel_bump="0";force_bump_check="1";;
@@ -131,7 +131,7 @@ while getopts "BCEDGbdgrceIimplxzvh" OPT;do
 			printf " -r\tuse release ebuild\n"
 			printf " -l\tuse local repo in \$PORTDIR_OVERLAY\n"
 			printf "\nKERNEL BUILDING\n"
-			printf " -G\tbuild kernel using gcc [default: clang]\n"
+			printf " -G\tbuild kernel using clang\n"
 			printf " -C\tdisable cleaning kenrel kernel source dir\n"
 			printf " -e\tdisable running emerge in post\n"
 			printf " -i\tbuild kernel but do not install or run post, implies -p\n"
@@ -286,7 +286,7 @@ if [ "${run_zfs_build}" = "1" ];then
 			mv .config "${tmpdir}"
 			cp "${switch_kconf}" .config
 		fi
-		${kmake} prepare
+		${kmake} prepare #FIXME does not work if CC=clang
 
 		export PORTAGE_TMPDIR="${tmpdir}"
 		if [ -d "${kmod_src}" ];then rm --preserve-root -r "${kmod_src}";fi
