@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#2.28.0
-#2019-01-27
+#2.29.0
+#2019-02-02
 
 #Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -288,12 +288,13 @@ if [ "${run_zfs_build}" = "1" ];then
 			mv .config "${tmpdir}"
 			cp "${switch_kconf}" .config
 		fi
-		${kmake} prepare #FIXME does not work if CC=clang
+		#${kmake} prepare #FIXME does not work if CC=clang
+		make CC=gcc LD=ld.bfd prepare
 
 		export PORTAGE_TMPDIR="${tmpdir}"
 		if [ -d "${kmod_src}" ];then rm --preserve-root -r "${kmod_src}";fi
 		mkdir -p "${kmod_src}"
-		CC=gcc env EXTRA_ECONF="--with-linux=${kdir} --enable-linux-builtin" \
+		EXTRA_ECONF="--with-linux=${kdir} --enable-linux-builtin" \
 			ebuild "${port}/sys-fs/zfs-kmod/zfs-kmod-${zver_path}.ebuild" clean configure
 		cd "${tmpdir}/portage/sys-fs/zfs-kmod-${zver_path}/work/${kmod}-${zver}" || die
 		./copy-builtin "${kdir}" || die "ERROR: copy-builtin failed"
@@ -305,6 +306,8 @@ if [ "${run_zfs_build}" = "1" ];then
 			rm "${kdir}/.config"
 			mv "${tmpdir}/.config" "${kdir}"
 		fi
+
+		if [ "${cc_use_clang}" = "1" ];then kernel-clean-src -c;fi
 	else
 		cd "${kmod_src}" || die
 		tar -I zstd -xf "${archive}" -C "${tmpdir}" || die "ERROR: cannot extract zfs work dir"
