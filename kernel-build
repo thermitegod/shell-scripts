@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#2.29.0
-#2019-02-02
+#3.0.0
+#2019-02-03
 
 #Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -42,7 +42,6 @@
 
 #TODO
 #add comments for all niche cases in script
-#expand script config file to be actually useful
 #multi build kernels
 #	multi kernel build - debug and regular, from one invocation
 #	single build, either debug or regular
@@ -72,28 +71,46 @@ storage="${XDG_DATA_HOME}/kernel"
 settings="${XDG_CONFIG_HOME}/kernel/config"
 
 ksym="/usr/src/linux"
-kdir="$(readlink -f ${ksym})"
+kdir="$(readlink -f "${ksym}")"
 
 cc_use_clang="0"
 
+clean_kernel_src="1"
+
+use_zfs_version="git"
+
+run_emerge="0"
+run_kmod_build="0"
+
 run_intro="1"
-run_emerge="1"
 run_zfs_build="1"
 run_kernel_post="1"
 run_kernel_build="1"
 run_kernel_install="1"
 
-clean_kernel_src="1"
-
 print_vars="0"
 intro_extra="0"
-use_modules="0"
-use_distdir="1"
-run_kmod_build="0"
 force_bump_check="0"
+
+use_distdir="1"
+
+use_modules="0"
 use_local_zfs_ebuild="0"
 
-while getopts "BCEDGbdgrceIimplxzvh" OPT;do
+if [ -f "${settings}" ];then
+	. "${settings}"
+else
+	if ! [ -d "${storage}" ];then
+		mkdir "${storage}"
+	fi
+	printf "Creating config file at ${settings}\n"
+	printf "#!/usr/bin/env sh\n" >| "${settings}"
+	printf "use_zfs_version=\"release\"\n" >> "${settings}"
+
+	exit
+fi
+
+while getopts "RBCEDGbdgrceIimplxzvh" OPT;do
 	case "$OPT" in
 		G) cc_use_clang="1";;
 		D) print_vars="1";;
@@ -101,7 +118,7 @@ while getopts "BCEDGbdgrceIimplxzvh" OPT;do
 		b) run_kernel_bump="0";force_bump_check="1";;
 		d) use_distdir="0";;
 		c) run_kmod_build="1";;
-		e) run_emerge="0";;
+		e) run_emerge="1";;
 		g) use_zfs_version="git";;
 		I) run_intro="0";;
 		i) run_kernel_install="0";run_kernel_post="0";;
@@ -111,9 +128,10 @@ while getopts "BCEDGbdgrceIimplxzvh" OPT;do
 		r) use_zfs_version="release";;
 		x) run_zfs_build="0";;
 		v) intro_extra="1";;
-		z) run_zfs_build="1";run_kernel_build="0";run_kernel_post="0";;
+		z) run_zfs_build="1";run_kernel_build="0";;
 		C) clean_kernel_src="0";;
-		E) $EDITOR "${settings}";exit;;
+		R) rm "${settings}";exit;;
+		E) ${EDITOR} "${settings}";exit;;
 		h)
 			printf "DEBUG\n"
 			printf " -D\tIf script exits with die() print all shell variables\n"
@@ -123,6 +141,7 @@ while getopts "BCEDGbdgrceIimplxzvh" OPT;do
 			printf " -E\tEdit config file\n"
 			printf " -h\tprint this help\n"
 			printf " -I\tdisable intro\n"
+			printf " -R\treset config file and exit\n"
 			printf " -v\tprint extra vars in intro\n"
 			printf "\nZFS\n"
 			printf " -c\tbuild kmod even if preconfigured sources exist\n"
@@ -132,8 +151,8 @@ while getopts "BCEDGbdgrceIimplxzvh" OPT;do
 			printf " -l\tuse local repo in \$PORTDIR_OVERLAY\n"
 			printf "\nKERNEL BUILDING\n"
 			printf " -G\tbuild kernel using clang\n"
-			printf " -C\tdisable cleaning kenrel kernel source dir\n"
-			printf " -e\tdisable running emerge in post\n"
+			printf " -C\tdisable cleaning kernel source dir\n"
+			printf " -e\tenable running emerge in post\n"
 			printf " -i\tbuild kernel but do not install or run post, implies -p\n"
 			printf " -m\tforce enable module build\n"
 			printf " -p\tdisable post, emerge, initramfs, and grub configure\n"
@@ -163,22 +182,17 @@ fi
 kmake="nice -19 make -j$(($(nproc)+1)) CC=${CC} LD=${LD}"
 
 if [ "${use_modules}" = "0" ];then
-	if [ "$(grep CONFIG_MODULES=y "${kdir}"/.config)" ];then
+	if [ "$(grep CONFIG_MODULES=y "${kdir}/.config")" ];then
 		use_modules="1"
 	fi
 fi
 
-if [ -f "${settings}" ];then
-	#file must be one line with either 'git' or 'release'
-	#this will be changed
-	use_zfs_version="$(cat "${settings}")"
-else
-	#printf "No config file\n"
-	use_zfs_version="git"
+if ! [ -e "${ksym}" ];then
+	die "ERROR: ${ksym} is not a valid symlink"
 fi
-
-if ! [ -e "${ksym}" ];then die "ERROR: ${ksym} is not a valid symlink";fi
-if ! [ -d "${storage}/config" ];then mkdir -p "${storage}/config";fi
+if ! [ -d "${storage}/config" ];then
+	mkdir -p "${storage}/config"
+fi
 
 kver_full="$(echo "${kdir##*/linux-}")"
 case "$(echo "${kdir##*/}"|grep rc)" in
@@ -202,50 +216,67 @@ fi
 #CONFIG_MODULES and CONFIG_KALLSYMS are required to build kmod
 #which are not needed at runtime if zfs is build into the kernel.
 while [ "${run_kernel_bump}" = "1" ];do
-	if ! [ -f "${switch_kconf}" ];then cp "${kdir}/.config" "${switch_kconf}";fi
+	if ! [ -f "${switch_kconf}" ];then
+		cp "${kdir}/.config" "${switch_kconf}"
+	fi
 	c1=$(grep -s CONFIG_MODULES=y "${switch_kconf}")
 	c2=$(grep -s CONFIG_KALLSYMS=y "${switch_kconf}")
 	if [ "${run_zfs_build}" = "1" ] && [ -z "${c1}" ] || [ -z "${c2}" ];then
 		printf "\nRequired option[s] located at:\n"
-		if [ -z "${c1}" ];then printf "\n[*] Enable loadable module support\n";fi
-		if [ -z "${c2}" ];then printf "\nGeneral setup  --->\n\t[*] Configure standard kernel features (expert users)  --->\n\t\t[*] Load all symbols for debugging/ksymoops\n\n";fi
+		if [ -z "${c1}" ];then
+			printf "\n[*] Enable loadable module support\n"
+		fi
+		if [ -z "${c2}" ];then
+			printf "\nGeneral setup  --->\n"
+			printf "\t[*] Configure standard kernel features (expert users)  --->\n"
+			printf "\t\t[*] Load all symbols for debugging/ksymoops\n\n"
+		fi
 		read -p "Enter to config switch config: " z;unset z
-		if [ -f "${switch_kconf}" ];then rm "${switch_kconf}";fi
+		if [ -f "${switch_kconf}" ];then
+			rm "${switch_kconf}"
+		fi
 		cdkdir
 		${kmake} nconfig
 		cp .config "${switch_kconf}"
-	else break
+	else
+		break
 	fi
 done
 
 #repo locations
 #https://github.com/thermitegod/etc-portage/tree/master/repos.conf
-case "${use_local_zfs_ebuild}" in
-	0) port="$(grep location /etc/portage/repos.conf/gentoo.conf|awk '{print $3}')";;
-	1) port="$(grep location /etc/portage/repos.conf/local.conf|awk '{print $3}')";;
-esac
+if [ "${use_local_zfs_ebuild}" = "0" ];then
+	repo_conf="gentoo.conf"
+else
+	repo_conf="local.conf"
+fi
+port="$(grep location "/etc/portage/repos.conf/${repo_conf}"|head -n1|awk '{print $3}')"
 
-case "${use_zfs_version}" in
-	git)
-		zver="9999"
-		kmod="zfs-kmod" #build path
-		;;
-	release)
-		Z="$(ls -1A --ignore=*9999* "${port}"/sys-fs/zfs-kmod|sort -V|tail -n1)"
-		zver="$(echo "${Z%%.ebuild}"|sed 's/^.\{9\}//')" #clean up filename
-		kmod="zfs" #build path
-		if [ "${use_distdir}" = "0" ];then export DISTDIR="${storage}"/distfiles;fi #keep sources on eclean-dist
-		;;
-esac
+if [ "${use_zfs_version}" = "release" ];then
+	Z="$(ls -1A --ignore=*9999* "${port}/sys-fs/zfs-kmod"|sort -V|tail -n1)"
+	zver="$(echo "${Z%%.ebuild}"|sed 's/^.\{9\}//')" #clean up filename
+	kmod="zfs" #build path
+	if [ "${use_distdir}" = "0" ];then
+		#keep sources on eclean-dist
+		export DISTDIR="${storage}/distfiles"
+	fi
+else
+	#git version
+	zver="9999"
+	kmod="zfs-kmod" #build path
+fi
 
-if ! [ -d "${port}/sys-fs/zfs-kmod" ];then die "ERROR: missing directory ${port}/sys-fs/zfs-kmod";fi
-if ! [ -f "${port}/sys-fs/zfs-kmod/zfs-kmod-${zver}.ebuild" ];then die "ERROR: missing zfs-kmod-${zver}.ebuild";fi
+if ! [ -f "${port}/sys-fs/zfs-kmod/zfs-kmod-${zver}.ebuild" ];then
+	die "ERROR: missing zfs-kmod-${zver}.ebuild"
+fi
 
 kmod_src="${storage}/src/${kver}/${zver}"
-if ! [ -d "${kmod_src}" ] && [ "${run_zfs_build}" = "1" ];then run_kmod_build="1";fi #need to build if configured src do not exists
+if ! [ -d "${kmod_src}" ] && [ "${run_zfs_build}" = "1" ];then
+	#need to build if configured src do not exists
+	run_kmod_build="1"
+fi
 
 if [ "${run_intro}" = "1" ];then
-	printf "\n"
 	printf "kernel             : %s\n" "${kdir}"
 	printf "compiler/linker    : %s\n" "${CC}/${LD}"
 	printf "Install Kernel     : %s\n" "${run_kernel_install}"
@@ -274,11 +305,9 @@ if [ "${run_zfs_build}" = "1" ];then
 	if [ "$(echo "${zver}"|grep rc)" ];then
 		zver="${zver%%_rc*}" #rc ebuilds
 	fi
-
 	if [ "$(echo "${zver}"|grep "\-r")" ];then
 		zver="${zver%%-r*}" #rev bump ebuilds
 	fi
-
 	archive="zfs-${zver}.tar.zst"
 
 	if [ "${run_kmod_build}" = "1" ];then
@@ -292,14 +321,16 @@ if [ "${run_zfs_build}" = "1" ];then
 		make CC=gcc LD=ld.bfd prepare
 
 		export PORTAGE_TMPDIR="${tmpdir}"
-		if [ -d "${kmod_src}" ];then rm --preserve-root -r "${kmod_src}";fi
+		if [ -d "${kmod_src}" ];then
+			rm --preserve-root -r "${kmod_src}"
+		fi
 		mkdir -p "${kmod_src}"
 		EXTRA_ECONF="--with-linux=${kdir} --enable-linux-builtin" \
-			ebuild "${port}/sys-fs/zfs-kmod/zfs-kmod-${zver_path}.ebuild" clean configure
+			ebuild "${port}/sys-fs/zfs-kmod/zfs-kmod-${zver_path}.ebuild" configure
 		cd "${tmpdir}/portage/sys-fs/zfs-kmod-${zver_path}/work/${kmod}-${zver}" || die
 		./copy-builtin "${kdir}" || die "ERROR: copy-builtin failed"
 		cd .. || die
-		tar -cf - "${kmod}-${zver}" -P | zstd -T0 >| "${archive}" || die "ERROR: did not compress zfs work dir"
+		tar -cf - "${kmod}-${zver}" -P | zstd -T0 -4 >| "${archive}" || die "ERROR: did not compress zfs work dir"
 		mv "${archive}" "${kmod_src}"
 
 		if [ "${use_modules}" = "0" ];then
@@ -307,7 +338,9 @@ if [ "${run_zfs_build}" = "1" ];then
 			mv "${tmpdir}/.config" "${kdir}"
 		fi
 
-		if [ "${cc_use_clang}" = "1" ];then kernel-clean-src -c;fi
+		if [ "${cc_use_clang}" = "1" ];then
+			kernel-clean-src -c
+		fi
 	else
 		cd "${kmod_src}" || die
 		tar -I zstd -xf "${archive}" -C "${tmpdir}" || die "ERROR: cannot extract zfs work dir"
@@ -321,28 +354,31 @@ if [ "${run_kernel_build}" = "1" ];then
 	msc
 	${kmake} || die "ERROR: kernel build failed"
 	if [ "${run_kernel_install}" = "1" ];then
-		if [ "${use_modules}" = "1" ];then ${kmake} modules_install;fi
+		if [ "${use_modules}" = "1" ];then
+			${kmake} modules_install
+		fi
 		${kmake} install
 	fi
-fi
 
-if [ "${run_kernel_post}" = "1" ];then
-	if [ "${run_emerge}" = "1" ];then
-		if [ "${run_kmod_build}" = "1" ];then
-			case "${use_zfs_version}" in
-				git)
-					#always rebuild zfs when building git
-					emerge --ignore-default-opts --oneshot --quiet sys-fs/zfs
-					;;
-				release)
-					#only builds on non-git and on version bump
+	if [ "${run_kernel_post}" = "1" ];then
+		if [ "${run_emerge}" = "1" ];then
+			emerge_cmd="emerge --ignore-default-opts --oneshot --quiet"
+			if [ "${run_kmod_build}" = "1" ];then
+				if [ "${use_zfs_version}" = "release" ];then
 					emerge --ignore-default-opts --oneshot --quiet --update sys-fs/zfs
-					;;
-			esac
+				else
+					#will always rebuild zfs when using git
+					emerge --ignore-default-opts --oneshot --quiet sys-fs/zfs
+				fi
+			fi
+			if [ "${use_modules}" = "1" ];then
+				emerge --ignore-default-opts --oneshot --jobs @module-rebuild
+			fi
 		fi
-		if [ "${use_modules}" = "1" ];then emerge --ignore-default-opts --oneshot --jobs @module-rebuild;fi
+		kernel-initramfs-dracut -k "${kver_full}"
+		kernel-grub
+		if [ "${clean_kernel_src}" = "1" ];then
+			kernel-clean-src -c
+		fi
 	fi
-	kernel-initramfs-dracut -k "${kver_full}"
-	kernel-grub
-	if [ "${clean_kernel_src}" = "1" ];then kernel-clean-src -c;fi
 fi
