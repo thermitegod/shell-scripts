@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-#7.3.0
+#7.4.0
 #2019-02-11
 
 #Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
@@ -146,8 +146,13 @@ main_container()
 		rtorrent_clean_torrent)
 			#printf "Running cleanup for: "${fullname}"\n"
 			set_dirs
-			if ! [ "$(ls -1A "${rushare}"/torrents|wc -l)" = "0" ];then
-				rm "${rushare}"/torrents/*.torrent
+			if [ "${htpasswd}" = "1" ];then
+				torrent_files_path="${rushare}/users/${user}/torrents"
+			else
+				torrent_files_path="${rushare}/torrents"
+			fi
+			if ! [ "$(ls -1A "${torrent_files_path}"|wc -l)" = "0" ];then
+				rm "${torrent_files_path}"/*.torrent
 			fi
 			;;
 		restart_service)
@@ -231,6 +236,7 @@ main_container()
 			printf "On/Off\t\t: %s\n" "${state}"
 			printf "Autostart\t: %s\n" "${autostart}"
 			if [ "${verbose}" = "1" ];then
+				printf "htpasswd\t: %s\n" "${htpasswd}"
 				printf "Level\t\t: %s\n" "${level}"
 				printf "Limit CPU\t: %s\n" "${lim_cpu}"
 				printf "Limit CPU ALLOW\t: %s\n" "${lim_cpu_allow}"
@@ -342,7 +348,7 @@ while getopts "O:l:TRCPZUHEScdrsuzpheo" OPT;do
 			printf "save location override, optional: a path\n\n"
 
 			printf "Example\n"
-			printf "rutorrent gentoo 1 1 192.168.0.161 6 10%% 8192MB anime /mnt/anime/anime-working\n\n"
+			printf "rutorrent gentoo 1 1 1 192.168.0.161 6 10%% 8192MB anime /mnt/anime/anime-working\n\n"
 
 			printf "Config file parsing\n"
 			printf "supports comments, no inline comments\n"
@@ -355,7 +361,7 @@ done
 
 if ! [ -f "${container_info}" ];then "${0}" -H;exit 1;fi
 
-while IFS=' ' read -r ctype distro autostart level ip4 lim_cpu lim_cpu_allow lim_mem cname save_override;do
+while IFS=' ' read -r ctype distro autostart htpasswd level ip4 lim_cpu lim_cpu_allow lim_mem cname save_override;do
 	main_container
 done < "${container_info}"
 
