@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#3.0.0
-#2019-02-03
+#3.1.0
+#2019-02-09
 
 #Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -179,7 +179,7 @@ else
 	CC="gcc"
 	LD="ld.bfd"
 fi
-kmake="nice -19 make -j$(($(nproc)+1)) CC=${CC} LD=${LD}"
+kmake="nice -19 make -j$(($(nproc)*2+1)) -l$(($(nproc)+1)) CC=${CC} LD=${LD}"
 
 if [ "${use_modules}" = "0" ];then
 	if [ "$(grep CONFIG_MODULES=y "${kdir}/.config")" ];then
@@ -287,7 +287,7 @@ if [ "${run_intro}" = "1" ];then
 	printf "Running emerge     : %s\n" "${run_emerge}"
 	if [ "${intro_extra}" = "1" ];then
 		printf "\nEXTRA\n"
-		printf "Make opts          : %s\n" "$(($(nproc)+1))"
+		printf "Make command       : %s\n" "${kmake}"
 		printf "PORTDIR            : %s\n" "${port}"
 		printf "kver               : %s\n" "${kver}"
 		printf "kver_full          : %s\n" "${kver_full}"
