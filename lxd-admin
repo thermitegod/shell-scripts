@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#7.2.0
-#2019-01-17
+#7.3.0
+#2019-02-11
 
 #Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -325,11 +325,28 @@ while getopts "O:l:TRCPZUHEScdrsuzpheo" OPT;do
 			printf " -p\tPrint limited container vars\n"
 			exit;;
 		H)
-			printf "All containers are declared in '%s' using the following space delimited format, subject to change\n" "${container_info}"
-			printf "\n'container type' 'distro' 'autostart' 'level'  'ipv4' 'limit cpu' 'limit cpu allowance' 'limit mem' 'container name' 'save location override, optional'\n"
-			printf "\nParsing of '%s'\nSkips line if: line starts with '#', line is blank, or 'container name' is not set\nScript exits when a line that starts with 'stop' is read\n" "${container_info}"
-			printf "\nNOTE: to not use limits, set them to '0'\n"
-			printf "\nexample:\n# this line will be skipped\nrutorrent gentoo 1 1 192.168.0.161 6 10%% 8192MB anime /mnt/anime/anime-working\nstop #nothing below this line will be run\n"
+			printf "All containers are declared in '%s' using the following space delimited format, subject to change\n\n" "${container_info}"
+
+			printf "Valid values are\n"
+			printf "================\n"
+			printf "container type: rutorrent, transmission, stop\n"
+			printf "distro: gentoo, alpine\n"
+			printf "autostart: 0, 1\n"
+			printf "htpasswd: 0, 1\n"
+			printf "level: any int\n"
+			printf "ipv4: a local ip4v address\n"
+			printf "limit cpu: any int\n"
+			printf "limit cpu allowance: any percent\n"
+			printf "limit mem: any int with a unit\n"
+			printf "container name: any string\n"
+			printf "save location override, optional: a path\n\n"
+
+			printf "Example\n"
+			printf "rutorrent gentoo 1 1 192.168.0.161 6 10%% 8192MB anime /mnt/anime/anime-working\n\n"
+
+			printf "Config file parsing\n"
+			printf "supports comments, no inline comments\n"
+			printf "Script will stop if 'container type' is set to 'stop'\n"
 			exit;;
 		*) printf "Showing help\n\n";"${0}" -h;;
 	esac
