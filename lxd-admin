@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#7.4.0
-#2019-02-11
+#8.0.0
+#2019-02-12
 
 #Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -76,6 +76,16 @@ get_state(){ if [ "$(lxc info "${1}"|grep Running)" ];then is_running="1";fi; }
 
 main_container()
 {
+	if [ "${ctype}" = "version" ];then
+		if ! [ "${distro}" = "${config_version}" ];then
+			printf "Config file format has changed\n"
+			printf "update existing config file to new version\n\n"
+			printf "Current version: %s\n" "${distro}"
+			printf "New version: %s\n" "${config_version}"
+			exit 1
+		fi
+	fi
+
 	#TODO: need to find a better way to do this
 	#order matters here
 	if [ -n "$(echo "${ctype}"|grep '\#')" ];then return;fi #skip comments
@@ -273,12 +283,14 @@ ip4_brd="192.168.0.255"
 ip4_gateway="192.168.0.1"
 ip4_netmask="255.255.255.0"
 
+#user in container
 user="brandon"
 
 old_prefix="old"
-lxclist=$(lxc list)
+lxclist="$(lxc list)"
 
-container_info="${XDG_DATA_HOME}/shell/lxd-admin"
+config_version="1"
+config_containers="${XDG_DATA_HOME}/shell/lxd-admin"
 
 if [ -z "${1}" ];then "${0}" -h;exit;fi
 while getopts "O:l:TRCPZUHEScdrsuzpheo" OPT;do
@@ -300,8 +312,8 @@ while getopts "O:l:TRCPZUHEScdrsuzpheo" OPT;do
 		P) act="print";get_dirs="1";verbose="1";;
 		S) act="restart_service";service="${OPTARG}";;
 		l) level_limit="${OPTARG}";limit_level="1";;
-		e) $EDITOR "${container_info}";exit;;
-		E) cat "${container_info}";exit;;
+		e) ${EDITOR} "${config_containers}";exit;;
+		E) cat "${config_containers}";exit;;
 		h)
 			printf "CONTAINER, only use to limit actions to specified\n"
 			printf " -R\tOnly run on rutorrent\n"
@@ -314,7 +326,7 @@ while getopts "O:l:TRCPZUHEScdrsuzpheo" OPT;do
 			printf "\nCONTAINER GENERAL\n"
 			printf " -d\tDelete containers\n"
 			printf " -h\tPrint this help\n"
-			printf " -H\tprint file setup guide: %s\n" "${container_info}"
+			printf " -H\tprint file setup guide: %s\n" "${config_containers}"
 			printf " -r\tRestart containers\n"
 			printf " -s\tStart containers\n"
 			printf " -u\tUpdate, rename existing with '%s' prefix\n" "${old_prefix}"
@@ -325,13 +337,15 @@ while getopts "O:l:TRCPZUHEScdrsuzpheo" OPT;do
 			printf " -c\trtorrent lockfile cleanup\n"
 			printf " -C\trutorrent cleanup only, remove *.torrent files in \$config/rutorrent/share/torrents/\n"
 			printf "\nOTHER\n"
-			printf " -e\tedit %s\n" "${container_info}"
-			printf " -E\tcat %s\n" "${container_info}"
+			printf " -e\tedit %s\n" "${config_containers}"
+			printf " -E\tcat %s\n" "${config_containers}"
 			printf " -P\tPrint all container vars\n"
 			printf " -p\tPrint limited container vars\n"
 			exit;;
 		H)
-			printf "All containers are declared in '%s' using the following space delimited format, subject to change\n\n" "${container_info}"
+			printf "==SUBJECT TO CHANGE==\n\n"
+			printf "Config version: ${config_version}\n\n"
+			printf "All containers are declared in '%s' using the following space delimited format\n\n" "${config_containers}"
 
 			printf "Valid values are\n"
 			printf "================\n"
@@ -348,6 +362,7 @@ while getopts "O:l:TRCPZUHEScdrsuzpheo" OPT;do
 			printf "save location override, optional: a path\n\n"
 
 			printf "Example\n"
+			printf "version ${config_version}\n"
 			printf "rutorrent gentoo 1 1 1 192.168.0.161 6 10%% 8192MB anime /mnt/anime/anime-working\n\n"
 
 			printf "Config file parsing\n"
@@ -359,9 +374,9 @@ while getopts "O:l:TRCPZUHEScdrsuzpheo" OPT;do
 done
 #shift $((OPTIND - 1))
 
-if ! [ -f "${container_info}" ];then "${0}" -H;exit 1;fi
+if ! [ -f "${config_containers}" ];then "${0}" -H;exit 1;fi
 
 while IFS=' ' read -r ctype distro autostart htpasswd level ip4 lim_cpu lim_cpu_allow lim_mem cname save_override;do
 	main_container
-done < "${container_info}"
+done < "${config_containers}"
 
