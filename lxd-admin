@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#8.0.0
-#2019-02-12
+#8.1.0
+#2019-02-13
 
 #Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -246,6 +246,7 @@ main_container()
 			printf "On/Off\t\t: %s\n" "${state}"
 			printf "Autostart\t: %s\n" "${autostart}"
 			if [ "${verbose}" = "1" ];then
+				printf "User\t\t: %s\n" "${user}"
 				printf "htpasswd\t: %s\n" "${htpasswd}"
 				printf "Level\t\t: %s\n" "${level}"
 				printf "Limit CPU\t: %s\n" "${lim_cpu}"
@@ -283,13 +284,10 @@ ip4_brd="192.168.0.255"
 ip4_gateway="192.168.0.1"
 ip4_netmask="255.255.255.0"
 
-#user in container
-user="brandon"
-
 old_prefix="old"
 lxclist="$(lxc list)"
 
-config_version="1"
+config_version="2"
 config_containers="${XDG_DATA_HOME}/shell/lxd-admin"
 
 if [ -z "${1}" ];then "${0}" -h;exit;fi
@@ -351,6 +349,7 @@ while getopts "O:l:TRCPZUHEScdrsuzpheo" OPT;do
 			printf "================\n"
 			printf "container type: rutorrent, transmission, stop\n"
 			printf "distro: gentoo, alpine\n"
+			printf "user: user used in container\n"
 			printf "autostart: 0, 1\n"
 			printf "htpasswd: 0, 1\n"
 			printf "level: any int\n"
@@ -363,7 +362,7 @@ while getopts "O:l:TRCPZUHEScdrsuzpheo" OPT;do
 
 			printf "Example\n"
 			printf "version ${config_version}\n"
-			printf "rutorrent gentoo 1 1 1 192.168.0.161 6 10%% 8192MB anime /mnt/anime/anime-working\n\n"
+			printf "rutorrent gentoo brandon 1 1 1 192.168.0.161 6 10%% 8192MB anime /mnt/anime/anime-working\n\n"
 
 			printf "Config file parsing\n"
 			printf "supports comments, no inline comments\n"
@@ -376,7 +375,7 @@ done
 
 if ! [ -f "${config_containers}" ];then "${0}" -H;exit 1;fi
 
-while IFS=' ' read -r ctype distro autostart htpasswd level ip4 lim_cpu lim_cpu_allow lim_mem cname save_override;do
+while IFS=' ' read -r ctype distro user autostart htpasswd level ip4 lim_cpu lim_cpu_allow lim_mem cname save_override;do
 	main_container
 done < "${config_containers}"
 
