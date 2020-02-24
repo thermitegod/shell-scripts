@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-#5.5.0
+#5.6.0
 #2019-02-24
 
 #Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
@@ -51,8 +51,14 @@ convert_main()
 		if [ -n "$(file -b --mime-type -- ${f%%}|grep image)" ];then
 			case "${1}" in
 				convert)
-					gm convert -quality ${qual} "${f%%}" "${cvloc}/${f%.*}.${newext}"
-					mv "${f}" "${O}"
+					if ! [ -f "${f%%.*}.${newext}" ];then
+						gm convert -quality ${qual} "${f%%.*}.${origext}" "${cvloc}/${f%%.*}.${newext}"
+						mv "${f}" "${O}"
+					else
+						if [ "${debug}" = "1" ];then
+							printf "Skipping: ${f}\n"
+						fi
+					fi
 					;;
 				convert_auto)
 					if [ "${newext}" = "jpg" ];then
