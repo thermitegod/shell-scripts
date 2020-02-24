@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-#5.6.0
+#5.7.0
 #2019-02-24
 
 #Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
@@ -44,15 +44,14 @@ convert_main()
 	if ! [ "${act}" = "get_size" ];then
 		if [ "${mimecheck}" = "1" ];then mime-correct -I;fi
 		mkdir -p "${O}"
-		cvloc="cv_tmp"
-		mkdir -p "${cvloc}"
+		tmpdir="$(mktemp -p . -d)"
 	fi
 	for f in *;do
 		if [ -n "$(file -b --mime-type -- ${f%%}|grep image)" ];then
 			case "${1}" in
 				convert)
 					if ! [ -f "${f%%.*}.${newext}" ];then
-						gm convert -quality ${qual} "${f%%.*}.${origext}" "${cvloc}/${f%%.*}.${newext}"
+						gm convert -quality ${qual} "${f%%.*}.${origext}" "${tmpdir}/${f%%.*}.${newext}"
 						mv "${f}" "${O}"
 					else
 						if [ "${debug}" = "1" ];then
@@ -69,8 +68,8 @@ convert_main()
 					if [ "${debug}" = "1" ];then iter="1";fi
 					while true;do
 						if [ "${debug}" = "1" ];then printf "iter %s\n" "${iter}";fi
-						gm convert -quality ${qual} "${f%%}" "${cvloc}/${f%.*}.${newext}"
-						test_size "${f%%}" "${cvloc}/${f%.*}.${newext}"
+						gm convert -quality ${qual} "${f%%}" "${tmpdir}/${f%.*}.${newext}"
+						test_size "${f%%}" "${tmpdir}/${f%.*}.${newext}"
 						if [ "${new_is_smaller}" = "1" ];then
 							new_is_smaller="0"
 							printf "final qual is %s for %s\n" "${qual}" "${f}"
@@ -83,7 +82,7 @@ convert_main()
 					done
 					;;
 				resize)
-					gm convert "${f%%}" -resize "${size}"\> "${cvloc}/${f%%}"
+					gm convert "${f%%}" -resize "${size}"\> "${tmpdir}/${f%%}"
 					mv "${f}" "${O}"
 					;;
 				get_size)
@@ -93,10 +92,15 @@ convert_main()
 		fi
 	done
 	if ! [ "${1}" = "get_size" ];then
-		mv ${cvloc}/* . #do not quote
-		rm -rf "${cvloc}"
-		if [ "${keep_orig}" = "0" ];then rm -rf "${O}"
-		elif [ -d "${O}" ] && ! [ "$(ls -A ${O})" ];then rm -rf "${O}"
+		if [ "$(ls -A ${tmpdir}|wc -l)" -gt "0" ];then
+			mv ${tmpdir}/* . #do not quote
+		fi
+		rm -rf "${tmpdir}"
+
+		if [ "${keep_orig}" = "0" ];then
+			rm -rf "${O}"
+		elif [ -d "${O}" ] && ! [ "$(ls -A ${O})" ];then
+			rm -rf "${O}"
 		fi
 	fi
 }
