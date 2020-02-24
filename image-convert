@@ -1,8 +1,8 @@
 #!/usr/bin/env sh
-#5.4.0
-#2019-09-25
+#5.5.0
+#2019-02-24
 
-#Copyright (C) 2018,2019 Brandon Zorn <brandonzorn@cock.li>
+#Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
 #This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License version 3
@@ -176,17 +176,13 @@ while getopts "dP:p:J:j:H:W:S:hmsBbr" OPT;do
 				3) size="x1280";;
 				4) size="x980";;
 				5) size="x780";;
-				*) size="${OPTARG}";;
+				*) size="x${OPTARG}";;
 			esac
 			act="resize"
 			;;
 		S)
 			case "${OPTARG}" in
-				1) size="90%";;
-				2) size="80%";;
-				3) size="70%";;
-				4) size="60%";;
-				5) size="50%";;
+				[1-9]) size="${OPTARG}0%";;
 				*) size="${OPTARG}";;
 			esac
 			act="resize"
@@ -221,19 +217,18 @@ while getopts "dP:p:J:j:H:W:S:hmsBbr" OPT;do
 			printf " -W 4\t980x\n"
 			printf " -W 5\t780x\n"
 			printf "\nRESIZE Hight, keeps aspect\n"
-			printf " -H *\tuse value provided, must prefix with 'x'\n"
+			printf " -H *\tuse value provided\n"
 			printf " -H 1\tx2400\n"
 			printf " -H 2\tx1600\n"
 			printf " -H 3\tx1280\n"
 			printf " -H 4\tx980\n"
 			printf " -H 5\tx780\n"
 			printf "\nRESIZE Percent\n"
-			printf " -S *\tuse value provided, must append '%%'\n"
-			printf " -S 1\t90%%\n"
-			printf " -S 2\t80%%\n"
-			printf " -S 3\t70%%\n"
-			printf " -S 4\t60%%\n"
-			printf " -S 5\t50%%\n"
+			printf " Increments in steps of 10%%\n"
+			printf " -S 9\t90%%\n"
+			printf " ..\n"
+			printf " -S 1\t10%%\n"
+			printf " -S *\tany percent, must append '%%'\n"
 			printf "\nCONVERT\n"
 			printf "value of '0' sets auto mode\n"
 			printf "quality ranges, higher is better quality, JPG: 1-100, PNG:1-9\n"
