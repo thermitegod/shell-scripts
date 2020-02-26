@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-#5.7.0
+#5.7.1
 #2019-02-24
 
 #Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
@@ -130,7 +130,6 @@ get_mode()
 }
 
 O="orig"
-mode="z"
 batch="0"
 debug="0"
 mimecheck="1"
