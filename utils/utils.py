@@ -51,6 +51,11 @@ def edit_conf(path, e=True):
         exit(0)
 
 
+def die(message=None):
+    print(f'{message}')
+    sys.exit(1)
+
+
 def get_extra_dir():
     return os.path.join(os.environ['XDG_DATA_HOME'], 'shell')
 
