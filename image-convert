@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.1.0
-# 2020-02-25
+# 2.0.0
+# 2020-02-26
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -17,14 +17,15 @@
 #    along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import argparse
-import os
-import sys
-import shutil
-import tempfile
 import mimetypes
+import os
+import shutil
+import sys
+import tempfile
 
 from loguru import logger
-from pgmagick import Image, Blob
+from pgmagick import Blob, Image
+
 from utils import utils
 
 
@@ -36,151 +37,239 @@ from utils import utils
 #   acceptable size range
 #   rezizing when w > h
 
+class Convert:
+    def __init__(self):
+        self.__origext = None
+        self.__newext = None
+        self.__act = None
+        self.__qual = None
+        self.__size = None
+        self.__directory = None
+        self.__rm_orig = False
+        self.__mimecheck = True
+        self.__strip_exif = True
 
-def convert_main(act, origext, newext, qual, size, directory, rm_orig, strip_exif, mimecheck):
-    tmpdir = tempfile.mkdtemp(dir=directory)
+    @staticmethod
+    def test_size(img_orig, img_new):
+        new_is_smaller = False
+        if os.path.isfile(img_orig) and os.path.isfile(img_new):
+            logger.debug(f'filesize new  : {os.path.getsize(img_new)}')
+            logger.debug(f'filesize orig : {os.path.getsize(img_orig)}')
 
-    orig = 'orig'
-    if not os.path.isdir(orig):
-        os.mkdir(orig)
+            if os.path.getsize(img_orig) > os.path.getsize(img_new):
+                new_is_smaller = True
 
-    c1 = 0
-    c2 = 0
+        return new_is_smaller
 
-    if mimecheck:
-        utils.run_cmd('sh -c "mime-correct -I"')
+    @staticmethod
+    def check_if_image(file):
+        try:
+            if 'image' in mimetypes.guess_type(file)[0]:
+                return True
+        except TypeError:
+            pass
+        return False
 
-    for filename in os.listdir(directory):
-        filename_base = os.path.splitext(filename)[0]
-        filename_ext = os.path.splitext(filename)[1][1:]
+    @staticmethod
+    def convert_set_size(mode, get_size):
+        if get_size == '1':
+            size = '2400'
+        elif get_size == '2':
+            size = '1600'
+        elif get_size == '3':
+            size = '1280'
+        elif get_size == '4':
+            size = '980'
+        elif get_size == '5':
+            size = '780'
+        else:
+            size = get_size
 
-        if check_if_image(filename):
-            c1 += 1
+        if mode == 'height':
+            size = f'x{size}'
 
-            if act == 'convert':
-                # when converting between diffrent formats, ex png to jpg, ensure
-                # that no jpg images get converted alongside png images, simply
-                # skip those images, unless converting between the same format
-                if newext not in os.path.splitext(filename)[1] or origext == newext:
+        return size
+
+    def get_img_size(self, print_only=True):
+        for filename in os.listdir(self.__directory):
+            if self.check_if_image(filename):
+                from pgmagick.api import Image
+                img = Image(filename)
+                if print_only:
+                    print(f'{img.width}x{img.height}')
+                else:
+                    return img.width, img.height
+
+    def convert_qual_check(self):
+        max_qual = 0
+        if self.__newext == 'jpg':
+            max_qual = 100
+        elif self.__newext == 'png':
+            max_qual = 9
+
+        if int(self.__qual) > max_qual:
+            utils.die(message=f'exiting because of invalid range for {self.__newext}: {self.__qual}')
+
+    def get_mode(self):
+        if self.__qual != '0':
+            return 'convert'
+        return 'convert_auto'
+
+    def convert_main(self):
+        tmpdir = tempfile.mkdtemp(dir=self.__directory)
+
+        orig = 'orig'
+        if not os.path.isdir(orig):
+            os.mkdir(orig)
+
+        c1 = 0
+        c2 = 0
+
+        if self.__mimecheck:
+            utils.run_cmd('sh -c "mime-correct -I"')
+
+        for filename in os.listdir(self.__directory):
+            filename_base = os.path.splitext(filename)[0]
+            filename_ext = os.path.splitext(filename)[1][1:]
+
+            if self.check_if_image(filename):
+                c1 += 1
+
+                if self.__act == 'convert':
+                    # when converting between diffrent formats, ex png to jpg, ensure
+                    # that no jpg images get converted alongside png images, simply
+                    # skip those images, unless converting between the same format
+                    if self.__newext not in os.path.splitext(filename)[1] or self.__origext == self.__newext:
+                        img = Image(filename)
+                        if self.__strip_exif:
+                            img.profile("*", Blob())
+                        img.quality(int(self.__qual))
+                        img.write(f'{tmpdir}/{filename_base}.{self.__newext}')
+
+                        os.rename(filename, f'{orig}/{filename}')
+                    else:
+                        logger.debug(f'Skipping: {filename}')
+
+                elif self.__act == 'resize':
                     img = Image(filename)
-                    if strip_exif:
+                    if self.__strip_exif:
                         img.profile("*", Blob())
-                    img.quality(int(qual))
-                    img.write(f'{tmpdir}/{filename_base}.{newext}')
+                    img.scale(self.__size)
+                    img.write(f'{tmpdir}/{filename_base}.{filename_ext}')
 
                     os.rename(filename, f'{orig}/{filename}')
-                else:
-                    logger.debug(f'Skipping: {filename}')
 
-            elif act == 'resize':
-                img = Image(filename)
-                if strip_exif:
-                    img.profile("*", Blob())
-                img.scale(size)
-                img.write(f'{tmpdir}/{filename_base}.{filename_ext}')
+        if os.path.exists(tmpdir):
+            for filedone in os.listdir(tmpdir):
+                filedone_ext = os.path.splitext(filedone)[1][1:]
+                file_in_temp = f'{tmpdir}/{filedone}'
+                file_final = f'{os.path.dirname(tmpdir)}/{os.path.splitext(filedone)[0]}.{filedone_ext}'
 
-                os.rename(filename, f'{orig}/{filename}')
+                logger.debug(f'Moving file: \'{file_in_temp}\' to \'{file_final}\'')
+                os.rename(f'{file_in_temp}', f'{file_final}')
 
-    if os.path.exists(tmpdir):
-        for filedone in os.listdir(tmpdir):
-            filedone_ext = os.path.splitext(filedone)[1][1:]
-            file_in_temp = f'{tmpdir}/{filedone}'
-            file_final = f'{os.path.dirname(tmpdir)}/{os.path.splitext(filedone)[0]}.{filedone_ext}'
+            logger.debug(f'Removing tempdir: {tmpdir}')
+            shutil.rmtree(tmpdir)
 
-            logger.debug(f'Moving file: \'{file_in_temp}\' to \'{file_final}\'')
-            os.rename(f'{file_in_temp}', f'{file_final}')
+        if os.path.exists(orig) and self.__rm_orig:
+            logger.debug(f'Removing Original: {orig}')
+            shutil.rmtree(orig)
 
-        logger.debug(f'Removing tempdir: {tmpdir}')
-        shutil.rmtree(tmpdir)
+        for filename in os.listdir(self.__directory):
+            if self.check_if_image(filename):
+                c2 += 1
 
-    if os.path.exists(orig) and rm_orig:
-        logger.debug(f'Removing Original: {orig}')
-        shutil.rmtree(orig)
+        if c1 != c2:
+            logger.error(f'total file count does not match: {c1}, {c2} in \'{self.__directory}\'')
 
-    for filename in os.listdir(directory):
-        if check_if_image(filename):
-            c2 += 1
+    def convert_main_batch(self):
+        utils.not_implemented()
 
-    if c1 != c2:
-        logger.error(f'total file count does not match: {c1}, {c2} in \'{directory}\'')
+        for dirs in os.listdir(self.__directory):
+            if os.path.isdir(dirs):
+                self.convert_main()
 
+    def run(self, args):
+        if args.directory:
+            self.__directory = args.directory
+        else:
+            self.__directory = os.getcwd()
 
-def convert_main_batch(act, origext, newext, qual, size, directory, rm_orig, strip_exif, mimecheck):
-    utils.not_implemented()
+        if args.jpg_to_jpg:
+            self.__origext = 'jpg'
+            self.__newext = 'jpg'
+            self.__qual = args.jpg_to_jpg
+            self.convert_qual_check()
+            self.__act = self.get_mode()
 
-    for dirs in os.listdir(directory):
-        if os.path.isdir(dirs):
-            convert_main(act=act, origext=origext, newext=newext, qual=qual, size=size, directory=dirs,
-                         rm_orig=rm_orig, strip_exif=strip_exif, mimecheck=mimecheck)
+        if args.jpg_to_png:
+            self.__origext = 'jpg'
+            self.__newext = 'png'
+            self.__qual = args.jpg_to_png
+            self.convert_qual_check()
+            self.__act = self.get_mode()
 
+        if args.png_to_png:
+            self.__origext = 'png'
+            self.__newext = 'png'
+            self.__qual = args.png_to_png
+            self.convert_qual_check()
+            self.__act = self.get_mode()
 
-def get_img_size(directory, print_only=True):
-    for filename in os.listdir(directory):
-        if check_if_image(filename):
-            from pgmagick.api import Image
-            img = Image(filename)
-            if print_only:
-                print(f'{img.width}x{img.height}')
-            else:
-                return img.width, img.height
+        if args.png_to_jpg:
+            self.__origext = 'png'
+            self.__newext = 'jpg'
+            self.__qual = args.png_to_jpg
+            self.convert_qual_check()
+            self.__act = self.get_mode()
 
+        if args.percent:
+            self.__size = f'{args.percent}%'
+            self.__act = 'resize'
 
-def test_size(img_orig, img_new):
-    new_is_smaller = False
-    if os.path.isfile(img_orig) and os.path.isfile(img_new):
-        logger.debug(f'filesize new  : {os.path.getsize(img_new)}')
-        logger.debug(f'filesize orig : {os.path.getsize(img_orig)}')
+        if args.width:
+            self.__size = self.convert_set_size(mode='width', get_size=args.width)
+            self.__act = 'resize'
 
-        if os.path.getsize(img_orig) > os.path.getsize(img_new):
-            new_is_smaller = True
+        if args.height:
+            utils.die(message='Height is currently disabled, use width')
+            self.__size = self.convert_set_size(mode='height', get_size=args.height)
+            self.__act = 'resize'
 
-    return new_is_smaller
+        if args.size:
+            self.__act = 'get_img_size'
 
+        if args.batch:
+            self.__rm_orig = False
+            self.__act = 'batch'
 
-def check_if_image(file):
-    try:
-        if 'image' in mimetypes.guess_type(file)[0]:
-            return True
-    except TypeError:
-        pass
-    return False
+        if args.batch_rm:
+            self.__rm_orig = True
+            self.__act = 'batch'
 
+        if args.rm_orig:
+            self.__rm_orig = True
 
-def get_mode(qual):
-    if qual != '0':
-        return 'convert'
-    return 'convert_auto'
+        if args.mimecheck:
+            self.__mimecheck = False
 
+        if args.no_strip_exif:
+            self.__strip_exif = False
 
-def convert_set_size(mode, get_size):
-    if get_size == '1':
-        size = '2400'
-    elif get_size == '2':
-        size = '1600'
-    elif get_size == '3':
-        size = '1280'
-    elif get_size == '4':
-        size = '980'
-    elif get_size == '5':
-        size = '780'
-    else:
-        size = get_size
+        if self.__act == 'convert':
+            self.convert_main()
 
-    if mode == 'height':
-        size = f'x{size}'
+        elif self.__act == 'convert_auto':
+            utils.not_implemented()
 
-    return size
+        elif self.__act == 'batch':
+            utils.not_implemented()
 
+        elif self.__act == 'resize':
+            self.convert_main()
 
-def convert_qual_check(newext, qual):
-    max_qual = 0
-    if newext == 'jpg':
-        max_qual = 100
-    elif newext == 'png':
-        max_qual = 9
-
-    if int(qual) > max_qual:
-        utils.die(message=f'exiting because of invalid range for {newext}: {qual}')
+        elif self.__act == 'get_img_size':
+            self.get_img_size()
 
 
 def main():
@@ -252,106 +341,11 @@ def main():
                          help='convert png to jpg')
     args = parser.parse_args()
 
-    utils.is_not_root()
-
-    act = None
-    origext = None
-    newext = None
-    qual = None
-    size = None
-    rm_orig = False
-    mimecheck = True
-    strip_exif = True
-
     logger.remove()
     logger.add(sys.stdout, level=args.loglevel, colorize=True)
 
-    if args.directory:
-        directory = args.directory
-    else:
-        directory = os.getcwd()
-
-    if args.jpg_to_jpg:
-        origext = 'jpg'
-        newext = 'jpg'
-        qual = args.jpg_to_jpg
-        convert_qual_check(newext=newext, qual=qual)
-        act = get_mode(qual=qual)
-
-    if args.jpg_to_png:
-        origext = 'jpg'
-        newext = 'png'
-        qual = args.jpg_to_png
-        convert_qual_check(newext=newext, qual=qual)
-        act = get_mode(qual=qual)
-
-    if args.png_to_png:
-        origext = 'png'
-        newext = 'png'
-        qual = args.png_to_png
-        convert_qual_check(newext=newext, qual=qual)
-        act = get_mode(qual=qual)
-
-    if args.png_to_jpg:
-        origext = 'png'
-        newext = 'jpg'
-        qual = args.png_to_jpg
-        convert_qual_check(newext=newext, qual=qual)
-        act = get_mode(qual=qual)
-
-    if args.percent:
-        size = f'{args.percent}%'
-        act = 'resize'
-
-    if args.width:
-        size = convert_set_size(mode='width', get_size=args.width)
-        act = 'resize'
-
-    if args.height:
-        utils.die(message='Height is currently disabled, use width')
-        size = convert_set_size(mode='height', get_size=args.height)
-        act = 'resize'
-
-    if args.size:
-        act = 'get_img_size'
-
-    if args.batch:
-        rm_orig = False
-        act = 'batch'
-
-    if args.batch_rm:
-        rm_orig = True
-        act = 'batch'
-
-    if args.rm_orig:
-        rm_orig = True
-
-    if args.mimecheck:
-        mimecheck = False
-
-    if args.no_strip_exif:
-        strip_exif = False
-
-    if act == 'convert':
-        convert_main(act='convert', origext=origext, newext=newext, qual=qual,
-                     size=None, directory=directory, rm_orig=rm_orig, strip_exif=strip_exif,
-                     mimecheck=mimecheck)
-
-    elif act == 'convert_auto':
-        pass
-
-    elif act == 'batch':
-        convert_main_batch(act='convert_auto', origext=origext, newext=newext, qual=qual,
-                           size=size, directory=directory, rm_orig=rm_orig, strip_exif=strip_exif,
-                           mimecheck=mimecheck)
-
-    elif act == 'resize':
-        convert_main(act='resize', origext=origext, newext=newext, qual=None,
-                     size=size, directory=directory, rm_orig=rm_orig, strip_exif=strip_exif,
-                     mimecheck=mimecheck)
-
-    elif act == 'get_img_size':
-        get_img_size(directory=directory)
+    convert = Convert()
+    convert.run(args)
 
 
 if __name__ == '__main__':
