@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-# 1.3.0
-# 2019-10-31
+# 1.4.0
+# 2019-02-28
 
-# Copyright (C) 2019 Brandon Zorn <brandonzorn@cock.li>
+# Copyright (C) 2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
 # This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License version 3
@@ -35,6 +35,14 @@ def is_not_root():
 
 def run_cmd(cmd):
     subprocess.run(shlex.split(cmd))
+
+
+def write_script(path, text):
+    script = f'{path}'
+    f = open(script, 'w+')
+    f.write(f'{text}')
+    f.close()
+    os.chmod(script, 0o700)
 
 
 def get_script_name():
