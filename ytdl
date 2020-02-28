@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-# 5.3.0
-# 2019-12-30
+# 6.0.0
+# 2019-02-28
 
-# Copyright (C) 2018,2019 Brandon Zorn <brandonzorn@cock.li>
+# Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
 # This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License version 3
@@ -22,76 +22,85 @@ import pyperclip
 
 from utils import utils
 
-args = None
 
+class Ytdl:
+    def __init__(self):
+        self.__link = ''
+        self.__batch_list = '/tmp/ytdl.tmp'
+        self.__audio_only = False
 
-def dl(link):
-    cmd = 'youtube-dl ' \
-          '--geo-bypass ' \
-          '--no-overwrites ' \
-          '--no-call-home ' \
-          '--yes-playlist ' \
-          '--audio-format best ' \
-          '--audio-quality 0 ' \
-          '--no-check-certificate '
+    def dl(self):
+        cmd = 'youtube-dl ' \
+              '--geo-bypass ' \
+              '--no-overwrites ' \
+              '--no-call-home ' \
+              '--yes-playlist ' \
+              '--audio-format best ' \
+              '--audio-quality 0 ' \
+              '--no-check-certificate '
 
-    if args.audio:
-        cmd += '--extract-audio '
+        if self.__audio_only:
+            cmd += '--extract-audio '
 
-    cmd += link
+        cmd += self.__link
 
-    print(f'downloading: {link}')
-    utils.run_cmd(cmd)
-    print(f'downloaded: {link}\n')
+        print(f'downloading: {self.__link}')
+        utils.run_cmd(cmd)
+        print(f'downloaded: {self.__link}\n')
+
+    def run(self, args):
+        if args.edit:
+            utils.edit_conf(self.__batch_list)
+
+        if args.audio:
+            self.__audio_only = True
+
+        if args.batch_rm:
+            if os.path.exists(self.__batch_list):
+                os.unlink(self.__batch_list)
+            exit(0)
+
+        if args.batch:
+            with open(self.__batch_list) as fp:
+                for link in fp:
+                    self.__link = link
+                    utils.link_check(self.__link)
+                    self.dl()
+        else:
+            if args.url:
+                self.__link = args.url
+            else:
+                self.__link = pyperclip.paste()
+
+            utils.link_check(self.__link)
+
+        self.dl()
 
 
 def main():
-    global args
     parser = argparse.ArgumentParser()
     parser.add_argument('-a', '--audio',
                         action='store_true',
                         help='Only download audio')
     parser.add_argument('-u', "--url",
                         help='supply a video url, otherwise will get link from clipboard')
-    group1 = parser.add_argument_group('Batch', 'NOT IMPLEMENTED')
-    group1.add_argument('-b', '--batch',
-                        action='store_true',
-                        help='Download from batch file')
-    group1.add_argument('-e', '--edit',
-                        action='store_true',
-                        help='edit batch file')
-    group1.add_argument('-r', '--batch-rm',
-                        action='store_true',
-                        help='Delete batch file')
+    batch = parser.add_argument_group('Batch', 'NOT IMPLEMENTED')
+    batch.add_argument('-b', '--batch',
+                       action='store_true',
+                       help='Download from batch file')
+    general = parser.add_argument_group('GENERAL')
+    general.add_argument('-e', '--edit',
+                         action='store_true',
+                         help='edit batch file')
+    general.add_argument('-r', '--batch-rm',
+                         action='store_true',
+                         help='Delete batch file')
     args = parser.parse_args()
 
     utils.is_not_root()
 
-    batch_list = '/tmp/ytdl.tmp'
-
-    if args.edit:
-        utils.edit_conf(batch_list)
-
-    if args.batch_rm:
-        if os.path.exists(batch_list):
-            os.unlink(batch_list)
-        exit(0)
-
-    if args.batch:
-        link = ''
-        with open(batch_list) as fp:
-            for link in fp:
-                utils.link_check(link)
-                dl(link)
-    else:
-        if args.url:
-            link = args.url
-        else:
-            link = pyperclip.paste()
-
-        utils.link_check(link)
-
-    dl(link)
+    run = Ytdl()
+    run.run(args)
 
 
 if __name__ == '__main__':

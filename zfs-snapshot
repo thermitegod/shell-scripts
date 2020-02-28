@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 5.2.0
-# 2019-12-21
+# 5.3.0
+# 2019-02-28
 
 # Copyright (C) 2018,2019 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -25,26 +25,27 @@ from utils import utils
 
 def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
-    parser.add_argument('-B', '--export',
-                        help='export passed snapshot')
-    parser.add_argument('-e', '--extra',
-                        action='store_true',
-                        help='Print extra info and exit')
-    group1 = parser.add_argument_group('Valid pools',
-                                       '0: all [list only]\n'
-                                       '1: zroot/ROOT/gentoo [list adds /var/{db/pkg}]\n'
-                                       '2: zroot/HOME/brandon\n'
-                                       '3: storage/anime\n'
-                                       '4: storage/data\n'
-                                       '5: ssd-mirror/KVM\n'
-                                       '6: torrents\n'
-                                       '7: zroot/CACHE/torrents\n')
-    group1.add_argument('-l', '--list',
-                        metavar='POOLS',
-                        choices=['0', '1', '2', '3', '4', '5', '6', '7'])
-    group1.add_argument('-m', '--snapshot',
-                        metavar='POOLS',
-                        choices=['1', '2', '3', '4', '5', '6', '7'])
+    general = parser.add_argument_group('GENERAL')
+    general.add_argument('-B', '--export',
+                         help='export passed snapshot')
+    general.add_argument('-e', '--extra',
+                         action='store_true',
+                         help='Print extra info and exit')
+    pools = parser.add_argument_group('Valid pools',
+                                      '0: all [list only]\n'
+                                      '1: zroot/ROOT/gentoo [list adds /var/{db/pkg}]\n'
+                                      '2: zroot/HOME/brandon\n'
+                                      '3: storage/anime\n'
+                                      '4: storage/data\n'
+                                      '5: ssd-mirror/KVM\n'
+                                      '6: torrents\n'
+                                      '7: zroot/CACHE/torrents\n')
+    pools.add_argument('-l', '--list',
+                       metavar='POOLS',
+                       choices=['0', '1', '2', '3', '4', '5', '6', '7'])
+    pools.add_argument('-m', '--snapshot',
+                       metavar='POOLS',
+                       choices=['1', '2', '3', '4', '5', '6', '7'])
     args = parser.parse_args()
 
     if args.extra:

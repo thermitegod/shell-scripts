@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 6.4.0
-# 2019-01-17
+# 6.5.0
+# 2020-02-28
 
 # Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -24,25 +24,25 @@ from utils import utils
 
 def main():
     parser = argparse.ArgumentParser()
-    group1 = parser.add_argument_group('PROFILES')
-    group1.add_argument('-d', '--default',
-                        action='store_true',
-                        help='default profile')
-    group1.add_argument('-e', '--extra',
-                        default='none',
-                        type=str,
-                        help='extra profiles, supplied arg is used as profile name')
-    group1.add_argument('-s', '--sandbox',
-                        action='store_true',
-                        help='sandbox, all data deleted on close')
-    group2 = parser.add_argument_group('BROWSER', 'which browser version to use')
-    group2.add_argument('-c', '--chromium',
-                        action='store_true',
-                        help='chromium')
-    group2.add_argument('-g', '--google-chrome',
-                        default='unstable',
-                        type=str,
-                        help='chrome, valid are [unstable,beta,release]')
+    profiles = parser.add_argument_group('PROFILES')
+    profiles.add_argument('-d', '--default',
+                          action='store_true',
+                          help='default profile')
+    profiles.add_argument('-e', '--extra',
+                          default='none',
+                          type=str,
+                          help='extra profiles, supplied arg is used as profile name')
+    profiles.add_argument('-s', '--sandbox',
+                          action='store_true',
+                          help='sandbox, all data deleted on close')
+    browser = parser.add_argument_group('BROWSER', 'which browser version to use')
+    browser.add_argument('-c', '--chromium',
+                         action='store_true',
+                         help='chromium')
+    browser.add_argument('-g', '--google-chrome',
+                         default='unstable',
+                         type=str,
+                         help='chrome, valid are [unstable,beta,release]')
     args = parser.parse_args()
 
     utils.is_not_root()
@@ -58,7 +58,7 @@ def main():
 
     profile = os.path.join(os.environ['XDG_CONFIG_HOME'], 'chrome')
 
-    if args.extra != 'none':
+    if args.extra is not None:
         profile_append = f'{cmd}-{args.extra}'
     else:
         # script/symlinks must be named chromium-<profile name> to work

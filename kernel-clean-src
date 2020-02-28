@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-# 4.0.0
-# 2019-10-24
+# 5.0.0
+# 2019-02-28
 
-# Copyright (C) 2018,2019 Brandon Zorn <brandonzorn@cock.li>
+# Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
 # This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License version 3
@@ -23,6 +23,34 @@ import shutil
 from tempfile import TemporaryDirectory
 
 from utils import utils
+from utils import kernel
+
+
+class Clean:
+    def __init__(self):
+        self.__src = kernel.get_kernel_dir()
+
+    def run(self, args):
+        if args.rm:
+            ksym = f'{self.__src}'
+            if os.path.exists(ksym) and os.path.islink(ksym):
+                os.unlink(ksym)
+
+            for dirs in next(os.walk(os.path.dirname(self.__src)))[1]:
+                kdirs = f'{self.__src}/{dirs}'
+                shutil.rmtree(kdirs)
+        elif args.clean:
+            kdir = f'{self.__src}'
+            if not os.path.exists(kdir):
+                utils.die(message=f'Missing kernel symlink: {kdir}')
+
+            if os.path.exists(f'{kdir}/.config'):
+                with TemporaryDirectory() as tmpdir:
+                    cmd = f'sh -c "cd {kdir};mv .config {tmpdir};make distclean;mv {tmpdir}/.config ."'
+                    utils.run_cmd(cmd)
+            else:
+                cmd = f'sh -c "cd {kdir};make distclean"'
+                utils.run_cmd(cmd)
 
 
 def main():
@@ -37,28 +65,8 @@ def main():
 
     utils.is_root()
 
-    src = '/usr/src/'
-
-    if args.rm:
-        ksym = src + 'linux'
-        if os.path.exists(ksym) and os.path.islink(ksym):
-            os.unlink(ksym)
-
-        for dirs in next(os.walk(src))[1]:
-            kernel = src + dirs
-            shutil.rmtree(kernel)
-    elif args.clean:
-        kdir = src + 'linux'
-        if not os.path.exists(kdir):
-            exit('Missing kernel symlink')
-
-        if os.path.exists(kdir + '/.config'):
-            with TemporaryDirectory() as tmpdir:
-                cmd = f'sh -c "cd {kdir};mv .config {tmpdir};make distclean;mv {tmpdir}/.config ."'
-                utils.run_cmd(cmd)
-        else:
-            cmd = f'sh -c "cd {kdir};make distclean"'
-            utils.run_cmd(cmd)
+    run = Clean()
+    run.run(args)
 
 
 if __name__ == '__main__':
