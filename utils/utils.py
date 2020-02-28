@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 1.4.0
+# 1.5.0
 # 2019-02-28
 
 # Copyright (C) 2019,2020 Brandon Zorn <brandonzorn@cock.li>
@@ -25,12 +25,12 @@ import hashlib
 
 def is_root():
     if os.geteuid() != 0:
-        exit('Requires root, exiting')
+        die(message='Requires root, exiting')
 
 
 def is_not_root():
     if os.geteuid() == 0:
-        exit('Do not run as root, exiting')
+        die(message='Do not run as root, exiting')
 
 
 def run_cmd(cmd):
@@ -83,4 +83,4 @@ def hash_compare_sha1(file1, file2):
 
 def link_check(link):
     if not link[:4] == 'http':
-        exit(f'Invalid URL: {link}')
+        die(message=f'Invalid URL: {link}')
