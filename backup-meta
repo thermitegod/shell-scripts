@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#2.3.0
-#2020-01-17
+#2.4.0
+#2020-03-03
 
 #Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -134,7 +134,7 @@ case "${mode}" in
 		year=$(date "+%Y")
 		month=$(date "+%m")
 		day=$(date "+%d")
-		target_source="${XDG_CONFIG_HOME}/vnstat/vnstat.db"
+		target_source="/var/lib/vnstat/vnstat.db"
 		target_dest="${backup_dir}/vnstat-database"
 		mkdir -p "${target_dest}/${year}/${month}/${day}"
 		cp "${target_source}" "${target_dest}/${year}/${month}/${day}"
