@@ -19,25 +19,24 @@
 # ZFS Builtin Kernel Build Script - gentoo
 
 # hard requirments
-# >=linux-4.17.0 : >=zfs-0.8.0 / git | 1.x.x script for previous support
+# >=linux-4.17.0 : >=zfs-0.8.0 / git
 
-# storage dirs - need to exist
+# storage dirs - will be created
 # ${XDG_DATA_DIRS}/kernel/{config,distfiles,src}
 
 # assumptions
 # /usr/src/linux is real source or symlink to real source
-# $run_kernel_bump is based om my own config and others CONFIG_* options may be needed based on kenrel config
 
 # What this script does, basically
 
-# if no preconfigured sources exist for ebuild sys-fs/zfs-kmod
+# if no preconfigured sources exist for sys-fs/zfs-kmod ebuild
 # runs configure phase on sys-fs/zfs-kmod ebuild
-# saves work/ to tar.zst file in $kmod_src
+# saves portage work/ to tar.zst file in $kmod_src
 # installs configured kmod-zfs to /usr/src/linux
 # build kernel
 
 # if preconfigured sources exist for ebuild sys-fs/zfs-kmod
-# moves saved work in tar.zst file to /usr/src/linux
+# moves saved work/ in tar.zst file to /usr/src/linux
 # build kernel
 
 import argparse
@@ -55,6 +54,7 @@ from utils import kernel
 # TODO
 #   config file
 #   add comments for all niche cases in script
+#   commit matching with git builds
 #   multi build kernels
 #       multi kernel build - debug and regular, from one invocation
 #       single build, either debug or regular
@@ -176,14 +176,12 @@ class Build:
 
     def set_compiler(self, get_cc=False):
         if self.__cc_use_clang:
-            # ld.lld only works when clang is the compiler otherwise fails with
-            # error: init sections too big!
+            # ld.lld only works when clang is the compiler
             self.__cc = 'clang'
             self.__ld = 'ld.lld'
         else:
             # force bfd since gold is not supported
             # https://bugs.gentoo.org/694612
-            # https://bugzilla.kernel.org/show_bug.cgi?id=204951
             self.__cc = 'gcc'
             self.__ld = 'ld.bfd'
 
@@ -319,6 +317,7 @@ class Build:
             utils.run_cmd(script)
 
             if self.__cc_use_clang:
+                # clean since gcc was used in prepare
                 utils.run_cmd('kernel-clean-src -c')
 
             if not self.__use_modules:
