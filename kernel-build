@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# 1.3.0
+# 1.4.0
 # 2019-03-08
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -208,15 +208,15 @@ class Build:
             if not (c1 or c2 or c3):
                 print('\nRequired option[s] located at:\n')
                 if not c1:
-                    print('\n[*] Enable loadable module support\n')
+                    print('\n[*] Enable loadable module support')
                 if not c2:
-                    print('\n[*] Enable loadable module support\n')
+                    print('\n[*] Enable loadable module support')
                     print('\t[ ]   Enable unused/obsolete exported symbols')
                     print('\t\t[ ]     Trim unused exported kernel symbols')
                 if not c3:
-                    print('\nGeneral setup  --->\n')
-                    print('\t[*] Configure standard kernel features (expert users)  --->\n')
-                    print('\t\t[*] Load all symbols for debugging/ksymoops\n\n')
+                    print('\nGeneral setup  --->')
+                    print('\t[*] Configure standard kernel features (expert users)  --->')
+                    print('\t\t[*] Load all symbols for debugging/ksymoops')
 
                 try:
                     input('Enter to config switch config: ')
@@ -286,8 +286,11 @@ class Build:
             self.msc()
 
             if not self.__use_modules:
-                shutil.move(f'{self.__kdir}/.config', f'{self.__tmpdir}/.config')
-                shutil.copyfile(self.__switch_kconf, f'{self.__kdir}/.config')
+                if os.path.isfile(self.__switch_kconf):
+                    shutil.move(f'{self.__kdir}/.config', f'{self.__tmpdir}/.config')
+                    shutil.copyfile(self.__switch_kconf, f'{self.__kdir}/.config')
+                else:
+                    utils.die(message=f'ERROR: missing switch config \'{self.__switch_kconf}\'')
 
             # FIXME does not work if CC=clang
             # utils.run_cmd(f'{self.__kmake} prepare')
