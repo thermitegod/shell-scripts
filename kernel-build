@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# 1.4.0
+# 1.5.0
 # 2019-03-08
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -292,9 +292,11 @@ class Build:
                 else:
                     utils.die(message=f'ERROR: missing switch config \'{self.__switch_kconf}\'')
 
-            # FIXME does not work if CC=clang
-            # utils.run_cmd(f'{self.__kmake} prepare')
-            utils.run_cmd('make CC=gcc LD=ld.bfd prepare')
+            if self.__cc_use_clang:
+                # FIXME clang fails when running prepare
+                utils.run_cmd('make CC=gcc LD=ld.bfd prepare')
+            else:
+                utils.run_cmd(f'{self.__kmake} prepare')
 
             if os.path.isdir(self.__kmod_src):
                 shutil.rmtree(self.__kmod_src)
