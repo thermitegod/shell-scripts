@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-#2.10.0
+#2.11.0
 #2019-03-11
 
 #Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
@@ -32,17 +32,14 @@ while getopts "dhk" OPT;do
 	esac
 done
 
-date_day=$(date "+%F")
-date_time=$(date "+%H:%M:%S")
-ip=$(curl --max-time 30 --silent ifconfig.co)
+date_day="$(date "+%F")"
+date_time="$(date "+%H:%M:%S")"
+ip="$(curl --max-time 30 --silent ifconfig.co)"
 if [ "$(echo "${ip}"|grep Error)" ];then ip="INTERNAL ERROR"
-elif [ -z "${ip}" ];then ip="DOWN";fi
+elif [ -z "${ip}" ];then ip="DOWN"
+fi
 
 case "$mode" in
-	daily)
-		printf "%s %s : %s\n" "${date_day}" "${date_time}" "${ip}" >> "${d}/${date_day}.txt"
-		;;
-	once)
-		printf "%s %s : %s\n" "${date_day}" "${date_time}" "${ip}"
-		;;
+	daily) echo "${date_day} ${date_time} : ${ip}" >> "${d}/${date_day}.txt";;
+	once) echo "${date_day}" "${date_time}" : "${ip}";;
 esac
