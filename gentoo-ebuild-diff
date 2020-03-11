@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-#1.1.0
+#1.2.0
 #2020-03-11
 
 #Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -63,7 +63,15 @@ else
 	pkg_local="$(ls -1A --ignore=*xml --ignore=Manifest "${repo_local_path}"|sort -V|tail -n1)"
 fi
 
-if [ -z "${pkg_gentoo}" ] || [ -z "${pkg_gentoo}" ];then die "No ebuilds found for: ${pkg}";fi
+pkg_local="${repo_local_path}/${pkg_local}"
+pkg_gentoo="${repo_gentoo_path}/${pkg_gentoo}"
 
-diff -Naur "${repo_gentoo_path}/${pkg_gentoo}" "${repo_local_path}/${pkg_local}"
+if ! [ -f "${pkg_gentoo}" ] || ! [ -f "${pkg_gentoo}" ];then die "No ebuilds found for: ${pkg}";fi
+
+if [ "$(openssl sha1 "${pkg_gentoo}"|awk '{print $2}')" = "$(openssl sha1 "${pkg_local}"|awk '{print $2}')" ];then
+	printf "ebuilds are the same, exiting\n"
+	exit
+else
+	diff -Naur "${pkg_gentoo}" "${pkg_local}"
+fi
 
