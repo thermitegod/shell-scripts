@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.0.0
-# 2019-01-27
+# 1.1.0
+# 2019-03-12
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -42,6 +42,7 @@ def main():
           '--hostonly ' \
           '--force ' \
           '--nofscks ' \
+          f'--compress {args.compression} ' \
           '-o "systemd systemd-initrd systemd-networkd" ' \
           '-o "lvmmerge btrfs dm dmraid dmsquash-live-ntfs lvm mdraid stratis cifs iscsi nfs" ' \
           '-o "modsign rngd network-legacy biosdevname masterkey bootchart" ' \
