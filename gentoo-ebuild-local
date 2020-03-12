@@ -1,8 +1,8 @@
 #!/usr/bin/env sh
-#1.1.0
-#2019-12-05
+#1.2.0
+#2019-03-12
 
-#Copyright (C) 2019 Brandon Zorn <brandonzorn@cock.li>
+#Copyright (C) 2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
 #This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License version 3
@@ -16,37 +16,24 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-if [ "$(id -u)" -ne 0 ];then die "Requires root";fi
-
 die(){ /bin/echo -e "\033[0;31m$*\033[m";exit 1; }
+
+if [ "$(id -u)" -ne 0 ];then die "Requires root";fi
 
 no_live="1"
 edit="0"
 pkg=""
 
-while getopts "f:Elehx" OPT;do
+while getopts "f:lehx" OPT;do
 	case "$OPT" in
-		l)
-			no_live="0"
-			;;
-		e)
-			edit="1"
-			;;
-		E)
-			die "WIP"
-			edit_only="1"
-			;;
-		f)
-			pkg="${OPTARG}"
-			;;
-		x)
-			pkg="$(xclip -o)"
-			;;
+		l) no_live="0";;
+		e) edit="1";;
+		f) pkg="${OPTARG}";;
+		x) pkg="$(xclip -o)";;
 		h)
 			printf "GENERAL\n"
 			printf " -h\tPrint this help\n"
 			printf " -e\tedit ebuild once copied\n"
-			#printf " -E\tonly edit the ebuild in local repo\n"
 			printf " -f\tcopy ebuild from gentoo repo to local repo\n"
 			printf " -x\tcopy ebuild from gentoo repo to local repo, get pkg from clipboard\n"
 			printf " -l\tcopy live ebuild from gentoo repo to local repo\n"
@@ -56,27 +43,31 @@ while getopts "f:Elehx" OPT;do
 done
 shift $((OPTIND - 1))
 
-repo_gentoo="$(grep location /etc/portage/repos.conf/gentoo.conf|awk '{print $3}')"
-repo_local="$(grep location /etc/portage/repos.conf/local.conf|awk '{print $3}')"
+repo_location_gentoo="$(grep location /etc/portage/repos.conf/gentoo.conf|awk '{print $3}')"
+repo_location_local="$(grep location /etc/portage/repos.conf/local.conf|awk '{print $3}')"
 
-repo_local_path="${repo_local}/${pkg}"
-repo_gentoo_path="${repo_gentoo}/${pkg}"
+repo_local_path="${repo_location_local}/${pkg}"
+repo_gentoo_path="${repo_location_gentoo}/${pkg}"
 
-if ! [ -d "${repo_gentoo_path}" ];then
+if [ "$(eix "${pkg}")" = "No matches found" ];then
 	die "supplied pkg is invalid: ${pkg}"
 fi
 
 if ! [ -d "${repo_local_path}" ];then
-	mkdir -pv "${repo_local_path}"
+	mkdir -pv "${repo_local_path}" || die "mkdir failed"
 fi
 
 if [ "${no_live}" = "1" ];then
-	pkg_wanted="$(ls -1A --ignore=*xml --ignore=Manifest --ignore=*9999* "${repo_gentoo_path}"|sort -V|tail -n1)"
+	pkg_gentoo="$(find "${repo_gentoo_path}" ! -name '*9999*' -name '*.ebuild' 2>/dev/null|sort -V|tail -n1)"
 else
-	pkg_wanted="$(ls -1A --ignore=*xml --ignore=Manifest "${repo_gentoo_path}"|sort -V|tail -n1)"
+	pkg_gentoo="$(find "${repo_gentoo_path}" -name '*.ebuild' 2>/dev/null|sort -V|tail -n1)"
 fi
 
-cp -a "${repo_gentoo_path}/${pkg_wanted}" "${repo_local_path}" || die "failed to copy ebuild: ${pkg_wanted}"
+if [ -f "${pkg_gentoo}" ];then
+	cp -a "${pkg_gentoo}" "${repo_local_path}" || die "failed to copy ebuild: ${pkg_gentoo}"
+else
+	die "BUG: selected ebuild does not exist: %s" "${pkg_gentoo}"
+fi
 
 if [ -f "${repo_gentoo_path}/metadata.xml" ];then
 	cp -a "${repo_gentoo_path}/metadata.xml" "${repo_local_path}" || die "failed to copy metadata.xml"
@@ -87,7 +78,7 @@ if [ -d "${repo_gentoo_path}/files" ];then
 fi
 
 if [ "${edit}" = "1" ];then
-	"${EDITOR}"  "${repo_local}/${pkg}/${pkg_wanted}"
+	"${EDITOR}" "${repo_local_path}"/*.ebuild
 fi
 
 cd "${repo_local_path}"
