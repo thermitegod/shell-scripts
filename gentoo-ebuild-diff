@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#1.2.0
-#2020-03-11
+#1.3.0
+#2020-03-12
 
 #Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -19,59 +19,80 @@
 die(){ /bin/echo -e "\033[0;31m$*\033[m";exit 1; }
 
 no_live="1"
+diff_mode="gentoo_local"
 pkg=""
 
 if [ -z "${1}" ];then "${0}" -h;exit;fi
-while getopts "f:Elehx" OPT;do
+while getopts "f:Iilhrx" OPT;do
 	case "$OPT" in
-		l)
-			no_live="0"
-			;;
-		f)
-			pkg="${OPTARG}"
-			;;
-		x)
-			pkg="$(xclip -o)"
-			;;
+		I) diff_mode="installed_gentoo";;
+		i) diff_mode="installed_local";;
+		r) diff_mode="local_gentoo";;
+		l) no_live="0";;
+		f) pkg="${OPTARG}";;
+		x) pkg="$(xclip -o)";;
 		h)
 			printf "GENERAL\n"
 			printf " -h\tPrint this help\n"
 			printf " -f\tget pkg from \$1\n"
+			printf " -I\tdiff installed against gentoo repo\n"
+			printf " -i\tdiff installed against local repo\n"
 			printf " -l\tenable diffing live ebuild, otherwise ignores them\n"
+			printf " -r\tdiff 'local gentoo' instead of 'gentoo local'\n"
 			printf " -x\tget pkg from clipboard\n"
 			exit;;
 		*) printf "Showing help\n\n";"${0}" -h;;
 	esac
 done
-shift $((OPTIND - 1))
+#shift $((OPTIND - 1))
 
-repo_gentoo="$(grep location /etc/portage/repos.conf/gentoo.conf|awk '{print $3}')"
-repo_local="$(grep location /etc/portage/repos.conf/local.conf|awk '{print $3}')"
+repo_location_gentoo="$(grep location /etc/portage/repos.conf/gentoo.conf|awk '{print $3}')"
+repo_location_local="$(grep location /etc/portage/repos.conf/local.conf|awk '{print $3}')"
+repo_location_installed="/var/db/pkg"
 
-repo_local_path="${repo_local}/${pkg}"
-repo_gentoo_path="${repo_gentoo}/${pkg}"
+repo_local_path="${repo_location_local}/${pkg}"
+repo_gentoo_path="${repo_location_gentoo}/${pkg}"
+repo_installed_path="${repo_location_installed}/${pkg}"
 
-if ! [ -d "${repo_gentoo_path}" ];then
+if [ "$(eix "${pkg}")" = "No matches found" ];then
 	die "supplied pkg is invalid: ${pkg}"
 fi
 
 if [ "${no_live}" = "1" ];then
-	pkg_gentoo="$(ls -1A --ignore=*xml --ignore=Manifest --ignore=*9999* "${repo_gentoo_path}"|sort -V|tail -n1)"
-	pkg_local="$(ls -1A --ignore=*xml --ignore=Manifest --ignore=*9999* "${repo_local_path}"|sort -V|tail -n1)"
+	pkg_gentoo="$(find "${repo_gentoo_path}" ! -name '*9999*' -name '*.ebuild' 2>/dev/null|sort -V|tail -n1)"
+	pkg_local="$(find "${repo_local_path}" ! -name '*9999*' -name '*.ebuild' 2>/dev/null|sort -V|tail -n1)"
 else
-	pkg_gentoo="$(ls -1A --ignore=*xml --ignore=Manifest "${repo_gentoo_path}"|sort -V|tail -n1)"
-	pkg_local="$(ls -1A --ignore=*xml --ignore=Manifest "${repo_local_path}"|sort -V|tail -n1)"
+	pkg_gentoo="$(find "${repo_gentoo_path}" -name '*.ebuild' 2>/dev/null|sort -V|tail -n1)"
+	pkg_local="$(find "${repo_local_path}" -name '*.ebuild' 2>/dev/null|sort -V|tail -n1)"
 fi
 
-pkg_local="${repo_local_path}/${pkg_local}"
-pkg_gentoo="${repo_gentoo_path}/${pkg_gentoo}"
+pkg_installed="$(find ${repo_installed_path}* -name '*.ebuild' 2>/dev/null)"
 
-if ! [ -f "${pkg_gentoo}" ] || ! [ -f "${pkg_gentoo}" ];then die "No ebuilds found for: ${pkg}";fi
+case "${diff_mode}" in
+	gentoo_local)
+		diff_old="${pkg_gentoo}"
+		diff_new="${pkg_local}"
+		;;
+	local_gentoo)
+		diff_old="${pkg_local}"
+		diff_new="${pkg_gentoo}"
+		;;
+	installed_local)
+		diff_old="${pkg_installed}"
+		diff_new="${pkg_local}"
+		;;
+	installed_gentoo)
+		diff_old="${pkg_installed}"
+		diff_new="${pkg_gentoo}"
+		;;
+esac
 
-if [ "$(openssl sha1 "${pkg_gentoo}"|awk '{print $2}')" = "$(openssl sha1 "${pkg_local}"|awk '{print $2}')" ];then
-	printf "ebuilds are the same, exiting\n"
+if ! [ -f "${diff_old}" ] || ! [ -f "${diff_new}" ];then die "No ebuilds found for: ${pkg}";fi
+
+if [ "$(openssl sha1 "${diff_old}"|awk '{print $2}')" = "$(openssl sha1 "${diff_new}"|awk '{print $2}')" ];then
+	printf "these ebuilds are the same: \n${diff_old}\n${diff_new}\n"
 	exit
 else
-	diff -Naur "${pkg_gentoo}" "${pkg_local}"
+	diff -Naur "${diff_old}" "${diff_new}"
 fi
 
