@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 5.0.0
-# 2019-02-28
+# 5.1.0
+# 2020-03-12
 
 # Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -19,38 +19,43 @@
 import argparse
 import os
 import shutil
-
 from tempfile import TemporaryDirectory
 
-from utils import utils
 from utils import kernel
+from utils import utils
 
 
 class Clean:
     def __init__(self):
-        self.__src = kernel.get_kernel_dir()
+        self.__kdir = os.path.realpath(kernel.get_kernel_dir())
+
+    def kernel_rm(self):
+        ksym = f'{self.__kdir}'
+        if os.path.islink(ksym):
+            os.unlink(ksym)
+
+        for dirs in next(os.walk(os.path.dirname(self.__kdir)))[1]:
+            kdirs = f'{os.path.dirname(self.__kdir)}/{dirs}'
+            shutil.rmtree(kdirs)
+
+    def kernel_clean(self):
+        cmd = 'make distclean'
+
+        if os.path.exists(f'{self.__kdir}/.config'):
+            with TemporaryDirectory() as tmpdir:
+                kernel.move_kernel_conf(src=self.__kdir, dst=tmpdir)
+                os.chdir(self.__kdir)
+                utils.run_cmd(cmd)
+                kernel.move_kernel_conf(src=tmpdir, dst=self.__kdir)
+        else:
+            os.chdir(self.__kdir)
+            utils.run_cmd(cmd)
 
     def run(self, args):
         if args.rm:
-            ksym = f'{self.__src}'
-            if os.path.exists(ksym) and os.path.islink(ksym):
-                os.unlink(ksym)
-
-            for dirs in next(os.walk(os.path.dirname(self.__src)))[1]:
-                kdirs = f'{self.__src}/{dirs}'
-                shutil.rmtree(kdirs)
+            self.kernel_rm()
         elif args.clean:
-            kdir = f'{self.__src}'
-            if not os.path.exists(kdir):
-                utils.die(message=f'Missing kernel symlink: {kdir}')
-
-            if os.path.exists(f'{kdir}/.config'):
-                with TemporaryDirectory() as tmpdir:
-                    cmd = f'sh -c "cd {kdir};mv .config {tmpdir};make distclean;mv {tmpdir}/.config ."'
-                    utils.run_cmd(cmd)
-            else:
-                cmd = f'sh -c "cd {kdir};make distclean"'
-                utils.run_cmd(cmd)
+            self.kernel_clean()
 
 
 def main():
