@@ -71,7 +71,7 @@ class Build:
         self.__kconf = f'{self.__kdir}/.config'
 
         if not os.path.isfile(self.__kconf):
-            utils.die(message='ERROR: no config in kenrel directory')
+            utils.die(msg='ERROR: no config in kenrel directory')
 
         self.__use_zfs_version = 'release'
 
@@ -262,7 +262,7 @@ class Build:
 
         self.__zfs_ebuild_full = f'{self.__port}/{self.__zfs_ebuild}/zfs-kmod-{self.__zver}.ebuild'
         if not os.path.isfile(f'{self.__zfs_ebuild_full}'):
-            utils.die(message=f'ERROR: missing \'{self.__zfs_ebuild_full}\'')
+            utils.die(msg=f'ERROR: missing \'{self.__zfs_ebuild_full}\'')
 
         self.__kmod_src = f'{self.__storage}/src/{self.__kver}/{self.__zver}'
         if not os.path.isdir(self.__kmod_src) and self.__run_zfs_build:
@@ -290,7 +290,7 @@ class Build:
                     kernel.move_kernel_conf(src=self.__kdir, dst=self.__tmpdir)
                     kernel.move_kernel_conf(src=self.__switch_kconf, dst=self.__kdir, act='copy')
                 else:
-                    utils.die(message=f'ERROR: missing switch config \'{self.__switch_kconf}\'')
+                    utils.die(msg=f'ERROR: missing switch config \'{self.__switch_kconf}\'')
 
             if self.__cc_use_clang:
                 # FIXME clang fails when running prepare
@@ -331,7 +331,7 @@ class Build:
 
         else:
             if not os.path.isfile(f'{self.__kmod_src}/{archive}'):
-                utils.die(message=f'Archive missing: {self.__kmod_src}/{archive}')
+                utils.die(msg=f'Archive missing: {self.__kmod_src}/{archive}')
 
             # this is just simpler
             script = f'{self.__tmpdir}/tmp.sh'

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 1.5.0
+# 1.6.0
 # 2019-02-28
 
 # Copyright (C) 2019,2020 Brandon Zorn <brandonzorn@cock.li>
@@ -25,12 +25,12 @@ import hashlib
 
 def is_root():
     if os.geteuid() != 0:
-        die(message='Requires root, exiting')
+        die(msg='Requires root, exiting')
 
 
 def is_not_root():
     if os.geteuid() == 0:
-        die(message='Do not run as root, exiting')
+        die(msg='Do not run as root, exiting')
 
 
 def run_cmd(cmd):
@@ -50,7 +50,7 @@ def get_script_name():
 
 
 def not_implemented():
-    exit('Not implemented')
+    die(msg='Not implemented')
 
 
 def edit_conf(path, e=True):
@@ -59,9 +59,10 @@ def edit_conf(path, e=True):
         exit(0)
 
 
-def die(message=None):
-    print(f'{message}')
-    sys.exit(1)
+def die(msg=None, exit_code=1):
+    if msg is not None:
+        print(msg)
+    sys.exit(exit_code)
 
 
 def get_extra_dir():
@@ -83,4 +84,4 @@ def hash_compare_sha1(file1, file2):
 
 def link_check(link):
     if not link[:4] == 'http':
-        die(message=f'Invalid URL: {link}')
+        die(msg=f'Invalid URL: {link}')

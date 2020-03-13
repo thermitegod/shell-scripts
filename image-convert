@@ -108,7 +108,7 @@ class Convert:
             max_qual = 9
 
         if int(self.__qual) > max_qual:
-            utils.die(message=f'exiting because of invalid range for {self.__newext}: {self.__qual}')
+            utils.die(msg=f'exiting because of invalid range for {self.__newext}: {self.__qual}')
 
     def get_mode(self):
         if self.__qual != '0':
@@ -232,7 +232,7 @@ class Convert:
             self.__act = 'resize'
 
         if args.height:
-            utils.die(message='Height is currently disabled, use width')
+            utils.die(msg='Height is currently disabled, use width')
             self.__size = self.convert_set_size(mode='height', get_size=args.height)
             self.__act = 'resize'
 

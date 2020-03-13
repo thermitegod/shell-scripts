@@ -35,7 +35,7 @@ def main():
         utils.run_cmd(cmd)
 
         if not os.path.isfile(cfgnew):
-            utils.die(message='grub did not create new cfg file')
+            utils.die(msg='grub did not create new cfg file')
 
         if not utils.hash_compare_sha1(cfgold, cfgnew):
             os.unlink(cfgold)
