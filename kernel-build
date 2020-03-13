@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.5.0
-# 2019-03-08
+# 1.6.0
+# 2019-03-12
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -114,6 +114,12 @@ class Build:
         self.__use_modules = False
         self.__use_local_zfs_ebuild = False
 
+        self.__kver_full = os.path.basename(self.__kdir)
+        if 'rc' in self.__kver_full:
+            self.__kver = self.__kver_full.rpartition('_')[0]
+        else:
+            self.__kver = self.__kver_full.rpartition('.')[0]
+
         self.__storage = os.path.join(os.environ['XDG_DATA_HOME'], 'kernel')
         self.__settings = os.path.join(os.environ['XDG_CONFIG_HOME'], 'kernel/config')
 
@@ -226,17 +232,11 @@ class Build:
                     os.remove(self.__switch_kconf)
                 self.cdkdir()
                 utils.run_cmd(f'{self.__kmake} nconfig')
-                shutil.copyfile(f'{self.__kdir}/.config', self.__switch_kconf)
+                kernel.move_kernel_conf(src=self.__kdir, dst=self.__switch_kconf, act='copy')
             else:
                 break
 
     def run_zfs_checks(self):
-        self.__kver_full = os.path.basename(self.__kdir)
-        if 'rc' in self.__kver_full:
-            self.__kver = self.__kver_full.rpartition('_')[0]
-        else:
-            self.__kver = self.__kver_full.rpartition('.')[0]
-
         if self.__use_local_zfs_ebuild:
             repo_conf = 'gentoo.conf'
         else:
@@ -287,8 +287,8 @@ class Build:
 
             if not self.__use_modules:
                 if os.path.isfile(self.__switch_kconf):
-                    shutil.move(f'{self.__kdir}/.config', f'{self.__tmpdir}/.config')
-                    shutil.copyfile(self.__switch_kconf, f'{self.__kdir}/.config')
+                    kernel.move_kernel_conf(src=self.__kdir, dst=self.__tmpdir)
+                    kernel.move_kernel_conf(src=self.__switch_kconf, dst=self.__kdir, act='copy')
                 else:
                     utils.die(message=f'ERROR: missing switch config \'{self.__switch_kconf}\'')
 
@@ -322,13 +322,12 @@ class Build:
             utils.write_script(script, text)
             utils.run_cmd(script)
 
+            if not self.__use_modules:
+                kernel.move_kernel_conf(src=self.__tmpdir, dst=self.__kdir)
+
             if self.__cc_use_clang:
                 # clean since gcc was used in prepare
                 utils.run_cmd('kernel-clean-src -c')
-
-            if not self.__use_modules:
-                os.remove(f'{self.__kdir}/.config')
-                shutil.copyfile(f'{self.__kdir}/.config', self.__switch_kconf)
 
         else:
             if not os.path.isfile(f'{self.__kmod_src}/{archive}'):
