@@ -1,1 +1,174 @@
-mkxz
+#!/usr/bin/env python3
+# 1.0.0
+# 2020-03-19
+
+# Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
+#
+# This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License version 3
+#    as published by the Free Software Foundation.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+import argparse
+import atexit
+import os
+import shutil
+import tempfile
+
+from utils import utils
+
+
+class Compress:
+    def __init__(self):
+        atexit.register(self.remove_tmpdir)
+
+        self.__tmpdir = tempfile.mkdtemp()
+
+        self.__cmd = None
+        self.__ext = None
+
+        self.__input = None
+
+        self.__comp_type = None
+
+        self.__directories = False
+        self.__files = False
+        self.__status = False
+
+        self.__verbose = ''
+
+        self.__destructive = False
+        self.__destructive_files = False
+        self.__destructive_directories = False
+
+    def remove_tmpdir(self):
+        shutil.rmtree(self.__tmpdir)
+
+    def get_mode(self):
+        if 'zst' in utils.get_script_name():
+            self.__cmd = 'zstd -T0'
+            self.__ext = 'zst'
+        elif 'lz4' in utils.get_script_name():
+            self.__cmd = 'lz4'
+            self.__ext = 'lz4'
+        elif 'xz' in utils.get_script_name():
+            self.__cmd = 'xz -k -e9'
+            self.__ext = 'xz'
+        elif 'gz' in utils.get_script_name():
+            self.__cmd = 'gzip -k'
+            self.__ext = 'gz'
+        elif 'bz2' in utils.get_script_name():
+            self.__cmd = 'bzip2 -k'
+            self.__ext = 'bz2'
+
+    def get_files(self):
+        if self.__directories or self.__files:
+            for f in os.listdir(os.getcwd()):
+                if os.path.isdir(f) and self.__directories:
+                    self.__comp_type = 'dir'
+                    self.compress(file=f)
+                if os.path.isfile(f) and self.__files:
+                    self.__comp_type = 'file'
+                    self.compress(file=f)
+        elif self.__input is not None:
+            for f in self.__input:
+                if os.path.isfile(f):
+                    self.__comp_type = 'file'
+                    self.compress(file=f)
+                elif os.path.isdir(f):
+                    self.__comp_type = 'dir'
+                    self.compress(file=f)
+
+    def compress(self, file):
+        script = f'{self.__tmpdir}/tmp.sh'
+        text = '#!/usr/bin/env sh\n' \
+               f'die(){{ /bin/echo -e $*;kill {os.getpid()}; }}\n'
+
+        if self.__comp_type == 'dir' and self.__status:
+            text += f'tar --xattrs -{self.__verbose}Scf - "{os.path.abspath(file)}" -P | ' \
+                    f'pv -s "$(du -sb "{os.path.abspath(file)}" | awk \'{{print $1}}\')" | ' \
+                    f'{self.__cmd} >| "{os.getcwd()}/{file}.tar.{self.__ext}" || die "Compression failed for: {file}"'
+
+        elif self.__comp_type == 'dir':
+            text += f'tar --xattrs -{self.__verbose}Scf - "{os.path.abspath(file)}" -P | ' \
+                    f'{self.__cmd} >| "{os.getcwd()}/{file}.tar.{self.__ext}" || die "Compression failed for: {file}"'
+
+        elif self.__comp_type == 'file':
+            text += f'{self.__cmd} {os.getcwd()}/{file} || die "Compression failed for: {file}"'
+
+        utils.write_script(script, text)
+        utils.run_cmd(script)
+        os.remove(script)
+
+    def parse_args(self, args):
+        # compression type
+        if args.directories:
+            self.__directories = True
+        if args.files:
+            self.__files = True
+        if args.status:
+            self.__status = True
+        # destructive
+        if args.destructive:
+            self.__destructive = True
+        if args.destructive_files:
+            self.__destructive_files = True
+        if args.destructive_directories:
+            self.__destructive_directories = True
+        # other
+        if args.input is not None:
+            self.__input = args.input
+        if args.verbose:
+            self.__verbose = 'v'
+
+    def run(self, args):
+        self.parse_args(args)
+        self.get_mode()
+        self.get_files()
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    general = parser.add_argument_group('GENERAL',
+                                        'default will compress files passed in $1')
+    general.add_argument('-d', '--directories',
+                         action='store_true',
+                         help='compress all directories')
+    general.add_argument('-f', '--files',
+                         action='store_true',
+                         help='compress all files')
+    general.add_argument('-i', '--input',
+                         nargs='+',
+                         help='compress input file')
+    general.add_argument('-s', '--destructive',
+                         action='store_true',
+                         help='compress $1, delete after compressed')
+    general.add_argument('-S', '--status',
+                         action='store_true',
+                         help='enable cool status bar, directories only')
+    general.add_argument('-v', '--verbose',
+                         action='store_true',
+                         help='enable verbose tar')
+    general.add_argument('-x', '--destructive-files',
+                         action='store_true',
+                         help='compress all files, delete original after compressed')
+    general.add_argument('-z', '--destructive-directories',
+                         action='store_true',
+                         help='compress all directories, delete original after compressed')
+    args = parser.parse_args()
+
+    utils.args_required_else_help()
+
+    run = Compress()
+    run.run(args)
+
+
+if __name__ == '__main__':
+    main()
