@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.6.0
-# 2019-02-28
+# 1.7.0
+# 2019-03-19
 
 # Copyright (C) 2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -34,7 +34,10 @@ def is_not_root():
 
 
 def run_cmd(cmd):
-    subprocess.run(shlex.split(cmd))
+    try:
+        subprocess.run(shlex.split(cmd))
+    except KeyboardInterrupt:
+        print()
 
 
 def write_script(path, text):
@@ -47,6 +50,14 @@ def write_script(path, text):
 
 def get_script_name():
     return os.path.basename(sys.argv[0])
+
+
+def args_required_else_help():
+    try:
+        sys.argv[1]
+    except IndexError:
+        run_cmd(f'{sys.argv[0]} -h')
+        exit()
 
 
 def not_implemented():
