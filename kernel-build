@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.6.0
-# 2019-03-12
+# 1.7.0
+# 2019-04-02
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -119,6 +119,7 @@ class Build:
             self.__kver = self.__kver_full.rpartition('_')[0]
         else:
             self.__kver = self.__kver_full.rpartition('.')[0]
+        self.__kver_full = self.__kver_full[6:-1]
 
         self.__storage = os.path.join(os.environ['XDG_DATA_HOME'], 'kernel')
         self.__settings = os.path.join(os.environ['XDG_CONFIG_HOME'], 'kernel/config')
