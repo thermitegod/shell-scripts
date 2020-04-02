@@ -119,7 +119,7 @@ class Build:
             self.__kver = self.__kver_full.rpartition('_')[0]
         else:
             self.__kver = self.__kver_full.rpartition('.')[0]
-        self.__kver_full = self.__kver_full[6:-1]
+        self.__kver_full = self.__kver_full[6:]
 
         self.__storage = os.path.join(os.environ['XDG_DATA_HOME'], 'kernel')
         self.__settings = os.path.join(os.environ['XDG_CONFIG_HOME'], 'kernel/config')
