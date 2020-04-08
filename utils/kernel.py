@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.1.0
-# 2019-03-12
+# 1.2.0
+# 2019-04-08
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -30,14 +30,12 @@ def get_kernel_dir():
     utils.die(msg=f'{src}: is not a valid symlink')
 
 
-def move_kernel_conf(src=None, dst=None, act='move'):
-    if (src or dst) is None:
-        utils.die(msg=f'Missing args for move_kernel_conf()')
-
+def __kernel_conf_action(src, dst, act):
     if os.path.isdir(src):
         src = f'{src}/.config'
+
     if os.path.isdir(dst):
-        src = f'{dst}/.config'
+        dst = f'{dst}/.config'
 
     if not os.path.isfile(src):
         utils.die(msg=f'No kernel config found: {src}')
@@ -49,8 +47,11 @@ def move_kernel_conf(src=None, dst=None, act='move'):
         shutil.move(src, dst)
     elif act == 'copy':
         shutil.copyfile(src, dst)
-    else:
-        utils.die(msg=f'invalid arg: {act}')
 
 
+def kernel_conf_copy(src, dst):
+    __kernel_conf_action(src=src, dst=dst, act='copy')
 
+
+def kernel_conf_move(src, dst):
+    __kernel_conf_action(src=src, dst=dst, act='move')

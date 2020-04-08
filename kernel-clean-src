@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 5.1.0
-# 2020-03-12
+# 5.2.0
+# 2020-04-08
 
 # Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -43,10 +43,10 @@ class Clean:
 
         if os.path.exists(f'{self.__kdir}/.config'):
             with TemporaryDirectory() as tmpdir:
-                kernel.move_kernel_conf(src=self.__kdir, dst=tmpdir)
+                kernel.kernel_conf_move(src=self.__kdir, dst=tmpdir)
                 os.chdir(self.__kdir)
                 utils.run_cmd(cmd)
-                kernel.move_kernel_conf(src=tmpdir, dst=self.__kdir)
+                kernel.kernel_conf_move(src=tmpdir, dst=self.__kdir)
         else:
             os.chdir(self.__kdir)
             utils.run_cmd(cmd)

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.8.0
-# 2019-04-04
+# 1.9.0
+# 2019-04-08
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -233,7 +233,7 @@ class Build:
                     os.remove(self.__switch_kconf)
                 self.cdkdir()
                 utils.run_cmd(f'{self.__kmake} nconfig')
-                kernel.move_kernel_conf(src=self.__kdir, dst=self.__switch_kconf, act='copy')
+                kernel.kernel_conf_copy(src=self.__kdir, dst=self.__switch_kconf)
             else:
                 break
 
@@ -288,8 +288,8 @@ class Build:
 
             if not self.__use_modules:
                 if os.path.isfile(self.__switch_kconf):
-                    kernel.move_kernel_conf(src=self.__kdir, dst=self.__tmpdir)
-                    kernel.move_kernel_conf(src=self.__switch_kconf, dst=self.__kdir, act='copy')
+                    kernel.kernel_conf_move(src=self.__kdir, dst=self.__tmpdir)
+                    kernel.kernel_conf_copy(src=self.__switch_kconf, dst=self.__kdir)
                 else:
                     utils.die(msg=f'ERROR: missing switch config \'{self.__switch_kconf}\'')
 
@@ -322,7 +322,7 @@ class Build:
             utils.run_cmd(script)
 
             if not self.__use_modules:
-                kernel.move_kernel_conf(src=self.__tmpdir, dst=self.__kdir)
+                kernel.kernel_conf_move(src=self.__tmpdir, dst=self.__kdir)
 
             if self.__cc_use_clang:
                 # clean since gcc was used in prepare
