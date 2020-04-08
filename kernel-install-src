@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-# 3.2.0
-# 2019-11-02
+# 3.3.0
+# 2019-04-08
 
-# Copyright (C) 2018,2019 Brandon Zorn <brandonzorn@cock.li>
+# Copyright (C) 2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
 # This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License version 3
@@ -17,6 +17,7 @@
 #    along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import argparse
+import os
 
 from utils import utils
 
@@ -45,13 +46,19 @@ def main():
         cmd += '--quiet '
 
     if args.git:
-        cmd += 'sys-kernel/git-sources'
+        kernel = 'git'
     elif args.vanilla:
-        cmd += 'sys-kernel/vanilla-sources'
+        kernel = 'vanilla'
     else:
-        cmd += 'sys-kernel/gentoo-sources'
+        kernel = 'gentoo'
+
+    cmd += f'sys-kernel/{kernel}-sources'
 
     utils.run_cmd(cmd)
+
+    kconf = '/proc/config.gz'
+    if os.path.isfile(kconf):
+        utils.run_cmd(f'sh -c "zcat {kconf} >| /usr/src/linux/.config"')
 
 
 if __name__ == '__main__':
