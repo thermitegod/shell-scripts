@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.7.0
-# 2019-04-02
+# 1.8.0
+# 2019-04-04
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -309,9 +309,7 @@ class Build:
 
             # this is just simpler
             script = f'{self.__tmpdir}/tmp.sh'
-            text = '#!/usr/bin/env sh\n' \
-                   f'die(){{ /bin/echo -e $*;kill {os.getpid()}; }}\n' \
-                   f'{portage_env}\n' \
+            text = f'{portage_env}\n' \
                    f'EXTRA_ECONF="--with-linux={self.__kdir} --enable-linux-builtin" ebuild ' \
                    f'{self.__zfs_ebuild_full} configure || die "build failed"\n' \
                    f'cd {self.__tmpdir}/portage/{self.__zfs_ebuild}-{zver_path}/work/{self.__kmod}-{self.__zver}\n' \
@@ -320,7 +318,7 @@ class Build:
                    f'tar -cf - {self.__kmod}-{self.__zver} -P | zstd -T0 -4 >| {archive}\n' \
                    f'mv {archive} {self.__kmod_src}'
 
-            utils.write_script(script, text)
+            utils.write_script_shell(script, text)
             utils.run_cmd(script)
 
             if not self.__use_modules:
@@ -336,14 +334,12 @@ class Build:
 
             # this is just simpler
             script = f'{self.__tmpdir}/tmp.sh'
-            text = '#!/usr/bin/env sh\n' \
-                   f'die(){{ /bin/echo -e $*;kill {os.getpid()}; }}\n' \
-                   f'cd {self.__kmod_src} || die "cd failed"\n' \
+            text = f'cd {self.__kmod_src} || die "cd failed"\n' \
                    f'tar -I zstd -xf {archive} -C {self.__tmpdir} || die "extraction failed"\n' \
                    f'cd {self.__tmpdir}/{self.__kmod}-{self.__zver}\n' \
                    f'./copy-builtin {self.__kdir} || die "copy-builtin failed"'
 
-            utils.write_script(script, text)
+            utils.write_script_shell(script, text)
             utils.run_cmd(script)
 
     def run_kernel_build(self):
