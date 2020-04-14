@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# 1.11.0
+# 1.12.0
 # 2019-04-14
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -17,9 +17,6 @@
 #    along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # ZFS Builtin Kernel Build Script - gentoo
-
-# hard requirments
-# >=linux-4.17.0 : >=zfs-0.8.0 / git
 
 # storage dirs - will be created
 # ${XDG_DATA_DIRS}/kernel/{config,distfiles,src}
@@ -47,6 +44,8 @@ import multiprocessing
 import atexit
 import pathlib
 
+from packaging import version
+
 from utils import utils
 from utils import kernel
 
@@ -61,6 +60,9 @@ from utils import kernel
 
 class Build:
     def __init__(self):
+        self.__MIN_KERNEL_VERSION = '4.17.0'
+        self.__MIN_ZFS_VERSION = '0.8.0'
+
         atexit.register(self.remove_tmpdir)
 
         self.__tmpdir = tempfile.mkdtemp()
@@ -86,6 +88,10 @@ class Build:
 
         self.__kver_module_scheme = None
         self.__kver_storage_scheme = None
+
+        self.__kver_version_check = None
+        self.__zfs_version_check = None
+
         self.__repos = None
         self.__zfs_ebuild = None
         self.__zver = None
@@ -129,6 +135,8 @@ class Build:
             kver_tmp = self.__kver_module_scheme.rpartition('-')
             self.__kver_module_scheme = f'{kver_tmp[0]}.0{kver_tmp[1]}{kver_tmp[2]}'
 
+        self.min_supported_version_check(checking='kernel', ver=self.__kver_module_scheme.rpartition('-')[0])
+
         self.__storage = os.path.join(os.environ['XDG_DATA_HOME'], 'kernel')
         self.__settings = os.path.join(os.environ['XDG_CONFIG_HOME'], 'kernel/config')
 
@@ -147,6 +155,8 @@ class Build:
         print(f'Running emerge     : {self.__run_emerge}')
         if self.__intro_extra:
             print(f'EXTRA')
+            print(f'Min kernel version : {self.__MIN_KERNEL_VERSION}')
+            print(f'Min ZFS version    : {self.__MIN_ZFS_VERSION}')
             print(f'Make command       : {self.__kmake}')
             print(f'PORTDIR            : {self.__repos}')
             print(f'kver storage       : {self.__kver_storage_scheme}')
@@ -158,6 +168,16 @@ class Build:
             input('Enter to start kernel build ')
         except KeyboardInterrupt:
             exit()
+
+    def min_supported_version_check(self, checking, ver):
+        required = None
+        if checking == 'kernel':
+            required = self.__MIN_KERNEL_VERSION
+        elif checking == 'zfs':
+            required = self.__MIN_ZFS_VERSION
+
+        if version.parse(required) > version.parse(ver):
+            utils.die(msg=f'Minimum supported {checking} version is: {required}, using {ver}')
 
     def cdkdir(self):
         os.chdir(self.__kdir)
@@ -265,6 +285,7 @@ class Build:
                             f'{self.__port}/{self.__zfs_ebuild}'))[-1].rpartition('.')[0].rpartition('-')[-1]
 
             self.__kmod = "zfs"  # build path
+            self.min_supported_version_check(checking='zfs', ver=self.__zver)
         else:
             # git
             self.__zver = '9999'
