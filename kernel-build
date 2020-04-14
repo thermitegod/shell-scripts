@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# 1.14.0
+# 2.0.0
 # 2019-04-14
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -60,7 +60,7 @@ from utils import kernel
 
 class Build:
     def __init__(self):
-        self.__MIN_KERNEL_VERSION = '4.17.0'
+        self.__MIN_KERNEL_VERSION = '5.7.0'
         self.__MIN_ZFS_VERSION = '0.8.0'
 
         atexit.register(self.remove_tmpdir)
@@ -80,10 +80,9 @@ class Build:
 
         self.__run_kernel_bump = False
 
-        self.__cc_use_clang = False
-        self.__cc = None
-        self.__ld = None
-        self.__kmake = None
+        self.__cc_use_clang = True
+
+        self.__experimental = False
 
         self.__kver_module_scheme = None
         self.__kver_storage_scheme = None
@@ -145,7 +144,7 @@ class Build:
 
     def intro(self):
         print(f'kernel             : {self.__kdir}')
-        print(f'compiler/linker    : {self.set_compiler(get_cc=True)}')
+        print(f'Using LLVM/Clang   : {self.__cc_use_clang}')
         print(f'Install            : {self.__run_kernel_install}')
         print(f'ZFS version        : {self.__zver}')
         print(f'ZFS local ebuild   : {self.__use_zfs_local_ebuild}')
@@ -156,11 +155,12 @@ class Build:
             print(f'EXTRA')
             print(f'Min kernel version : {self.__MIN_KERNEL_VERSION}')
             print(f'Min ZFS version    : {self.__MIN_ZFS_VERSION}')
-            print(f'Make command       : {self.__kmake}')
+            print(f'Make command       : {self.run_compiler(return_only=True)}')
             print(f'PORTDIR            : {self.__repos}')
             print(f'kver storage       : {self.__kver_storage_scheme}')
             print(f'kver module        : {self.__kver_module_scheme}')
             print(f'Tempdir            : {self.__tmpdir}')
+            print(f'Experimental opts  : {self.__experimental}')
             utils.run_cmd('eselect kernel list')
         print()
         try:
@@ -185,7 +185,7 @@ class Build:
         os.chdir(self.__tmpdir)
 
     def msc(self):
-        utils.run_cmd(f'{self.__kmake} syncconfig')
+        self.run_compiler(act='syncconfig')
 
     def remove_tmpdir(self):
         shutil.rmtree(self.__tmpdir)
@@ -209,22 +209,29 @@ class Build:
                 if 'CONFIG_MODULES=y' in line:
                     self.__use_modules = True
 
-    def set_compiler(self, get_cc=False):
-        if self.__cc_use_clang:
-            # ld.lld only works when clang is the compiler
-            self.__cc = 'clang'
-            self.__ld = 'ld.lld'
-        else:
-            # force bfd since gold is not supported
-            # https://bugs.gentoo.org/694612
-            self.__cc = 'gcc'
-            self.__ld = 'ld.bfd'
-
-        if get_cc:
-            return self.__cc, self.__ld
-
+    def run_compiler(self, act='', force_gcc=False, return_only=False):
+        # keep CC/LD to override env, probably not needed though
         cores = multiprocessing.cpu_count()
-        self.__kmake = f'nice -19 make -j{cores * 2 + 1} -l{cores + 1} CC={self.__cc} LD={self.__ld}'
+        cc = ''
+        ld = ''
+        kmake = f'sh -c "'
+        if not self.__cc_use_clang or force_gcc:
+            # gcc
+            cc = 'gcc'
+            ld = 'ld.bfd'
+        elif self.__cc_use_clang:
+            # clang
+            cc = 'clang'
+            ld = 'ld.lld'
+            kmake += f'LLVM=1 '
+            if self.__experimental:
+                kmake += 'LLVM_IAS=1 '
+
+        kmake += f'nice -19 make -j{cores * 2 + 1} -l{cores + 1} CC={cc} LD={ld} {act}"'
+        if not return_only:
+            utils.run_cmd(kmake)
+        else:
+            return kmake
 
     def kernel_bump(self):
         # CONFIG_MODULES and CONFIG_KALLSYMS are required to build kmod
@@ -259,7 +266,7 @@ class Build:
                 if os.path.isfile(self.__switch_kconf):
                     os.remove(self.__switch_kconf)
                 self.cdkdir()
-                utils.run_cmd(f'{self.__kmake} nconfig')
+                self.run_compiler(act='nconfig')
                 kernel.kernel_conf_copy(src=self.__kdir, dst=self.__switch_kconf)
             else:
                 break
@@ -322,11 +329,8 @@ class Build:
                 else:
                     utils.die(msg=f'ERROR: missing switch config \'{self.__switch_kconf}\'')
 
-            if self.__cc_use_clang:
-                # FIXME clang fails when running prepare
-                utils.run_cmd('make CC=gcc LD=ld.bfd prepare')
-            else:
-                utils.run_cmd(f'{self.__kmake} prepare')
+            # need to use gcc for this
+            self.run_compiler(act='prepare', force_gcc=True)
 
             if os.path.isdir(self.__kmod_src):
                 shutil.rmtree(self.__kmod_src)
@@ -354,7 +358,9 @@ class Build:
                 kernel.kernel_conf_move(src=self.__tmpdir, dst=self.__kdir)
 
             if self.__cc_use_clang:
-                # clean since gcc was used in prepare
+                # when using clang to run 'make prepare' get error when running zfs configure
+                # 'Unable to build an empty module.'
+                # so clean kernel src since gcc was used in prepare
                 utils.run_cmd('kernel-clean-src -c')
 
         else:
@@ -374,12 +380,12 @@ class Build:
     def run_kernel_build(self):
         self.cdkdir()
         self.msc()
-        utils.run_cmd(f'{self.__kmake}')
+        self.run_compiler()
 
         if self.__run_kernel_install:
             if self.__use_modules:
-                utils.run_cmd(f'{self.__kmake} modules_install')
-            utils.run_cmd(f'{self.__kmake} install')
+                self.run_compiler(act='modules_install')
+            self.run_compiler(act='install')
 
         if self.__run_kernel_post:
             if self.__run_emerge:
@@ -397,7 +403,6 @@ class Build:
                 utils.run_cmd('kernel-clean-src -c')
 
     def build(self):
-        self.set_compiler()
         self.modules_check()
         self.storage_check()
 
@@ -444,7 +449,7 @@ class Build:
             self.__use_zfs_local_ebuild = True
         # Kernel
         if args.compiler:
-            self.__cc_use_clang = True
+            self.__cc_use_clang = False
         if args.no_clean:
             self.__clean_kernel_src = False
         if args.emerge:
@@ -462,6 +467,8 @@ class Build:
         if args.zfs_install:
             self.__run_zfs_build = True
             self.__run_kernel_build = False
+        if args.experimental:
+            self.__experimental = True
 
         self.build()
 
@@ -509,7 +516,7 @@ def main():
     ker = parser.add_argument_group('KERNEL')
     ker.add_argument('-G', '--compiler',
                      action='store_true',
-                     help='build kernel using clang')
+                     help='build kernel using gcc')
     ker.add_argument('-C', '--no-clean',
                      action='store_true',
                      help='disable cleaning kernel source dir')
@@ -531,6 +538,9 @@ def main():
     ker.add_argument('-z', '--zfs-install',
                      action='store_true',
                      help='only run zfs build, will install zfs into kenrel tree')
+    ker.add_argument('-Z', '--experimental',
+                     action='store_true',
+                     help='enables experimental options, may or may not do something, or even work')
 
     args = parser.parse_args()
 
