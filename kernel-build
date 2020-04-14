@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# 1.13.0
+# 1.14.0
 # 2019-04-14
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -75,9 +75,8 @@ class Build:
         if not os.path.isfile(self.__kconf):
             utils.die(msg='ERROR: no config in kenrel directory')
 
-        self.__use_zfs_version = 'release'
-
-        self.__use_local_zfs_ebuild = False
+        self.__use_zfs_release_version = True
+        self.__use_zfs_local_ebuild = False
 
         self.__run_kernel_bump = False
 
@@ -149,7 +148,7 @@ class Build:
         print(f'compiler/linker    : {self.set_compiler(get_cc=True)}')
         print(f'Install            : {self.__run_kernel_install}')
         print(f'ZFS version        : {self.__zver}')
-        print(f'ZFS local ebuild   : {self.__use_local_zfs_ebuild}')
+        print(f'ZFS local ebuild   : {self.__use_zfs_local_ebuild}')
         print(f'Configure kmod     : {self.__run_kmod_build}')
         print(f'Enable modules     : {self.__use_modules}')
         print(f'Running emerge     : {self.__run_emerge}')
@@ -266,7 +265,7 @@ class Build:
                 break
 
     def run_zfs_checks(self):
-        if self.__use_local_zfs_ebuild:
+        if self.__use_zfs_local_ebuild:
             repo_conf = 'local.conf'
         else:
             repo_conf = 'gentoo.conf'
@@ -278,7 +277,7 @@ class Build:
                 break
 
         self.__zfs_ebuild = 'sys-fs/zfs-kmod'
-        if self.__use_zfs_version == 'release':
+        if self.__use_zfs_release_version:
             for ebuilds in os.listdir(f'{self.__port}/{self.__zfs_ebuild}'):
                 if 'ebuild' in ebuilds and '9999' not in ebuilds:
                     self.__zver = ebuilds.rpartition('.')[0].rpartition('-')[-1]
@@ -385,7 +384,7 @@ class Build:
         if self.__run_kernel_post:
             if self.__run_emerge:
                 if self.__run_kmod_build:
-                    if self.__use_zfs_version == 'release':
+                    if self.__use_zfs_release_version:
                         utils.run_cmd('emerge --ignore-default-opts --oneshot --quiet --update sys-fs/zfs')
                     else:
                         # will always rebuild zfs when using git
@@ -438,11 +437,11 @@ class Build:
         if args.local_distdir:
             self.__use_distdir = True
         if args.use_git:
-            self.__use_zfs_version = 'git'
+            self.__use_zfs_release_version = False
         if args.use_release:
-            self.__use_zfs_version = 'release'
+            self.__use_zfs_release_version = True
         if args.use_local_ebuild:
-            self.__use_local_zfs_ebuild = True
+            self.__use_zfs_local_ebuild = True
         # Kernel
         if args.compiler:
             self.__cc_use_clang = True
