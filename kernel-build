@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# 2.1.0
+# 2.2.0
 # 2019-04-17
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -19,7 +19,7 @@
 # ZFS Builtin Kernel Build Script - gentoo
 
 # storage dirs - will be created
-# ${XDG_DATA_DIRS}/kernel/{config,distfiles,src}
+# ${XDG_DATA_DIRS}/kernel/{distfiles,kernels}
 
 # assumptions
 # /usr/src/linux is real source or symlink to real source
@@ -88,7 +88,6 @@ class Build:
 
         self.__zfs_ebuild = 'sys-fs/zfs-kmod'
         self.__zfs_ebuild_path = None
-        self.__zfs_kmod_src = None
         self.__zfs_version = None
         self.__zfs_kmod_build_path = None
 
@@ -126,9 +125,14 @@ class Build:
         self.min_supported_version_check(checking='kernel', ver=self.__kernel_module_dir.rpartition('-')[0])
 
         self.__storage = os.path.join(os.environ['XDG_DATA_HOME'], 'kernel')
-        self.__settings = os.path.join(os.environ['XDG_CONFIG_HOME'], 'kernel/config')
+        # self.__settings = os.path.join(os.environ['XDG_CONFIG_HOME'], 'kernel/config')
+        self.__storage_distfiles = f'{self.__storage}/distfiles'
+        self.__storage_kernel_base = f'{self.__storage}/kernels'
+        self.__storage_kernel_individual = f'{self.__storage_kernel_base}/{self.__zfs_src_storage_scheme}'
+        self.__kernel_switch_config = f'{self.__storage_kernel_individual}/.config'
+        self.__zfs_kmod_archive = 'zfs.tar.zst'
+        self.__zfs_kmod_src = f'{self.__storage_kernel_individual}/{self.__zfs_kmod_archive}'
 
-        self.__kernel_switch_config = f'{self.__storage}/config/{self.__zfs_src_storage_scheme}-config'
         if not os.path.isfile(self.__kernel_switch_config):
             self.__force_bump_check = True
 
@@ -147,7 +151,7 @@ class Build:
             print(f'Min ZFS version    : {self.__MIN_ZFS_VERSION}')
             print(f'Make command       : {self.run_compiler(return_only=True)}')
             print(f'PORTDIR            : {self.__gentoo_repo_path}')
-            print(f'zfs storage dir    : {self.__storage}/src/{self.__zfs_src_storage_scheme}')
+            print(f'kernel storage dir : {self.__storage_kernel_individual}')
             print(f'kernel module dir  : /lib/modules/{self.__kernel_module_dir}')
             print(f'Tempdir            : {self.__tmpdir}')
             print(f'Experimental opts  : {self.__experimental}')
@@ -182,16 +186,13 @@ class Build:
 
     def storage_check(self):
         if not os.path.isdir(self.__storage):
-            os.mkdir(self.__storage)
+            pathlib.Path(self.__storage).mkdir(parents=True, exist_ok=True)
 
-        if not os.path.isdir(f'{self.__storage}/distfiles'):
-            os.mkdir(f'{self.__storage}/distfiles')
+        if not os.path.isdir(self.__storage_distfiles):
+            pathlib.Path(self.__storage_distfiles).mkdir(parents=True, exist_ok=True)
 
-        if not os.path.isdir(f'{self.__storage}/src'):
-            os.mkdir(f'{self.__storage}/src')
-
-        if not os.path.isdir(f'{self.__storage}/config'):
-            os.mkdir(f'{self.__storage}/config')
+        if not os.path.isdir(self.__storage_kernel_individual):
+            pathlib.Path(self.__storage_kernel_individual).mkdir(parents=True, exist_ok=True)
 
     def modules_check(self):
         if not self.__kernel_has_module_support:
@@ -289,8 +290,7 @@ class Build:
         if not os.path.isfile(f'{self.__zfs_ebuild_path}'):
             utils.die(msg=f'ERROR: missing \'{self.__zfs_ebuild_path}\'')
 
-        self.__zfs_kmod_src = f'{self.__storage}/src/{self.__zfs_src_storage_scheme}/{self.__zfs_version}'
-        if not os.path.isdir(self.__zfs_kmod_src) and self.__run_zfs_build:
+        if not os.path.isfile(self.__zfs_kmod_src) and self.__run_zfs_build:
             # need to build if configured src do not exists
             self.__run_kmod_build = True
 
@@ -303,8 +303,6 @@ class Build:
         if '-r' in self.__zfs_version:
             # rev bump ebuilds
             self.__zfs_version = self.__zfs_version.rpartition('-')[0]
-
-        archive = f'zfs-{self.__zfs_version}.tar.zst'
 
         if self.__run_kmod_build:
             self.cdkdir()
@@ -320,24 +318,26 @@ class Build:
             # need to use gcc for this
             self.run_compiler(act='prepare', force_gcc=True)
 
-            if os.path.isdir(self.__zfs_kmod_src):
-                shutil.rmtree(self.__zfs_kmod_src)
-            pathlib.Path(self.__zfs_kmod_src).mkdir(parents=True, exist_ok=True)
+            if os.path.isfile(self.__zfs_kmod_src):
+                os.remove(self.__zfs_kmod_src)
 
             portage_env = f'export PORTAGE_TMPDIR="{self.__tmpdir}"\n'
             if self.__use_local_distdir:
-                portage_env += f'export DISTDIR="{self.__storage}/distfiles"\n'
+                portage_env += f'export DISTDIR="{self.__storage_distfiles}"\n'
+
+            zfs_build_path = f'{self.__tmpdir}/portage/{self.__zfs_ebuild}-{zver_path}/work'
+            zfs_build_version = f'{self.__zfs_kmod_build_path}-{self.__zfs_version}'
 
             # this is just simpler
             script = f'{self.__tmpdir}/tmp.sh'
             text = f'{portage_env}\n' \
                    f'EXTRA_ECONF="--with-linux={self.__kernel_src} --enable-linux-builtin" ebuild ' \
                    f'{self.__zfs_ebuild_path} configure || die "build failed"\n' \
-                   f'cd {self.__tmpdir}/portage/{self.__zfs_ebuild}-{zver_path}/work/{self.__zfs_kmod_build_path}-{self.__zfs_version}\n' \
+                   f'cd {zfs_build_path}/{zfs_build_version}\n' \
                    f'./copy-builtin {self.__kernel_src} || die "copy-builtin failed"\n' \
                    'cd ..\n' \
-                   f'tar -cf - {self.__zfs_kmod_build_path}-{self.__zfs_version} -P | zstd -T0 -4 >| {archive}\n' \
-                   f'mv {archive} {self.__zfs_kmod_src}'
+                   f'tar -cf - {zfs_build_version} -P | zstd -T0 -4 >| {self.__zfs_kmod_archive}\n' \
+                   f'mv {self.__zfs_kmod_archive} {self.__zfs_kmod_src}'
 
             utils.write_script_shell(script, text)
             utils.run_cmd(script)
@@ -352,13 +352,13 @@ class Build:
                 utils.run_cmd('kernel-clean-src -c')
 
         else:
-            if not os.path.isfile(f'{self.__zfs_kmod_src}/{archive}'):
-                utils.die(msg=f'Archive missing: {self.__zfs_kmod_src}/{archive}')
+            if not os.path.isfile(f'{self.__zfs_kmod_src}'):
+                utils.die(msg=f'Archive missing: {self.__zfs_kmod_src}')
 
             # this is just simpler
             script = f'{self.__tmpdir}/tmp.sh'
-            text = f'cd {self.__zfs_kmod_src} || die "cd failed"\n' \
-                   f'tar -I zstd -xf {archive} -C {self.__tmpdir} || die "extraction failed"\n' \
+            text = f'cd {self.__storage_kernel_individual} || die "cd failed"\n' \
+                   f'tar -I zstd -xf {self.__zfs_kmod_archive} -C {self.__tmpdir} || die "extraction failed"\n' \
                    f'cd {self.__tmpdir}/{self.__zfs_kmod_build_path}-{self.__zfs_version}\n' \
                    f'./copy-builtin {self.__kernel_src} || die "copy-builtin failed"'
 
@@ -412,14 +412,17 @@ class Build:
         if args.force_bump:
             self.__force_bump_check = True
         if args.edit:
-            utils.edit_conf(self.__settings)
+            utils.not_implemented()
+            # utils.edit_conf(self.__settings)
         if args.reset_config:
-            os.remove(self.__settings)
+            utils.not_implemented()
+            # os.remove(self.__settings)
         if args.rm_built_src:
-            shutil.rmtree(f'{self.__storage}/distfiles')
-            shutil.rmtree(f'{self.__storage}/src')
-            os.mkdir(f'{self.__storage}/distfiles')
-            os.mkdir(f'{self.__storage}/src')
+            if os.path.isdir(self.__storage_kernel_base):
+                shutil.rmtree(self.__storage_kernel_base)
+            if os.path.isdir(self.__storage_distfiles):
+                shutil.rmtree(self.__storage_distfiles)
+            utils.die()
         if args.no_intro:
             self.__run_intro = False
         if args.verbose:
@@ -481,7 +484,7 @@ def main():
                          help='reset config file and exit')
     general.add_argument('--rm-built-src',
                          action='store_true',
-                         help='Remove script generated \'distfiles\' and \'src\' dirs')
+                         help='Remove generated \'distfiles\' and \'kernels\' dirs')
     general.add_argument('-v', '--verbose',
                          action='store_true',
                          help='set verbose on')
