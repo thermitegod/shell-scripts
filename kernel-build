@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 2.0.0
-# 2019-04-14
+# 2.0.1
+# 2019-04-17
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -60,7 +60,7 @@ from utils import kernel
 
 class Build:
     def __init__(self):
-        self.__MIN_KERNEL_VERSION = '5.7.0'
+        self.__MIN_KERNEL_VERSION = '4.17.0'
         self.__MIN_ZFS_VERSION = '0.8.0'
 
         atexit.register(self.remove_tmpdir)
