@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 6.6.0
-# 2020-02-28
+# 6.7.0
+# 2020-04-24
 
 # Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -18,8 +18,14 @@
 
 import argparse
 import os
+from pathlib import Path
 
 from utils import utils
+
+
+def run_chrome(cmd, path):
+    cmd += f' --disable-setuid-sandbox --user-data-dir={path}'
+    utils.run_cmd(cmd)
 
 
 def main():
@@ -29,20 +35,21 @@ def main():
                           action='store_true',
                           help='default profile')
     profiles.add_argument('-e', '--extra',
-                          default='none',
+                          default=None,
                           type=str,
                           help='extra profiles, supplied arg is used as profile name')
     profiles.add_argument('-s', '--sandbox',
                           action='store_true',
-                          help='sandbox, all data deleted on close')
+                          help='sandbox, all data deleted on close, ignores all other profile flags')
     browser = parser.add_argument_group('BROWSER', 'which browser version to use')
     browser.add_argument('-c', '--chromium',
                          action='store_true',
                          help='chromium')
     browser.add_argument('-g', '--google-chrome',
                          default='unstable',
-                         type=str,
-                         help='chrome, valid are [unstable,beta,release]')
+                         metavar='VERSION',
+                         choices=['unstable', 'beta', 'release'],
+                         help='set specific chrome version to use')
     args = parser.parse_args()
 
     utils.is_not_root()
@@ -56,24 +63,24 @@ def main():
     else:
         cmd = 'google-chrome'
 
-    profile = os.path.join(os.environ['XDG_CONFIG_HOME'], 'chrome')
+    script_name = utils.get_script_name()
 
-    if args.extra != 'none':
-        profile_append = f'{cmd}-{args.extra}'
-    else:
-        # script/symlinks must be named chromium-<profile name> to work
-        # or this can be changed
-        profile_append = f'{cmd}-{utils.get_script_name()[9:]}'
-
-    if args.sandbox or 'sandbox' in utils.get_script_name():
+    if args.sandbox or 'sandbox' in script_name:
         from tempfile import TemporaryDirectory
         with TemporaryDirectory() as tmpdir:
-            cmd += f' --user-data-dir={tmpdir}'
-            utils.run_cmd(cmd)
+            run_chrome(cmd=cmd, path=tmpdir)
+        return
+
+    if args.extra is not None:
+        profile = f'{cmd}-{args.extra}'
     else:
-        profile += f'/{profile_append}'
-        cmd += f' --user-data-dir={profile}'
-        utils.run_cmd(cmd)
+        # script/symlinks must be named chromium-<profile> to work
+        # or this can be changed
+        # e.g. ln -s chromium-default chromium-<profile>
+        profile = f'{cmd}-{script_name[9:]}'
+
+    path = Path() / os.environ['XDG_CONFIG_HOME'] / 'chrome' / profile
+    run_chrome(cmd=cmd, path=path)
 
 
 if __name__ == '__main__':
