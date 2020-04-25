@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#2.4.0
-#2020-03-03
+#2.5.0
+#2020-04-25
 
 #Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -38,14 +38,13 @@ move_finish()
 }
 
 mode="${0##*/backup-}"
-while getopts "123456hvxz" OPT;do
+while getopts "12345hvxz" OPT;do
 	case "$OPT" in
 		1) mode="chromium";;
 		2) mode="user-bin";;
 		3) mode="user-config";;
 		4) mode="user-local";;
 		5) mode="etc";;
-		6) mode="vnstat";;
 		v) V="v";;
 		x) comp="xz";;
 		z) comp="zstd";;
@@ -61,7 +60,6 @@ while getopts "123456hvxz" OPT;do
 			printf " -3\tuser-config\n"
 			printf " -4\tuser-local\n"
 			printf " -5\tetc\n"
-			printf " -6\tvnstat\n"
 			exit;;
 		*) printf "Showing help\n\n";"${0}" -h;;
 	esac
@@ -129,15 +127,6 @@ case "${mode}" in
 		tar \
 			--xattrs --sparse -${V}cf - "${target_source}" -P | "$C" "$A" >| "${tmpdir}/${target_comp}"
 		move_finish
-		;;
-	vnstat)
-		year=$(date "+%Y")
-		month=$(date "+%m")
-		day=$(date "+%d")
-		target_source="/var/lib/vnstat/vnstat.db"
-		target_dest="${backup_dir}/vnstat-database"
-		mkdir -p "${target_dest}/${year}/${month}/${day}"
-		cp "${target_source}" "${target_dest}/${year}/${month}/${day}"
 		;;
 	meta) "${0}" -h;exit;;
 esac
