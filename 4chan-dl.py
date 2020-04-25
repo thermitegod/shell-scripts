@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# 2.0.0
+# 2.1.0
 # 2020-04-25
 
 # Original
@@ -69,14 +69,14 @@ class Chandl:
         if urldef[1] == 'thread':
             self.chan = '4chan'
         elif urldef[1] == 'res':
-            self.chan = '8chan'
+            self.chan = '8kun'
         else:
             self.chan = None
 
         if self.chan == '4chan' and len(urldef) == 4:
             del urldef[3]
 
-        if self.chan == '8chan':
+        if self.chan == '8kun':
             threadurl = 'https://8ch.net/'
         else:
             threadurl = 'https://a.4cdn.org/'
@@ -108,8 +108,8 @@ class Chandl:
                 return
 
         post_time = str(post['tim'])
-        if self.chan == '8chan':
-            url = f'https://media.8ch.net/file_store/{post_time}{extension}'
+        if self.chan == '8kun':
+            url = f'https://media.8kun.top/file_store/{post_time}{extension}'
         else:
             url = f'https://i.4cdn.org/{self.board}/{post_time}{extension}'
         path = Path() / str(self.dest) / f'{filename}{extension}'
@@ -268,7 +268,7 @@ class Chandl:
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-url', '--url',
-                        help='The URL of the thread you want to download (4chan and 8chan supported)')
+                        help='The URL of the thread you want to download (4chan and 8kun supported)')
     parser.add_argument('-d', '--destination',
                         help='Where the files are to be stored')
     parser.add_argument('-ext', '--extension',
