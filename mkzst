@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.1.0
-# 2020-04-04
+# 1.2.0
+# 2020-04-24
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -18,9 +18,9 @@
 
 import argparse
 import atexit
-import os
 import shutil
 import tempfile
+from pathlib import Path
 
 from utils import utils
 
@@ -70,19 +70,21 @@ class Compress:
 
     def get_files(self):
         if self.__directories or self.__files:
-            for f in os.listdir(os.getcwd()):
-                if os.path.isdir(f) and self.__directories:
+            for f in Path(Path.cwd()).iterdir():
+                f = Path(f)
+                if Path.is_dir(f) and self.__directories:
                     self.__comp_type = 'dir'
                     self.compress(file=f)
-                if os.path.isfile(f) and self.__files:
+                if Path.is_file(f) and self.__files:
                     self.__comp_type = 'file'
                     self.compress(file=f)
         elif self.__input is not None:
             for f in self.__input:
-                if os.path.isfile(f):
+                f = Path(f)
+                if Path.is_file(f):
                     self.__comp_type = 'file'
                     self.compress(file=f)
-                elif os.path.isdir(f):
+                elif Path.is_dir(f):
                     self.__comp_type = 'dir'
                     self.compress(file=f)
 
@@ -91,20 +93,20 @@ class Compress:
         text = ''
 
         if self.__comp_type == 'dir' and self.__status:
-            text += f'tar --xattrs -{self.__verbose}Scf - "{os.path.abspath(file)}" -P | ' \
-                    f'pv -s "$(du -sb "{os.path.abspath(file)}" | awk \'{{print $1}}\')" | ' \
-                    f'{self.__cmd} >| "{os.getcwd()}/{file}.tar.{self.__ext}" || die "Compression failed for: {file}"'
+            text += f'tar --xattrs -{self.__verbose}Scf - "{Path(file).name}" -P | ' \
+                    f'pv -s "$(du -sb "{Path.resolve(file)}" | awk \'{{print $1}}\')" | ' \
+                    f'{self.__cmd} >| "{Path(file).name}.tar.{self.__ext}" || die "Compression failed for: {file}"'
 
         elif self.__comp_type == 'dir':
-            text += f'tar --xattrs -{self.__verbose}Scf - "{os.path.abspath(file)}" -P | ' \
-                    f'{self.__cmd} >| "{os.getcwd()}/{file}.tar.{self.__ext}" || die "Compression failed for: {file}"'
+            text += f'tar --xattrs -{self.__verbose}Scf - "{Path(file).name}" -P | ' \
+                    f'{self.__cmd} >| "{Path(file).name}.tar.{self.__ext}" || die "Compression failed for: {file}"'
 
         elif self.__comp_type == 'file':
-            text += f'{self.__cmd} {os.getcwd()}/{file} || die "Compression failed for: {file}"'
+            text += f'{self.__cmd} "{file}" || die "Compression failed for: {file}"'
 
         utils.write_script_shell(script, text)
         utils.run_cmd(script)
-        os.remove(script)
+        Path.unlink(Path(script))
 
     def parse_args(self, args):
         # compression type

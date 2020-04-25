@@ -19,6 +19,7 @@
 import argparse
 import os
 import shutil
+from pathlib import Path
 
 from utils import utils
 
@@ -38,7 +39,7 @@ def main():
 
     utils.is_not_root()
 
-    cache = os.path.join(os.environ.get('XDG_CACHE_HOME'), 'pip')
+    cache = Path() / os.environ['XDG_CACHE_HOME'] / 'pip'
 
     pip = shutil.which('pip3')
 
@@ -58,7 +59,7 @@ def main():
 
     utils.run_cmd(cmd)
 
-    if os.path.exists(cache):
+    if Path.exists(cache):
         shutil.rmtree(cache)
 
 

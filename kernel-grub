@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 3.1.0
-# 2020-02-28
+# 3.2.0
+# 2020-04-24
 
 # Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -16,8 +16,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-import os
 import shutil
+from pathlib import Path
 
 from tempfile import TemporaryDirectory
 
@@ -28,17 +28,17 @@ def main():
     utils.is_root()
 
     with TemporaryDirectory() as tmpdir:
-        cfgold = '/boot/grub/grub.cfg'
-        cfgnew = f'{tmpdir}/grub.cfg'
+        cfgold = Path('/boot/grub/grub.cfg')
+        cfgnew = Path() / tmpdir / 'grub.cfg'
 
         cmd = f'grub-mkconfig -o {cfgnew}'
         utils.run_cmd(cmd)
 
-        if not os.path.isfile(cfgnew):
+        if not Path.is_file(cfgnew):
             utils.die(msg='grub did not create new cfg file')
 
         if not utils.hash_compare_sha1(cfgold, cfgnew):
-            os.unlink(cfgold)
+            Path.unlink(cfgold)
             shutil.move(cfgnew, cfgold)
         else:
             # print('No changes')

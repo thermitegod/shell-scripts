@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 9.0.0
-# 2020-02-28
+# 9.1.0
+# 2020-04-24
 
 # Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -19,9 +19,10 @@
 import argparse
 import os
 import pyperclip
+from pathlib import Path
 
-from utils import utils
 from utils import private
+from utils import utils
 
 
 class Download:
@@ -31,14 +32,14 @@ class Download:
         self.__mode = utils.get_script_name()
         self.__extra = utils.get_extra_dir()
         self.__link = ''
-        self.__save_path = '/mnt/data/'
+        self.__save_path = Path('/mnt/data')
         self.__symlink = True
 
     def dl(self):
         utils.link_check(self.__link)
 
         link_cut = self.__link.split('/')[-1]
-        save_path_full = f'{self.__save_path}/{link_cut}'.replace('%20', ' ').replace('%21', '!')
+        save_path_full = Path() / self.__save_path / link_cut.replace('%20', ' ').replace('%21', '!')
 
         cmd = 'wget ' \
               '--random-wait ' \
@@ -63,28 +64,28 @@ class Download:
         print(f'save path:  {save_path_full}')
 
         if self.__symlink:
-            if not os.path.exists(save_path_full) and not os.path.islink(save_path_full):
-                os.symlink(save_path_full, os.path.join(os.environ.get('HOME'), 'media/manga-reading'))
+            if not Path.exists(save_path_full) and not Path.is_symlink(save_path_full):
+                os.symlink(save_path_full, Path() / os.environ['HOME'] / 'media/manga-reading')
 
     def run(self, args):
         if self.__mode == 'madokami-novels-publishing':
-            self.__extra += '/madokami-novels'
+            self.__extra = Path() / self.__extra / 'madokami-novels'
         elif self.__mode == 'madokami-manga-publishing':
-            self.__extra += '/madokami-manga'
+            self.__extra = Path() / self.__extra / 'madokami-manga'
 
         if args.edit:
             utils.edit_conf(self.__extra)
 
         if args.save_dir:
-            self.__save_path += 'manga/neglected/finished'
+            self.__save_path = Path() / self.__save_path / 'manga/neglected/finished'
         else:
-            self.__save_path += 'manga/neglected/in-print'
+            self.__save_path = Path() / self.__save_path / 'manga/neglected/in-print'
 
         if not args.symlink:
             self.__symlink = False
 
         if self.__mode == ('madokami-manga-publishing' or 'madokami-novels-publishing'):
-            with open(self.__extra) as fp:
+            with Path.open(self.__extra) as fp:
                 for link in fp:
                     self.__link = link
                     self.dl()

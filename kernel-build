@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 2.2.0
-# 2019-04-17
+# 2.3.0
+# 2019-04-25
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -42,7 +42,7 @@ import shutil
 import tempfile
 import multiprocessing
 import atexit
-import pathlib
+from pathlib import Path
 
 from packaging import version
 
@@ -65,13 +65,13 @@ class Build:
 
         atexit.register(self.remove_tmpdir)
 
-        self.__tmpdir = tempfile.mkdtemp()
-        os.chmod(f'{self.__tmpdir}', 0o777)
+        self.__tmpdir = Path(tempfile.mkdtemp())
+        Path.chmod(self.__tmpdir, 0o777)
 
-        self.__kernel_src = os.path.realpath(kernel.get_kernel_dir())
-        self.__kernel_config = f'{self.__kernel_src}/.config'
+        self.__kernel_src = Path.resolve(kernel.get_kernel_dir())
+        self.__kernel_config = Path() / self.__kernel_src / '.config'
 
-        if not os.path.isfile(self.__kernel_config):
+        if not Path.is_file(self.__kernel_config):
             utils.die(msg='ERROR: no config in kenrel directory')
 
         self.__use_zfs_release_version = True
@@ -107,7 +107,7 @@ class Build:
         self.__kernel_has_module_support = False
 
         # gets module version for 'dracut -k' and versioned storage path for saved work
-        self.__kernel_module_dir = os.path.basename(self.__kernel_src)[6:]
+        self.__kernel_module_dir = Path(self.__kernel_src).name[6:]
         if 'rc' not in self.__kernel_module_dir:
             # stable
             # ignore point releases and only care about minor version
@@ -124,16 +124,16 @@ class Build:
 
         self.min_supported_version_check(checking='kernel', ver=self.__kernel_module_dir.rpartition('-')[0])
 
-        self.__storage = os.path.join(os.environ['XDG_DATA_HOME'], 'kernel')
-        # self.__settings = os.path.join(os.environ['XDG_CONFIG_HOME'], 'kernel/config')
-        self.__storage_distfiles = f'{self.__storage}/distfiles'
-        self.__storage_kernel_base = f'{self.__storage}/kernels'
-        self.__storage_kernel_individual = f'{self.__storage_kernel_base}/{self.__zfs_src_storage_scheme}'
-        self.__kernel_switch_config = f'{self.__storage_kernel_individual}/.config'
-        self.__zfs_kmod_archive = 'zfs.tar.zst'
-        self.__zfs_kmod_src = f'{self.__storage_kernel_individual}/{self.__zfs_kmod_archive}'
+        self.__storage = Path() / os.environ['XDG_DATA_HOME'] / 'kernel'
+        # self.__settings = Path() / os.environ['XDG_CONFIG_HOME'] / 'kernel/config'
+        self.__storage_distfiles = Path() / self.__storage / 'distfiles'
+        self.__storage_kernel_base = Path() / self.__storage / 'kernels'
+        self.__storage_kernel_individual = Path() / self.__storage_kernel_base / self.__zfs_src_storage_scheme
+        self.__kernel_switch_config = Path() / self.__storage_kernel_individual / '.config'
+        self.__zfs_kmod_archive = Path('zfs.tar.zst')
+        self.__zfs_kmod_src = Path() / self.__storage_kernel_individual / self.__zfs_kmod_archive
 
-        if not os.path.isfile(self.__kernel_switch_config):
+        if not Path.is_file(self.__kernel_switch_config):
             self.__force_bump_check = True
 
     def intro(self):
@@ -185,18 +185,18 @@ class Build:
         shutil.rmtree(self.__tmpdir)
 
     def storage_check(self):
-        if not os.path.isdir(self.__storage):
-            pathlib.Path(self.__storage).mkdir(parents=True, exist_ok=True)
+        if not Path.is_dir(self.__storage):
+            Path(self.__storage).mkdir(parents=True, exist_ok=True)
 
-        if not os.path.isdir(self.__storage_distfiles):
-            pathlib.Path(self.__storage_distfiles).mkdir(parents=True, exist_ok=True)
+        if not Path.is_dir(self.__storage_distfiles):
+            Path(self.__storage_distfiles).mkdir(parents=True, exist_ok=True)
 
-        if not os.path.isdir(self.__storage_kernel_individual):
-            pathlib.Path(self.__storage_kernel_individual).mkdir(parents=True, exist_ok=True)
+        if not Path.is_dir(self.__storage_kernel_individual):
+            Path(self.__storage_kernel_individual).mkdir(parents=True, exist_ok=True)
 
     def modules_check(self):
         if not self.__kernel_has_module_support:
-            for line in open(self.__kernel_config):
+            for line in Path.open(self.__kernel_config):
                 if 'CONFIG_MODULES=y' in line:
                     self.__kernel_has_module_support = True
 
@@ -229,7 +229,7 @@ class Build:
         # which are not needed at runtime if zfs is build into the kernel.
         c1, c2, c3 = False, False, False
         while True:
-            for line in open(self.__kernel_config):
+            for line in Path.open(self.__kernel_config):
                 if 'CONFIG_MODULES=y' in line:
                     c1 = True
                 if 'CONFIG_TRIM_UNUSED_KSYMS=y' in line:
@@ -254,8 +254,8 @@ class Build:
                     input('Enter to config switch config: ')
                 except KeyboardInterrupt:
                     exit()
-                if os.path.isfile(self.__kernel_switch_config):
-                    os.remove(self.__kernel_switch_config)
+                if Path.is_file(self.__kernel_switch_config):
+                    Path.unlink(self.__kernel_switch_config)
                 self.cdkdir()
                 self.run_compiler(act='nconfig')
                 kernel.kernel_conf_copy(src=self.__kernel_src, dst=self.__kernel_switch_config)
@@ -268,15 +268,16 @@ class Build:
         else:
             repo_conf = 'gentoo.conf'
 
-        for line in open(f'/etc/portage/repos.conf/{repo_conf}'):
+        for line in Path.open(Path() / '/etc/portage/repos.conf' / repo_conf):
             if 'location' in line:
                 self.__gentoo_repo_path = line.split()[2]
                 break
 
         if self.__use_zfs_release_version:
-            for ebuilds in os.listdir(f'{self.__gentoo_repo_path}/{self.__zfs_ebuild}'):
-                if 'ebuild' in ebuilds and '9999' not in ebuilds:
-                    self.__zfs_version = ebuilds.rpartition('.')[0].rpartition('-')[-1]
+            zfs_ebuild_path = Path() / self.__gentoo_repo_path / self.__zfs_ebuild
+            for ebuilds in Path(zfs_ebuild_path).iterdir():
+                if 'ebuild' in str(ebuilds) and '9999' not in str(ebuilds):
+                    self.__zfs_version = str(ebuilds).rpartition('.')[0].rpartition('-')[-1]
                     break
 
             self.__zfs_kmod_build_path = "zfs"  # build path
@@ -286,11 +287,11 @@ class Build:
             self.__zfs_version = '9999'
             self.__zfs_kmod_build_path = 'zfs-kmod'  # build path
 
-        self.__zfs_ebuild_path = f'{self.__gentoo_repo_path}/{self.__zfs_ebuild}/zfs-kmod-{self.__zfs_version}.ebuild'
-        if not os.path.isfile(f'{self.__zfs_ebuild_path}'):
+        self.__zfs_ebuild_path = Path() / self.__gentoo_repo_path / self.__zfs_ebuild / f'zfs-kmod-{self.__zfs_version}.ebuild'
+        if not Path.is_file(self.__zfs_ebuild_path):
             utils.die(msg=f'ERROR: missing \'{self.__zfs_ebuild_path}\'')
 
-        if not os.path.isfile(self.__zfs_kmod_src) and self.__run_zfs_build:
+        if not Path.is_file(self.__zfs_kmod_src) and self.__run_zfs_build:
             # need to build if configured src do not exists
             self.__run_kmod_build = True
 
@@ -309,7 +310,7 @@ class Build:
             self.msc()
 
             if not self.__kernel_has_module_support:
-                if os.path.isfile(self.__kernel_switch_config):
+                if Path.is_file(self.__kernel_switch_config):
                     kernel.kernel_conf_move(src=self.__kernel_src, dst=self.__tmpdir)
                     kernel.kernel_conf_copy(src=self.__kernel_switch_config, dst=self.__kernel_src)
                 else:
@@ -318,14 +319,14 @@ class Build:
             # need to use gcc for this
             self.run_compiler(act='prepare', force_gcc=True)
 
-            if os.path.isfile(self.__zfs_kmod_src):
-                os.remove(self.__zfs_kmod_src)
+            if Path.is_file(self.__zfs_kmod_src):
+                Path.unlink(self.__zfs_kmod_src)
 
             portage_env = f'export PORTAGE_TMPDIR="{self.__tmpdir}"\n'
             if self.__use_local_distdir:
                 portage_env += f'export DISTDIR="{self.__storage_distfiles}"\n'
 
-            zfs_build_path = f'{self.__tmpdir}/portage/{self.__zfs_ebuild}-{zver_path}/work'
+            zfs_build_path = Path() / self.__tmpdir / 'portage' / f'{self.__zfs_ebuild}-{zver_path}' / 'work'
             zfs_build_version = f'{self.__zfs_kmod_build_path}-{self.__zfs_version}'
 
             # this is just simpler
@@ -333,7 +334,7 @@ class Build:
             text = f'{portage_env}\n' \
                    f'EXTRA_ECONF="--with-linux={self.__kernel_src} --enable-linux-builtin" ebuild ' \
                    f'{self.__zfs_ebuild_path} configure || die "build failed"\n' \
-                   f'cd {zfs_build_path}/{zfs_build_version}\n' \
+                   f'cd {Path() / zfs_build_path / zfs_build_version}\n' \
                    f'./copy-builtin {self.__kernel_src} || die "copy-builtin failed"\n' \
                    'cd ..\n' \
                    f'tar -cf - {zfs_build_version} -P | zstd -T0 -4 >| {self.__zfs_kmod_archive}\n' \
@@ -352,7 +353,7 @@ class Build:
                 utils.run_cmd('kernel-clean-src -c')
 
         else:
-            if not os.path.isfile(f'{self.__zfs_kmod_src}'):
+            if not Path.is_file(self.__zfs_kmod_src):
                 utils.die(msg=f'Archive missing: {self.__zfs_kmod_src}')
 
             # this is just simpler
@@ -416,11 +417,11 @@ class Build:
             # utils.edit_conf(self.__settings)
         if args.reset_config:
             utils.not_implemented()
-            # os.remove(self.__settings)
+            # Path.unlink(self.__settings)
         if args.rm_built_src:
-            if os.path.isdir(self.__storage_kernel_base):
+            if Path.is_dir(self.__storage_kernel_base):
                 shutil.rmtree(self.__storage_kernel_base)
-            if os.path.isdir(self.__storage_distfiles):
+            if Path.is_dir(self.__storage_distfiles):
                 shutil.rmtree(self.__storage_distfiles)
             utils.die()
         if args.no_intro:

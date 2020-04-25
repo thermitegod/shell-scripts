@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.8.0
-# 2020-04-04
+# 1.9.0
+# 2020-04-24
 
 # Copyright (C) 2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -16,11 +16,12 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+import hashlib
 import os
 import shlex
 import subprocess
 import sys
-import hashlib
+from pathlib import Path
 
 
 def is_root():
@@ -49,14 +50,12 @@ def write_script_shell(path, text, inc_die=True):
         script = '#!/usr/bin/env sh\n' \
                  f'{text}'
 
-    f = open(path, 'w+')
-    f.write(script)
-    f.close()
-    os.chmod(path, 0o700)
+    Path(path).write_text(script)
+    Path.chmod(Path(path), 0o700)
 
 
 def get_script_name():
-    return os.path.basename(sys.argv[0])
+    return Path(sys.argv[0]).name
 
 
 def args_required_else_help():
@@ -72,7 +71,7 @@ def not_implemented():
 
 
 def edit_conf(path, e=True):
-    run_cmd(f'{os.environ.get("EDITOR")} {path}')
+    run_cmd(f'{os.environ["EDITOR"]} {path}')
     if e:
         exit(0)
 
@@ -84,14 +83,14 @@ def die(msg=None, exit_code=1):
 
 
 def get_extra_dir():
-    return os.path.join(os.environ['XDG_DATA_HOME'], 'shell')
+    return Path() / os.environ['XDG_DATA_HOME'] / 'shell'
 
 
 def hash_compare_sha1(file1, file2):
     hash = []
     for filename in [file1, file2]:
         hasher = hashlib.sha1()
-        with open(filename, 'rb') as f:
+        with Path.open(filename, 'rb') as f:
             hasher.update(f.read())
             hash.append(hasher.hexdigest())
 

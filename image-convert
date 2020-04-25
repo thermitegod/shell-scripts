@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 2.1.0
-# 2020-02-28
+# 2.2.0
+# 2020-04-24
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -18,10 +18,10 @@
 
 import argparse
 import mimetypes
-import os
 import shutil
 import sys
 import tempfile
+from pathlib import Path
 
 from loguru import logger
 from pgmagick import Blob, Image
@@ -51,15 +51,16 @@ class Convert:
 
     @staticmethod
     def test_size(img_orig, img_new):
-        new_is_smaller = False
-        if os.path.isfile(img_orig) and os.path.isfile(img_new):
-            logger.debug(f'filesize new  : {os.path.getsize(img_new)}')
-            logger.debug(f'filesize orig : {os.path.getsize(img_orig)}')
+        if Path.is_file(img_orig) and Path.is_file(img_new):
+            img_size_new = Path.stat(img_new).st_size
+            img_size_orig = Path.stat(img_orig).st_size
+            logger.debug(f'filesize new  : {img_size_new}')
+            logger.debug(f'filesize orig : {img_size_orig}')
 
-            if os.path.getsize(img_orig) > os.path.getsize(img_new):
-                new_is_smaller = True
+            if img_size_orig > img_size_new:
+                return True
 
-        return new_is_smaller
+        return False
 
     @staticmethod
     def check_if_image(file):
@@ -91,8 +92,9 @@ class Convert:
         return size
 
     def get_img_size(self, print_only=True):
-        for filename in os.listdir(self.__directory):
-            if self.check_if_image(filename):
+        for filename in Path(self.__directory).iterdir():
+            filename = str(filename)
+            if self.check_if_image(file=filename):
                 from pgmagick.api import Image
                 img = Image(filename)
                 if print_only:
@@ -118,9 +120,9 @@ class Convert:
     def convert_main(self):
         tmpdir = tempfile.mkdtemp(dir=self.__directory)
 
-        orig = 'orig'
-        if not os.path.isdir(orig):
-            os.mkdir(orig)
+        orig = Path('orig')
+        if not Path.is_dir(orig):
+            Path(orig).mkdir(parents=True, exist_ok=True)
 
         c1 = 0
         c2 = 0
@@ -128,25 +130,26 @@ class Convert:
         if self.__mimecheck:
             utils.run_cmd('sh -c "mime-correct -I"')
 
-        for filename in os.listdir(self.__directory):
-            filename_base = os.path.splitext(filename)[0]
-            filename_ext = os.path.splitext(filename)[1][1:]
-
+        for filename in Path(self.__directory).iterdir():
             if self.check_if_image(filename):
                 c1 += 1
+
+                filename_basename = Path(filename).name
+                filename_base = Path(filename).stem
+                filename = str(filename)
 
                 if self.__act == 'convert':
                     # when converting between diffrent formats, ex png to jpg, ensure
                     # that no jpg images get converted alongside png images, simply
                     # skip those images, unless converting between the same format
-                    if self.__newext not in os.path.splitext(filename)[1] or self.__origext == self.__newext:
+                    if self.__newext not in Path(filename).suffix or self.__origext == self.__newext:
                         img = Image(filename)
                         if self.__strip_exif:
                             img.profile("*", Blob())
                         img.quality(int(self.__qual))
                         img.write(f'{tmpdir}/{filename_base}.{self.__newext}')
 
-                        os.rename(filename, f'{orig}/{filename}')
+                        Path.rename(Path(filename), Path() / orig / filename_basename)
                     else:
                         logger.debug(f'Skipping: {filename}')
 
@@ -155,27 +158,27 @@ class Convert:
                     if self.__strip_exif:
                         img.profile("*", Blob())
                     img.scale(self.__size)
-                    img.write(f'{tmpdir}/{filename_base}.{filename_ext}')
+                    img.write(f'{tmpdir}/{str(filename_basename)}')
 
-                    os.rename(filename, f'{orig}/{filename}')
+                    Path.rename(Path(filename), Path() / orig / filename_basename)
 
-        if os.path.exists(tmpdir):
-            for filedone in os.listdir(tmpdir):
-                filedone_ext = os.path.splitext(filedone)[1][1:]
-                file_in_temp = f'{tmpdir}/{filedone}'
-                file_final = f'{os.path.dirname(tmpdir)}/{os.path.splitext(filedone)[0]}.{filedone_ext}'
+        if Path.exists(Path(tmpdir)):
+            for filedone in Path(tmpdir).iterdir():
+                filedone = Path(filedone)
+                file_in_temp = Path() / tmpdir / filedone
+                file_final = Path() / Path(tmpdir).parent / Path(filedone).name
 
                 logger.debug(f'Moving file: \'{file_in_temp}\' to \'{file_final}\'')
-                os.rename(f'{file_in_temp}', f'{file_final}')
+                Path.rename(file_in_temp, file_final)
 
             logger.debug(f'Removing tempdir: {tmpdir}')
             shutil.rmtree(tmpdir)
 
-        if os.path.exists(orig) and self.__rm_orig:
+        if Path.exists(orig) and self.__rm_orig:
             logger.debug(f'Removing Original: {orig}')
             shutil.rmtree(orig)
 
-        for filename in os.listdir(self.__directory):
+        for filename in Path(self.__directory).iterdir():
             if self.check_if_image(filename):
                 c2 += 1
 
@@ -185,15 +188,15 @@ class Convert:
     def convert_main_batch(self):
         utils.not_implemented()
 
-        for dirs in os.listdir(self.__directory):
-            if os.path.isdir(dirs):
+        for dirs in Path(self.__directory).iterdir():
+            if Path.is_dir(Path(dirs)):
                 self.convert_main()
 
     def run(self, args):
         if args.directory:
             self.__directory = args.directory
         else:
-            self.__directory = os.getcwd()
+            self.__directory = Path.cwd()
 
         if args.jpg_to_jpg:
             self.__origext = 'jpg'

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.2.0
-# 2019-04-08
+# 1.3.0
+# 2019-04-24
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -16,32 +16,34 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-import os
 import shutil
+from pathlib import Path
 
 from utils import utils
 
 
 def get_kernel_dir():
-    src = '/usr/src/linux'
-    if os.path.exists(src):
+    src = Path('/usr/src/linux')
+    if Path.exists(src):
         return src
 
     utils.die(msg=f'{src}: is not a valid symlink')
 
 
 def __kernel_conf_action(src, dst, act):
-    if os.path.isdir(src):
-        src = f'{src}/.config'
+    src = Path(src)
+    dst = Path(dst)
+    if Path.is_dir(src):
+        src = Path() / src / '.config'
 
-    if os.path.isdir(dst):
-        dst = f'{dst}/.config'
+    if Path.is_dir(dst):
+        dst = Path() / dst / '.config'
 
-    if not os.path.isfile(src):
+    if not Path.is_file(src):
         utils.die(msg=f'No kernel config found: {src}')
 
-    if os.path.isfile(dst):
-        os.remove(dst)
+    if Path.is_file(dst):
+        Path.unlink(dst)
 
     if act == 'move':
         shutil.move(src, dst)
