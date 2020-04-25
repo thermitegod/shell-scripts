@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# 2.1.0
+# 2.2.0
 # 2020-04-25
 
 # Original
@@ -48,6 +48,7 @@ class Chandl:
         self.thread = None
         self.orig_filenames = False
         self.url_folder_regex = '.*\\/([.\\w+]+[^.html])'
+        self.update_interval = 60
 
     @staticmethod
     def chunks(seq, num):
@@ -159,6 +160,35 @@ class Chandl:
             Path(top_dir).mkdir(parents=True, exist_ok=True)
             Path(self.datapath).mkdir(parents=True, exist_ok=True)
 
+    def thread_watcher(self):
+        i = 0
+        logger.info(f'Entering watch mode (update interval = {self.update_interval}s)')
+        while True:
+            i += 1
+            logger.info(f'Number of times watch loop has run: {i}')
+
+            images = []
+
+            r = self.download_thread_data(self.thread)
+            posts = r.json()['posts']
+            # if posts[0].has_key('closed') and posts[0]['closed'] == 1:
+            if 'closed' in posts[0] and posts[0]['closed'] == 1:
+                logger.info('Thread is closed. Exiting.')
+                exit(0)
+
+            for post in posts:
+                if 'filename' in post:
+                    if post['md5'] not in self.hashlist:
+                        images.append(copy.deepcopy(post))
+                if 'extra_files' in post:
+                    for f in post['extra_files']:
+                        if post['md5'] not in self.hashlist:
+                            images.append(copy.deepcopy(f))
+
+            self.download_images_thread(images)
+            self.write_hashlist()
+            time.sleep(float(self.update_interval))
+
     def run(self, args):
         url = args.url
 
@@ -172,7 +202,6 @@ class Chandl:
         self.ext = str(args.extension).lower().split(',')
         self.orig_filenames = args.original_filenames
         watch = args.watch
-        update_interval = args.update_interval
 
         if args.gen_hashlist is not None:
             self.init_datapath(args.gen_hashlist)
@@ -184,9 +213,11 @@ class Chandl:
             logger.error('Missing url')
             exit(1)
 
-        if update_interval <= 0:
-            logger.error('Invalid update interval')
-            exit(1)
+        if args.update_interval:
+            self.update_interval = args.update_interval
+            if self.update_interval <= 0:
+                logger.error('Invalid update interval')
+                exit(1)
 
         self.board, self.thread = self.parse_url(url)
 
@@ -233,36 +264,8 @@ class Chandl:
 
         self.write_hashlist()
 
-        if not watch:
-            exit(0)
-
-        i = 0
-        logger.info(f'Entering watch mode (update interval = {update_interval}s)')
-        while True:
-            i += 1
-            logger.info(f'Number of times watch loop has run: {i}')
-
-            images = []
-
-            r = self.download_thread_data(self.thread)
-            posts = r.json()['posts']
-            # if posts[0].has_key('closed') and posts[0]['closed'] == 1:
-            if 'closed' in posts[0] and posts[0]['closed'] == 1:
-                logger.info('Thread is closed. Exiting.')
-                exit(0)
-
-            for post in posts:
-                if 'filename' in post:
-                    if post['md5'] not in self.hashlist:
-                        images.append(copy.deepcopy(post))
-                if 'extra_files' in post:
-                    for f in post['extra_files']:
-                        if post['md5'] not in self.hashlist:
-                            images.append(copy.deepcopy(f))
-
-            self.download_images_thread(images)
-            self.write_hashlist()
-            time.sleep(float(update_interval))
+        if watch:
+            self.thread_watcher()
 
 
 def main():
@@ -282,7 +285,6 @@ def main():
                         action='store_true',
                         help='Continually search for new images to download')
     parser.add_argument('-u', '--update-interval',
-                        default=60,
                         type=int,
                         help='Interval in seconds after which to trigger a new poll update when enabled with -w')
     parser.add_argument('-o', '--original-filenames',
