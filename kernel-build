@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# 2.3.0
+# 2.4.0
 # 2019-04-25
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -334,14 +334,16 @@ class Build:
             text = f'{portage_env}\n' \
                    f'EXTRA_ECONF="--with-linux={self.__kernel_src} --enable-linux-builtin" ebuild ' \
                    f'{self.__zfs_ebuild_path} configure || die "build failed"\n' \
-                   f'cd {Path() / zfs_build_path / zfs_build_version}\n' \
-                   f'./copy-builtin {self.__kernel_src} || die "copy-builtin failed"\n' \
-                   'cd ..\n' \
-                   f'tar -cf - {zfs_build_version} -P | zstd -T0 -4 >| {self.__zfs_kmod_archive}\n' \
-                   f'mv {self.__zfs_kmod_archive} {self.__zfs_kmod_src}'
 
             utils.write_script_shell(script, text)
             utils.run_cmd(script)
+
+            os.chdir(Path() / zfs_build_path / zfs_build_version)
+            utils.run_cmd(f'./copy-builtin {self.__kernel_src}')
+            os.chdir(zfs_build_path)
+            utils.run_cmd(f'mkzst -i {zfs_build_version}')
+            shutil.move(Path(f'{zfs_build_version}.tar.zst'),
+                        Path() / self.__zfs_kmod_src)
 
             if not self.__kernel_has_module_support:
                 kernel.kernel_conf_move(src=self.__tmpdir, dst=self.__kernel_src)
@@ -356,15 +358,13 @@ class Build:
             if not Path.is_file(self.__zfs_kmod_src):
                 utils.die(msg=f'Archive missing: {self.__zfs_kmod_src}')
 
-            # this is just simpler
-            script = f'{self.__tmpdir}/tmp.sh'
-            text = f'cd {self.__storage_kernel_individual} || die "cd failed"\n' \
-                   f'tar -I zstd -xf {self.__zfs_kmod_archive} -C {self.__tmpdir} || die "extraction failed"\n' \
-                   f'cd {self.__tmpdir}/{self.__zfs_kmod_build_path}-{self.__zfs_version}\n' \
-                   f'./copy-builtin {self.__kernel_src} || die "copy-builtin failed"'
-
-            utils.write_script_shell(script, text)
-            utils.run_cmd(script)
+            shutil.copyfile(Path() / self.__storage_kernel_individual / self.__zfs_kmod_archive,
+                            Path() / self.__tmpdir / self.__zfs_kmod_archive)
+            os.chdir(Path(self.__tmpdir))
+            # utils.run_cmd(f'sh -c "zstd -dc {self.__zfs_kmod_archive}|tar xf -')
+            utils.run_cmd(f'extract {self.__zfs_kmod_archive}')
+            os.chdir(Path() / self.__tmpdir / f'{self.__zfs_kmod_build_path}-{self.__zfs_version}')
+            utils.run_cmd(f'./copy-builtin {self.__kernel_src}')
 
     def build_kernel(self):
         self.cdkdir()
