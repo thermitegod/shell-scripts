@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.0.0
-# 2020-04-25
+# 1.1.0
+# 2020-04-30
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -27,12 +27,12 @@ def main():
     month = str(time.month)
     day = str(time.day)
 
-    file = 'vnstat.db'
-    target_src = Path() / '/var/lib/vnstat' / file
-    target_dst = Path() / '/mnt/data/backup/vnstat-database' / year / month / day
+    db = 'vnstat.db'
+    target_src = Path() / '/var/lib/vnstat' / db
+    target_dst = Path() / '/mnt/data/backup/vnstat-database' / year / month / day / db
 
     Path(target_dst).mkdir(parents=True, exist_ok=True)
-    shutil.copyfile(target_src, Path() / target_dst / file)
+    shutil.copyfile(target_src, target_dst)
 
 
 if __name__ == '__main__':
