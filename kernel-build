@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# 2.4.2
+# 2.5.0
 # 2020-05-06
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -269,12 +269,14 @@ class Build:
                 break
 
         if self.__use_zfs_release_version:
+            wanted_ebuild = None
             zfs_ebuild_path = Path() / self.__gentoo_repo_path / self.__zfs_ebuild
-            for ebuilds in Path(zfs_ebuild_path).iterdir():
-                ebuilds = str(ebuilds)
-                if 'ebuild' in ebuilds and '9999' not in ebuilds:
-                    self.__zfs_version = ebuilds.rpartition('.')[0].rpartition('-')[-1]
-                    break
+            for ebuild in Path(zfs_ebuild_path).iterdir():
+                ebuild = str(ebuild)
+                if ebuild.endswith('.ebuild') and not ebuild.endswith('9999.ebuild'):
+                    wanted_ebuild = ebuild
+
+            self.__zfs_version = wanted_ebuild.rpartition('.')[0].rpartition('-')[-1]
 
             # build path
             self.__zfs_kmod_build_path = "zfs"
