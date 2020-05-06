@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#3.7.0
-#2020-04-30
+#3.8.0
+#2020-05-01
 
 #Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -53,13 +53,6 @@ compress()
 			nice -19 \
 				7zr a -t7z -m0=lzma2 -md=1024m -mmf=bt4 -mmt=on -mmtf=on -myx=9 -mx=9 -mfb=276 \
 				-mhc=on -ms=on -mtm=off -mtc=off -mta=off "${f%%}.7z" "${f%%}" || die_failed
-			test_file_list
-			;;
-		old)
-			extra_info
-			nice -19 \
-				7zr a -t7z -m0=lzma2 -md=1024m -mmf=bt4 -mmt=off -myx=9 -mx=9 -mfb=276 -ms=on \
-				"${f%%}.7z" "${f%%}" || die_failed
 			test_file_list
 			;;
 		test)
@@ -118,7 +111,6 @@ while getopts "SMTROPEetdfhxz" OPT;do
 	case "$OPT" in
 		S) comp_type="single";;
 		M) comp_type="multi";;
-		O) comp_type="old";;
 		t) comp_type="test";test_post="0";printf "${YEL}RUNNING TESTS${NC}\n";;
 		T) comp_type="test";test_post="0";test_post_fancy="0";;
 		P) test_post="0";;
@@ -136,7 +128,6 @@ while getopts "SMTROPEetdfhxz" OPT;do
 			printf "\nPROFILES\n"
 			printf " -S\tSingle threaded, useful when hitting oom with multi\n"
 			printf " -M\tMultithreaded\n"
-			printf " -O\tOld profile for testing\n"
 			printf "\nOTHER\n"
 			printf " -E\tDisable moving files that fail tests to subdirectory\n"
 			printf " -d\tcompress all directories\n"
