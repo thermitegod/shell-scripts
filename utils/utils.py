@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.9.0
-# 2020-04-24
+# 1.10.0
+# 2020-05-01
 
 # Copyright (C) 2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -42,13 +42,12 @@ def run_cmd(cmd):
 
 
 def write_script_shell(path, text, inc_die=True):
+    script = '#!/usr/bin/env sh\n'
     if inc_die:
-        script = '#!/usr/bin/env sh\n' \
-                 f'die(){{ /bin/echo -e $*;kill {os.getpid()};exit; }}\n' \
-                 f'{text}'
+        script += f'die(){{ /bin/echo -e $*;kill {os.getpid()};exit; }}\n' \
+                  f'{text}'
     else:
-        script = '#!/usr/bin/env sh\n' \
-                 f'{text}'
+        script += f'{text}'
 
     Path(path).write_text(script)
     Path.chmod(Path(path), 0o700)
