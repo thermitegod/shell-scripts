@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.2.0
-# 2020-04-24
+# 1.2.1
+# 2020-05-06
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -172,4 +172,7 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        exit()
