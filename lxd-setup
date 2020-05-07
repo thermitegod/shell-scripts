@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.0.0
-# 2020-05-06
+# 1.1.0
+# 2020-05-07
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -17,7 +17,6 @@
 #    along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import argparse
-import time
 
 from utils import utils
 
@@ -42,34 +41,25 @@ class Container:
         print(f'copying {self.__base_container} to {container}')
         utils.run_cmd(f'lxc copy {self.__base_container} {container}')
 
-        print(f'Starting {self.__base_rutorrent}')
+        print(f'Starting {container}')
         utils.run_cmd(f'lxc start {container}')
 
-        # make sure everyting has started
-        time.sleep(2)
-
         print(f'Running setup script for {container}')
-        utils.run_cmd(f'lxc exec base-gentoo-rutorrent {setup_script}')
+        utils.run_cmd(f'lxc exec {container} {setup_script}')
 
         print(f'Stopping {container}')
         utils.run_cmd(f'lxc stop {container}')
-
-    def update_rutorrent(self):
-        self.update_generic(container=self.__base_rutorrent,
-                            setup_script='/root/setup-rutorrent.sh')
-
-    def update_transmission(self):
-        self.update_generic(container=self.__base_transmission,
-                            setup_script='/root/setup-transmission.sh')
 
     def run(self, args):
         self.stop_base()
 
         if args.rutorrent:
-            self.update_rutorrent()
+            self.update_generic(container=self.__base_rutorrent,
+                                setup_script='/root/setup-rutorrent.sh')
 
         if args.transmission:
-            self.update_transmission()
+            self.update_generic(container=self.__base_transmission,
+                                setup_script='/root/setup-transmission.sh')
 
 
 def main():
