@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 3.2.1
-# 2020-05-06
+# 3.3.0
+# 2020-05-07
 
 # Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -37,12 +37,14 @@ def main():
         if not Path.is_file(cfgnew):
             utils.die(msg='grub did not create new cfg file')
 
-        if not utils.hash_compare_sha1(cfgold, cfgnew):
-            Path.unlink(cfgold)
-            shutil.move(cfgnew, cfgold)
+        if Path.exists(cfgold):
+            if not utils.hash_compare_sha1(cfgold, cfgnew):
+                Path.unlink(cfgold)
+                shutil.move(cfgnew, cfgold)
+            else:
+                print('No changes')
         else:
-            # print('No changes')
-            pass
+            shutil.move(cfgnew, cfgold)
 
 
 if __name__ == '__main__':
