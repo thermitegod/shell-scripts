@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.10.0
-# 2020-05-01
+# 1.10.1
+# 2020-05-10
 
 # Copyright (C) 2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -35,10 +35,7 @@ def is_not_root():
 
 
 def run_cmd(cmd):
-    try:
-        subprocess.run(shlex.split(cmd))
-    except KeyboardInterrupt:
-        print()
+    subprocess.run(shlex.split(cmd))
 
 
 def write_script_shell(path, text, inc_die=True):
