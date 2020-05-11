@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.2.1
-# 2020-05-06
+# 1.3.0
+# 2020-05-10
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -34,7 +34,7 @@ class Compress:
         self.__cmd = None
         self.__ext = None
 
-        self.__input = None
+        self.__input_files = None
 
         self.__comp_type = None
 
@@ -78,8 +78,8 @@ class Compress:
                 if Path.is_file(f) and self.__files:
                     self.__comp_type = 'file'
                     self.compress(file=f)
-        elif self.__input is not None:
-            for f in self.__input:
+        elif self.__input_files is not None:
+            for f in self.__input_files:
                 f = Path(f)
                 if Path.is_file(f):
                     self.__comp_type = 'file'
@@ -108,7 +108,7 @@ class Compress:
         utils.run_cmd(script)
         Path.unlink(Path(script))
 
-    def parse_args(self, args):
+    def run(self, args):
         # compression type
         if args.directories:
             self.__directories = True
@@ -124,13 +124,11 @@ class Compress:
         if args.destructive_directories:
             self.__destructive_directories = True
         # other
-        if args.input is not None:
-            self.__input = args.input
+        if args.input_files is not None:
+            self.__input_files = args.input_files
         if args.verbose:
             self.__verbose = 'v'
 
-    def run(self, args):
-        self.parse_args(args)
         self.get_mode()
         self.get_files()
 
@@ -138,16 +136,19 @@ class Compress:
 def main():
     parser = argparse.ArgumentParser()
     general = parser.add_argument_group('GENERAL',
-                                        'default will compress files passed in $1')
+                                        'default is to compress files passed in $1')
+    general.add_argument('input_files',
+                         action='store',
+                         type=str,
+                         nargs='*',
+                         default='',
+                         help=argparse.SUPPRESS)
     general.add_argument('-d', '--directories',
                          action='store_true',
                          help='compress all directories')
     general.add_argument('-f', '--files',
                          action='store_true',
                          help='compress all files')
-    general.add_argument('-i', '--input',
-                         nargs='+',
-                         help='compress input file')
     general.add_argument('-s', '--destructive',
                          action='store_true',
                          help='compress $1, delete after compressed')
