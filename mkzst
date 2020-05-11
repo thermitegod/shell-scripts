@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# 1.4.0
+# 1.5.0
 # 2020-05-10
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -54,7 +54,7 @@ class Compress:
 
     def get_mode(self):
         if 'zst' in utils.get_script_name():
-            self.__cmd = 'zstd -T0'
+            self.__cmd = 'zstd -T0 -6 --long=31'
             self.__ext = 'zst'
         elif 'lz4' in utils.get_script_name():
             self.__cmd = 'lz4'
