@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# 2.6.0
+# 2.6.1
 # 2020-05-12
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -216,10 +216,10 @@ class Build:
                 kmake += 'LLVM_IAS=1 '
 
         kmake += f'nice -19 make -j{cores * 2 + 1} -l{cores + 1} CC={cc} LD={ld} {act}"'
-        if not return_only:
-            utils.run_cmd(kmake)
-        else:
+        if return_only:
             return kmake
+
+        utils.run_cmd(kmake)
 
     def kernel_bump(self):
         # CONFIG_MODULES and CONFIG_KALLSYMS are required to build zfs
@@ -345,7 +345,7 @@ class Build:
             os.chdir(Path() / zfs_build_path / zfs_build_version)
             utils.run_cmd(f'./copy-builtin {self.__kernel_src}')
             os.chdir(zfs_build_path)
-            utils.run_cmd(f'mkzst -i {zfs_build_version}')
+            utils.run_cmd(f'mkzst {zfs_build_version}')
             shutil.move(Path(f'{zfs_build_version}.tar.zst'),
                         Path() / self.__zfs_kmod_src)
 
