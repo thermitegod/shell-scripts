@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 2.5.0
-# 2020-05-06
+# 2.6.0
+# 2020-05-12
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -222,10 +222,11 @@ class Build:
             return kmake
 
     def kernel_bump(self):
-        # CONFIG_MODULES and CONFIG_KALLSYMS are required to build kmod
-        # which are not needed at runtime if zfs is build into the kernel.
-        c1, c2, c3 = False, False, False
+        # CONFIG_MODULES and CONFIG_KALLSYMS are required to build zfs
+        # but are not needed at runtime if zfs is build into the kernel.
+        kernel.kernel_conf_copy(src=self.__kernel_src, dst=self.__tmpdir)
         while True:
+            c1, c2, c3 = False, False, False
             for line in Path.open(self.__kernel_config):
                 if 'CONFIG_MODULES=y' in line:
                     c1 = True
@@ -253,9 +254,12 @@ class Build:
                     Path.unlink(self.__kernel_switch_config)
                 self.cdkdir()
                 self.run_compiler(act='nconfig')
-                kernel.kernel_conf_copy(src=self.__kernel_src, dst=self.__kernel_switch_config)
             else:
                 break
+
+        kernel.kernel_conf_move(src=self.__kernel_config, dst=self.__kernel_switch_config)
+        kernel.kernel_conf_copy(src=self.__tmpdir, dst=self.__kernel_src)
+        utils.die(msg='\n\nSwitch config created, rerun script\n', exit_code=0)
 
     def zfs_checks(self):
         if self.__use_zfs_local_ebuild:
