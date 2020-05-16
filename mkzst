@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.5.0
-# 2020-05-10
+# 2.0.0
+# 2020-05-15
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -18,6 +18,7 @@
 
 import argparse
 import atexit
+import os
 import shutil
 import tempfile
 from pathlib import Path
@@ -28,26 +29,25 @@ from utils import utils
 class Compress:
     def __init__(self):
         atexit.register(self.remove_tmpdir)
-
         self.__tmpdir = tempfile.mkdtemp()
 
         self.__cmd = None
         self.__ext = None
 
         self.__input_files = None
+        self.__output_dir = Path.cwd()
 
-        self.__comp_type = None
+        self.__compressing_dir = True
 
-        self.__overwrite = False
         self.__directories = False
         self.__files = False
         self.__status = False
 
-        self.__verbose = ''
+        self.__tar_verbose = ''
 
         self.__destructive = False
         self.__destructive_files = False
-        self.__destructive_directories = False
+        self.__destructive_dirs = False
 
     def remove_tmpdir(self):
         shutil.rmtree(self.__tmpdir)
@@ -57,63 +57,60 @@ class Compress:
             self.__cmd = 'zstd -T0 -6 --long=31'
             self.__ext = 'zst'
         elif 'lz4' in utils.get_script_name():
-            self.__cmd = 'lz4'
+            self.__cmd = 'zstd --format=lz4 -12'
             self.__ext = 'lz4'
         elif 'xz' in utils.get_script_name():
-            self.__cmd = 'xz -k -e9'
+            self.__cmd = 'zstd --format=xz -9'
             self.__ext = 'xz'
         elif 'gz' in utils.get_script_name():
-            self.__cmd = 'gzip -k'
+            self.__cmd = 'zstd --format=gzip -9'
             self.__ext = 'gz'
-        elif 'bz2' in utils.get_script_name():
-            self.__cmd = 'bzip2 -k'
-            self.__ext = 'bz2'
 
     def get_files(self):
         if self.__directories or self.__files:
+            dir_listing = []
             for f in Path(Path.cwd()).iterdir():
-                f = Path(f)
+                dir_listing.append(f)
+
+            for f in dir_listing:
                 if Path.is_dir(f) and self.__directories:
-                    self.__comp_type = 'dir'
+                    self.__compressing_dir = True
                     self.compress(file=f)
-                if Path.is_file(f) and self.__files:
-                    self.__comp_type = 'file'
+                elif Path.is_file(f) and self.__files:
+                    self.__compressing_dir = False
                     self.compress(file=f)
         elif self.__input_files is not None:
             for f in self.__input_files:
                 f = Path(f)
-                if Path.is_file(f):
-                    self.__comp_type = 'file'
+                if Path.is_dir(f):
+                    self.__compressing_dir = True
                     self.compress(file=f)
-                elif Path.is_dir(f):
-                    self.__comp_type = 'dir'
+                elif Path.is_file(f):
+                    self.__compressing_dir = False
                     self.compress(file=f)
 
     def compress(self, file):
-        if self.__overwrite:
-            if self.__comp_type == 'dir':
-                if Path.is_file(Path(f'{file}.tar.{self.__ext}')):
-                    print(f'archive already exists for \'{file}\', use -i to overwrite')
-                    return
-            elif self.__comp_type == 'file':
-                if Path.is_file(Path(f'{file}.{self.__ext}')):
-                    print(f'archive already exists for \'{file}\', use -i to overwrite')
-                    return
+        if self.__compressing_dir:
+            if Path.exists(Path(f'{self.__output_dir}/{file}.tar.{self.__ext}')):
+                print(f'Skipping, archive already exists at \'{self.__output_dir}/{file}.tar.{self.__ext}\'')
+                return
+        else:
+            if Path.exists(Path(f'{self.__output_dir}/{file}.{self.__ext}')):
+                print(f'Skipping, archive already exists at \'{self.__output_dir}/{file}.{self.__ext}\'')
+                return
 
         script = f'{self.__tmpdir}/tmp.sh'
-        text = ''
+        die = f'die "Compression failed for \'{Path.resolve(file)}\'"'
 
-        if self.__comp_type == 'dir' and self.__status:
-            text += f'tar --xattrs -{self.__verbose}Scf - "{Path(file).name}" -P | ' \
-                    f'pv -s "$(du -sb "{Path.resolve(file)}" | awk \'{{print $1}}\')" | ' \
-                    f'{self.__cmd} >| "{Path(file).name}.tar.{self.__ext}" || die "Compression failed for: {file}"'
+        os.chdir(Path(file).parent)
 
-        elif self.__comp_type == 'dir':
-            text += f'tar --xattrs -{self.__verbose}Scf - "{Path(file).name}" -P | ' \
-                    f'{self.__cmd} >| "{Path(file).name}.tar.{self.__ext}" || die "Compression failed for: {file}"'
-
-        elif self.__comp_type == 'file':
-            text += f'{self.__cmd} "{file}" || die "Compression failed for: {file}"'
+        if self.__compressing_dir:
+            text = f'tar --xattrs -{self.__tar_verbose}Scf - "{Path(file).name}" -P | '
+            if self.__status:
+                text += f'pv -s "$(du -sb "{Path.resolve(file)}" | awk \'{{print $1}}\')" | '
+            text += f'{self.__cmd} >| "{self.__output_dir}/{Path(file).name}.tar.{self.__ext}" || {die}'
+        else:
+            text = f'{self.__cmd} --output-dir-flat="{self.__output_dir}" -- "{file}" || {die}'
 
         utils.write_script_shell(script, text)
         utils.run_cmd(script)
@@ -128,19 +125,24 @@ class Compress:
         if args.status:
             self.__status = True
         # destructive
-        if args.overwrite:
-            self.__overwrite = True
         if args.destructive:
             self.__destructive = True
         if args.destructive_files:
             self.__destructive_files = True
-        if args.destructive_directories:
-            self.__destructive_directories = True
+        if args.destructive_dirs:
+            self.__destructive_dirs = True
         # other
         if args.input_files is not None:
             self.__input_files = args.input_files
+        if args.output_dir:
+            out = Path.resolve(Path(args.output_dir))
+            if not Path.is_dir(out):
+                if Path.exists(out):
+                    utils.die(msg=f'selected output dir \'{out}\' exists but is not a directory')
+                Path(out).mkdir(parents=True, exist_ok=True)
+            self.__output_dir = out
         if args.verbose:
-            self.__verbose = 'v'
+            self.__tar_verbose = 'v'
 
         self.get_mode()
         self.get_files()
@@ -148,39 +150,39 @@ class Compress:
 
 def main():
     parser = argparse.ArgumentParser()
-    general = parser.add_argument_group('GENERAL',
-                                        'default is to compress files passed in $1')
-    general.add_argument('input_files',
-                         action='store',
-                         type=str,
-                         nargs='*',
-                         default='',
-                         help=argparse.SUPPRESS)
-    general.add_argument('-d', '--directories',
-                         action='store_true',
-                         help='compress all directories')
-    general.add_argument('-f', '--files',
-                         action='store_true',
-                         help='compress all files')
-    general.add_argument('-i', '--overwrite',
-                         action='store_false',
-                         default=True,
-                         help='compress all files')
-    general.add_argument('-s', '--destructive',
-                         action='store_true',
-                         help='compress $1, delete after compressed')
-    general.add_argument('-S', '--status',
-                         action='store_true',
-                         help='enable cool status bar, directories only')
-    general.add_argument('-v', '--verbose',
-                         action='store_true',
-                         help='enable verbose tar')
-    general.add_argument('-x', '--destructive-files',
-                         action='store_true',
-                         help='compress all files, delete original after compressed')
-    general.add_argument('-z', '--destructive-directories',
-                         action='store_true',
-                         help='compress all directories, delete original after compressed')
+    parser.add_argument('input_files',
+                        action='store',
+                        type=str,
+                        nargs='*',
+                        default=None,
+                        help=argparse.SUPPRESS)
+    parser.add_argument('-S', '--status',
+                        action='store_true',
+                        help='enable cool status bar, directories only')
+    parser.add_argument('-v', '--verbose',
+                        action='store_true',
+                        help='enable verbose tar')
+    parser.add_argument('-o', '--output-dir',
+                        metavar='DIR',
+                        help='create the archive[s] in this directory')
+    batch = parser.add_argument_group('BATCH CREATION')
+    batch.add_argument('-d', '--directories',
+                       action='store_true',
+                       help='compress all directories in cwd')
+    batch.add_argument('-f', '--files',
+                       action='store_true',
+                       help='compress all files in cwd')
+    rm = parser.add_argument_group('DESTRUCTIVE')
+    rm.add_argument('-s', '--destructive',
+                    action='store_true',
+                    help='compress $1, delete after compressed')
+    rm.add_argument('-x', '--destructive-files',
+                    action='store_true',
+                    help='compress all files in cwd, delete original after compressed')
+    rm.add_argument('-z', '--destructive-dirs',
+                    action='store_true',
+                    help='compress all directories in cwd, delete original after compressed')
+
     args = parser.parse_args()
 
     utils.args_required_else_help()
