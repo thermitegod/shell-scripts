@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 2.0.0
-# 2020-05-15
+# 2.1.0
+# 2020-05-16
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -46,8 +46,6 @@ class Compress:
         self.__tar_verbose = ''
 
         self.__destructive = False
-        self.__destructive_files = False
-        self.__destructive_dirs = False
 
     def remove_tmpdir(self):
         shutil.rmtree(self.__tmpdir)
@@ -116,6 +114,12 @@ class Compress:
         utils.run_cmd(script)
         Path.unlink(Path(script))
 
+        if self.__destructive:
+            if self.__compressing_dir:
+                shutil.rmtree(file)
+            else:
+                Path.unlink(file)
+
     def run(self, args):
         # compression type
         if args.directories:
@@ -127,10 +131,6 @@ class Compress:
         # destructive
         if args.destructive:
             self.__destructive = True
-        if args.destructive_files:
-            self.__destructive_files = True
-        if args.destructive_dirs:
-            self.__destructive_dirs = True
         # other
         if args.input_files is not None:
             self.__input_files = args.input_files
@@ -173,15 +173,9 @@ def main():
                        action='store_true',
                        help='compress all files in cwd')
     rm = parser.add_argument_group('DESTRUCTIVE')
-    rm.add_argument('-s', '--destructive',
+    rm.add_argument('-z', '--destructive',
                     action='store_true',
-                    help='compress $1, delete after compressed')
-    rm.add_argument('-x', '--destructive-files',
-                    action='store_true',
-                    help='compress all files in cwd, delete original after compressed')
-    rm.add_argument('-z', '--destructive-dirs',
-                    action='store_true',
-                    help='compress all directories in cwd, delete original after compressed')
+                    help='Delete original after it is compressed')
 
     args = parser.parse_args()
 
