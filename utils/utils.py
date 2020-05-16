@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.10.1
-# 2020-05-10
+# 1.11.0
+# 2020-05-12
 
 # Copyright (C) 2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -38,16 +38,14 @@ def run_cmd(cmd):
     subprocess.run(shlex.split(cmd))
 
 
-def write_script_shell(path, text, inc_die=True):
-    script = '#!/usr/bin/env sh\n'
-    if inc_die:
-        script += f'die(){{ /bin/echo -e $*;kill {os.getpid()};exit; }}\n' \
-                  f'{text}'
-    else:
-        script += f'{text}'
+def write_script_shell(path, text):
+    script = '#!/usr/bin/env sh\n' \
+             f'die(){{ /bin/echo -e $*;kill {os.getpid()};exit; }}\n' \
+             f'{text}'
 
-    Path(path).write_text(script)
-    Path.chmod(Path(path), 0o700)
+    script_path = Path(path)
+    script_path.write_text(script)
+    Path.chmod(script_path, 0o700)
 
 
 def get_script_name():
