@@ -1,8 +1,8 @@
 #!/usr/bin/env sh
-#1.17.0
-#2019-05-27
+#1.18.0
+#2020-05-17
 
-#Copyright (C) 2018,2019 Brandon Zorn <brandonzorn@cock.li>
+#Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
 #This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License version 3
@@ -118,10 +118,10 @@ if [ "${optimize}" = "1" ];then
 fi
 
 case "${archivetype}" in
-	1) mkzip -zP;;
-	2) mkzip -ZP;;
-	3) mk7z -zP;;
-	*) mkzip -zP;;
+	1) mkzip -dzP;;
+	2) mkzip -dZjP;;
+	3) mk7z -dzP;;
+	*) mkzip -dzP;;
 esac
 
 if [ "${comp_advzip}" = "1" ] && ! [ "${archivetype}" = "3" ];then
