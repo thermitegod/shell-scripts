@@ -1,0 +1,75 @@
+#!/usr/bin/env python3
+# 1.0.0
+# 2020-05-17
+
+# Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
+#
+# This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License version 3
+#    as published by the Free Software Foundation.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+import argparse
+from pathlib import Path
+
+from utils import utils
+
+
+class Container:
+    def __init__(self):
+        self.__backup_dir = Path('/mnt/data/backup/lxd')
+
+    def export_container(self, container):
+        if not Path.is_dir(self.__backup_dir):
+            if Path.exists(self.__backup_dir):
+                utils.die(msg=f'Backup dir \'{self.__backup_dir}\' exists but is not a directory')
+            Path(self.__backup_dir).mkdir(parents=True, exist_ok=True)
+
+        print(f'Stoping {container}')
+        utils.run_cmd(f'lxc stop {container}')
+        utils.run_cmd(f'lxc export {container} {self.__backup_dir}/{container}.tar.gz')
+
+    @staticmethod
+    def install_container(file):
+        container = Path(file)
+        if not Path.is_file(container):
+            utils.die(msg=f'Cannont locate \'{container}\', enter file path')
+
+        utils.run_cmd(f'lxc import {container}')
+
+    def run(self, args):
+        if args.export:
+            self.export_container(container=args.export)
+
+        if args.install:
+            self.install_container(file=args.install)
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-e', '--export',
+                        metavar='CONTAINER',
+                        help='Export lxd container to file')
+    parser.add_argument('-i', '--install',
+                        metavar='FILE',
+                        help='Import lxd container from file')
+    args = parser.parse_args()
+
+    utils.args_required_else_help()
+
+    run = Container()
+    run.run(args)
+
+
+if __name__ == '__main__':
+    try:
+        main()
+    except KeyboardInterrupt:
+        exit()
