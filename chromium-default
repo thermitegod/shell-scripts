@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 6.7.1
-# 2020-05-06
+# 6.8.0
+# 2020-06-12
 
 # Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -24,7 +24,7 @@ from utils import utils
 
 
 def run_chrome(cmd, path):
-    cmd += f' --disable-setuid-sandbox --user-data-dir={path}'
+    cmd += f' --user-data-dir={path}'
     utils.run_cmd(cmd)
 
 
@@ -42,23 +42,20 @@ def main():
                           action='store_true',
                           help='sandbox, all data deleted on close, ignores all other profile flags')
     browser = parser.add_argument_group('BROWSER', 'which browser version to use')
-    browser.add_argument('-c', '--chromium',
-                         action='store_true',
-                         help='chromium')
-    browser.add_argument('-g', '--google-chrome',
-                         default='unstable',
+    browser.add_argument('-c', '--chrome',
+                         default='chromium',
                          metavar='VERSION',
-                         choices=['unstable', 'beta', 'release'],
+                         choices=['chromium', 'unstable', 'beta', 'release'],
                          help='set specific chrome version to use')
     args = parser.parse_args()
 
     utils.is_not_root()
 
-    if args.chromium:
+    if args.chrome == 'chromium':
         cmd = 'chromium'
-    elif args.google_chrome == 'unstable':
+    elif args.chrome == 'unstable':
         cmd = 'google-chrome-unstable'
-    elif args.google_chrome == 'beta':
+    elif args.chrome == 'beta':
         cmd = 'google-chrome-beta'
     else:
         cmd = 'google-chrome'
