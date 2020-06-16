@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 2.1.0
-# 2020-05-16
+# 2.2.0
+# 2020-06-15
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -114,11 +114,16 @@ class Compress:
         utils.run_cmd(script)
         Path.unlink(Path(script))
 
-        if self.__destructive:
-            if self.__compressing_dir:
-                shutil.rmtree(file)
-            else:
-                Path.unlink(file)
+        # could probably be better
+        if Path.exists(Path() / self.__output_dir / f'{file}.{self.__ext}') or \
+                Path.exists(Path() / self.__output_dir / f'{file}.tar.{self.__ext}'):
+            if self.__destructive:
+                if self.__compressing_dir:
+                    shutil.rmtree(file)
+                else:
+                    Path.unlink(file)
+        else:
+            utils.die(f'ERROR: archive not created for {file}')
 
     def run(self, args):
         # compression type
