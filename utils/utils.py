@@ -57,7 +57,7 @@ def args_required_else_help():
         sys.argv[1]
     except IndexError:
         run_cmd(f'{sys.argv[0]} -h')
-        exit()
+        sys.exit(0)
 
 
 def not_implemented():
@@ -67,7 +67,7 @@ def not_implemented():
 def edit_conf(path, e=True):
     run_cmd(f'{os.environ["EDITOR"]} {path}')
     if e:
-        exit(0)
+        sys.exit(0)
 
 
 def die(msg=None, exit_code=1):
