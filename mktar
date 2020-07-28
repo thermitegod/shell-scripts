@@ -16,7 +16,13 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-# cut down version of mkzst that only creates tar files
+# changes should be disseminated to the following scripts when applicable
+# mktar
+# mkzst
+# mkzip
+# mk7z
+# these are based on each other but different enough that they
+# are separated into unique scripts
 
 import argparse
 import os
