@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 2.3.0
-# 2020-07-27
+# 2.4.0
+# 2020-07-28
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -94,13 +94,13 @@ class Compress:
 
     def compress(self, file):
         if self.__compressing_dir:
-            if Path.exists(Path(f'{self.__output_dir}/{file}.tar.{self.__ext}')):
-                print(f'Skipping, archive already exists at \'{self.__output_dir}/{file}.tar.{self.__ext}\'')
-                return
+            test_file = Path() / self.__output_dir / f'{file}.tar.{self.__ext}'
         else:
-            if Path.exists(Path(f'{self.__output_dir}/{file}.{self.__ext}')):
-                print(f'Skipping, archive already exists at \'{self.__output_dir}/{file}.{self.__ext}\'')
-                return
+            test_file = Path() / self.__output_dir / f'{file}.{self.__ext}'
+
+        if Path.exists(test_file):
+            print(f'Skipping, archive already exists at: \'{test_file}\'')
+            return
 
         script = f'{self.__tmpdir}/tmp.sh'
         die = f'die "Compression failed for \'{Path.resolve(file)}\'"'
@@ -119,16 +119,14 @@ class Compress:
         utils.run_cmd(script)
         Path.unlink(Path(script))
 
-        # could probably be better
-        if Path.exists(Path() / self.__output_dir / f'{file}.{self.__ext}') or \
-                Path.exists(Path() / self.__output_dir / f'{file}.tar.{self.__ext}'):
+        if Path.exists(test_file):
             if self.__destructive:
                 if self.__compressing_dir:
                     shutil.rmtree(file)
                 else:
                     Path.unlink(file)
         else:
-            utils.die(f'ERROR: archive not created for {file}')
+            utils.die(f'ERROR: archive not created for: \'{file}\'')
 
     def run(self, args):
         # compression type
