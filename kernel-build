@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 2.6.1
-# 2020-05-12
+# 2.7.0
+# 2020-08-05
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -122,7 +122,7 @@ class Build:
             kver_tmp = self.__kernel_module_dir.rpartition('-')
             self.__kernel_module_dir = f'{kver_tmp[0]}.0{kver_tmp[1]}{kver_tmp[2]}'
 
-        self.min_supported_version_check(checking='kernel', ver=self.__kernel_module_dir.rpartition('-')[0])
+        self.min_supported_version_check(checking='kernel', ver=self.__kernel_module_dir.partition('-')[0])
 
         self.__storage = Path() / os.environ['XDG_DATA_HOME'] / 'kernel'
         # self.__settings = Path() / os.environ['XDG_CONFIG_HOME'] / 'kernel/config'
