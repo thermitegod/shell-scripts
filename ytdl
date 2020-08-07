@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 6.2.1
-# 2020-05-06
+# 6.3.0
+# 2020-08-06
 
 # Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -18,7 +18,6 @@
 
 import argparse
 import pyperclip
-from pathlib import Path
 
 from utils import utils
 
@@ -26,7 +25,6 @@ from utils import utils
 class Ytdl:
     def __init__(self):
         self.__link = ''
-        self.__batch_list = Path('/tmp/ytdl.tmp')
         self.__audio_only = False
 
     def dl(self):
@@ -49,24 +47,8 @@ class Ytdl:
         print(f'downloaded: {self.__link}\n')
 
     def run(self, args):
-        if args.edit:
-            utils.edit_conf(self.__batch_list)
-
         if args.audio:
             self.__audio_only = True
-
-        if args.batch_rm:
-            if Path.exists(self.__batch_list):
-                Path.unlink(self.__batch_list)
-            exit(0)
-
-        if args.batch:
-            with Path.open(self.__batch_list) as fp:
-                for link in fp:
-                    self.__link = link
-                    utils.link_check(self.__link)
-                    self.dl()
-            return
 
         if args.url:
             self.__link = args.url
@@ -85,17 +67,6 @@ def main():
                         help='Only download audio')
     parser.add_argument('-u', "--url",
                         help='supply a video url, otherwise will get link from clipboard')
-    batch = parser.add_argument_group('Batch', 'NOT IMPLEMENTED')
-    batch.add_argument('-b', '--batch',
-                       action='store_true',
-                       help='Download from batch file')
-    general = parser.add_argument_group('GENERAL')
-    general.add_argument('-e', '--edit',
-                         action='store_true',
-                         help='edit batch file')
-    general.add_argument('-r', '--batch-rm',
-                         action='store_true',
-                         help='Delete batch file')
     args = parser.parse_args()
 
     utils.is_not_root()
