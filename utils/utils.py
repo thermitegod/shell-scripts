@@ -57,7 +57,7 @@ def args_required_else_help():
         sys.argv[1]
     except IndexError:
         run_cmd(f'{sys.argv[0]} -h')
-        sys.exit(0)
+        raise SystemExit
 
 
 def not_implemented():
@@ -67,13 +67,13 @@ def not_implemented():
 def edit_conf(path, e=True):
     run_cmd(f'{os.environ["EDITOR"]} {path}')
     if e:
-        sys.exit(0)
+        raise SystemExit
 
 
 def die(msg=None, exit_code=1):
     if msg is not None:
         print(msg)
-    sys.exit(exit_code)
+    raise SystemExit(exit_code)
 
 
 def get_extra_dir():

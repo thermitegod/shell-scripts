@@ -150,7 +150,7 @@ class Chandl:
         r = requests.get(self.thread)
         if r.status_code == 404:
             logger.info('API returned 404.')
-            exit(0)
+            raise SystemExit
         else:
             return r
 
@@ -174,7 +174,7 @@ class Chandl:
             # if posts[0].has_key('closed') and posts[0]['closed'] == 1:
             if 'closed' in posts[0] and posts[0]['closed'] == 1:
                 logger.info('Thread is closed. Exiting.')
-                exit(0)
+                raise SystemExit
 
             for post in posts:
                 if 'filename' in post:
@@ -207,17 +207,17 @@ class Chandl:
             self.init_datapath(args.gen_hashlist)
             logger.info('here-gen_hashlist')
             self.gen_hashlist(args.gen_hashlist)
-            exit(0)
+            raise SystemExit
 
         if url is None:
             logger.error('Missing url')
-            exit(1)
+            raise SystemExit
 
         if args.update_interval:
             self.update_interval = args.update_interval
             if self.update_interval <= 0:
                 logger.error('Invalid update interval')
-                exit(1)
+                raise SystemExit
 
         self.board, self.thread = self.parse_url(url)
 
@@ -225,7 +225,7 @@ class Chandl:
             self.thread = self.thread.replace('.html', '.json')
         elif not self.thread.endswith('.json'):
             logger.error('Invalid URL')
-            exit(1)
+            raise SystemExit
 
         r = self.download_thread_data(self.thread)
 
@@ -315,4 +315,4 @@ if __name__ == '__main__':
     try:
         main()
     except KeyboardInterrupt:
-        exit()
+        raise SystemExit

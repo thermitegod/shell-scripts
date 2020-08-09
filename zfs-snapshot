@@ -59,7 +59,7 @@ def main():
         print('zfs destroy <pool/dataset@snapshot>')
         print('zfs list -t snapshot')
         print('zfs list -r pool')
-        exit(0)
+        raise SystemExit
 
     selected_pool = None
     cmd = 'zfs '
@@ -108,4 +108,4 @@ if __name__ == '__main__':
     try:
         main()
     except KeyboardInterrupt:
-        exit()
+        raise SystemExit
