@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# 2.7.1
+# 2.8.0
 # 2020-08-20
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -106,6 +106,8 @@ class Build:
 
         self.__kernel_has_module_support = False
 
+        self.__initramfs_compression = 'zstd'
+
         # gets module version for 'dracut -k' and versioned storage path for saved work
         self.__kernel_module_dir = Path(self.__kernel_src).name[6:]
         if 'rc' not in self.__kernel_module_dir:
@@ -197,6 +199,21 @@ class Build:
                 if 'CONFIG_MODULES=y' in line:
                     self.__kernel_has_module_support = True
                     return
+
+    def init_compression_check(self):
+        for line in Path.open(self.__kernel_config):
+            if 'CONFIG_RD_ZSTD=y' in line:
+                self.__initramfs_compression = 'zstd'
+                return
+            elif 'CONFIG_RD_LZ4=y' in line:
+                self.__initramfs_compression = 'lz4'
+                return
+            elif 'CONFIG_RD_LZO=y' in line:
+                self.__initramfs_compression = 'lzo'
+                return
+            elif 'CONFIG_RD_XZ=y' in line:
+                self.__initramfs_compression = 'xz'
+                return
 
     def run_compiler(self, act='', force_gcc=False, return_only=False):
         # keep CC/LD to override env, probably not needed though
@@ -390,7 +407,7 @@ class Build:
                         utils.run_cmd('emerge --ignore-default-opts --oneshot --quiet sys-fs/zfs')
                 if self.__kernel_has_module_support:
                     utils.run_cmd('emerge --ignore-default-opts --oneshot --jobs @module-rebuild')
-            utils.run_cmd(f'kernel-initramfs-dracut -k {self.__kernel_module_dir}')
+            utils.run_cmd(f'kernel-initramfs-dracut -c {self.__initramfs_compression} -k {self.__kernel_module_dir}')
             utils.run_cmd('kernel-grub')
             if self.__clean_kernel_src:
                 utils.run_cmd('kernel-clean-src -c')
@@ -398,6 +415,7 @@ class Build:
     def build(self):
         self.modules_check()
         self.storage_check()
+        self.init_compression_check()
 
         if self.__run_zfs_checks:
             self.zfs_checks()
