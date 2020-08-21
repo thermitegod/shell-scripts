@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 2.4.0
-# 2020-07-28
+# 2.5.0
+# 2020-08-20
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -61,19 +61,20 @@ class Compress:
         shutil.rmtree(self.__tmpdir)
 
     def get_mode(self):
-        if 'zst' in utils.get_script_name():
+        mode = utils.get_script_name()
+        if 'zst' in mode:
             if self.__ultra:
                 self.__cmd = 'zstd -T0 --ultra -22 --long=31'
             else:
                 self.__cmd = 'zstd -T0 -6 --long=31'
             self.__ext = 'zst'
-        elif 'lz4' in utils.get_script_name():
+        elif 'lz4' in mode:
             self.__cmd = 'zstd --format=lz4 -12'
             self.__ext = 'lz4'
-        elif 'xz' in utils.get_script_name():
+        elif 'xz' in mode:
             self.__cmd = 'zstd --format=xz -9'
             self.__ext = 'xz'
-        elif 'gz' in utils.get_script_name():
+        elif 'gz' in mode:
             self.__cmd = 'zstd --format=gzip -9'
             self.__ext = 'gz'
 
