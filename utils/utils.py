@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 1.12.0
+# 1.13.0
 # 2020-08-21
 
 # Copyright (C) 2019,2020 Brandon Zorn <brandonzorn@cock.li>
@@ -25,7 +25,7 @@ from pathlib import Path
 from . import colors
 
 
-def root_check(require_root):
+def root_check(require_root: bool):
     """
     :param require_root:
         If True, running as root is required otherwise will terminate.
@@ -40,11 +40,21 @@ def root_check(require_root):
             die(msg=f'{c.BRED}\n\nDo not run as root, exiting\n\n{c.NC}')
 
 
-def run_cmd(cmd):
+def run_cmd(cmd: str):
+    """
+    :param cmd:
+        shell command to run
+    """
     subprocess.run(shlex.split(cmd))
 
 
-def write_script_shell(path, text):
+def write_script_shell(path: str, text: str):
+    """
+    :param path:
+        Path to shell script that will be writen
+    :param text:
+        Text of the shell script
+    """
     script = '#!/usr/bin/env sh\n' \
              f'die(){{ /bin/echo -e $*;kill {os.getpid()};exit; }}\n' \
              f'{text}'
@@ -70,18 +80,34 @@ def not_implemented():
     die(msg='Not implemented')
 
 
-def edit_conf(path, e=True):
+def edit_conf(path: str, e: bool):
+    """
+    :param path:
+        Path to config to edit
+    :param e:
+        Whether exit when editing is done
+    """
     run_cmd(f'{os.environ["EDITOR"]} {path}')
     if e:
         raise SystemExit
 
 
 def die(msg=None, exit_code=1):
+    """
+    :param msg:
+        Message to show before exiting
+    :param exit_code:
+        exit code
+    """
     if msg is not None:
         print(msg)
     raise SystemExit(exit_code)
 
 
 def link_check(link):
+    """
+    :param link:
+        link to check for http at start
+    """
     if not link[:4] == 'http':
         die(msg=f'Invalid URL: {link}')
