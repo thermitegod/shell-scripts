@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 5.4.1
-# 2020-05-06
+# 5.4.2
+# 2020-08-21
 
 # Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -69,7 +69,7 @@ def main():
         selected_pool = args.list
 
     if args.snapshot:
-        utils.is_root()
+        utils.root_check(require_root=True)
         cmd += 'snapshot '
         selected_pool = args.snapshot
 
@@ -98,7 +98,7 @@ def main():
         utils.run_cmd(cmd)
 
     if args.export:
-        utils.is_root()
+        utils.root_check(require_root=True)
         target = args.export
         cmd = f'sh -c "zfs send {target} | zstd -T0 >| {Path.cwd()}/{Path(target).name}.zst"'
         utils.run_cmd(cmd)

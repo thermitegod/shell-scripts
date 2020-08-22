@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.11.0
-# 2020-05-12
+# 1.12.0
+# 2020-08-21
 
 # Copyright (C) 2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -23,15 +23,22 @@ import subprocess
 import sys
 from pathlib import Path
 
-
-def is_root():
-    if os.geteuid() != 0:
-        die(msg='Requires root, exiting')
+from . import colors
 
 
-def is_not_root():
-    if os.geteuid() == 0:
-        die(msg='Do not run as root, exiting')
+def root_check(require_root):
+    """
+    :param require_root:
+        If True, running as root is required otherwise will terminate.
+        If False, running as root will terminate.
+    """
+    c = colors.Colors()
+    if require_root:
+        if os.geteuid() != 0:
+            die(msg=f'{c.BRED}\n\nRequires root, exiting\n\n{c.NC}')
+    else:
+        if os.geteuid() == 0:
+            die(msg=f'{c.BRED}\n\nDo not run as root, exiting\n\n{c.NC}')
 
 
 def run_cmd(cmd):
