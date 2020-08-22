@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# 3.3.1
+# 3.3.2
 # 2020-08-21
 
 # Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
@@ -18,9 +18,9 @@
 
 import shutil
 from pathlib import Path
-
 from tempfile import TemporaryDirectory
 
+from utils import hash
 from utils import utils
 
 
@@ -38,7 +38,7 @@ def main():
             utils.die(msg='grub did not create new cfg file')
 
         if Path.exists(cfgold):
-            if not utils.hash_compare_sha1(cfgold, cfgnew):
+            if not hash.hash_compare_sha1(cfgold, cfgnew):
                 Path.unlink(cfgold)
                 shutil.move(cfgnew, cfgold)
             else:

@@ -16,7 +16,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-import hashlib
 import os
 import shlex
 import subprocess
@@ -81,23 +80,6 @@ def die(msg=None, exit_code=1):
     if msg is not None:
         print(msg)
     raise SystemExit(exit_code)
-
-
-def get_extra_dir():
-    return Path() / os.environ['XDG_DATA_HOME'] / 'shell'
-
-
-def hash_compare_sha1(file1, file2):
-    hash = []
-    for filename in [file1, file2]:
-        hasher = hashlib.sha1()
-        with Path.open(filename, 'rb') as f:
-            hasher.update(f.read())
-            hash.append(hasher.hexdigest())
-
-    if hash[0] == hash[1]:
-        return True
-    return False
 
 
 def link_check(link):

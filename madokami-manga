@@ -18,9 +18,11 @@
 
 import argparse
 import os
-import pyperclip
 from pathlib import Path
 
+import pyperclip
+
+from utils import dirs
 from utils import private
 from utils import utils
 
@@ -30,7 +32,7 @@ class Download:
         self.__user = private.mado_user()
         self.__pass = private.mado_pass()
         self.__mode = utils.get_script_name()
-        self.__extra = utils.get_extra_dir()
+        self.__extra = dirs.get_extra_dir()
         self.__link = ''
         self.__save_path = Path('/mnt/data')
         self.__symlink = True
