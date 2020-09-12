@@ -30,7 +30,7 @@ class Optimize:
     def __init__(self):
         self.__verbose = False
         self.__disable_mimecheck = False
-        self.__mode = utils.get_script_name().strip('.py')
+        self.__mode = utils.get_script_name()
         self.__png_max = False
 
         self.__size_start = 0
