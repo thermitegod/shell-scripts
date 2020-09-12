@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.13.0
-# 2020-08-21
+# 1.14.0
+# 2020-09-12
 
 # Copyright (C) 2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -45,7 +45,7 @@ def run_cmd(cmd: str):
     :param cmd:
         shell command to run
     """
-    subprocess.run(shlex.split(cmd))
+    return subprocess.run(shlex.split(cmd), stdout=subprocess.PIPE).stdout.decode('utf-8')
 
 
 def write_script_shell(path: str, text: str):
