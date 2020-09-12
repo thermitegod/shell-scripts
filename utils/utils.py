@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 1.14.0
+# 1.15.0
 # 2020-09-12
 
 # Copyright (C) 2019,2020 Brandon Zorn <brandonzorn@cock.li>
@@ -77,7 +77,7 @@ def args_required_else_help():
 
 
 def not_implemented():
-    die(msg='Not implemented')
+    raise NotImplementedError
 
 
 def edit_conf(path: str, e: bool):
