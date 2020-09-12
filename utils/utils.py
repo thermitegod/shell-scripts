@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 1.15.0
+# 1.16.0
 # 2020-09-12
 
 # Copyright (C) 2019,2020 Brandon Zorn <brandonzorn@cock.li>
@@ -40,12 +40,18 @@ def root_check(require_root: bool):
             die(msg=f'{c.BRED}\n\nDo not run as root, exiting\n\n{c.NC}')
 
 
-def run_cmd(cmd: str):
+def run_cmd(cmd: str, to_stdout=False):
     """
     :param cmd:
         shell command to run
+    :param to_stdout:
+        send output to stdout
     """
-    return subprocess.run(shlex.split(cmd), stdout=subprocess.PIPE).stdout.decode('utf-8')
+
+    if to_stdout:
+        return subprocess.run(shlex.split(cmd), stdout=subprocess.PIPE).stdout.decode('utf-8')
+    else:
+        return subprocess.run(shlex.split(cmd))
 
 
 def write_script_shell(path: str, text: str):
