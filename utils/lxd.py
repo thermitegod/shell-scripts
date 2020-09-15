@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.0.0
-# 2020-09-12
+# 1.1.0
+# 2020-09-15
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -22,7 +22,8 @@ from . import utils
 
 
 def get_state(container: str):
-    state = utils.run_cmd(f'sh -c "lxc info {container} 2>|/dev/null | grep Running"')
+    state = utils.run_cmd(f'sh -c "lxc info {container} 2>|/dev/null | grep Running"', to_stdout=True)
+
     if 'Running' in state:
         logger.debug(f'container state is running for {container}')
         return True
