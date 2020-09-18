@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.16.0
-# 2020-09-12
+# 1.17.0
+# 2020-09-18
 
 # Copyright (C) 2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -86,7 +86,7 @@ def not_implemented():
     raise NotImplementedError
 
 
-def edit_conf(path: str, e: bool):
+def edit_conf(path: str, e: bool = True):
     """
     :param path:
         Path to config to edit
