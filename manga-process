@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-#1.18.0
-#2020-05-17
+#1.18.1
+#2020-09-18
 
 #Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -114,7 +114,7 @@ if [ "${show_time}" = "1" ];then
 fi
 
 if [ "${optimize}" = "1" ];then
-	optimize-all -mv
+	optimize-all -Mv
 fi
 
 case "${archivetype}" in
@@ -125,7 +125,7 @@ case "${archivetype}" in
 esac
 
 if [ "${comp_advzip}" = "1" ] && ! [ "${archivetype}" = "3" ];then
-	mkadvzip -a
+	mkadvzip
 fi
 
 if [ "${comp_test}" = "1" ];then
