@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 2.5.0
-# 2020-08-20
+# 2.6.0
+# 2020-09-19
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -46,6 +46,8 @@ class Compress:
         self.__output_dir = Path.cwd()
 
         self.__ultra = False
+
+        self.__exclude = ''
 
         self.__compressing_dir = True
 
@@ -117,7 +119,7 @@ class Compress:
         os.chdir(Path(file).parent)
 
         if self.__compressing_dir:
-            text = f'tar --xattrs -{self.__tar_verbose}Scf - "{Path(file).name}" -P | '
+            text = f'tar {self.__exclude} --xattrs -{self.__tar_verbose}Scf - "{Path(file).name}" -P | '
             if self.__status:
                 text += f'pv -s "$(du -sb "{Path.resolve(file)}" | awk \'{{print $1}}\')" | '
             text += f'{self.__cmd} >| "{self.__output_dir}/{Path(file).name}.tar.{self.__ext}" || {die}'
@@ -162,6 +164,9 @@ class Compress:
             self.__output_dir = out
         if args.verbose:
             self.__tar_verbose = 'v'
+        if args.exclude:
+            for e in args.exclude:
+                self.__exclude += f'--exclude="{e}" '
 
         self.get_mode()
         self.get_files()
@@ -175,6 +180,10 @@ def main():
                         nargs='*',
                         default=None,
                         help=argparse.SUPPRESS)
+    parser.add_argument('-e', '--exclude',
+                        metavar='EX',
+                        nargs='*',
+                        help='exclude files from archive')
     parser.add_argument('-S', '--status',
                         action='store_true',
                         help='enable cool status bar, directories only')

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.1.0
-# 2020-08-06
+# 1.2.0
+# 2020-09-19
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -28,7 +28,6 @@ import argparse
 import atexit
 import os
 import shutil
-import sys
 import tempfile
 from pathlib import Path
 
@@ -44,6 +43,8 @@ class Compress:
         self.__output_dir = Path.cwd()
 
         self.__compressing_dir = True
+
+        self.__exclude = ''
 
         self.__directories = False
         self.__files = False
@@ -101,7 +102,7 @@ class Compress:
 
         text = f'nice -19 ' \
                f'7zr a -t7z -m0=lzma2 -md=1024m -mmf=bt4 -mmt={self.__threads} -mmtf={self.__threads} ' \
-               f'-myx=9 -mx=9 -mfb=276 -mhc=on -ms=on -mtm=off -mtc=off -mta=off ' \
+               f'-myx=9 -mx=9 -mfb=276 -mhc=on -ms=on -mtm=off -mtc=off -mta=off {self.__exclude}' \
                f'-o="{self.__output_dir}" "{Path(file).name}.7z" "{Path(file).name}" || {die_failed}'
 
         utils.write_script_shell(script, text)
@@ -149,6 +150,9 @@ class Compress:
         # destructive
         if args.destructive:
             self.__destructive = True
+        if args.exclude:
+            for e in args.exclude:
+                self.__exclude += f'-x "{e}" '
 
         self.get_files()
 
@@ -161,6 +165,10 @@ def main():
                         nargs='*',
                         default=None,
                         help=argparse.SUPPRESS)
+    parser.add_argument('-e', '--exclude',
+                        metavar='EX',
+                        nargs='*',
+                        help='exclude files from archive')
     parser.add_argument('-P', '--disable-tests',
                         action='store_true',
                         help='disable post compression test')
