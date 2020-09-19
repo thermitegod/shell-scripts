@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# 1.0.0
+# 1.1.0
 # 2020-09-18
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -49,11 +49,9 @@ class Decompress:
         elif filename.endswith('.tar.xz'):
             self.__cmd = f'tar xvJf -- "{filename}"'
         elif filename.endswith('.tar.zst'):
-            # runs in sh wrapper because of pipes
-            self.__cmd = f'sh -c "zstd -dc --long=31 -- "{filename}" | tar xvf -"'
+            self.__cmd = f'zstd -dc --long=31 -- "{filename}" | tar xvf -'
         elif filename.endswith('.tar.lz4'):
-            # runs in sh wrapper because of pipes
-            self.__cmd = f'sh -c "lz4 -dc -- "{filename}" | tar xvf -"'
+            self.__cmd = f'lz4 -dc -- "{filename}" | tar xvf -'
         elif filename.endswith('.tar.lzma'):
             self.__cmd = f'tarlzma xvf -- "{filename}"'
         elif filename.endswith('.tar.lrz'):
@@ -98,7 +96,8 @@ class Decompress:
             self.__supported = False
 
         if self.__supported:
-            utils.run_cmd(self.__cmd)
+            # sh_wrap needed for tar.zst and tar.lz4
+            utils.run_cmd(self.__cmd, sh_wrap=True)
         else:
             self.__supported = True
 

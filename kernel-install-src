@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 3.4.2
-# 2020-08-21
+# 3.5.0
+# 2020-09-18
 
 # Copyright (C) 2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -58,7 +58,7 @@ def main():
 
     kconf = Path('/proc/config.gz')
     if Path.is_file(kconf):
-        utils.run_cmd(f'sh -c "zcat {kconf} >| /usr/src/linux/.config"')
+        utils.run_cmd(f'zcat {kconf} >| /usr/src/linux/.config', sh_wrap=True)
 
 
 if __name__ == '__main__':

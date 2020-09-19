@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.0.0
-# 2020-05-06
+# 1.1.0
+# 2020-09-18
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -33,7 +33,8 @@ class Trash:
 
     def size(self):
         if Path.is_dir(self.__trashdir):
-            utils.run_cmd(f'sh -c "du -h {self.__trashdir}|tail -n1|awk \'{{print $1}}\'"')
+            utils.run_cmd(f'du -h {self.__trashdir} | tail -n1 | awk \'{{print $1}}\'',
+                          sh_wrap=True)
         else:
             print(f'There is no trash dir: {self.__trashdir}')
 

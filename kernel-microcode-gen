@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.0.1
-# 2020-08-21
+# 1.1.0
+# 2020-09-18
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -43,8 +43,9 @@ class Microcode:
             Path(full_path).mkdir(parents=True, exist_ok=True)
             shutil.copyfile(self.__amd_micro, Path() / full_path / self.__amd_micro_name)
             os.chdir(tmpdir)
-            utils.run_cmd(f'sh -c "echo {self.__dir_structure}/{self.__amd_micro_name} '
-                          f'| bsdcpio -o -H newc -R 0:0 >| {self.__amd_micro_boot}"')
+            utils.run_cmd(f'echo {self.__dir_structure}/{self.__amd_micro_name} | '
+                          f'bsdcpio -o -H newc -R 0:0 >| {self.__amd_micro_boot}',
+                          sh_wrap=True)
 
 
 def main():

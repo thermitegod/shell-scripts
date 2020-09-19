@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.1.0
-# 2020-09-12
+# 1.2.0
+# 2020-09-18
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -286,7 +286,8 @@ class Container:
 
         logger.info(f'Running update for: {self.__container_fullname}')
 
-        check_exists = utils.run_cmd(f'sh -c "lxc list |grep {self.__container_fullname}"', to_stdout=True)
+        check_exists = utils.run_cmd(f'lxc list | grep {self.__container_fullname}',
+                                     sh_wrap=True, to_stdout=True)
         if check_exists:
             if self.__update_keep_old:
                 logger.info(f'Renaming {self.__container_fullname} to '
@@ -449,7 +450,7 @@ class Container:
             utils.edit_conf(self.__config, e=True)
             raise SystemExit
         if args.cat:
-            print(utils.run_cmd(f'sh -c "cat {self.__config}"'))
+            print(utils.run_cmd(f'cat {self.__config}'))
             raise SystemExit
         if args.print:
             self.__print = True

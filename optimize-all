@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.0.0
-# 2020-09-12
+# 1.1.0
+# 2020-09-18
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -46,10 +46,10 @@ class Optimize:
             self.__size_end = size
 
     def optimize_jpg(self):
-        utils.run_cmd(f'sh -c "'
-                      f'find . -type f -iname \'*.jp**\' -print0 | '
+        utils.run_cmd(f'find . -type f -iname \'*.jp**\' -print0 | '
                       f'nice -19 xargs --max-args=1 --max-procs={self.__cpu} --null '
-                      f'jpegoptim --strip-all --preserve --preserve-perms"')
+                      f'jpegoptim --strip-all --preserve --preserve-perms',
+                      sh_wrap=True)
 
     def optimize_png(self):
         if self.__png_max:
@@ -57,16 +57,16 @@ class Optimize:
         else:
             level = '5'
 
-        utils.run_cmd(f'sh -c "'
-                      f'find . -type f -iname \'*.png\' -print0 | '
+        utils.run_cmd(f'find . -type f -iname \'*.png\' -print0 | '
                       f'nice -19 xargs --max-args=1 --max-procs={self.__cpu} --null '
-                      f'optipng -o{level} -strip all -preserve"')
+                      f'optipng -o{level} -strip all -preserve',
+                      sh_wrap=True)
 
     def optimize_gif(self):
-        utils.run_cmd(f'sh -c "'
-                      f'find . -type f -iname \'*.gif\' -print0 | '
+        utils.run_cmd(f'find . -type f -iname \'*.gif\' -print0 | '
                       f'nice -19 xargs --max-args=1 --max-procs={self.__cpu} --null '
-                      f'gifsicle -bO3 -V"')
+                      f'gifsicle -bO3 -V',
+                      sh_wrap=True)
 
     def main(self):
         if self.__verbose:
