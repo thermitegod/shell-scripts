@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 3.3.2
-# 2020-08-21
+# 3.4.0
+# 2020-09-19
 
 # Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -28,8 +28,10 @@ def main():
     utils.root_check(require_root=True)
 
     with TemporaryDirectory() as tmpdir:
-        cfgold = Path('/boot/grub/grub.cfg')
-        cfgnew = Path() / tmpdir / 'grub.cfg'
+        cfg = 'grub.cfg'
+
+        cfgold = Path() / '/boot/grub' / cfg
+        cfgnew = Path() / tmpdir / cfg
 
         cmd = f'grub-mkconfig -o {cfgnew}'
         utils.run_cmd(cmd)
@@ -38,7 +40,7 @@ def main():
             utils.die(msg='grub did not create new cfg file')
 
         if Path.exists(cfgold):
-            if not hash.hash_compare_sha1(cfgold, cfgnew):
+            if not hash.file_hash_compare(cfgold, cfgnew):
                 Path.unlink(cfgold)
                 shutil.move(cfgnew, cfgold)
             else:

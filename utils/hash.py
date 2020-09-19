@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.0.0
-# 2020-08-21
+# 1.1.0
+# 2020-09-19
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -21,10 +21,10 @@ import hashlib
 from pathlib import Path
 
 
-def hash_compare_sha1(file1, file2):
+def file_hash_compare(file1: Path, file2: Path):
     hash_list = []
     for filename in [file1, file2]:
-        hasher = hashlib.sha1()
+        hasher = hashlib.blake2b()
         with Path.open(filename, 'rb') as f:
             hasher.update(f.read())
             hash_list.append(hasher.hexdigest())
