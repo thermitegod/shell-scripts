@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# 1.1.0
+# 1.2.0
 # 2020-09-18
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -129,8 +129,6 @@ def main():
                        choices=['NONE', 'CRITICAL', 'ERROR', 'WARNING', 'INFO', 'VERBOSE', 'DEBUG', 'TRACE'],
                        help='Levels: %(choices)s')
     args = parser.parse_args()
-
-    utils.args_required_else_help()
 
     logger.remove()
     logger.add(sys.stdout, level=args.loglevel, colorize=True)
