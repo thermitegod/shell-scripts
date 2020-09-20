@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.2.0
-# 2020-09-18
+# 1.3.0
+# 2020-09-19
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -32,6 +32,7 @@ class Optimize:
         self.__disable_mimecheck = False
         self.__mode = utils.get_script_name()
         self.__png_max = False
+        self.__png_oxipng = True
 
         self.__size_start = 0
         self.__size_end = 0
@@ -52,15 +53,24 @@ class Optimize:
                       sh_wrap=True)
 
     def optimize_png(self):
-        if self.__png_max:
-            level = '7'
-        else:
-            level = '5'
+        if self.__png_oxipng:
+            # use oxipng
+            level = 'max'
 
-        utils.run_cmd(f'find . -type f -iname \'*.png\' -print0 | '
-                      f'nice -19 xargs --max-args=1 --max-procs={self.__cpu} --null '
-                      f'optipng -o{level} -strip all -preserve',
-                      sh_wrap=True)
+            utils.run_cmd(f'find . -type f -iname \'*.png\' -print0 | '
+                          f'nice -19 xargs --max-args=1 --max-procs={int(self.__cpu / 4)} --null '
+                          f'oxipng --threads {int(self.__cpu / 2)} -o {level} --strip all --preserve',
+                          sh_wrap=True)
+        else:
+            # use optipng
+            level = '5'
+            if self.__png_max:
+                level = '7'
+
+            utils.run_cmd(f'find . -type f -iname \'*.png\' -print0 | '
+                          f'nice -19 xargs --max-args=1 --max-procs={self.__cpu} --null '
+                          f'optipng -o{level} -strip all -preserve',
+                          sh_wrap=True)
 
     def optimize_gif(self):
         utils.run_cmd(f'find . -type f -iname \'*.gif\' -print0 | '
@@ -101,6 +111,8 @@ class Optimize:
             self.__mode = f'optimize-{args.mode_force}'
         if args.png_max:
             self.__png_max = True
+        if args.png_optipng:
+            self.__png_oxipng = False
 
         self.main()
 
@@ -120,7 +132,10 @@ def main():
                         help='Which file to optimize [all]')
     parser.add_argument('-x', '--png-max',
                         action='store_true',
-                        help='png only, use -o7 instead of -o5')
+                        help='optipng only, use -o7 instead of -o5')
+    parser.add_argument('-z', '--png-optipng',
+                        action='store_true',
+                        help='use optipng instead of oxipng')
     debug = parser.add_argument_group('DEBUG')
     debug.add_argument('-L', '--loglevel',
                        default='INFO',
