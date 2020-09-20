@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.1.0
-# 2020-09-18
+# 1.2.0
+# 2020-09-20
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -18,12 +18,7 @@
 
 # TODO
 #   output dir for all compressors
-#   implement subdirectory extraction
-
-# Notes
-#   taken from mkzst
-#       args.output_dir
-#       get_files()
+#   implement extraction to a subdirectory
 
 import argparse
 from pathlib import Path
@@ -33,73 +28,59 @@ from utils import utils
 
 class Decompress:
     def __init__(self):
-        self.__cmd = None
         self.__input_files = None
         self.__output_dir = None
         self.__files = False
-        self.__supported = True
         self.__subdir_extract = False
 
     def run_extraction(self, filename: str):
-        filename = str(filename)
-        if filename.endswith('.tar.bz2'):
-            self.__cmd = f'tar xvjf -- "{filename}"'
-        elif filename.endswith('.tar.gz'):
-            self.__cmd = f'tar xvzf -- "{filename}"'
-        elif filename.endswith('.tar.xz'):
-            self.__cmd = f'tar xvJf -- "{filename}"'
+        if filename.endswith(('.tar.bz2', '.tbz2')):
+            utils.run_cmd(f'tar -xvjf "{filename}"')
+
+        elif filename.endswith(('.tar.gz', '.tgz')):
+            utils.run_cmd(f'tar -xvzf "{filename}"')
+
+        elif filename.endswith(('.tar.xz', '.txz')):
+            utils.run_cmd(f'tar -xvJf "{filename}"')
+
         elif filename.endswith('.tar.zst'):
-            self.__cmd = f'zstd -dc --long=31 -- "{filename}" | tar xvf -'
+            utils.run_cmd(f'zstd -dc --long=31 \'{filename}\' | tar xvf -', sh_wrap=True)
+
         elif filename.endswith('.tar.lz4'):
-            self.__cmd = f'lz4 -dc -- "{filename}" | tar xvf -'
+            utils.run_cmd(f'lz4 -dc \'{filename}\' | tar xvf -', sh_wrap=True)
+
         elif filename.endswith('.tar.lzma'):
-            self.__cmd = f'tarlzma xvf -- "{filename}"'
+            utils.run_cmd(f'tarlzma -xvf "{filename}"')
+
         elif filename.endswith('.tar.lrz'):
-            self.__cmd = f'lrzuntar -- "{filename}"'
-        elif filename.endswith('.rar') or filename.endswith('RAR'):
-            self.__cmd = f'unrar -- "{filename}"'
+            utils.run_cmd(f'lrzuntar "{filename}"')
+
+        elif filename.endswith(('.rar', 'RAR', '.cbr')):
+            utils.run_cmd(f'unrar "{filename}"')
+
         elif filename.endswith('.gz'):
-            self.__cmd = f'gunzip -k -- "{filename}"'
+            utils.run_cmd(f'gunzip -k "{filename}"')
+
         elif filename.endswith('.xz'):
-            self.__cmd = f'unxz -k -- "{filename}"'
+            utils.run_cmd(f'unxz -k "{filename}"')
+
         elif filename.endswith('.bz2'):
-            self.__cmd = f'bzip2 -dk -- "{filename}"'
+            utils.run_cmd(f'bzip2 -dk "{filename}"')
+
         elif filename.endswith('.zst'):
-            self.__cmd = f'unzstd -d --long=31 -- "{filename}"'
-        elif filename.endswith('.tgz') or filename.endswith('.tbz2'):
-            self.__cmd = f'tar xvf -- "{filename}"'
-        elif filename.endswith('.txz'):
-            self.__cmd = f'tar xvJf -- "{filename}"'
+            utils.run_cmd(f'unzstd -d --long=31 "{filename}"')
+
         elif filename.endswith('.tar'):
-            self.__cmd = f'tar xvf -- "{filename}"'
-        elif filename.endswith('.zip'):
-            self.__cmd = f'unzip -- "{filename}"'
-        elif filename.endswith('.7z'):
-            self.__cmd = f'7z x -- "{filename}"'
-        elif filename.endswith('iso') or filename.endswith('ISO'):
-            # TODO
-            if self.__subdir_extract:
-                pass
-            self.__cmd = f'7z x -- "{filename}"'
-        elif filename.endswith('.cbz'):
-            # TODO
-            if self.__subdir_extract:
-                pass
-            self.__cmd = f'7z x -- "{filename}"'
-        elif filename.endswith('.cbr'):
-            # TODO
-            if self.__subdir_extract:
-                pass
-            self.__cmd = f'unrar -- "{filename}"'
+            utils.run_cmd(f'tar -xvf "{filename}"')
+
+        elif filename.endswith(('.zip', '.cbz')):
+            utils.run_cmd(f'unzip "{filename}"')
+
+        elif filename.endswith(('.7z', 'iso', 'ISO')):
+            utils.run_cmd(f'7z x "{filename}"')
+
         else:
             print(f'cannot extract: \'{filename}\'')
-            self.__supported = False
-
-        if self.__supported:
-            # sh_wrap needed for tar.zst and tar.lz4
-            utils.run_cmd(self.__cmd, sh_wrap=True)
-        else:
-            self.__supported = True
 
     def get_files(self):
         if self.__files:
