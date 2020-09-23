@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.2.0
-# 2020-09-18
+# 1.3.0
+# 2020-09-21
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -45,20 +45,14 @@ class Container:
         self.__only = None
         self.__catch_single = False
 
-        self.__only_old = False
-
         self.__print = False
         self.__print_verbose = False
 
         self.__service = None
 
-        self.__update_keep_old = False
-
         self.__ip4_brd = '192.168.0.255'
         self.__ip4_gateway = '192.168.0.1'
         self.__ip4_netmask = '255.255.255.0'
-
-        self.__old_prefix = 'old'
 
         self.__clean_lockfiles = False
         self.__clean_torrents = False
@@ -289,14 +283,8 @@ class Container:
         check_exists = utils.run_cmd(f'lxc list | grep {self.__container_fullname}',
                                      sh_wrap=True, to_stdout=True)
         if check_exists:
-            if self.__update_keep_old:
-                logger.info(f'Renaming {self.__container_fullname} to '
-                            f'{self.__old_prefix}-{self.__container_fullname}')
-                utils.run_cmd(f'lxc rename {self.__container_fullname} '
-                              f'{self.__old_prefix}-{self.__container_fullname}', to_stdout=True)
-            else:
-                logger.info(f'Deleting: {self.__container_fullname}')
-                utils.run_cmd(f'lxc delete {self.__container_fullname}', to_stdout=True)
+            logger.info(f'Deleting: {self.__container_fullname}')
+            utils.run_cmd(f'lxc delete {self.__container_fullname}', to_stdout=True)
 
         logger.info(f'Copying: {self.__container_template} to {self.__container_fullname}')
         utils.run_cmd(f'lxc copy {self.__container_template} {self.__container_fullname}')
@@ -384,9 +372,6 @@ class Container:
                 self.__container_fullname = f'{self.__container_type}-{self.__container_name}'
                 self.__container_template = f'base-{self.__container_distro}-{self.__container_type}'
 
-                if self.__only_old:
-                    self.__container_fullname = f'{self.__old_prefix}-{self.__container_fullname}'
-
                 if self.__catch_single:
                     if self.__container_fullname != self.__only:
                         continue
@@ -421,8 +406,6 @@ class Container:
         if args.only:
             self.__only = args.only
             self.__catch_single = True
-        if args.only_old:
-            self.__only_old = True
         # container services
         if args.service:
             self.__action = 'service'
@@ -473,9 +456,6 @@ def main():
     c.add_argument('-O', '--only',
                    metavar='CONTAINER',
                    help='Only operate in the supplied container, requires full container name')
-    c.add_argument('-o', '--only-old',
-                   action='store_true',
-                   help='Only run on containers with \'old\' prefix')
     s = p.add_argument_group('CONTAINER SERVICES')
     s.add_argument('-S', '--service',
                    metavar='SERVICE',
