@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.3.0
-# 2020-09-21
+# 1.5.0
+# 2020-09-23
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -44,6 +44,8 @@ class Container:
 
         self.__only = None
         self.__catch_single = False
+
+        self.__create_missing_dirs = False
 
         self.__print = False
         self.__print_verbose = False
@@ -164,25 +166,26 @@ class Container:
         self.__container_inside_path_watch = Path() / self.__container_inside_path_home / 'rtorrent/watch'
         self.__container_inside_path_session = Path() / self.__container_inside_path_home / 'rtorrent/session'
 
-        # create config dirs if they are missing
-        if not Path.exists(self.__container_path_config):
-            logger.info(f'Creating missing dir {self.__container_path_config}')
-            self.__container_path_config.mkdir(parents=True, exist_ok=True)
-        if not Path.exists(self.__container_path_session):
-            logger.info(f'Creating missing dir {self.__container_path_session}')
-            self.__container_path_session.mkdir(parents=True, exist_ok=True)
-        if not Path.exists(self.__container_path_watch):
-            logger.info(f'Creating missing dir {self.__container_path_watch}')
-            self.__container_path_watch.mkdir(parents=True, exist_ok=True)
-        if not Path.exists(self.__container_path_save):
-            logger.info(f'Creating missing dir {self.__container_path_save}')
-            self.__container_path_save.mkdir(parents=True, exist_ok=True)
-        if not Path.exists(self.__container_path_rushare):
-            logger.info(f'Creating missing dir {self.__container_path_rushare}')
-            self.__container_path_rushare.mkdir(parents=True, exist_ok=True)
-        if not Path.exists(self.__container_path_save):
-            logger.info(f'Creating missing dir {self.__container_path_save}')
-            self.__container_path_save.mkdir(parents=True, exist_ok=True)
+        if self.__create_missing_dirs:
+            # create config dirs if they are missing
+            if not Path.exists(self.__container_path_config):
+                logger.info(f'Creating missing dir: \'{self.__container_path_config}\'')
+                self.__container_path_config.mkdir(parents=True, exist_ok=True)
+            if not Path.exists(self.__container_path_session):
+                logger.info(f'Creating missing dir: \'{self.__container_path_session}\'')
+                self.__container_path_session.mkdir(parents=True, exist_ok=True)
+            if not Path.exists(self.__container_path_watch):
+                logger.info(f'Creating missing dir: \'{self.__container_path_watch}\'')
+                self.__container_path_watch.mkdir(parents=True, exist_ok=True)
+            if not Path.exists(self.__container_path_save):
+                logger.info(f'Creating missing dir: \'{self.__container_path_save}\'')
+                self.__container_path_save.mkdir(parents=True, exist_ok=True)
+            if not Path.exists(self.__container_path_rushare):
+                logger.info(f'Creating missing dir: \'{self.__container_path_rushare}\'')
+                self.__container_path_rushare.mkdir(parents=True, exist_ok=True)
+            if not Path.exists(self.__container_path_save):
+                logger.info(f'Creating missing dir: \'{self.__container_path_save}\'')
+                self.__container_path_save.mkdir(parents=True, exist_ok=True)
 
     def attach_dirs(self):
         utils.run_cmd(f'lxc config device add {self.__container_fullname} storage disk '
@@ -423,6 +426,8 @@ class Container:
             self.__action = 'stop'
         if args.force_stop:
             self.__action = 'forcestop'
+        if args.create_dirs:
+            self.__create_missing_dirs = True
         # specific
         if args.rutorrent_lockfile:
             self.__clean_lockfiles = True
@@ -460,6 +465,9 @@ def main():
     s.add_argument('-S', '--service',
                    metavar='SERVICE',
                    help='restart service passed as arg')
+    s.add_argument('--create-dirs',
+                   action='store_true',
+                   help='Create container storage dirs if the do not exist')
     g = p.add_argument_group('CONTAINER GENERAL')
     g.add_argument('-d', '--delete',
                    action='store_true',
