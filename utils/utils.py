@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.18.0
-# 2020-09-18
+# 1.19.0
+# 2020-09-20
 
 # Copyright (C) 2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -20,6 +20,7 @@ import os
 import shlex
 import subprocess
 import sys
+import re
 from pathlib import Path
 
 from . import colors
@@ -38,6 +39,12 @@ def root_check(require_root: bool):
     else:
         if os.geteuid() == 0:
             die(msg=f'{c.BRED}\n\nDo not run as root, exiting\n\n{c.NC}')
+
+
+def shell_escape(string):
+    # to get full shell escape have to use .replace because re.escape will not
+    # escape single quotes
+    return re.escape(string).replace("'", r"\'")
 
 
 def run_cmd(cmd: str, sh_wrap: bool = False, to_stdout: bool = False):
