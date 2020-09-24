@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# 1.5.0
+# 1.5.1
 # 2020-09-23
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -189,16 +189,16 @@ class Container:
 
     def attach_dirs(self):
         utils.run_cmd(f'lxc config device add {self.__container_fullname} storage disk '
-                      f'source={self.__container_path_save} path={self.__container_inside_path_data}',
+                      f'source="{self.__container_path_save}" path="{self.__container_inside_path_data}"',
                       to_stdout=True)
         utils.run_cmd(f'lxc config device add {self.__container_fullname} session disk '
-                      f'source={self.__container_path_session} path={self.__container_inside_path_session}',
+                      f'source="{self.__container_path_session}" path="{self.__container_inside_path_session}"',
                       to_stdout=True)
         utils.run_cmd(f'lxc config device add {self.__container_fullname} watch disk '
-                      f'source={self.__container_path_watch} path={self.__container_inside_path_watch}',
+                      f'source="{self.__container_path_watch}" path="{self.__container_inside_path_watch}"',
                       to_stdout=True)
         utils.run_cmd(f'lxc config device add {self.__container_fullname} ru disk '
-                      f'source={self.__container_path_rushare} path={self.__container_inside_path_rushare}',
+                      f'source="{self.__container_path_rushare}" path={self.__container_inside_path_rushare}',
                       to_stdout=True)
 
     def stop(self):
