@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# 1.3.0
+# 1.4.0
 # 2020-09-23
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -119,6 +119,7 @@ class Decompress:
                     self.run_extraction(filename=f)
         elif self.__input_files is not None:
             for f in self.__input_files:
+                f = str(Path(f).resolve())
                 if Path.is_file(Path(f)):
                     self.run_extraction(filename=f)
 
