@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# 1.4.0
+# 1.5.0
 # 2020-09-23
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -134,7 +134,7 @@ class Decompress:
             self.__input_files = args.input_files
         if args.output_dir:
             self.__extract_to = True
-            out = Path.resolve(Path(args.output_dir))
+            out = Path.resolve(Path(args.output_dir[0]))
             if not Path.is_dir(out):
                 if Path.exists(out):
                     utils.die(msg=f'selected output dir \'{out}\' exists but is not a directory')
@@ -157,6 +157,7 @@ def main():
                         help='decompress all files in cwd')
     parser.add_argument('-o', '--output-dir',
                         metavar='DIR',
+                        nargs=1,
                         help='create the archive[s] in this directory')
     opts = parser.add_argument_group('EXTRACTION OPTIONS')
     opts.add_argument('-s', '--no-subdir',
