@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.0.0
-# 2020-08-19
+# 1.1.0
+# 2020-09-24
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -33,6 +33,7 @@ class Process:
         self.__time_end = 0
 
         self.__archivetype = None
+        self.__set_compressor_interactive = False
 
         self.__optimize = True
         self.__match_zzz = False
@@ -86,36 +87,37 @@ class Process:
         size = utils.run_cmd('du -h | tail -n1 | awk \'{print $1}\'', sh_wrap=True, to_stdout=True).strip('\n')
         print(f'\nSize : {size}\n')
 
-        print('Choose archive type [DEFAULT:1]')
-        print('1: zip destructive')
-        print('2: zip destructive nojunkpath')
-        print('3: 7z dir destructive')
-        print('')
-        archivetype = input()
+        if self.__set_compressor_interactive:
+            print('Choose archive type [DEFAULT:1]')
+            print('1: zip destructive')
+            print('2: zip destructive nojunkpath')
+            print('3: 7z dir destructive')
+            print('')
+            self.__archivetype = input()
 
-        if not archivetype:
-            archivetype = 1
-        else:
-            try:
-                archivetype = int(archivetype)
-                if archivetype > 3:
-                    utils.die('Input is out of range')
-            except ValueError:
-                utils.die('Input does not match supported values')
+            if not self.__archivetype:
+                self.__archivetype = 1
+            else:
+                try:
+                    self.__archivetype = int(self.__archivetype)
+                    if self.__archivetype > 3:
+                        utils.die('Input is out of range')
+                except ValueError:
+                    utils.die('Input does not match supported values')
 
         self.get_time(start=True)
 
         if self.__optimize:
             utils.run_cmd('optimize-all -Mv')
 
-        if archivetype == 1:
+        if self.__archivetype == 1:
             utils.run_cmd('mkzip -dzP')
-        elif archivetype == 2:
+        elif self.__archivetype == 2:
             utils.run_cmd('mkzip -dZjP')
-        elif archivetype == 3:
+        elif self.__archivetype == 3:
             utils.run_cmd('mk7z -dzP')
 
-        if self.__comp_advzip and not archivetype == 3:
+        if self.__comp_advzip and not self.__archivetype == 3:
             # does not need to be run for 7z
             utils.run_cmd('mkadvzip')
 
@@ -138,6 +140,10 @@ class Process:
             self.__mode = 'alt'
         if args.input_files is not None:
             self.__input_files = args.input_files
+        if args.compression == 0:
+            self.__set_compressor_interactive = True
+        else:
+            self.__archivetype = args.compression
         # disable
         if args.disable_advzip:
             self.__comp_advzip = False
@@ -170,6 +176,14 @@ def main():
     parser.add_argument('-d', '--directories',
                         action='store_true',
                         help='Run for all directories in CWD')
+    parser.add_argument('-c', '--compression',
+                        action='store',
+                        type=int,
+                        nargs=1,
+                        metavar='COMP',
+                        default=1,
+                        choices=[0, 1, 2, 3],
+                        help='Sets default compression for dirs, use \'0\' to get interactive and compressor list')
     parser.add_argument('-r', '--numerical',
                         action='store_true',
                         help='Enable numerical renaming')
