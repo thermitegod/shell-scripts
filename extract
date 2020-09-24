@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.2.0
-# 2020-09-20
+# 1.3.0
+# 2020-09-23
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -17,10 +17,10 @@
 #    along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # TODO
-#   output dir for all compressors
-#   implement extraction to a subdirectory
+#   dynamically decide whether to have self.__extract_to_subdir set to True or False
 
 import argparse
+import os
 from pathlib import Path
 
 from utils import utils
@@ -29,58 +29,84 @@ from utils import utils
 class Decompress:
     def __init__(self):
         self.__input_files = None
+
         self.__output_dir = None
+
         self.__files = False
-        self.__subdir_extract = False
+
+        self.__extract_to = False
+        self.__extract_to_subdir = True
+
+    def extract_to(self, filename):
+        if self.__extract_to_subdir:
+            if '.tar.' in filename:
+                # removes both extensions
+                basename = filename.split('/')[-1].rpartition('.')[0].rpartition('.')[0]
+            else:
+                basename = filename.split('/')[-1].rpartition('.')[0]
+
+            extract_location = Path() / self.__output_dir / basename
+        else:
+            extract_location = Path() / self.__output_dir
+
+        extract_location.mkdir(parents=True, exist_ok=True)
+        os.chdir(extract_location)
 
     def run_extraction(self, filename: str):
+        if self.__extract_to:
+            self.extract_to(filename=filename)
+
+        # since extract_to() will change the CWD have to use absolute path
+        # when calling extraction programs
+        filename_path = Path(filename).resolve()
+
         if filename.endswith(('.tar.bz2', '.tbz2')):
-            utils.run_cmd(f'tar -xvjf "{filename}"')
+            utils.run_cmd(f'tar -xvjf "{filename_path}"')
 
         elif filename.endswith(('.tar.gz', '.tgz')):
-            utils.run_cmd(f'tar -xvzf "{filename}"')
+            utils.run_cmd(f'tar -xvzf "{filename_path}"')
 
         elif filename.endswith(('.tar.xz', '.txz')):
-            utils.run_cmd(f'tar -xvJf "{filename}"')
+            utils.run_cmd(f'tar -xvJf "{filename_path}"')
 
         elif filename.endswith('.tar.zst'):
-            utils.run_cmd(f'zstd -dc --long=31 \'{filename}\' | tar xvf -', sh_wrap=True)
+            utils.run_cmd(f'zstd -dc --long=31 \'{filename_path}\' | tar xvf -', sh_wrap=True)
 
         elif filename.endswith('.tar.lz4'):
-            utils.run_cmd(f'lz4 -dc \'{filename}\' | tar xvf -', sh_wrap=True)
+            utils.run_cmd(f'lz4 -dc \'{filename_path}\' | tar xvf -', sh_wrap=True)
 
         elif filename.endswith('.tar.lzma'):
-            utils.run_cmd(f'tarlzma -xvf "{filename}"')
+            utils.run_cmd(f'tarlzma -xvf "{filename_path}"')
 
         elif filename.endswith('.tar.lrz'):
-            utils.run_cmd(f'lrzuntar "{filename}"')
+            utils.run_cmd(f'lrzuntar "{filename_path}"')
 
         elif filename.endswith(('.rar', 'RAR', '.cbr')):
-            utils.run_cmd(f'unrar "{filename}"')
+            utils.run_cmd(f'unrar "{filename_path}"')
 
         elif filename.endswith('.gz'):
-            utils.run_cmd(f'gunzip -k "{filename}"')
+            utils.run_cmd(f'gunzip -k "{filename_path}"')
 
         elif filename.endswith('.xz'):
-            utils.run_cmd(f'unxz -k "{filename}"')
+            utils.run_cmd(f'unxz -k "{filename_path}"')
 
         elif filename.endswith('.bz2'):
-            utils.run_cmd(f'bzip2 -dk "{filename}"')
+            utils.run_cmd(f'bzip2 -dk "{filename_path}"')
 
         elif filename.endswith('.zst'):
-            utils.run_cmd(f'unzstd -d --long=31 "{filename}"')
+            utils.run_cmd(f'unzstd -d --long=31 "{filename_path}"')
 
         elif filename.endswith('.tar'):
-            utils.run_cmd(f'tar -xvf "{filename}"')
+            utils.run_cmd(f'tar -xvf "{filename_path}"')
 
         elif filename.endswith(('.zip', '.cbz')):
-            utils.run_cmd(f'unzip "{filename}"')
+            utils.run_cmd(f'unzip "{filename_path}"')
 
         elif filename.endswith(('.7z', 'iso', 'ISO')):
-            utils.run_cmd(f'7z x "{filename}"')
+            utils.run_cmd(f'7z x "{filename_path}"')
 
         else:
-            print(f'cannot extract: \'{filename}\'')
+            print(f'cannot extract: \'{filename_path}\'')
 
     def get_files(self):
         if self.__files:
@@ -100,22 +126,19 @@ class Decompress:
         # decompression type
         if args.files:
             self.__files = True
-        if args.subdir:
-            self.__subdir_extract = True
+        if args.no_subdir:
+            self.__extract_to_subdir = False
         # other
         if args.input_files is not None:
             self.__input_files = args.input_files
         if args.output_dir:
+            self.__extract_to = True
             out = Path.resolve(Path(args.output_dir))
             if not Path.is_dir(out):
                 if Path.exists(out):
                     utils.die(msg=f'selected output dir \'{out}\' exists but is not a directory')
-                Path(out).mkdir(parents=True, exist_ok=True)
+                out.mkdir(parents=True, exist_ok=True)
             self.__output_dir = out
-
-            # TODO
-            #   need to plumb into decompressors
-            raise NotImplementedError
 
         self.get_files()
 
@@ -135,9 +158,9 @@ def main():
                         metavar='DIR',
                         help='create the archive[s] in this directory')
     opts = parser.add_argument_group('EXTRACTION OPTIONS')
-    opts.add_argument('-s', '--subdir',
+    opts.add_argument('-s', '--no-subdir',
                       action='store_true',
-                      help='Extract archive to a directory created from filename, only cb{r,z} and iso')
+                      help='Extract files to output dir without creating sub directories, req -o')
 
     args = parser.parse_args()
 
