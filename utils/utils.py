@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.19.0
-# 2020-09-20
+# 1.20.0
+# 2020-09-24
 
 # Copyright (C) 2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -91,10 +91,6 @@ def args_required_else_help():
     except IndexError:
         run_cmd(f'{sys.argv[0]} -h')
         raise SystemExit
-
-
-def not_implemented():
-    raise NotImplementedError
 
 
 def edit_conf(path: str, e: bool = True):
