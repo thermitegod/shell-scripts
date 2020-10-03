@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.0.0
-# 2020-09-24
+# 1.1.0
+# 2020-10-03
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -19,18 +19,21 @@
 import mimetypes
 
 
-def check_if_video(filename: str):
-    try:
-        if 'video' in mimetypes.guess_type(filename)[0]:
-            return True
-    except TypeError:
-        pass
-    return False
+def check_if_video(filename):
+    return __check_mimetype(filename=str(filename), mime_type='video')
 
 
-def check_if_audio(filename: str):
+def check_if_audio(filename):
+    return __check_mimetype(filename=str(filename), mime_type='audio')
+
+
+def check_if_image(filename):
+    return __check_mimetype(filename=str(filename), mime_type='image')
+
+
+def __check_mimetype(filename: str, mime_type: str):
     try:
-        if 'audio' in mimetypes.guess_type(filename)[0]:
+        if mime_type in mimetypes.guess_type(filename)[0]:
             return True
     except TypeError:
         pass
