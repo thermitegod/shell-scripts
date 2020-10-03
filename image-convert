@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# 2.4.0
+# 2.5.0
 # 2020-10-03
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -83,11 +83,13 @@ class Convert:
         return size
 
     def get_img_size(self, print_only=True):
+        # pgmagick.api.Image is imported here to avoid name collision with
+        # pgmagick.Image
+        from pgmagick.api import Image
+
         for filename in Path(self.__directory).iterdir():
             if mimecheck.check_if_image(filename=filename):
-                from pgmagick.api import Image
-                filename = str(filename)
-                img = Image(filename)
+                img = Image(str(filename))
                 if print_only:
                     print(f'{img.width}x{img.height}')
                 else:
