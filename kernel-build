@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# 2.10.2
+# 2.11.0
 # 2020-10-03
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -51,9 +51,7 @@ from utils import utils
 
 
 # TODO
-#   config file
 #   add comments for all niche cases in script
-#   commit matching with git builds
 #   multi build kernels
 #       multi kernel build - debug and regular, from one invocation
 #       single build, either debug or regular
@@ -127,7 +125,6 @@ class Build:
         self.min_supported_version_check(checking='kernel', ver=self.__kernel_module_dir.partition('-')[0])
 
         self.__storage = Path() / os.environ['XDG_DATA_HOME'] / 'kernel'
-        # self.__settings = Path() / os.environ['XDG_CONFIG_HOME'] / 'kernel/config'
         self.__storage_distfiles = Path() / self.__storage / 'distfiles'
         self.__storage_kernel_base = Path() / self.__storage / 'kernels'
         self.__storage_kernel_individual = Path() / self.__storage_kernel_base / self.__zfs_src_storage_scheme
@@ -434,12 +431,6 @@ class Build:
             self.__force_bump_check = False
         if args.force_bump:
             self.__force_bump_check = True
-        if args.edit:
-            raise NotImplementedError
-            # utils.edit_conf(self.__settings)
-        if args.reset_config:
-            raise NotImplementedError
-            # Path.unlink(self.__settings)
         if args.rm_built_src:
             if Path.is_dir(self.__storage_kernel_base):
                 shutil.rmtree(self.__storage_kernel_base)
@@ -496,15 +487,9 @@ def main():
     general.add_argument('-B', '--force-bump',
                          action='store_true',
                          help='force enable kernel bump check')
-    general.add_argument('-E', '--edit',
-                         action='store_true',
-                         help='Edit config file')
     general.add_argument('-I', '--no-intro',
                          action='store_true',
                          help='disable intro')
-    general.add_argument('-R', '--reset-config',
-                         action='store_true',
-                         help='reset config file and exit')
     general.add_argument('--rm-built-src',
                          action='store_true',
                          help='Remove generated \'distfiles\' and \'kernels\' dirs')
