@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 2.10.1
-# 2020-09-24
+# 2.10.2
+# 2020-10-03
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -407,7 +407,7 @@ class Build:
                         utils.run_cmd('emerge --ignore-default-opts --oneshot --quiet sys-fs/zfs')
                 if self.__kernel_has_module_support:
                     utils.run_cmd('emerge --ignore-default-opts --oneshot --jobs @module-rebuild')
-            utils.run_cmd(f'kernel-initramfs-dracut -c {self.__initramfs_compression} -k {self.__kernel_module_dir}')
+            utils.run_cmd(f'kernel-initramfs -c {self.__initramfs_compression} -k {self.__kernel_module_dir}')
             utils.run_cmd('kernel-grub')
             if self.__clean_kernel_src:
                 utils.run_cmd('kernel-clean-src -c')
