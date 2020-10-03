@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 3.5.0
-# 2020-09-18
+# 4.0.0
+# 2020-10-03
 
 # Copyright (C) 2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -22,6 +22,29 @@ from pathlib import Path
 from utils import utils
 
 
+class Install:
+    def __init__(self):
+        self.__verbose = 'quiet'
+        self.__kernel_ebuild = 'sys-kernel/gentoo-sources'
+
+        pass
+
+    def run(self, args):
+        if args.verbose:
+            self.__verbose = 'verbose'
+
+        if args.git:
+            self.__kernel_ebuild = 'sys-kernel/git-sources'
+        elif args.vanilla:
+            self.__kernel_ebuild = 'sys-kernel/vanilla-sources'
+
+        utils.run_cmd(f'emerge --ignore-default-opts --oneshot --{self.__verbose} {self.__kernel_ebuild}')
+
+        kernel_config = Path() / '/proc/config.gz'
+        if Path.is_file(kernel_config):
+            utils.run_cmd(f'zcat {kernel_config} >| /usr/src/linux/.config', sh_wrap=True)
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-v', '--verbose',
@@ -38,27 +61,8 @@ def main():
 
     utils.root_check(require_root=True)
 
-    cmd = 'emerge --ignore-default-opts --oneshot '
-
-    if args.verbose:
-        cmd += '--verbose '
-    else:
-        cmd += '--quiet '
-
-    if args.git:
-        kernel = 'git'
-    elif args.vanilla:
-        kernel = 'vanilla'
-    else:
-        kernel = 'gentoo'
-
-    cmd += f'sys-kernel/{kernel}-sources'
-
-    utils.run_cmd(cmd)
-
-    kconf = Path('/proc/config.gz')
-    if Path.is_file(kconf):
-        utils.run_cmd(f'zcat {kconf} >| /usr/src/linux/.config', sh_wrap=True)
+    run = Install()
+    run.run(args)
 
 
 if __name__ == '__main__':
