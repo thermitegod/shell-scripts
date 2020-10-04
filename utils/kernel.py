@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 1.4.0
+# 1.4.1
 # 2020-10-04
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -31,6 +31,11 @@ def get_kernel_dir():
 
 
 def __kernel_conf_action(src: Path, dst: Path, act: str):
+    # src and dst can be either a directory containing the
+    # kernel .config or the full path to the kernel .config
+    # if src or dst is a directory then the kernel .config will
+    # be appended
+
     if Path.is_dir(src):
         src = Path() / src / '.config'
 
