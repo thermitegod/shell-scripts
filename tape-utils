@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# 1.1.0
+# 1.2.0
 # 2020-10-04
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -20,6 +20,7 @@ import argparse
 import os
 from pathlib import Path
 
+from utils import confirm
 from utils import utils
 
 
@@ -56,11 +57,10 @@ class Backup:
             utils.die(msg='Not a file or directory')
 
     def t_confirm_erase(self):
-        confirm = input('Confirm erase current tape [yn]?')
-        if confirm == 'y':
+        if confirm.confirm_run('Confirm erase current tape [y/n]? '):
             self.t_erase()
         else:
-            utils.die(msg='Exiting. Did not enter: \'y\'')
+            utils.die(msg='Did not confirm, Exiting')
 
     def t_backup(self):
         self.t_cdloc()

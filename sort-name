@@ -22,8 +22,10 @@ from pathlib import Path
 
 from loguru import logger
 
-from utils import utils
+from utils import confirm
 from utils import dirs
+from utils import utils
+
 
 # file format for
 # self.__list_final and self.__list_type
@@ -138,8 +140,7 @@ class Sort:
         print(f'Dest is\t\t: {self.__dest}')
         print('\nMake sure everything has been processed correctly')
         print(f'\nRunning script is: {utils.get_script_name()}\n')
-        confirm = input('Confirm run [yn]? ')
-        if confirm == 'y':
+        if confirm.confirm_run():
             # all target dirs should exits before running
             # otherwise you are going to have a bad time
             logger.debug(f'running dir_check')
