@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 9.2.1
-# 2020-09-18
+# 9.3.0
+# 2020-10-04
 
 # Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -23,6 +23,7 @@ from pathlib import Path
 import pyperclip
 
 from utils import dirs
+from utils import net
 from utils import private
 from utils import utils
 
@@ -38,7 +39,7 @@ class Download:
         self.__symlink = True
 
     def dl(self):
-        utils.link_check(self.__link)
+        net.link_check(self.__link)
 
         link_cut = self.__link.split('/')[-1]
         save_path_full = Path() / self.__save_path / link_cut.replace('%20', ' ').replace('%21', '!')

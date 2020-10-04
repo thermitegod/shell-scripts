@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 1.21.1
+# 1.22.0
 # 2020-10-04
 
 # Copyright (C) 2019,2020 Brandon Zorn <brandonzorn@cock.li>
@@ -114,12 +114,3 @@ def die(msg: str = None, exit_code: int = 1):
     if msg is not None:
         print(msg)
     raise SystemExit(exit_code)
-
-
-def link_check(link: str):
-    """
-    :param link:
-        link to check for http at start
-    """
-    if not link[:4] == 'http':
-        die(msg=f'Invalid URL: {link}')
