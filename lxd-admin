@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# 1.6.0
+# 1.7.0
 # 2020-10-04
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -333,7 +333,9 @@ class Container:
         self.attach_dirs()
 
     def main(self):
+        c = 0
         for line in Path.open(self.__config):
+            c += 1
             line = line.strip('\n').split(' ')
             if line[0] == 'version':
                 if line[1] != self.__CONFIG_VERSION:
@@ -355,21 +357,25 @@ class Container:
                 except IndexError:
                     continue
 
-                # set config file variables
-                self.__container_type = line[0]
-                self.__container_distro = line[1]
-                self.__container_user = line[2]
-                self.__container_autostart = line[3]
-                self.__container_htpasswd = line[4]
-                self.__container_ipv4 = line[5]
-                self.__container_limit_cpu = line[6]
-                self.__container_limit_cpu_allowance = line[7]
-                self.__container_limit_mem = line[8]
-                self.__container_name = line[9]
                 try:
-                    self.__container_save_override = line[10]
+                    # set config file variables
+                    self.__container_type = line[0]
+                    self.__container_distro = line[1]
+                    self.__container_user = line[2]
+                    self.__container_autostart = line[3]
+                    self.__container_htpasswd = line[4]
+                    self.__container_ipv4 = line[5]
+                    self.__container_limit_cpu = line[6]
+                    self.__container_limit_cpu_allowance = line[7]
+                    self.__container_limit_mem = line[8]
+                    self.__container_name = line[9]
+                    try:
+                        self.__container_save_override = line[10]
+                    except IndexError:
+                        self.__container_save_override = None
                 except IndexError:
-                    self.__container_save_override = None
+                    logger.critical(f'Malformed config on line {c}')
+                    raise SystemExit
 
                 # create actual container name
                 self.__container_fullname = f'{self.__container_type}-{self.__container_name}'
