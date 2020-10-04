@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.0.0
-# 2020-10-02
+# 1.2.0
+# 2020-10-04
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -29,19 +29,25 @@ class Symlink:
         # /root so create wanted home path
         self.__user = 'brandon'
 
-        self.__home_bin = Path() / '/home' / self.__user / '.bin'
+        self.__home = Path() / '/home' / self.__user
         self.__local_bin = Path() / '/usr/local/bin'
 
-        self.__ignore = '--ignore=".git" --ignore=".gitignore"'
+        self.__ignore = '--ignore=".git" ' \
+                        '--ignore=".idea" ' \
+                        '--ignore=".gitignore" ' \
+                        '--ignore="deprecated" ' \
+                        '--ignore="python" ' \
+                        '--ignore="shell" ' \
+                        '--ignore="tools" ' \
+                        '--ignore="utils" '
 
     def run(self, args):
-        # decompression type
         if args.stow_bin:
-            os.chdir(self.__home_bin)
-            utils.run_cmd(f'stow {self.__ignore} -v --target={self.__local_bin} bin bin-other opt')
+            os.chdir(self.__home)
+            utils.run_cmd(f'stow {self.__ignore} -v --target={self.__local_bin} .bin')
         if args.unstow_bin:
-            os.chdir(self.__home_bin)
-            utils.run_cmd(f'stow {self.__ignore} -D -v --target={self.__local_bin} bin bin-other opt')
+            os.chdir(self.__home)
+            utils.run_cmd(f'stow {self.__ignore} -D -v --target={self.__local_bin} .bin')
 
 
 def main():
