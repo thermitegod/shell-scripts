@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 1.23.0
+# 1.24.0
 # 2020-10-04
 
 # Copyright (C) 2019,2020 Brandon Zorn <brandonzorn@cock.li>
@@ -91,16 +91,4 @@ def args_required_else_help():
         sys.argv[1]
     except IndexError:
         run_cmd(f'{sys.argv[0]} -h')
-        raise SystemExit
-
-
-def edit_conf(path: str, e: bool = True):
-    """
-    :param path:
-        Path to config to edit
-    :param e:
-        Whether exit when editing is done
-    """
-    run_cmd(f'{os.environ["EDITOR"]} {path}')
-    if e:
         raise SystemExit

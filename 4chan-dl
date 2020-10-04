@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.0.0
-# 2020-09-18
+# 1.1.0
+# 2020-10-04
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -20,8 +20,9 @@ import argparse
 import os
 from pathlib import Path
 
-from utils import utils
 from utils import dirs
+from utils import editor
+from utils import utils
 
 
 class Dl:
@@ -90,7 +91,7 @@ class Dl:
         if args.batch:
             self.__batch = True
         if args.edit:
-            utils.edit_conf(self.__thread_list)
+            editor.edit_conf(self.__thread_list)
 
         self.main()
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# 1.7.0
+# 1.8.0
 # 2020-10-04
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -23,6 +23,7 @@ from pathlib import Path
 
 from loguru import logger
 
+from utils import editor
 from utils import utils
 from utils import lxd
 
@@ -441,8 +442,7 @@ class Container:
             self.__clean_torrents = True
         # other
         if args.edit:
-            utils.edit_conf(self.__config, e=True)
-            raise SystemExit
+            editor.edit_conf(self.__config)
         if args.cat:
             print(utils.run_cmd(f'cat {self.__config}'))
             raise SystemExit
