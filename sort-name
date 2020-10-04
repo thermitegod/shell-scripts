@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# 1.1.0
+# 1.2.0
 # 2020-10-04
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -31,12 +31,10 @@ class Sort:
         self.__list_final = dirs.get_extra_dir() / 'sort-name-final'
         self.__list_type = dirs.get_extra_dir() / 'sort-name-type'
 
-        self.__dest_final = dirs.get_extra_dir() / 'sort-name-final'
-        self.__dest_type = dirs.get_extra_dir() / 'sort-name-type'
-
         self.__list_sort = None
         self.__dest = None
 
+        self.__use_test_dir = False
         self.__test_dir = Path() / '/tmp/test'
 
         self.__sort_name = None
@@ -48,22 +46,44 @@ class Sort:
         self.__total_before = utils.run_cmd("ls -1A | wc -l", sh_wrap=True, to_stdout=True)
 
     def get_dest_dir(self, dest_file):
+        # format to decalre save dir is
+        # save_dir <location>
+        # can be a relative or absolute path
+        # first hit wins
+
+        if self.__use_test_dir:
+            return
+
+        c = 0
         for line in Path.open(dest_file):
+            c += 1
+
+            if c > 10:
+                # 10 limes is an abstract limit but save_dir should be set
+                # within this limit
+                logger.error(f'save_dir not declared within first 10 lines')
+                raise SystemExit
+
             line = line.strip('\n').split(' ')
             if line[0].startswith('#'):
                 continue
 
             if line[0].startswith('save_dir'):
-                if self.__dest != self.__test_dir:
+                try:
                     self.__dest = line[1]
                     logger.debug(f'Setting dest dir: {line[1]}')
-                continue
+                except IndexError:
+                    logger.critical(f'Invalid format for save_dir on line: {c}')
+                    raise SystemExit
+                break
 
     def main_sort(self):
         for line in Path.open(self.__list_sort):
             line = line.strip('\n').split(' ')
             if line[0].startswith('#'):
                 # logger.debug(f'Skipping comment: {line}')
+                continue
+            if line[0].startswith('save_dir'):
                 continue
 
             self.__sort_name = line[0]
@@ -130,6 +150,7 @@ class Sort:
     def run(self, args):
         # general
         if args.test:
+            self.__use_test_dir = True
             self.__dest = self.__test_dir
         if args.edit_type:
             utils.edit_conf(self.__list_final)
@@ -138,11 +159,11 @@ class Sort:
         if args.final:
             self.__list_sort = self.__list_final
             if not self.__dest:
-                self.get_dest_dir(self.__dest_final)
+                self.get_dest_dir(self.__list_final)
         if args.type:
             self.__list_sort = self.__list_type
             if not self.__dest:
-                self.get_dest_dir(self.__dest_type)
+                self.get_dest_dir(self.__list_type)
 
         self.main()
 
