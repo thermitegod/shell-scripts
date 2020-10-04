@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.3.0
-# 2019-04-24
+# 1.4.0
+# 2020-10-04
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -23,16 +23,14 @@ from utils import utils
 
 
 def get_kernel_dir():
-    src = Path('/usr/src/linux')
+    src = Path() / '/usr/src/linux'
     if Path.exists(src):
         return src
 
     utils.die(msg=f'{src}: is not a valid symlink')
 
 
-def __kernel_conf_action(src, dst, act):
-    src = Path(src)
-    dst = Path(dst)
+def __kernel_conf_action(src: Path, dst: Path, act: str):
     if Path.is_dir(src):
         src = Path() / src / '.config'
 
@@ -51,9 +49,9 @@ def __kernel_conf_action(src, dst, act):
         shutil.copyfile(src, dst)
 
 
-def kernel_conf_copy(src, dst):
+def kernel_conf_copy(src: Path, dst: Path):
     __kernel_conf_action(src=src, dst=dst, act='copy')
 
 
-def kernel_conf_move(src, dst):
+def kernel_conf_move(src: Path, dst: Path):
     __kernel_conf_action(src=src, dst=dst, act='move')
