@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 1.21.0
+# 1.21.1
 # 2020-10-04
 
 # Copyright (C) 2019,2020 Brandon Zorn <brandonzorn@cock.li>
@@ -41,7 +41,7 @@ def root_check(require_root: bool):
             die(msg=f'{c.BRED}\n\nDo not run as root, exiting\n\n{c.NC}')
 
 
-def shell_escape(string):
+def shell_escape(string: str):
     # to get full shell escape have to use .replace because re.escape will not
     # escape single quotes
     return re.escape(string).replace("'", r"\'")
@@ -104,7 +104,7 @@ def edit_conf(path: str, e: bool = True):
         raise SystemExit
 
 
-def die(msg=None, exit_code=1):
+def die(msg: str = None, exit_code: int = 1):
     """
     :param msg:
         Message to show before exiting
@@ -116,7 +116,7 @@ def die(msg=None, exit_code=1):
     raise SystemExit(exit_code)
 
 
-def link_check(link):
+def link_check(link: str):
     """
     :param link:
         link to check for http at start
