@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.20.0
-# 2020-09-24
+# 1.21.0
+# 2020-10-04
 
 # Copyright (C) 2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -65,7 +65,7 @@ def run_cmd(cmd: str, sh_wrap: bool = False, to_stdout: bool = False):
         return subprocess.run(shlex.split(cmd))
 
 
-def write_script_shell(path: str, text: str):
+def write_script_shell(path: Path, text: str):
     """
     :param path:
         Path to shell script that will be writen
@@ -76,9 +76,8 @@ def write_script_shell(path: str, text: str):
              f'die(){{ /bin/echo -e $*;kill {os.getpid()};exit; }}\n' \
              f'{text}'
 
-    script_path = Path(path)
-    script_path.write_text(script)
-    Path.chmod(script_path, 0o700)
+    path.write_text(script)
+    Path.chmod(path, 0o700)
 
 
 def get_script_name():

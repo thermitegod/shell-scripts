@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.4.0
-# 2020-09-23
+# 1.5.0
+# 2020-10-04
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -133,7 +133,7 @@ class Compress:
             print(f'Skipping, archive already exists at: \'{test_file}\'')
             return
 
-        script = f'{self.__tmpdir}/tmp.sh'
+        script = Path() / self.__tmpdir / 'tmp.sh'
         die_failed = f'die "Compression failed for \'{Path.resolve(file)}\'"'
 
         self.__file_list.append(f'{self.__output_dir}/{Path(file).name}.7z')
