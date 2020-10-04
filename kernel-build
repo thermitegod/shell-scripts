@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# 2.13.1
+# 2.14.0
 # 2020-10-04
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -70,7 +70,8 @@ class Build:
         self.__kernel_config = Path() / self.__kernel_src / '.config'
 
         if not Path.is_file(self.__kernel_config):
-            utils.die(msg='ERROR: no config in kenrel directory')
+            print('ERROR: no config in kenrel directory')
+            raise SystemExit(1)
 
         self.__use_zfs_release_version = True
         self.__use_zfs_local_ebuild = False
@@ -166,7 +167,8 @@ class Build:
             required = self.__MIN_ZFS_VERSION
 
         if version.parse(required) > version.parse(ver):
-            utils.die(msg=f'Minimum supported {checking} version is: {required}, using {ver}')
+            print(f'Minimum supported {checking} version is: {required}, using {ver}')
+            raise SystemExit(1)
 
     def cdkdir(self):
         os.chdir(self.__kernel_src)
@@ -274,7 +276,9 @@ class Build:
 
         kernel.kernel_conf_move(src=self.__kernel_config, dst=self.__kernel_switch_config)
         kernel.kernel_conf_copy(src=self.__tmpdir, dst=self.__kernel_src)
-        utils.die(msg='\n\nSwitch config created, rerun script\n', exit_code=0)
+
+        print('\n\nSwitch config created, rerun script\n')
+        raise SystemExit
 
     def zfs_checks(self):
         if self.__use_zfs_local_ebuild:
@@ -308,7 +312,8 @@ class Build:
 
         self.__zfs_ebuild_path = Path() / self.__gentoo_repo_path / self.__zfs_ebuild / f'zfs-kmod-{self.__zfs_version}.ebuild'
         if not Path.is_file(self.__zfs_ebuild_path):
-            utils.die(msg=f'ERROR: missing \'{self.__zfs_ebuild_path}\'')
+            print(f'ERROR: missing \'{self.__zfs_ebuild_path}\'')
+            raise SystemExit(1)
 
         if not Path.is_file(self.__zfs_kmod_src) and self.__run_zfs_build:
             # need to build if configured src do not exists
@@ -333,7 +338,8 @@ class Build:
                     kernel.kernel_conf_move(src=self.__kernel_src, dst=self.__tmpdir)
                     kernel.kernel_conf_copy(src=self.__kernel_switch_config, dst=self.__kernel_src)
                 else:
-                    utils.die(msg=f'ERROR: missing switch config \'{self.__kernel_switch_config}\'')
+                    print(f'ERROR: missing switch config \'{self.__kernel_switch_config}\'')
+                    raise SystemExit(1)
 
             # need to use gcc for this
             self.run_compiler(act='prepare', force_gcc=True)
@@ -375,7 +381,8 @@ class Build:
 
         else:
             if not Path.is_file(self.__zfs_kmod_src):
-                utils.die(msg=f'Archive missing: {self.__zfs_kmod_src}')
+                print(f'Archive missing: {self.__zfs_kmod_src}')
+                raise SystemExit(1)
 
             shutil.copyfile(Path() / self.__storage_kernel_individual / self.__zfs_kmod_archive,
                             Path() / self.__tmpdir / self.__zfs_kmod_archive)
@@ -436,7 +443,7 @@ class Build:
                 shutil.rmtree(self.__storage_kernel_base)
             if Path.is_dir(self.__storage_distfiles):
                 shutil.rmtree(self.__storage_distfiles)
-            utils.die()
+            raise SystemExit
         if args.no_intro:
             self.__run_intro = False
         if args.verbose:

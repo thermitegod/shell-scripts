@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 1.22.0
+# 1.23.0
 # 2020-10-04
 
 # Copyright (C) 2019,2020 Brandon Zorn <brandonzorn@cock.li>
@@ -35,10 +35,12 @@ def root_check(require_root: bool):
     c = colors.Colors()
     if require_root:
         if os.geteuid() != 0:
-            die(msg=f'{c.BRED}\n\nRequires root, exiting\n\n{c.NC}')
+            print(f'{c.BRED}\n\nRequires root, exiting\n\n{c.NC}')
+            raise SystemExit(1)
     else:
         if os.geteuid() == 0:
-            die(msg=f'{c.BRED}\n\nDo not run as root, exiting\n\n{c.NC}')
+            print(f'{c.BRED}\n\nDo not run as root, exiting\n\n{c.NC}')
+            raise SystemExit(1)
 
 
 def shell_escape(string: str):
@@ -102,15 +104,3 @@ def edit_conf(path: str, e: bool = True):
     run_cmd(f'{os.environ["EDITOR"]} {path}')
     if e:
         raise SystemExit
-
-
-def die(msg: str = None, exit_code: int = 1):
-    """
-    :param msg:
-        Message to show before exiting
-    :param exit_code:
-        exit code
-    """
-    if msg is not None:
-        print(msg)
-    raise SystemExit(exit_code)

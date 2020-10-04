@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# 1.4.0
+# 1.5.0
 # 2020-10-04
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -40,7 +40,8 @@ class Container:
     def export_container(self, container):
         if not Path.is_dir(self.__backup_dir):
             if Path.exists(self.__backup_dir):
-                utils.die(msg=f'Backup dir \'{self.__backup_dir}\' exists but is not a directory')
+                print(f'Backup dir \'{self.__backup_dir}\' exists but is not a directory')
+                raise SystemExit(1)
             Path(self.__backup_dir).mkdir(parents=True, exist_ok=True)
 
         if lxd.get_state(container=container):

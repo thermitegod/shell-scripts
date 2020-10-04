@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# 1.5.0
+# 1.6.0
 # 2020-10-04
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -107,7 +107,8 @@ class Compress:
                 else:
                     Path.unlink(file)
         else:
-            utils.die(f'ERROR: archive not created for: \'{file}\'')
+            print(f'ERROR: archive not created for: \'{file}\'')
+            raise SystemExit(1)
 
     def run(self, args):
         # compression type
@@ -129,7 +130,8 @@ class Compress:
             out = Path.resolve(Path(args.output_dir[0]))
             if not Path.is_dir(out):
                 if Path.exists(out):
-                    utils.die(msg=f'selected output dir \'{out}\' exists but is not a directory')
+                    print(f'selected output dir \'{out}\' exists but is not a directory')
+                    raise SystemExit(1)
                 Path(out).mkdir(parents=True, exist_ok=True)
             self.__output_dir = out
         if args.exclude:

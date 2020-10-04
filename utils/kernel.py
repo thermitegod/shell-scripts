@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 1.4.1
+# 1.5.0
 # 2020-10-04
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -19,15 +19,14 @@
 import shutil
 from pathlib import Path
 
-from utils import utils
-
 
 def get_kernel_dir():
     src = Path() / '/usr/src/linux'
     if Path.exists(src):
         return src
 
-    utils.die(msg=f'{src}: is not a valid symlink')
+    print(f'{src}: is not a valid symlink')
+    raise SystemExit(1)
 
 
 def __kernel_conf_action(src: Path, dst: Path, act: str):
@@ -43,7 +42,8 @@ def __kernel_conf_action(src: Path, dst: Path, act: str):
         dst = Path() / dst / '.config'
 
     if not Path.is_file(src):
-        utils.die(msg=f'No kernel config found: {src}')
+        print(f'No kernel config found: {src}')
+        raise SystemExit(1)
 
     if Path.is_file(dst):
         Path.unlink(dst)
