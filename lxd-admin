@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.5.1
-# 2020-09-23
+# 1.6.0
+# 2020-10-04
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -25,6 +25,7 @@ from loguru import logger
 
 from utils import utils
 from utils import lxd
+
 
 # TODO
 #   utils.run_cmd() will block until cmd returns,
@@ -268,7 +269,6 @@ class Container:
 
         for f in torrent_files_path.iterdir():
             if Path.is_file(Path(f)) and str(f).endswith('.torrent'):
-
                 f.unlink()
 
     def update(self):
@@ -460,10 +460,14 @@ def main():
     c = p.add_argument_group('CONTAINER')
     c.add_argument('-O', '--only',
                    metavar='CONTAINER',
+                   type=str,
+                   nargs=1,
                    help='Only operate in the supplied container, requires full container name')
     s = p.add_argument_group('CONTAINER SERVICES')
     s.add_argument('-S', '--service',
                    metavar='SERVICE',
+                   type=str,
+                   nargs=1,
                    help='restart service passed as arg')
     s.add_argument('--create-dirs',
                    action='store_true',
@@ -512,6 +516,7 @@ def main():
                    default='INFO',
                    metavar='LEVEL',
                    type=str.upper,
+                   nargs=1,
                    choices=['NONE', 'CRITICAL', 'ERROR', 'WARNING', 'INFO', 'VERBOSE', 'DEBUG', 'TRACE'],
                    help='Levels: %(choices)s')
     args = p.parse_args()

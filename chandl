@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 2.2.2
-# 2020-09-18
+# 2.3.0
+# 2020-10-04
 
 # Original
 # https://github.com/JLDevOps/ChanDL
@@ -281,13 +281,13 @@ def main():
                         help='What file extensions to download, format: ext1,ext2;...')
     parser.add_argument('-t', '--threads',
                         default=multiprocessing.cpu_count(),
-                        type=int,
                         help='How many threads to utilise')
     parser.add_argument('-w', '--watch',
                         action='store_true',
                         help='Continually search for new images to download')
     parser.add_argument('-u', '--update-interval',
                         type=int,
+                        nargs=1,
                         help='Interval in seconds after which to trigger a new poll update when enabled with -w')
     parser.add_argument('-o', '--original-filenames',
                         action='store_true',
@@ -301,6 +301,7 @@ def main():
                        default='INFO',
                        metavar='LEVEL',
                        type=str.upper,
+                       nargs=1,
                        choices=['NONE', 'CRITICAL', 'ERROR', 'WARNING', 'INFO', 'VERBOSE', 'DEBUG', 'TRACE'],
                        help='Levels: %(choices)s')
     args = parser.parse_args()

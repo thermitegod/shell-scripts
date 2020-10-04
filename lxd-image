@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.3.0
-# 2020-09-12
+# 1.4.0
+# 2020-10-04
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -70,6 +70,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-e', '--export',
                         metavar='CONTAINER',
+                        type=str,
+                        nargs=1,
                         help='Export lxd container to file')
     parser.add_argument('-i', '--install',
                         metavar='FILE',
@@ -79,6 +81,7 @@ def main():
                        default='INFO',
                        metavar='LEVEL',
                        type=str.upper,
+                       nargs=1,
                        choices=['NONE', 'CRITICAL', 'ERROR', 'WARNING', 'INFO', 'VERBOSE', 'DEBUG', 'TRACE'],
                        help='Levels: %(choices)s')
     args = parser.parse_args()
