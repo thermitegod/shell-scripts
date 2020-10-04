@@ -2,11 +2,22 @@ chromium-e*
 chromium-s*
 chromium-h*
 chromium-p*
+
+
+# shell symlinks
 remove-ja*
 remove-ff*
-set-n*
-tmux-l*
-tra*
+set-nftable-rules
+transcode
 
-utils/private.py
-utils/__pycache__
+shell/remove-ja*
+shell/remove-ff*
+shell/set-nftable-rules.sh
+shell/transcode.sh
+
+python/utils/private.py
+
+python/tools/__pycache__
+python/utils/__pycache__
+python/__pycache__
+
