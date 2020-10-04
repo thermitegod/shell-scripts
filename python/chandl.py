@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# 2.3.0
+# 2.3.1
 # 2020-10-04
 
 # Original
@@ -301,7 +301,6 @@ def main():
                        default='INFO',
                        metavar='LEVEL',
                        type=str.upper,
-                       nargs=1,
                        choices=['NONE', 'CRITICAL', 'ERROR', 'WARNING', 'INFO', 'VERBOSE', 'DEBUG', 'TRACE'],
                        help='Levels: %(choices)s')
     args = parser.parse_args()

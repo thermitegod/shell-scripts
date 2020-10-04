@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# 1.4.0
+# 1.4.1
 # 2020-10-04
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -167,7 +167,6 @@ def main():
                        default='INFO',
                        metavar='LEVEL',
                        type=str.upper,
-                       nargs=1,
                        choices=['NONE', 'CRITICAL', 'ERROR', 'WARNING', 'INFO', 'VERBOSE', 'DEBUG', 'TRACE'],
                        help='Levels: %(choices)s')
     args = parser.parse_args()
