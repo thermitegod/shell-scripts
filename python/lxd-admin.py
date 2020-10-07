@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.8.2
-# 2020-10-04
+# 1.9.0
+# 2020-10-06
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -334,6 +334,11 @@ class Container:
         self.attach_dirs()
 
     def main(self):
+        if not Path.is_file(self.__config):
+            print('Missing container config file, showing help.\n\n')
+            utils.run_cmd(f'{utils.get_script_name()} -H')
+            raise SystemExit
+
         c = 0
         for line in Path.open(self.__config):
             c += 1
