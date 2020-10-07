@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 5.6.0
-# 2020-10-04
+# 5.6.1
+# 2020-10-07
 
 # Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -43,12 +43,10 @@ def main():
     pools.add_argument('-l', '--list',
                        metavar='POOLS',
                        type=str,
-                       nargs=1,
                        choices=['0', '1', '2', '3', '4', '5', '6', '7'])
     pools.add_argument('-m', '--snapshot',
                        metavar='POOLS',
                        type=str,
-                       nargs=1,
                        choices=['1', '2', '3', '4', '5', '6', '7'])
     args = parser.parse_args()
 
