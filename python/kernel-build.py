@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# 2.17.0
+# 2.18.0
 # 2020-10-08
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -69,7 +69,7 @@ class Build:
         # script is run as root but tmpdir needs to be rw for portage
         Path.chmod(self.__tmpdir, 0o777)
 
-        self.__kernel_src = Path.resolve(kernel.get_kernel_dir())
+        self.__kernel_src = kernel.get_kernel_dir()
         self.__kernel_config = Path() / self.__kernel_src / '.config'
 
         if not Path.is_file(self.__kernel_config):
@@ -111,7 +111,7 @@ class Build:
         self.__initramfs_compression = 'zstd'
 
         # gets module version for 'dracut -k' and versioned storage path for saved work
-        self.__kernel_module_dir = Path(self.__kernel_src).name[6:]
+        self.__kernel_module_dir = self.__kernel_src.name[6:]
         if 'rc' not in self.__kernel_module_dir:
             # stable
             # ignore point releases and only care about minor version
@@ -188,13 +188,13 @@ class Build:
 
     def storage_check(self):
         if not Path.is_dir(self.__storage):
-            Path(self.__storage).mkdir(parents=True, exist_ok=True)
+            self.__storage.mkdir(parents=True, exist_ok=True)
 
         if not Path.is_dir(self.__storage_distfiles):
-            Path(self.__storage_distfiles).mkdir(parents=True, exist_ok=True)
+            self.__storage_distfiles.mkdir(parents=True, exist_ok=True)
 
         if not Path.is_dir(self.__storage_kernel_individual):
-            Path(self.__storage_kernel_individual).mkdir(parents=True, exist_ok=True)
+            self.__storage_kernel_individual.mkdir(parents=True, exist_ok=True)
 
     def modules_check(self):
         if not self.__kernel_has_module_support:
