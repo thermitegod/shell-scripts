@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.5.1
-# 2020-10-04
+# 1.5.2
+# 2020-10-08
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -71,8 +71,6 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-e', '--export',
                         metavar='CONTAINER',
-                        type=str,
-                        nargs=1,
                         help='Export lxd container to file')
     parser.add_argument('-i', '--install',
                         metavar='FILE',
