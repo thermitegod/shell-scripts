@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.9.0
-# 2020-10-06
+# 1.9.1
+# 2020-10-08
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -270,7 +270,7 @@ class Container:
         logger.debug(f'Cleaning *.torrent files in {torrent_files_path}')
 
         for f in torrent_files_path.iterdir():
-            if Path.is_file(Path(f)) and str(f).endswith('.torrent'):
+            if Path.is_file(f) and str(f).endswith('.torrent'):
                 f.unlink()
 
     def update(self):
