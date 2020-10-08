@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# 2.15.0
+# 2.15.1
 # 2020-10-08
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -359,7 +359,7 @@ class Build:
             script = Path() / self.__tmpdir / 'tmp.sh'
             text = f'{portage_env}\n' \
                    f'EXTRA_ECONF="--with-linux={self.__kernel_src} --enable-linux-builtin" ebuild ' \
-                   f'{self.__zfs_ebuild_path} configure || die "build failed"\n' \
+                   f'{self.__zfs_ebuild_path} configure || die "build failed"\n'
 
             utils.write_script_shell(script, text)
             utils.run_cmd(script)
