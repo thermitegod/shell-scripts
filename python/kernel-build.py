@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 2.14.0
-# 2020-10-04
+# 2.15.0
+# 2020-10-08
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -137,25 +137,26 @@ class Build:
             self.__force_bump_check = True
 
     def intro(self):
-        print(f'kernel             : {self.__kernel_src}')
-        print(f'Using LLVM/Clang   : {self.__cc_use_clang}')
-        print(f'Install            : {self.__run_kernel_install}')
-        print(f'ZFS version        : {self.__zfs_version}')
-        print(f'ZFS local ebuild   : {self.__use_zfs_local_ebuild}')
-        print(f'Configure kmod     : {self.__run_kmod_build}')
-        print(f'Enable modules     : {self.__kernel_has_module_support}')
-        print(f'Running emerge     : {self.__run_emerge}')
+        print(f'kernel             : {self.__kernel_src}\n'
+              f'Using LLVM/Clang   : {self.__cc_use_clang}\n'
+              f'Install            : {self.__run_kernel_install}\n'
+              f'ZFS version        : {self.__zfs_version}\n'
+              f'ZFS local ebuild   : {self.__use_zfs_local_ebuild}\n'
+              f'Configure kmod     : {self.__run_kmod_build}\n'
+              f'Enable modules     : {self.__kernel_has_module_support}\n'
+              f'Running emerge     : {self.__run_emerge}')
         if self.__run_intro_extra:
-            print(f'EXTRA')
-            print(f'Min kernel version : {self.__MIN_KERNEL_VERSION}')
-            print(f'Min ZFS version    : {self.__MIN_ZFS_VERSION}')
-            print(f'Make command       : {self.run_compiler(return_only=True)}')
-            print(f'PORTDIR            : {self.__gentoo_repo_path}')
-            print(f'kernel storage dir : {self.__storage_kernel_individual}')
-            print(f'kernel module dir  : /lib/modules/{self.__kernel_module_dir}')
-            print(f'Tempdir            : {self.__tmpdir}')
-            print(f'Experimental opts  : {self.__experimental}')
+            print(f'EXTRA\n'
+                  f'Min kernel version : {self.__MIN_KERNEL_VERSION}\n'
+                  f'Min ZFS version    : {self.__MIN_ZFS_VERSION}\n'
+                  f'Make command       : {self.run_compiler(return_only=True)}\n'
+                  f'PORTDIR            : {self.__gentoo_repo_path}\n'
+                  f'kernel storage dir : {self.__storage_kernel_individual}\n'
+                  f'kernel module dir  : /lib/modules/{self.__kernel_module_dir}\n'
+                  f'Tempdir            : {self.__tmpdir}\n'
+                  f'Experimental opts  : {self.__experimental}')
             utils.run_cmd('eselect kernel list')
+
         print()
         input('Enter to start kernel build ')
 
@@ -257,13 +258,13 @@ class Build:
                 if not c1:
                     print('\n[*] Enable loadable module support')
                 if not c2:
-                    print('\n[*] Enable loadable module support')
-                    print('\t[ ]   Enable unused/obsolete exported symbols')
-                    print('\t\t[ ]     Trim unused exported kernel symbols')
+                    print('\n[*] Enable loadable module support\n'
+                          '\t[ ]   Enable unused/obsolete exported symbols\n'
+                          '\t\t[ ]     Trim unused exported kernel symbols')
                 if not c3:
-                    print('\nGeneral setup  --->')
-                    print('\t[*] Configure standard kernel features (expert users)  --->')
-                    print('\t\t[*] Load all symbols for debugging/ksymoops')
+                    print('\nGeneral setup  --->\n'
+                          '\t[*] Configure standard kernel features (expert users)  --->\n'
+                          '\t\t[*] Load all symbols for debugging/ksymoops')
 
                 input('Enter to config switch config: ')
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.0.0
-# 2020-09-19
+# 1.1.0
+# 2020-10-08
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -50,9 +50,9 @@ class Optimize:
 
         if self.__verbose:
             self.get_size(start=False)
-            print(f'Before     : {self.__size_start}')
-            print(f'After      : {self.__size_end}')
-            print(f'% of orig  : {self.__size_end / self.__size_start}')
+            print(f'Before     : {self.__size_start}\n'
+                  f'After      : {self.__size_end}\n'
+                  f'% of orig  : {self.__size_end / self.__size_start}')
 
     def run(self, args):
         if args.verbose:

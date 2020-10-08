@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 5.6.1
-# 2020-10-07
+# 5.7.0
+# 2020-10-08
 
 # Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -51,16 +51,16 @@ def main():
     args = parser.parse_args()
 
     if args.extra:
-        print('zfs send pool/dataset@snapshot | zstd -T0 >| /tmp/backup.zst')
-        print('unzstd -c backup.zst | zfs receive pool/newdataset')
-        print('')
-        print('zfs set mountpoint=/newmount pool/dataset')
-        print('')
-        print('zfs snapshot -r zroot/ROOT/gentoo@<type>-<date>')
-        print('zfs rollback -r <pool/dataset@snapshot>')
-        print('zfs destroy <pool/dataset@snapshot>')
-        print('zfs list -t snapshot')
-        print('zfs list -r pool')
+        print('zfs send pool/dataset@snapshot | zstd -T0 >| /tmp/backup.zst\n'
+              'unzstd -c backup.zst | zfs receive pool/newdataset\n'
+              '\n'
+              'zfs set mountpoint=/newmount pool/dataset\n'
+              '\n'
+              'zfs snapshot -r zroot/ROOT/gentoo@<type>-<date>\n'
+              'zfs rollback -r <pool/dataset@snapshot>\n'
+              'zfs destroy <pool/dataset@snapshot>\n'
+              'zfs list -t snapshot\n'
+              'zfs list -r pool')
         raise SystemExit
 
     selected_pool = None

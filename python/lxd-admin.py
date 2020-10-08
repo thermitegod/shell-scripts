@@ -94,62 +94,63 @@ class Container:
         self.__container_save_override = None
 
     def print_config(self):
-        print(f'Container Name      : {self.__container_fullname}')
-        print(f'Base Name           : {self.__container_name}')
-        print(f'Template            : {self.__container_type}')
-        print(f'Distro              : {self.__container_distro}')
-        print(f'IPV4                : {self.__container_ipv4}')
-        print(f'Running             : {lxd.get_state(container=self.__container_fullname)}')
-        print(f'Autostart           : {self.__container_autostart}')
-        print(f'Container User      : {self.__container_user}')
+        print(f'Container Name      : {self.__container_fullname}\n'
+              f'Base Name           : {self.__container_name}\n'
+              f'Template            : {self.__container_type}\n'
+              f'Distro              : {self.__container_distro}\n'
+              f'IPV4                : {self.__container_ipv4}\n'
+              f'Running             : {lxd.get_state(container=self.__container_fullname)}\n'
+              f'Autostart           : {self.__container_autostart}\n'
+              f'Container User      : {self.__container_user}')
         if self.__print_verbose:
-            print(f'using htpasswd      : {self.__container_htpasswd}')
-            print(f'Limit CPU           : {self.__container_limit_cpu}')
-            print(f'Limit CPU ALLOW     : {self.__container_limit_cpu_allowance}')
-            print(f'Limit MEM           : {self.__container_limit_mem}')
-            print('IN CONTAINER PATHS')
-            print(f'home path           : {self.__container_inside_path_home}')
-            print(f'session path        : {self.__container_inside_path_session}')
-            print(f'watch path          : {self.__container_inside_path_watch}')
-            print(f'data path           : {self.__container_inside_path_data}')
-            print(f'rushare path        : {self.__container_inside_path_rushare}')
-            print('HOST PATHS')
-            print(f'config path         : {self.__container_path_config}')
-            print(f'session path        : {self.__container_path_session}')
-            print(f'watch path          : {self.__container_path_watch}')
-            print(f'rushare path        : {self.__container_path_rushare}')
-            print(f'save path           : {self.__container_path_save}')
-
-            print(f'save override path  : {self.__container_save_override}')
+            print(f'using htpasswd      : {self.__container_htpasswd}\n'
+                  f'Limit CPU           : {self.__container_limit_cpu}\n'
+                  f'Limit CPU ALLOW     : {self.__container_limit_cpu_allowance}\n'
+                  f'Limit MEM           : {self.__container_limit_mem}\n'
+                  'IN CONTAINER PATHS\n'
+                  f'home path           : {self.__container_inside_path_home}\n'
+                  f'session path        : {self.__container_inside_path_session}\n'
+                  f'watch path          : {self.__container_inside_path_watch}\n'
+                  f'data path           : {self.__container_inside_path_data}\n'
+                  f'rushare path        : {self.__container_inside_path_rushare}\n'
+                  'HOST PATHS\n'
+                  f'config path         : {self.__container_path_config}\n'
+                  f'session path        : {self.__container_path_session}\n'
+                  f'watch path          : {self.__container_path_watch}\n'
+                  f'rushare path        : {self.__container_path_rushare}\n'
+                  f'save path           : {self.__container_path_save}\n'
+                  f'save override path  : {self.__container_save_override}')
 
         print('\n')
 
     def config_help(self):
-        print('==SUBJECT TO CHANGE==\n')
-        print(f'Config version: {self.__CONFIG_VERSION}\n')
-        print(f'All containers are declared in \'{self.__config}\' using the following space delimited format\n')
+        print('==SUBJECT TO CHANGE==\n\n'
+              f'Config version: {self.__CONFIG_VERSION}\n'
+              f'Config file: \'{self.__config}\'\n\n'
+              'All containers are declared using the following space delimited format\n'
+              'Valid values are\n'
+              '================\n'
+              'container type: rutorrent, stop\n'
+              'distro: gentoo\n'
+              'user: user used in container\n'
+              'autostart: 0, 1\n'
+              'htpasswd: 0, 1\n'
+              'ipv4: a local ipv4 address\n'
+              'limit cpu: any int\n'
+              'limit cpu allowance: any percent\n'
+              'limit mem: any int with a unit\n'
+              'container name: any string\n'
+              'save location override, optional: a path\n\n'
 
-        print('Valid values are')
-        print('================')
-        print('container type: rutorrent, stop')
-        print('distro: gentoo')
-        print('user: user used in container')
-        print('autostart: 0, 1')
-        print('htpasswd: 0, 1')
-        print('ipv4: a local ip4v address')
-        print('limit cpu: any int')
-        print('limit cpu allowance: any percent')
-        print('limit mem: any int with a unit')
-        print('container name: any string')
-        print('save location override, optional: a path\n')
+              'Example\n'
+              '================\n'
+              f'version {self.__CONFIG_VERSION}\n'
+              'rutorrent gentoo brandon 1 1 192.168.0.161 6 10% 8192MB anime /mnt/anime/anime-working\n'
 
-        print('Example')
-        print(f'version {self.__CONFIG_VERSION}')
-        print('rutorrent gentoo brandon 1 1 192.168.0.161 6 10% 8192MB anime /mnt/anime/anime-working\n')
-
-        print('Config file parsing')
-        print('supports comments, no inline comments')
-        print('Script will stop if \'container type\' is set to \'stop\'')
+              'Config file parsing\n'
+              '================\n'
+              'supports comments, no inline comments\n'
+              'Script will stop if \'container type\' is set to \'stop\'')
 
     def set_dirs(self):
         # paths from host

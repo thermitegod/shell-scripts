@@ -135,12 +135,13 @@ class Sort:
                           f'-exec mv -i -- "{{}}" "{Path.cwd()}/{move_to_dir}" \\;')
 
     def main(self):
-        print(f'Prerun info')
-        print(f'MODE\t\t: {Path(self.__list_sort).name}')
-        print(f'Running from\t: {Path.cwd()}')
-        print(f'Dest is\t\t: {self.__dest}')
-        print('\nMake sure everything has been processed correctly')
-        print(f'\nRunning script is: {utils.get_script_name()}\n')
+        print(f'Prerun info\n'
+              f'MODE\t\t: {Path(self.__list_sort).name}\n'
+              f'Running from\t: {Path.cwd()}\n'
+              f'Dest is\t\t: {self.__dest}\n'
+              '\nMake sure everything has been processed correctly\n'
+              f'\nRunning script is: {utils.get_script_name()}\n')
+
         if confirm.confirm_run():
             # all target dirs should exits before running
             # otherwise you are going to have a bad time

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.2.0
-# 2020-10-04
+# 1.3.0
+# 2020-10-08
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -88,11 +88,10 @@ class Process:
         print(f'\nSize : {size}\n')
 
         if self.__set_compressor_interactive:
-            print('Choose archive type [DEFAULT:1]')
-            print('1: zip destructive')
-            print('2: zip destructive nojunkpath')
-            print('3: 7z dir destructive')
-            print('')
+            print('Choose archive type [DEFAULT:1]\n'
+                  '1: zip destructive\n'
+                  '2: zip destructive nojunkpath\n'
+                  '3: 7z dir destructive\n')
             self.__archivetype = input()
 
             if not self.__archivetype:
@@ -128,9 +127,9 @@ class Process:
 
         if self.__show_time:
             self.get_time(start=False)
-            print('\n\n')
-            print(f'Start : {self.__time_start}')
-            print(f'End   : {self.__time_end}\n\n')
+            print('\n\n\n'
+                  f'Start : {self.__time_start}\n'
+                  f'End   : {self.__time_end}\n\n')
 
     def run(self, args):
         # general
