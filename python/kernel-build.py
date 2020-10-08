@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# 2.15.1
+# 2.16.0
 # 2020-10-08
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -385,10 +385,8 @@ class Build:
                 print(f'Archive missing: {self.__zfs_kmod_src}')
                 raise SystemExit(1)
 
-            shutil.copyfile(Path() / self.__storage_kernel_individual / self.__zfs_kmod_archive,
-                            Path() / self.__tmpdir / self.__zfs_kmod_archive)
-            os.chdir(self.__tmpdir)
-            utils.run_cmd(f'extract {self.__zfs_kmod_archive}')
+            archive = Path() / self.__storage_kernel_individual / self.__zfs_kmod_archive
+            utils.run_cmd(f'extract -s -o {self.__tmpdir} {archive}')
             os.chdir(Path() / self.__tmpdir / f'{self.__zfs_kmod_build_path}-{self.__zfs_version}')
             utils.run_cmd(f'./copy-builtin {self.__kernel_src}')
 
