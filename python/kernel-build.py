@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# 2.16.0
+# 2.17.0
 # 2020-10-08
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -41,9 +41,11 @@ import atexit
 import multiprocessing
 import os
 import shutil
+import sys
 import tempfile
-
 from pathlib import Path
+
+from loguru import logger
 from packaging import version
 
 from utils import kernel
@@ -71,7 +73,7 @@ class Build:
         self.__kernel_config = Path() / self.__kernel_src / '.config'
 
         if not Path.is_file(self.__kernel_config):
-            print('ERROR: no config in kenrel directory')
+            logger.critical('ERROR: no config in kenrel directory')
             raise SystemExit(1)
 
         self.__use_zfs_release_version = True
@@ -169,7 +171,7 @@ class Build:
             required = self.__MIN_ZFS_VERSION
 
         if version.parse(required) > version.parse(ver):
-            print(f'Minimum supported {checking} version is: {required}, using {ver}')
+            logger.critical(f'Minimum supported {checking} version is: {required}, using {ver}')
             raise SystemExit(1)
 
     def cdkdir(self):
@@ -215,6 +217,8 @@ class Build:
             elif 'CONFIG_RD_XZ=y' in line:
                 self.__initramfs_compression = 'xz'
                 return
+
+            logger.debug(f'initramfs compression: {self.__initramfs_compression}')
 
     def run_compiler(self, act='', force_gcc=False, return_only=False):
         # keep CC/LD to override env, probably not needed though
@@ -314,7 +318,7 @@ class Build:
 
         self.__zfs_ebuild_path = Path() / self.__gentoo_repo_path / self.__zfs_ebuild / f'zfs-kmod-{self.__zfs_version}.ebuild'
         if not Path.is_file(self.__zfs_ebuild_path):
-            print(f'ERROR: missing \'{self.__zfs_ebuild_path}\'')
+            logger.critical(f'missing ebuild \'{self.__zfs_ebuild_path}\'')
             raise SystemExit(1)
 
         if not Path.is_file(self.__zfs_kmod_src) and self.__run_zfs_build:
@@ -340,7 +344,7 @@ class Build:
                     kernel.kernel_conf_move(src=self.__kernel_src, dst=self.__tmpdir)
                     kernel.kernel_conf_copy(src=self.__kernel_switch_config, dst=self.__kernel_src)
                 else:
-                    print(f'ERROR: missing switch config \'{self.__kernel_switch_config}\'')
+                    logger.critical(f'missing switch config \'{self.__kernel_switch_config}\'')
                     raise SystemExit(1)
 
             # need to use gcc for this
@@ -383,7 +387,7 @@ class Build:
 
         else:
             if not Path.is_file(self.__zfs_kmod_src):
-                print(f'Archive missing: {self.__zfs_kmod_src}')
+                logger.critical(f'Archive missing: {self.__zfs_kmod_src}')
                 raise SystemExit(1)
 
             archive = Path() / self.__storage_kernel_individual / self.__zfs_kmod_archive
@@ -547,9 +551,19 @@ def main():
     ker.add_argument('-Z', '--experimental',
                      action='store_true',
                      help='enables experimental options, may or may not do something, or even work')
+    debug = parser.add_argument_group('DEBUG')
+    debug.add_argument('-L', '--loglevel',
+                       default='INFO',
+                       metavar='LEVEL',
+                       type=str.upper,
+                       choices=['NONE', 'CRITICAL', 'ERROR', 'WARNING', 'INFO', 'VERBOSE', 'DEBUG', 'TRACE'],
+                       help='Levels: %(choices)s')
     args = parser.parse_args()
 
     utils.root_check(require_root=True)
+
+    logger.remove()
+    logger.add(sys.stdout, level=args.loglevel, colorize=True)
 
     run = Build()
     run.run(args)
