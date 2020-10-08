@@ -64,6 +64,7 @@ class Build:
         atexit.register(self.remove_tmpdir)
 
         self.__tmpdir = Path(tempfile.mkdtemp())
+        # script is run as root but tmpdir needs to be rw for portage
         Path.chmod(self.__tmpdir, 0o777)
 
         self.__kernel_src = Path.resolve(kernel.get_kernel_dir())
