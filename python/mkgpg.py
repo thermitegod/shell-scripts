@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.3.0
-# 2020-10-04
+# 1.3.1
+# 2020-10-08
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -98,7 +98,7 @@ def main():
                         help=argparse.SUPPRESS)
     parser.add_argument('-o', '--output-dir',
                         metavar='DIR',
-                        type=str,
+                        type=list,
                         nargs=1,
                         help='create the gpg files in this directory')
     parser.add_argument('-d', '--decrypt-dir',
@@ -112,7 +112,6 @@ def main():
                         help='print available keys')
     parser.add_argument('-u', '--user',
                         metavar='USER',
-                        type=str,
                         nargs=1,
                         default='brandon',
                         help='User to use')

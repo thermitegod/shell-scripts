@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# 1.5.0
+# 1.5.1
 # 2020-10-08
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -127,8 +127,6 @@ def main():
                         help='disanle mime check')
     parser.add_argument('-m', '--mode-force',
                         metavar='MODE',
-                        type=str,
-                        nargs=1,
                         choices=['jpg', 'png', 'gif', 'all'],
                         help='Which file to optimize [all]')
     parser.add_argument('-x', '--png-max',

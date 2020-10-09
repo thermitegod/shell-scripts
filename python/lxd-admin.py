@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# 1.9.1
+# 1.9.2
 # 2020-10-08
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -472,14 +472,10 @@ def main():
     c = p.add_argument_group('CONTAINER')
     c.add_argument('-O', '--only',
                    metavar='CONTAINER',
-                   type=str,
-                   nargs=1,
                    help='Only operate in the supplied container, requires full container name')
     s = p.add_argument_group('CONTAINER SERVICES')
     s.add_argument('-S', '--service',
                    metavar='SERVICE',
-                   type=str,
-                   nargs=1,
                    help='restart service passed as arg')
     s.add_argument('--create-dirs',
                    action='store_true',

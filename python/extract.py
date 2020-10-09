@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.7.0
-# 2020-10-04
+# 1.7.1
+# 2020-10-08
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -158,7 +158,7 @@ def main():
                         help='decompress all files in cwd')
     parser.add_argument('-o', '--output-dir',
                         metavar='DIR',
-                        type=str,
+                        type=list,
                         nargs=1,
                         help='create the archive[s] in this directory')
     opts = parser.add_argument_group('EXTRACTION OPTIONS')

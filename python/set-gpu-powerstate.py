@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.1.0
-# 2020-10-04
+# 1.1.1
+# 2020-10-08
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -51,8 +51,6 @@ def main():
                         help='Get current GPU power state')
     parser.add_argument('-s', '--set',
                         metavar='STATE',
-                        type=str,
-                        nargs=1,
                         choices=['auto', 'low', 'high'],
                         help='Set GPU power state')
     args = parser.parse_args()

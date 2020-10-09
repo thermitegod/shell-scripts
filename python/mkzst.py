@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 2.10.0
-# 2020-10-04
+# 2.10.1
+# 2020-10-08
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -184,7 +184,6 @@ def main():
                         help=argparse.SUPPRESS)
     parser.add_argument('-e', '--exclude',
                         metavar='EX',
-                        type=str,
                         nargs='*',
                         help='exclude files from archive')
     parser.add_argument('-S', '--status',
@@ -198,7 +197,7 @@ def main():
                         help='enable verbose tar')
     parser.add_argument('-o', '--output-dir',
                         metavar='DIR',
-                        type=str,
+                        type=list,
                         nargs=1,
                         help='create the archive[s] in this directory')
     batch = parser.add_argument_group('BATCH CREATION')

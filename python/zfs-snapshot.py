@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# 5.7.0
+# 5.7.1
 # 2020-10-08
 
 # Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
@@ -42,11 +42,9 @@ def main():
                                       '7: zroot/CACHE/torrents\n')
     pools.add_argument('-l', '--list',
                        metavar='POOLS',
-                       type=str,
                        choices=['0', '1', '2', '3', '4', '5', '6', '7'])
     pools.add_argument('-m', '--snapshot',
                        metavar='POOLS',
-                       type=str,
                        choices=['1', '2', '3', '4', '5', '6', '7'])
     args = parser.parse_args()
 

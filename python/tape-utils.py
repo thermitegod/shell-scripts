@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.3.0
-# 2020-10-04
+# 1.3.1
+# 2020-10-08
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -121,12 +121,12 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-b', '--backup',
                         metavar='FILE/DIR',
-                        type=str,
+                        type=list,
                         nargs=1,
                         help='backup <input> at end of last backup on <tape>')
     parser.add_argument('-B', '--backup-overwrite',
                         metavar='FILE/DIR',
-                        type=str,
+                        type=list,
                         nargs=1,
                         help='backup <input> at start, overwriting existing, on <tape>')
     parser.add_argument('-e', '--eject',
@@ -134,7 +134,7 @@ def main():
                         help='eject tape')
     parser.add_argument('-g', '--restore',
                         metavar='DIR',
-                        type=str,
+                        type=list,
                         nargs=1,
                         help='restore from begining of <tape> to <input>')
     parser.add_argument('-l', '--list',

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 7.1.0
-# 2020-10-04
+# 7.1.1
+# 2020-10-08
 
 # Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -76,8 +76,6 @@ def main():
     profiles.add_argument('-C', '--custom',
                           default=None,
                           metavar='PROFILE',
-                          type=str,
-                          nargs=1,
                           help='custom profile, supplied str is used as the profile name')
     profiles.add_argument('-s', '--sandbox',
                           action='store_true',
@@ -86,8 +84,6 @@ def main():
     browser.add_argument('-c', '--chrome',
                          default='chromium',
                          metavar='VERSION',
-                         type=str,
-                         nargs=1,
                          choices=['chromium', 'unstable', 'beta', 'release'],
                          help='set specific chrome version to use, [%(choices)s]')
     args = parser.parse_args()

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.1.0
-# 2020-10-04
+# 1.2.0
+# 2020-10-08
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -112,15 +112,11 @@ class Backup:
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-v', '--verbose',
-                        metavar='EX',
-                        type=str,
-                        nargs='*',
+                        action='store_true',
                         help='verbose tar')
     parser.add_argument('-u', '--user',
                         metavar='USER',
                         default='brandon',
-                        type=str,
-                        nargs=1,
                         help='user')
     args = parser.parse_args()
 
