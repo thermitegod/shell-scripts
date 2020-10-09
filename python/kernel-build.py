@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# 2.18.0
+# 2.19.0
 # 2020-10-08
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -126,7 +126,7 @@ class Build:
             kver_tmp = self.__kernel_module_dir.rpartition('-')
             self.__kernel_module_dir = f'{kver_tmp[0]}.0{kver_tmp[1]}{kver_tmp[2]}'
 
-        self.min_supported_version_check(checking='kernel', ver=self.__kernel_module_dir.partition('-')[0])
+        self.version_check_kernel(ver=self.__kernel_module_dir.partition('-')[0])
 
         self.__storage = Path() / os.environ['XDG_DATA_HOME'] / 'kernel'
         self.__storage_distfiles = Path() / self.__storage / 'distfiles'
@@ -163,15 +163,18 @@ class Build:
         print()
         input('Enter to start kernel build ')
 
-    def min_supported_version_check(self, checking, ver):
-        required = None
-        if checking == 'kernel':
-            required = self.__MIN_KERNEL_VERSION
-        elif checking == 'zfs':
-            required = self.__MIN_ZFS_VERSION
+    def version_check_kernel(self, ver):
+        required = self.__MIN_KERNEL_VERSION
 
         if version.parse(required) > version.parse(ver):
-            logger.critical(f'Minimum supported {checking} version is: {required}, using {ver}')
+            logger.critical(f'Minimum supported kernel version is: {required}, using {ver}')
+            raise SystemExit(1)
+
+    def version_check_zfs(self, ver):
+        required = self.__MIN_ZFS_VERSION
+
+        if version.parse(required) > version.parse(ver):
+            logger.critical(f'Minimum supported zfs version is: {required}, using {ver}')
             raise SystemExit(1)
 
     def cdkdir(self):
@@ -309,7 +312,7 @@ class Build:
 
             # build path
             self.__zfs_kmod_build_path = "zfs"
-            self.min_supported_version_check(checking='zfs', ver=self.__zfs_version)
+            self.version_check_zfs(ver=self.__zfs_version)
         else:
             # git
             self.__zfs_version = '9999'

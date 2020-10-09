@@ -19,14 +19,16 @@
 import shutil
 from pathlib import Path
 
+from loguru import logger
+
 
 def get_kernel_dir():
-    src = Path() / '/usr/src/linux'
-    if Path.exists(src):
-        return src
+    src = Path.resolve(Path('/usr/src/linux'))
+    if not Path.exists(src):
+        logger.critical(f'{src}: is not a valid symlink')
+        raise SystemExit(1)
 
-    print(f'{src}: is not a valid symlink')
-    raise SystemExit(1)
+    return src
 
 
 def __kernel_conf_action(src: Path, dst: Path, act: str):
@@ -42,7 +44,7 @@ def __kernel_conf_action(src: Path, dst: Path, act: str):
         dst = Path() / dst / '.config'
 
     if not Path.is_file(src):
-        print(f'No kernel config found: {src}')
+        logger.critical(f'No kernel config found: {src}')
         raise SystemExit(1)
 
     if Path.is_file(dst):

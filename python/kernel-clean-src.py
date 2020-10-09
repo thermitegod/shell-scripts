@@ -19,8 +19,11 @@
 import argparse
 import os
 import shutil
+import sys
 from pathlib import Path
 from tempfile import TemporaryDirectory
+
+from loguru import logger
 
 from utils import kernel
 from utils import utils
@@ -67,11 +70,21 @@ def main():
     parser.add_argument('-r', '--rm',
                         action='store_true',
                         help='remove all /usr/src/linux/*')
+    debug = parser.add_argument_group('DEBUG')
+    debug.add_argument('-L', '--loglevel',
+                       default='INFO',
+                       metavar='LEVEL',
+                       type=str.upper,
+                       choices=['NONE', 'CRITICAL', 'ERROR', 'WARNING', 'INFO', 'VERBOSE', 'DEBUG', 'TRACE'],
+                       help='Levels: %(choices)s')
     args = parser.parse_args()
+
+    utils.args_required_else_help()
 
     utils.root_check(require_root=True)
 
-    utils.args_required_else_help()
+    logger.remove()
+    logger.add(sys.stdout, level=args.loglevel, colorize=True)
 
     run = Clean()
     run.run(args)
