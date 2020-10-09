@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.1.0
-# 2020-10-04
+# 1.2.0
+# 2020-10-08
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -18,12 +18,13 @@
 
 import argparse
 import atexit
-import time
 import os
 import shutil
 import tempfile
+import time
 from pathlib import Path
 
+from utils import confirm
 from utils import utils
 
 
@@ -61,8 +62,8 @@ class Backup:
 
     def remove(self):
         if Path.is_dir(self.__backup_dir):
-            input(f'Remove \'{self.__backup_dir}\'? ')
-            shutil.rmtree(self.__backup_dir)
+            if confirm.confirm_run(text=f'Remove \'{self.__backup_dir}\'? '):
+                shutil.rmtree(self.__backup_dir)
 
     def run(self, args):
         if args.backup:
