@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 2.0.0
-# 2020-10-03
+# 2.1.0
+# 2020-10-12
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -55,9 +55,9 @@ class Initramfs:
 
     def run(self, args):
         if args.compression:
-            self.__compression = args.compression
+            self.__compression = args.compression[0]
         if args.kver:
-            self.__kernel_version = args.kver
+            self.__kernel_version = args.kver[0]
         if args.no_firmware:
             self.__no_firmware = False
 
