@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 2.10.1
-# 2020-10-08
+# 2.10.2
+# 2020-10-12
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -127,8 +127,8 @@ class Compress:
             text = f'{self.__cmd} --output-dir-flat="{self.__output_dir}" -- "{file}" || {die}'
 
         utils.write_script_shell(script, text)
-        utils.run_cmd(script)
-        Path.unlink(Path(script))
+        utils.run_cmd(str(script))
+        Path.unlink(script)
 
         if Path.exists(test_file):
             if self.__destructive:

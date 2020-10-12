@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.7.1
-# 2020-10-08
+# 1.7.2
+# 2020-10-12
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -146,8 +146,8 @@ class Compress:
                f'-o="{self.__output_dir}" "{Path(file).name}.7z" "{Path(file).name}" || {die_failed}'
 
         utils.write_script_shell(script, text)
-        utils.run_cmd(script)
-        Path.unlink(Path(script))
+        utils.run_cmd(str(script))
+        Path.unlink(script)
 
         if Path.exists(test_file):
             if self.__destructive:

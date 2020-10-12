@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 2.19.0
-# 2020-10-08
+# 2.19.1
+# 2020-10-12
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -370,7 +370,7 @@ class Build:
                    f'{self.__zfs_ebuild_path} configure || die "build failed"\n'
 
             utils.write_script_shell(script, text)
-            utils.run_cmd(script)
+            utils.run_cmd(str(script))
 
             os.chdir(Path() / zfs_build_path / zfs_build_version)
             utils.run_cmd(f'./copy-builtin {self.__kernel_src}')

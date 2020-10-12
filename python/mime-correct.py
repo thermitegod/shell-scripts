@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.4.1
-# 2020-10-04
+# 1.4.2
+# 2020-10-12
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -135,7 +135,7 @@ class Mimecheck:
             text = f'find {Path.cwd()} -path \'*/*\' -type d \\( ! -name . \\) | ' \
                    f'while read -r dir ; do cd "${{dir}}" && {Path(sys.argv[0])} ; done\n'
             utils.write_script_shell(path=script, text=text)
-            utils.run_cmd(script)
+            utils.run_cmd(str(script))
             raise SystemExit
         if args.list:
             self.__list_only = True
