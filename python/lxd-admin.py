@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.9.2
-# 2020-10-08
+# 1.10.0
+# 2020-10-12
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -213,6 +213,7 @@ class Container:
 
     def start(self):
         if lxd.get_state(container=self.__container_fullname):
+            logger.info(f'Already started: {self.__container_fullname}')
             return
 
         if self.__container_autostart != '1':
