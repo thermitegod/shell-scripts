@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.0.0
-# 2020-10-04
+# 1.1.0
+# 2020-10-12
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -23,6 +23,6 @@ def confirm_run(text: str = None):
     else:
         confirm = input(text)
 
-    if confirm == ('y', 'Y', 'yes', 'YES'):
+    if confirm in ('y', 'Y', 'yes', 'YES'):
         return True
     return False
