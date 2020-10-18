@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 6.5.0
-# 2020-10-17
+# 6.6.0
+# 2020-10-18
 
 # Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -20,6 +20,7 @@ import argparse
 
 import pyperclip
 
+from utils import clipboard
 from utils import net
 from utils import utils
 
@@ -55,10 +56,7 @@ class Ytdl:
         if args.audio:
             self.__audio_only = True
 
-        if args.url:
-            self.__link = args.url
-        else:
-            self.__link = pyperclip.paste()
+        self.__link = clipboard.from_flag_else_clipboard(args.url)
 
         net.link_check(self.__link)
 
@@ -71,6 +69,9 @@ def main():
                         action='store_true',
                         help='Only download audio')
     parser.add_argument('-u', "--url",
+                        metavar='URL',
+                        type=str,
+                        nargs=1,
                         help='supply a video url, otherwise will get link from clipboard')
     args = parser.parse_args()
 

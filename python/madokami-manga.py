@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 9.4.0
-# 2020-10-04
+# 9.5.0
+# 2020-10-18
 
 # Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -20,8 +20,7 @@ import argparse
 import os
 from pathlib import Path
 
-import pyperclip
-
+from utils import clipboard
 from utils import dirs
 from utils import editor
 from utils import net
@@ -94,10 +93,7 @@ class Download:
                     self.__link = link
                     self.dl()
         else:
-            if args.url:
-                self.__link = args.url
-            else:
-                self.__link = pyperclip.paste()
+            self.__link = clipboard.from_flag_else_clipboard(args.url)
 
             self.dl()
 
@@ -114,6 +110,9 @@ def main():
                         action='store_true',
                         help='symlink')
     parser.add_argument('-u', "--url",
+                        metavar='URL',
+                        type=str,
+                        nargs=1,
                         help='supply a url, otherwise will get link from clipboard')
     args = parser.parse_args()
 
