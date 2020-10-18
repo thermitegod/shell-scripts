@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 6.4.0
-# 2020-10-04
+# 6.5.0
+# 2020-10-17
 
 # Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -35,6 +35,9 @@ class Ytdl:
               '--no-overwrites ' \
               '--no-call-home ' \
               '--yes-playlist ' \
+              '--format best ' \
+              '--continue ' \
+              '--ignore-errors ' \
               '--audio-format best ' \
               '--audio-quality 0 ' \
               '--no-check-certificate '
