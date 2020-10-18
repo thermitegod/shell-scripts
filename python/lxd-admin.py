@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.10.0
-# 2020-10-12
+# 1.11.0
+# 2020-10-18
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -218,6 +218,12 @@ class Container:
 
         if self.__container_autostart != '1':
             return
+
+        # remove rtorrent lockfiles since they can persist
+        # and do not always work even between restart of the same
+        # container, overall they are just annoying
+        # utils.run_cmd(f'{utils.get_script_name()} -c -O {self.__container_fullname}')
+        self.rtorrent_clean_torrent()
 
         logger.info(f'Starting container: {self.__container_fullname}')
         utils.run_cmd(f'lxc start {self.__container_fullname}', to_stdout=True)
