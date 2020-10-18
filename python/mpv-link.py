@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.1.0
-# 2020-10-04
+# 1.2.0
+# 2020-10-18
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -16,16 +16,35 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-import pyperclip
+import argparse
 
+from utils import clipboard
 from utils import net
 from utils import utils
 
 
+class Mpv:
+    def __init__(self):
+        self.__link = None
+
+    def run(self, args):
+        self.__link = clipboard.from_flag_else_clipboard(args.url)
+
+        net.link_check(self.__link)
+        utils.run_cmd(f'mpv {self.__link}')
+
+
 def main():
-    link = pyperclip.paste()
-    net.link_check(link)
-    utils.run_cmd(f'mpv {link}')
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-u', "--url",
+                        metavar='URL',
+                        type=str,
+                        nargs=1,
+                        help='supply a video url, otherwise will get link from clipboard')
+    args = parser.parse_args()
+
+    run = Mpv()
+    run.run(args)
 
 
 if __name__ == '__main__':
