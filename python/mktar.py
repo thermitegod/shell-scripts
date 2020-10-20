@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.5.1
-# 2020-10-08
+# 1.6.0
+# 2020-10-20
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -38,6 +38,8 @@ class Compress:
         self.__output_dir = Path.cwd()
 
         self.__exclude = ''
+
+        self.__junk_paths = False
 
         self.__compressing_dir = True
 
@@ -78,10 +80,31 @@ class Compress:
             return
 
         os.chdir(Path(file).parent)
+        file_name = Path(file).name
 
-        cmd = f'tar {self.__exclude} --xattrs -{self.__tar_verbose}Scf ' \
-              f'"{self.__output_dir}/{Path(file).name}.tar" "{Path(file).name}"'
-        # print(cmd)
+        if self.__junk_paths:
+            # simulates zip --junk-path
+
+            # Notes: archives all files in 'file' and creates archive
+            # without a basedir. i.e. creates archive of only files
+            # but if nested dirs exist then they still get created
+
+            file_list = []
+            for f in Path(file_name).iterdir():
+                file_list.append(str(f.name))
+                if f.is_dir():
+                    print(f'SUBDIR will be created in archive: {f}')
+
+            file_list_comp = ''
+            for f in file_list:
+                file_list_comp += f'"{f}" '
+
+            cmd = f'tar {self.__exclude} --directory="{file.resolve()}" -{self.__tar_verbose}Scf ' \
+                  f'"{self.__output_dir}/{file_name}.tar" {file_list_comp}'
+        else:
+            cmd = f'tar {self.__exclude} --xattrs -{self.__tar_verbose}Scf ' \
+                  f'"{self.__output_dir}/{file_name}.tar" "{file_name}"'
+
         utils.run_cmd(cmd)
 
         if Path.exists(test_file):
@@ -119,6 +142,8 @@ class Compress:
         if args.exclude:
             for e in args.exclude:
                 self.__exclude += f'--exclude="{e}" '
+        if args.junk_paths:
+            self.__junk_paths = True
 
         self.get_files()
 
@@ -139,6 +164,9 @@ def main():
     parser.add_argument('-v', '--verbose',
                         action='store_true',
                         help='enable verbose tar')
+    parser.add_argument('-j', '--junk-paths',
+                        action='store_true',
+                        help='simulates \'zip --junk-paths\'')
     parser.add_argument('-o', '--output-dir',
                         metavar='DIR',
                         type=list,
