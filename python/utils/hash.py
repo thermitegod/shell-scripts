@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.1.0
-# 2020-09-19
+# 1.2.0
+# 2020-10-23
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -16,7 +16,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-import hashlib
+import xxhash
 
 from pathlib import Path
 
@@ -24,7 +24,7 @@ from pathlib import Path
 def file_hash_compare(file1: Path, file2: Path):
     hash_list = []
     for filename in [file1, file2]:
-        hasher = hashlib.blake2b()
+        hasher = xxhash.xxh3_64()
         with Path.open(filename, 'rb') as f:
             hasher.update(f.read())
             hash_list.append(hasher.hexdigest())
