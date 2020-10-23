@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 2.3.1
-# 2020-10-04
+# 2.4.0
+# 2020-10-23
 
 # Original
 # https://github.com/JLDevOps/ChanDL
@@ -80,7 +80,7 @@ class Chandl:
             del urldef[3]
 
         if self.chan == '8kun':
-            threadurl = 'https://8ch.net/'
+            threadurl = 'https://8kun.top/'
         else:
             threadurl = 'https://a.4cdn.org/'
 
