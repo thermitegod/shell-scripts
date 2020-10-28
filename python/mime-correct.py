@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.4.2
-# 2020-10-12
+# 1.5.0
+# 2020-10-28
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -18,16 +18,17 @@
 
 import argparse
 import atexit
-import sys
-from pathlib import Path
 import shutil
+import sys
 import tempfile
+from pathlib import Path
 
 from loguru import logger
 
-from utils import utils
-from utils import hash
 from utils import colors
+from utils import hash
+from utils import mimecheck
+from utils import utils
 
 
 class Mimecheck:
@@ -50,25 +51,23 @@ class Mimecheck:
         total = 0
         collision = 0
         fixed = 0
+
         for f in Path.cwd().iterdir():
             if Path.is_dir(f):
                 continue
 
-            mime = utils.run_cmd(f'file -b --mime-type -- "{f}"', to_stdout=True)
-            mime = mime.strip('\n').split('/')
-
-            mimeext = mime[1]
-
-            if mime[0] != 'image':
-                logger.debug(f'Skipping non inage file: {f}')
+            if not mimecheck.check_if_image(f):
+                logger.debug(f'Skipping non image file: {f}')
                 continue
 
             total += 1
 
+            mimeext = mimecheck.get_mimetype_ext(filename=f)
+
             if 'bmp' in mimeext:
                 mimeext = 'bmp'
 
-            if mimeext not in ['jpeg', 'png', 'gif', 'tiff', 'bmp']:
+            if mimeext not in ('jpeg', 'png', 'gif', 'tiff', 'bmp'):
                 logger.debug(f'file type not supported: {mimeext}')
                 continue
 
@@ -93,7 +92,7 @@ class Mimecheck:
                     else:
                         logger.debug(f'File collision with different files: \'{current_name}\' \'{correct_name}\'')
                     collision += 1
-                    if self.__rm_hash_collision:
+                    if self.__rm_hash_collision and not self.__list_only:
                         current_name.unlink()
 
                     continue

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.1.0
-# 2020-10-03
+# 1.2.0
+# 2020-10-28
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -18,22 +18,28 @@
 
 import mimetypes
 
+from . import utils
+
+
+def get_mimetype_ext(filename):
+    return utils.run_cmd(f'file -b --mime-type -- "{filename}"', to_stdout=True).strip('\n').split('/')[1]
+
 
 def check_if_video(filename):
-    return __check_mimetype(filename=str(filename), mime_type='video')
+    return __check_mimetype(filename=filename, mime_type='video')
 
 
 def check_if_audio(filename):
-    return __check_mimetype(filename=str(filename), mime_type='audio')
+    return __check_mimetype(filename=filename, mime_type='audio')
 
 
 def check_if_image(filename):
-    return __check_mimetype(filename=str(filename), mime_type='image')
+    return __check_mimetype(filename=filename, mime_type='image')
 
 
-def __check_mimetype(filename: str, mime_type: str):
+def __check_mimetype(filename, mime_type: str):
     try:
-        if mime_type in mimetypes.guess_type(filename)[0]:
+        if mime_type in mimetypes.guess_type(str(filename))[0]:
             return True
     except TypeError:
         pass
