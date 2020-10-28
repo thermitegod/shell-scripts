@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 2.19.1
-# 2020-10-12
+# 2.20.0
+# 2020-10-28
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -50,6 +50,7 @@ from packaging import version
 
 from utils import kernel
 from utils import utils
+from utils.script import Script
 
 
 # TODO
@@ -364,13 +365,10 @@ class Build:
             zfs_build_version = f'{self.__zfs_kmod_build_path}-{self.__zfs_version}'
 
             # this is just simpler
-            script = Path() / self.__tmpdir / 'tmp.sh'
             text = f'{portage_env}\n' \
                    f'EXTRA_ECONF="--with-linux={self.__kernel_src} --enable-linux-builtin" ebuild ' \
                    f'{self.__zfs_ebuild_path} configure || die "build failed"\n'
-
-            utils.write_script_shell(script, text)
-            utils.run_cmd(str(script))
+            Script.execute_script_shell(text=text)
 
             os.chdir(Path() / zfs_build_path / zfs_build_version)
             utils.run_cmd(f'./copy-builtin {self.__kernel_src}')

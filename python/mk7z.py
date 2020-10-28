@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.7.2
-# 2020-10-12
+# 1.8.0
+# 2020-10-28
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -25,21 +25,17 @@
 # are separated into unique scripts
 
 import argparse
-import atexit
 import os
 import shutil
-import tempfile
 from pathlib import Path
 
-from utils import utils
 from utils import colors
+from utils import utils
+from utils.script import Script
 
 
 class Compress:
     def __init__(self):
-        atexit.register(self.remove_tmpdir)
-        self.__tmpdir = tempfile.mkdtemp()
-
         self.__input_files = None
         self.__output_dir = Path.cwd()
 
@@ -60,9 +56,6 @@ class Compress:
         self.__test_move_failed_file = True
         self.__test_passed = 0
         self.__test_failed = 0
-
-    def remove_tmpdir(self):
-        shutil.rmtree(self.__tmpdir)
 
     def test_archive(self, filename):
         filename = Path(filename)
@@ -133,9 +126,6 @@ class Compress:
             print(f'Skipping, archive already exists at: \'{test_file}\'')
             return
 
-        script = Path() / self.__tmpdir / 'tmp.sh'
-        die_failed = f'die "Compression failed for \'{Path.resolve(file)}\'"'
-
         self.__file_list.append(f'{self.__output_dir}/{Path(file).name}.7z')
 
         os.chdir(Path(file).parent)
@@ -143,11 +133,10 @@ class Compress:
         text = f'nice -19 ' \
                f'7zr a -t7z -m0=lzma2 -md=1024m -mmf=bt4 -mmt={self.__threads} -mmtf={self.__threads} ' \
                f'-myx=9 -mx=9 -mfb=276 -mhc=on -ms=on -mtm=off -mtc=off -mta=off {self.__exclude}' \
-               f'-o="{self.__output_dir}" "{Path(file).name}.7z" "{Path(file).name}" || {die_failed}'
+               f'-o="{self.__output_dir}" "{Path(file).name}.7z" "{Path(file).name}" || ' \
+               f'die "Compression failed for \'{Path.resolve(file)}\'"'
 
-        utils.write_script_shell(script, text)
-        utils.run_cmd(str(script))
-        Path.unlink(script)
+        Script.execute_script_shell(text=text)
 
         if Path.exists(test_file):
             if self.__destructive:

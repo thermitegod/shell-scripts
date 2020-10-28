@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 2.10.2
-# 2020-10-12
+# 2.11.0
+# 2020-10-28
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -25,20 +25,16 @@
 # are separated into unique scripts
 
 import argparse
-import atexit
 import os
 import shutil
-import tempfile
 from pathlib import Path
 
 from utils import utils
+from utils.script import Script
 
 
 class Compress:
     def __init__(self):
-        atexit.register(self.remove_tmpdir)
-        self.__tmpdir = tempfile.mkdtemp()
-
         self.__cmd = None
         self.__ext = None
 
@@ -58,9 +54,6 @@ class Compress:
         self.__tar_verbose = ''
 
         self.__destructive = False
-
-    def remove_tmpdir(self):
-        shutil.rmtree(self.__tmpdir)
 
     def get_mode(self):
         mode = utils.get_script_name()
@@ -113,7 +106,6 @@ class Compress:
             print(f'Skipping, archive already exists at: \'{test_file}\'')
             return
 
-        script = Path() / self.__tmpdir / 'tmp.sh'
         die = f'die "Compression failed for \'{Path.resolve(file)}\'"'
 
         os.chdir(Path(file).parent)
@@ -126,9 +118,7 @@ class Compress:
         else:
             text = f'{self.__cmd} --output-dir-flat="{self.__output_dir}" -- "{file}" || {die}'
 
-        utils.write_script_shell(script, text)
-        utils.run_cmd(str(script))
-        Path.unlink(script)
+        Script.execute_script_shell(text=text)
 
         if Path.exists(test_file):
             if self.__destructive:

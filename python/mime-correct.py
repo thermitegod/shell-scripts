@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# 1.5.0
+# 1.6.0
 # 2020-10-28
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -17,10 +17,7 @@
 #    along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import argparse
-import atexit
-import shutil
 import sys
-import tempfile
 from pathlib import Path
 
 from loguru import logger
@@ -28,24 +25,17 @@ from loguru import logger
 from utils import colors
 from utils import hash
 from utils import mimecheck
-from utils import utils
+from utils.script import Script
 
 
 class Mimecheck:
     def __init__(self):
-        atexit.register(self.remove_tmpdir)
-
-        self.__tmpdir = Path(tempfile.mkdtemp())
-
         self.__list_only = False
         self.__rm_hash_collision = False
 
         self.__verbose = False
 
         self.__c = colors.Colors
-
-    def remove_tmpdir(self):
-        shutil.rmtree(self.__tmpdir)
 
     def main(self):
         total = 0
@@ -130,11 +120,9 @@ class Mimecheck:
 
     def run(self, args):
         if args.check_all:
-            script = Path() / self.__tmpdir / 'tmp.sh'
             text = f'find {Path.cwd()} -path \'*/*\' -type d \\( ! -name . \\) | ' \
                    f'while read -r dir ; do cd "${{dir}}" && {Path(sys.argv[0])} ; done\n'
-            utils.write_script_shell(path=script, text=text)
-            utils.run_cmd(str(script))
+            Script.execute_script_shell(text=text)
             raise SystemExit
         if args.list:
             self.__list_only = True
