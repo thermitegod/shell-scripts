@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.1.1
-# 2020-10-08
+# 1.2.0
+# 2020-10-28
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -19,8 +19,8 @@
 import argparse
 from pathlib import Path
 
-from utils import colors
 from utils import utils
+from utils.colors import Colors
 
 
 class Scheduler:
@@ -36,11 +36,10 @@ class Scheduler:
         return Path.open(Path() / '/sys/block' / disk / 'queue/scheduler', 'r').read().partition(' ')[0]
 
     def run(self, args):
-        c = colors.Colors()
         if args.current:
             for disk in self.__disks:
                 sched = self.get_scheduler(disk)
-                print(f'Scheduler is {c.GRE}{sched}{c.NC} for {c.YEL}/dev/{disk}{c.NC}')
+                print(f'Scheduler is {Colors.GRE}{sched}{Colors.NC} for {Colors.YEL}/dev/{disk}{Colors.NC}')
         if args.set:
             # not really needed with current setup but still porting from sh in case
             # it ever is needed for some reason
@@ -54,7 +53,8 @@ class Scheduler:
                     print(f'Disk scheduler is already set to \'{current_sched}\'')
                 else:
                     disk.write_text(new_sched)
-                    print(f'Scheduler set to {c.GRE}[{new_sched}]{c.NC} for {c.YEL}/dev/{disk}{c.NC}\n')
+                    print(f'Scheduler set to {Colors.GRE}[{new_sched}]{Colors.NC} for '
+                          f'{Colors.YEL}/dev/{disk}{Colors.NC}\n')
 
 
 def main():

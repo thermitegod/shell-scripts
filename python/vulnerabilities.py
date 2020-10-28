@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.0.0
-# 2020-09-19
+# 1.1.0
+# 2020-10-28
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -19,18 +19,16 @@
 
 from pathlib import Path
 
-from utils import colors
+from utils.colors import Colors
 
 
 def main():
     vuln = Path() / '/sys/devices/system/cpu/vulnerabilities'
 
-    c = colors.Colors
-
     for f in Path(vuln).iterdir():
         name = f.name
         state = (f.read_text().strip('\n'))
-        print(f'{c.YEL}{name: >20}{c.NC} : {state}')
+        print(f'{Colors.YEL}{name: >20}{Colors.NC} : {state}')
 
 
 if __name__ == '__main__':

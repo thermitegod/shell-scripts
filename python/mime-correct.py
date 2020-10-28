@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# 1.6.0
+# 1.7.0
 # 2020-10-28
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -22,9 +22,9 @@ from pathlib import Path
 
 from loguru import logger
 
-from utils import colors
 from utils import hash
 from utils import mimecheck
+from utils.colors import Colors
 from utils.script import Script
 
 
@@ -34,8 +34,6 @@ class Mimecheck:
         self.__rm_hash_collision = False
 
         self.__verbose = False
-
-        self.__c = colors.Colors
 
     def main(self):
         total = 0
@@ -97,15 +95,15 @@ class Mimecheck:
                 fixed += 1
 
         if total != 0:
-            total_out = f'{self.__c.GRE}Checked{self.__c.NC}: {total}'
+            total_out = f'{Colors.GRE}Checked{Colors.NC}: {total}'
 
             if fixed != 0:
-                fixed_out = f'{self.__c.YEL}Corrected{self.__c.NC}: {fixed}'
+                fixed_out = f'{Colors.YEL}Corrected{Colors.NC}: {fixed}'
             else:
                 fixed_out = ''
 
             if collision != 0:
-                collision_out = f'{self.__c.RED}Collision{self.__c.NC}: {collision}'
+                collision_out = f'{Colors.RED}Collision{Colors.NC}: {collision}'
             else:
                 collision_out = ''
 

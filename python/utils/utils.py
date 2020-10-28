@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 1.25.0
+# 1.26.0
 # 2020-10-28
 
 # Copyright (C) 2019,2020 Brandon Zorn <brandonzorn@cock.li>
@@ -17,13 +17,13 @@
 #    along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import os
+import re
 import shlex
 import subprocess
 import sys
-import re
 from pathlib import Path
 
-from . import colors
+from utils.colors import Colors
 
 
 def root_check(require_root: bool):
@@ -32,14 +32,13 @@ def root_check(require_root: bool):
         If True, running as root is required otherwise will terminate.
         If False, running as root will terminate.
     """
-    c = colors.Colors()
     if require_root:
         if os.geteuid() != 0:
-            print(f'{c.BRED}\n\nRequires root, exiting\n\n{c.NC}')
+            print(f'{Colors.BRED}\n\nRequires root, exiting\n\n{Colors.NC}')
             raise SystemExit(1)
     else:
         if os.geteuid() == 0:
-            print(f'{c.BRED}\n\nDo not run as root, exiting\n\n{c.NC}')
+            print(f'{Colors.BRED}\n\nDo not run as root, exiting\n\n{Colors.NC}')
             raise SystemExit(1)
 
 

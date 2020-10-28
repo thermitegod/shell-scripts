@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# 1.8.0
+# 1.9.0
 # 2020-10-28
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -29,8 +29,8 @@ import os
 import shutil
 from pathlib import Path
 
-from utils import colors
 from utils import utils
+from utils.colors import Colors
 from utils.script import Script
 
 
@@ -59,9 +59,8 @@ class Compress:
 
     def test_archive(self, filename):
         filename = Path(filename)
-        c = colors.Colors
         if Path.is_file(filename) and str(filename).endswith(('.7z', '.zip')):
-            print(f'\r{c.YEL}TEST{c.NC}\t{filename}', end='')
+            print(f'\r{Colors.YEL}TEST{Colors.NC}\t{filename}', end='')
 
             # have to use shell_escape because syntax gets fucked up with when using sh_wrap=True.
             # double quotes dont work around filename becuse sh_wrap will provide its own double
@@ -71,10 +70,10 @@ class Compress:
                                    sh_wrap=True, to_stdout=True)
 
             if 'Everything is Ok' in status:
-                print(f'\r{c.GRE}PASSED{c.NC}\t{filename}')
+                print(f'\r{Colors.GRE}PASSED{Colors.NC}\t{filename}')
                 self.__test_passed += 1
             else:
-                print(f'\r{c.RED}FAILED{c.NC}\t{filename}')
+                print(f'\r{Colors.RED}FAILED{Colors.NC}\t{filename}')
                 self.__test_failed += 1
 
                 if self.__test_move_failed_file:
@@ -83,14 +82,13 @@ class Compress:
                     Path.rename(filename, Path() / failed_dir / filename)
 
     def test_print_results(self):
-        c = colors.Colors
         total = self.__test_passed + self.__test_failed
         if total != 0:
-            print(f'\n\n{c.YEL}TOTAL{c.NC}\t{total}')
+            print(f'\n\n{Colors.YEL}TOTAL{Colors.NC}\t{total}')
             if self.__test_passed != 0:
-                print(f'{c.GRE}PASSED{c.NC}\t{self.__test_passed}')
+                print(f'{Colors.GRE}PASSED{Colors.NC}\t{self.__test_passed}')
             if self.__test_failed != 0:
-                print(f'{c.RED}FAILED{c.NC}\t{self.__test_failed}')
+                print(f'{Colors.RED}FAILED{Colors.NC}\t{self.__test_failed}')
 
     def get_files(self):
         if self.__directories or self.__files:

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.1.1
-# 2020-10-08
+# 1.2.0
+# 2020-10-28
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -20,7 +20,7 @@ import argparse
 from pathlib import Path
 
 from utils import utils
-from utils import colors
+from utils.colors import Colors
 
 
 class Powerstate:
@@ -30,8 +30,7 @@ class Powerstate:
 
     def run(self, args):
         if args.current:
-            c = colors.Colors()
-            print(f'Current GPU power state is: {c.GRE}{self.__current_state}{c.NC}')
+            print(f'Current GPU power state is: {Colors.GRE}{self.__current_state}{Colors.NC}')
         if args.set:
             new_state = args.set
             if self.__current_state == new_state:
