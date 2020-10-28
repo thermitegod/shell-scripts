@@ -21,4 +21,7 @@ python/utils/private.py
 python/tools/__pycache__
 python/utils/__pycache__
 python/__pycache__
+tools/__pycache__/
+__pycache__/
+
 
