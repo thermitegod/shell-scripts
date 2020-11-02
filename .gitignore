@@ -16,12 +16,14 @@ shell/remove-ff*
 shell/set-nftable-rules.sh
 shell/transcode.sh
 
-python/utils/private.py
-
 python/tools/__pycache__
 python/utils/__pycache__
 python/__pycache__
 tools/__pycache__/
 __pycache__/
 
+
+# configs
+python/utils/config_lxd.py
+python/utils/private.py
 
