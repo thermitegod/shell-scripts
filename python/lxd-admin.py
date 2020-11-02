@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.11.0
-# 2020-10-18
+# 2.0.0
+# 2020-11-02
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -17,21 +17,25 @@
 #    along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import argparse
-import os
 import sys
 from pathlib import Path
 
 from loguru import logger
 
-from utils import editor
-from utils import utils
 from utils import lxd
+from utils import utils
+
+try:
+    from utils.config_lxd import LxdConfig
+except ImportError:
+    print('Missing config file, see python/utils/template_config_lxd.py')
+    raise SystemExit(1)
 
 
 # TODO
 #   utils.run_cmd() will block until cmd returns,
 #       therfore forking to speed up commands does not work
-#   possible config version 4
+#   possible config changes
 #       more limits
 #       drop self.__container_type
 #       drop self.__container_distro
@@ -39,12 +43,15 @@ from utils import lxd
 
 class Container:
     def __init__(self):
-        self.__CONFIG_VERSION = '3'
-        self.__config = Path() / os.environ["XDG_DATA_HOME"] / 'shell/lxd-admin'
+        self.__CONFIG_VERSION = 5
+
+        if self.__CONFIG_VERSION != LxdConfig.CONFIG_VERSION:
+            logger.critical('config versions do not match, update config to new format')
+            raise SystemExit(1)
 
         self.__action = None
 
-        self.__only = None
+        self.__only_container = None
         self.__catch_single = False
 
         self.__create_missing_dirs = False
@@ -84,8 +91,8 @@ class Container:
         self.__container_type = None
         self.__container_distro = None
         self.__container_user = None
-        self.__container_autostart = None
-        self.__container_htpasswd = None
+        self.__container_autostart = False
+        self.__container_htpasswd = False
         self.__container_ipv4 = None
         self.__container_limit_cpu = None
         self.__container_limit_cpu_allowance = None
@@ -122,35 +129,6 @@ class Container:
                   f'save override path  : {self.__container_save_override}')
 
         print('\n')
-
-    def config_help(self):
-        print('==SUBJECT TO CHANGE==\n\n'
-              f'Config version: {self.__CONFIG_VERSION}\n'
-              f'Config file: \'{self.__config}\'\n\n'
-              'All containers are declared using the following space delimited format\n'
-              'Valid values are\n'
-              '================\n'
-              'container type: rutorrent, stop\n'
-              'distro: gentoo\n'
-              'user: user used in container\n'
-              'autostart: 0, 1\n'
-              'htpasswd: 0, 1\n'
-              'ipv4: a local ipv4 address\n'
-              'limit cpu: any int\n'
-              'limit cpu allowance: any percent\n'
-              'limit mem: any int with a unit\n'
-              'container name: any string\n'
-              'save location override, optional: a path\n\n'
-
-              'Example\n'
-              '================\n'
-              f'version {self.__CONFIG_VERSION}\n'
-              'rutorrent gentoo brandon 1 1 192.168.0.161 6 10% 8192MB anime /mnt/anime/anime-working\n'
-
-              'Config file parsing\n'
-              '================\n'
-              'supports comments, no inline comments\n'
-              'Script will stop if \'container type\' is set to \'stop\'')
 
     def set_dirs(self):
         # paths from host
@@ -216,7 +194,7 @@ class Container:
             logger.info(f'Already started: {self.__container_fullname}')
             return
 
-        if self.__container_autostart != '1':
+        if not self.__container_autostart:
             return
 
         # remove rtorrent lockfiles since they can persist
@@ -269,7 +247,7 @@ class Container:
             lockfile.unlink()
 
     def rtorrent_clean_torrent(self):
-        if self.__container_htpasswd == '1':
+        if self.__container_htpasswd:
             torrent_files_path = Path() / self.__container_path_rushare / 'users' / self.__container_user / 'torrents'
         else:
             torrent_files_path = Path() / self.__container_path_rushare / 'torrents'
@@ -342,92 +320,61 @@ class Container:
         self.attach_dirs()
 
     def main(self):
-        if not Path.is_file(self.__config):
-            print('Missing container config file, showing help.\n\n')
-            utils.run_cmd(f'{utils.get_script_name()} -H')
-            raise SystemExit
+        container_config = LxdConfig.CONFIG
 
-        c = 0
-        for line in Path.open(self.__config):
-            c += 1
-            line = line.strip('\n').split(' ')
-            if line[0] == 'version':
-                if line[1] != self.__CONFIG_VERSION:
-                    logger.critical('config versions do not match, update config to new format')
-                    raise SystemExit
+        for idx, item in enumerate(container_config):
+            if not container_config[item]['ENABLED']:
                 continue
-            elif line[0] == 'stop':
-                logger.trace('will now stop parsing config file')
-                raise SystemExit
-            elif line[0].startswith('#'):
-                logger.trace('Ignoring comment')
-                continue
-            else:
-                try:
-                    # test for blank lines, probably
-                    # not the best way but it works
-                    if line[1] is None:
-                        pass
-                except IndexError:
+
+            self.__container_type = container_config[item]['TYPE']
+            self.__container_distro = container_config[item]['DISTRO']
+            self.__container_user = container_config[item]['USER']
+            self.__container_autostart = container_config[item]['AUTOSTART']
+            self.__container_htpasswd = container_config[item]['HTPASSWD']
+            self.__container_ipv4 = container_config[item]['IPV4']
+            self.__container_limit_cpu = container_config[item]['LIMIT_CPU']
+            self.__container_limit_cpu_allowance = container_config[item]['LIMIT_CPU_ALLOWANCE']
+            self.__container_limit_mem = container_config[item]['LIMIT_MEM']
+            self.__container_name = container_config[item]['NAME']
+            self.__container_save_override = container_config[item]['SAVE_OVERRIDE']
+
+            # create actual container name
+            self.__container_fullname = f'{self.__container_type}-{self.__container_name}'
+            self.__container_template = f'base-{self.__container_distro}-{self.__container_type}'
+
+            if self.__catch_single:
+                if self.__container_fullname != self.__only_container:
                     continue
 
-                try:
-                    # set config file variables
-                    self.__container_type = line[0]
-                    self.__container_distro = line[1]
-                    self.__container_user = line[2]
-                    self.__container_autostart = line[3]
-                    self.__container_htpasswd = line[4]
-                    self.__container_ipv4 = line[5]
-                    self.__container_limit_cpu = line[6]
-                    self.__container_limit_cpu_allowance = line[7]
-                    self.__container_limit_mem = line[8]
-                    self.__container_name = line[9]
-                    try:
-                        self.__container_save_override = line[10]
-                    except IndexError:
-                        self.__container_save_override = None
-                except IndexError:
-                    logger.critical(f'Malformed config on line {c}')
-                    raise SystemExit
+            self.set_dirs()
 
-                # create actual container name
-                self.__container_fullname = f'{self.__container_type}-{self.__container_name}'
-                self.__container_template = f'base-{self.__container_distro}-{self.__container_type}'
-
-                if self.__catch_single:
-                    if self.__container_fullname != self.__only:
-                        continue
-
-                self.set_dirs()
-
-                # wish python had a switch
-                if self.__action == 'start':
-                    self.start()
-                elif self.__action == 'stop':
-                    self.stop()
-                elif self.__action == 'forcestop':
-                    self.forcestop()
-                elif self.__action == 'restart':
-                    self.restart()
-                elif self.__action == 'delete':
-                    self.delete()
-                elif self.__action == 'update':
-                    self.update()
-                elif self.__action == 'service':
-                    self.restart_service()
-                elif self.__clean_lockfiles:
-                    self.rtorrent_clean_lock()
-                elif self.__clean_torrents:
-                    # self.set_dirs()
-                    self.rtorrent_clean_torrent()
-                elif self.__print:
-                    self.print_config()
+            # wish python had a switch
+            if self.__action == 'start':
+                self.start()
+            elif self.__action == 'stop':
+                self.stop()
+            elif self.__action == 'forcestop':
+                self.forcestop()
+            elif self.__action == 'restart':
+                self.restart()
+            elif self.__action == 'delete':
+                self.delete()
+            elif self.__action == 'update':
+                self.update()
+            elif self.__action == 'service':
+                self.restart_service()
+            elif self.__clean_lockfiles:
+                self.rtorrent_clean_lock()
+            elif self.__clean_torrents:
+                # self.set_dirs()
+                self.rtorrent_clean_torrent()
+            elif self.__print:
+                self.print_config()
 
     def run(self, args):
         # container
         if args.only:
-            self.__only = args.only
+            self.__only_container = args.only
             self.__catch_single = True
         # container services
         if args.service:
@@ -454,28 +401,17 @@ class Container:
         if args.rutorrent_torrents:
             self.__clean_torrents = True
         # other
-        if args.edit:
-            editor.edit_conf(self.__config)
-        if args.cat:
-            utils.run_cmd(f'cat {self.__config}')
-            raise SystemExit
         if args.print:
             self.__print = True
         if args.print_verbose:
             self.__print = True
             self.__print_verbose = True
-        if args.config_help:
-            self.config_help()
-            raise SystemExit
 
         self.main()
 
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument('-H', '--config-help',
-                   action='store_true',
-                   help='Show config file help')
     c = p.add_argument_group('CONTAINER')
     c.add_argument('-O', '--only',
                    metavar='CONTAINER',
@@ -514,12 +450,6 @@ def main():
                    action='store_true',
                    help='rutorrent cleanup only, remove *.torrent files in $config/rutorrent/share/torrents/')
     o = p.add_argument_group('OTHER')
-    o.add_argument('-e', '--edit',
-                   action='store_true',
-                   help='edit config file')
-    o.add_argument('-E', '--cat',
-                   action='store_true',
-                   help='cat config file')
     o.add_argument('-p', '--print',
                    action='store_true',
                    help='Print all container vars')
