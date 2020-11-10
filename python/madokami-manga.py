@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 9.5.0
-# 2020-10-18
+# 10.0.0
+# 2020-11-09
 
 # Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -22,16 +22,26 @@ from pathlib import Path
 
 from utils import clipboard
 from utils import dirs
-from utils import editor
 from utils import net
-from utils import private
 from utils import utils
+
+try:
+    from private.manga_list import MangaList
+except ImportError:
+    print('Missing config file, see python/template/manga_list.py')
+    raise SystemExit(1)
+
+try:
+    from private import mado_pass
+except ImportError:
+    print('Missing config file, see python/template/mado_pass.py')
+    raise SystemExit(1)
 
 
 class Download:
     def __init__(self):
-        self.__user = private.mado_credentials(username=True)
-        self.__pass = private.mado_credentials(password=True)
+        self.__user, self.__pass = mado_pass.mado_login()
+
         self.__mode = utils.get_script_name()
         self.__extra = dirs.get_extra_dir()
         self.__link = ''
@@ -76,9 +86,6 @@ class Download:
         elif self.__mode == 'madokami-manga-publishing':
             self.__extra = Path() / self.__extra / 'madokami-manga'
 
-        if args.edit:
-            editor.edit_conf(self.__extra)
-
         if args.save_dir:
             self.__save_path = Path() / self.__save_path / 'manga/neglected/finished'
         else:
@@ -88,21 +95,21 @@ class Download:
             self.__symlink = False
 
         if self.__mode == ('madokami-manga-publishing' or 'madokami-novels-publishing'):
-            with Path.open(self.__extra) as fp:
-                for link in fp:
-                    self.__link = link
-                    self.dl()
+            if self.__mode == 'madokami-manga-publishing':
+                url_list = MangaList.MANGA_LIST
+            else:
+                url_list = MangaList.NOVEL_LIST
+
+            for link in url_list:
+                self.__link = link
+                self.dl()
         else:
             self.__link = clipboard.from_flag_else_clipboard(args.url)
-
             self.dl()
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-e', '--edit',
-                        action='store_true',
-                        help='Edit batch file')
     parser.add_argument('-d', '--save-dir',
                         action='store_true',
                         help='Save to finished publishing dir')
