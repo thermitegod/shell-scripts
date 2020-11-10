@@ -36,7 +36,7 @@ class _LxdConfig:
         'SAVE_OVERRIDE': str, override default save path, absolute path
         """
 
-        # rename to config_lxd.py to use
+        # copy to python/private/config_lxd.py to use
 
         self.CONFIG_VERSION = 5
 

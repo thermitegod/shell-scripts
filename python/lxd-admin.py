@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# 2.1.0
+# 2.1.1
 # 2020-11-09
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -26,9 +26,9 @@ from utils import lxd
 from utils import utils
 
 try:
-    from utils.config_lxd import LxdConfig
+    from private.config_lxd import LxdConfig
 except ImportError:
-    print('Missing config file, see python/utils/template_config_lxd.py')
+    print('Missing config file, see python/template/config_lxd.py')
     raise SystemExit(1)
 
 
