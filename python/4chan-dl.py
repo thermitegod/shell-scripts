@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.1.0
-# 2020-10-04
+# 2.0.0
+# 2020-11-09
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -16,13 +16,20 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+# wrapper script around chandl to batch download threads
+
 import argparse
 import os
 from pathlib import Path
 
 from utils import dirs
-from utils import editor
 from utils import utils
+
+try:
+    from private.thread_list import ThreadList
+except ImportError:
+    print('Missing config file, see python/template/thread_list.py')
+    raise SystemExit(1)
 
 
 class Dl:
@@ -39,11 +46,11 @@ class Dl:
 
         script_name = utils.get_script_name()
         if script_name == '4chan-dl':
-            self.__thread_list = Path() / dirs.get_extra_dir() / script_name
+            self.__thread_list = ThreadList.THREADS_4CHAN
             self.__dir = Path() / dirs.get_download_dir() / 'chan/4chan'
             self.__url_base = 'https://boards.4chan.org'
         elif script_name == '8chan-dl':
-            self.__thread_list = Path() / dirs.get_extra_dir() / script_name
+            self.__thread_list = ThreadList.THREADS_8KUN
             self.__dir = Path() / dirs.get_download_dir() / 'chan/8chan'
             self.__url_base = 'https://8kun.top/'
 
@@ -69,19 +76,10 @@ class Dl:
                 print(f'Example: {utils.get_script_name()} <save dir> <link>')
                 raise SystemExit
 
-        for line in Path.open(self.__thread_list):
-            line = line.strip('\n').split(' ')
-            if line[0].startswith('#'):
-                continue
-
-            # set config file variables
-            try:
-                self.__board = line[0]
-                self.__thread = line[1]
-                self.__save_dir = line[2]
-            except IndexError:
-                # skip line if malformed
-                continue
+        for c in self.__thread_list:
+            self.__board = c[0]
+            self.__thread = c[1]
+            self.__save_dir = c[2]
 
             self.dl_batch()
 
@@ -90,8 +88,6 @@ class Dl:
             self.__input = args.input_files
         if args.batch:
             self.__batch = True
-        if args.edit:
-            editor.edit_conf(self.__thread_list)
 
         self.main()
 
@@ -107,9 +103,6 @@ def main():
     parser.add_argument('-b', '--batch',
                         action='store_true',
                         help='run batch file')
-    parser.add_argument('-e', '--edit',
-                        action='store_true',
-                        help='edit batch file')
     args = parser.parse_args()
 
     utils.args_required_else_help()
