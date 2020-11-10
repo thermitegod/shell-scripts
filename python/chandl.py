@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 2.4.0
-# 2020-10-23
+# 2.5.0
+# 2020-11-09
 
 # Original
 # https://github.com/JLDevOps/ChanDL
@@ -148,12 +148,14 @@ class Chandl:
             self.hashlist.append(self.gen_md5(Path() / d / f))
         self.write_hashlist()
 
-    def download_thread_data(self, url):
+    def download_thread_data(self):
+        plain_url = self.thread.strip('.json')
         r = requests.get(self.thread)
         if r.status_code == 404:
-            logger.info('API returned 404.')
+            logger.info(f'API returned 404: \'{plain_url}\'')
             raise SystemExit
         else:
+            logger.info(f'Downloading thread: \'{plain_url}\'')
             return r
 
     def init_datapath(self, top_dir):
@@ -171,7 +173,7 @@ class Chandl:
 
             images = []
 
-            r = self.download_thread_data(self.thread)
+            r = self.download_thread_data()
             posts = r.json()['posts']
             # if posts[0].has_key('closed') and posts[0]['closed'] == 1:
             if 'closed' in posts[0] and posts[0]['closed'] == 1:
@@ -229,7 +231,7 @@ class Chandl:
             logger.error('Invalid URL')
             raise SystemExit
 
-        r = self.download_thread_data(self.thread)
+        r = self.download_thread_data()
 
         self.init_datapath(self.dest)
 
