@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 2.0.0
-# 2020-11-02
+# 2.1.0
+# 2020-11-09
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -56,9 +56,6 @@ class Container:
 
         self.__create_missing_dirs = False
 
-        self.__print = False
-        self.__print_verbose = False
-
         self.__service = None
 
         self.__ip4_brd = '192.168.0.255'
@@ -100,7 +97,7 @@ class Container:
         self.__container_name = None
         self.__container_save_override = None
 
-    def print_config(self):
+    def print_config(self, verbose: bool = False):
         print(f'Container Name      : {self.__container_fullname}\n'
               f'Base Name           : {self.__container_name}\n'
               f'Template            : {self.__container_type}\n'
@@ -109,7 +106,7 @@ class Container:
               f'Running             : {lxd.get_state(container=self.__container_fullname)}\n'
               f'Autostart           : {self.__container_autostart}\n'
               f'Container User      : {self.__container_user}')
-        if self.__print_verbose:
+        if verbose:
             print(f'using htpasswd      : {self.__container_htpasswd}\n'
                   f'Limit CPU           : {self.__container_limit_cpu}\n'
                   f'Limit CPU ALLOW     : {self.__container_limit_cpu_allowance}\n'
@@ -402,10 +399,9 @@ class Container:
             self.__clean_torrents = True
         # other
         if args.print:
-            self.__print = True
+            self.print_config()
         if args.print_verbose:
-            self.__print = True
-            self.__print_verbose = True
+            self.print_config(verbose=True)
 
         self.main()
 
