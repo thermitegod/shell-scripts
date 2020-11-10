@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 10.0.0
-# 2020-11-09
+# 10.1.0
+# 2020-11-10
 
 # Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -21,7 +21,6 @@ import os
 from pathlib import Path
 
 from utils import clipboard
-from utils import dirs
 from utils import net
 from utils import utils
 
@@ -43,7 +42,6 @@ class Download:
         self.__user, self.__pass = mado_pass.mado_login()
 
         self.__mode = utils.get_script_name()
-        self.__extra = dirs.get_extra_dir()
         self.__link = ''
         self.__save_path = Path('/mnt/data')
         self.__symlink = True
@@ -81,11 +79,6 @@ class Download:
                 os.symlink(save_path_full, Path() / os.environ['HOME'] / 'media/manga-reading')
 
     def run(self, args):
-        if self.__mode == 'madokami-novels-publishing':
-            self.__extra = Path() / self.__extra / 'madokami-novels'
-        elif self.__mode == 'madokami-manga-publishing':
-            self.__extra = Path() / self.__extra / 'madokami-manga'
-
         if args.save_dir:
             self.__save_path = Path() / self.__save_path / 'manga/neglected/finished'
         else:

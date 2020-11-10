@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.1.0
-# 2020-09-18
+# 1.2.0
+# 2020-10-10
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -30,10 +30,6 @@ def get_config_dir():
 
 def get_data_dir():
     return Path() / os.environ['XDG_DATA_HOME']
-
-
-def get_extra_dir():
-    return Path() / os.environ['XDG_DATA_HOME'] / 'shell'
 
 
 def get_download_dir():
