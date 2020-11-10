@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# 2.0.0
+# 2.1.0
 # 2020-11-09
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -18,7 +18,6 @@
 
 # wrapper script around chandl to batch download threads
 
-import argparse
 import os
 from pathlib import Path
 
@@ -34,7 +33,6 @@ except ImportError:
 
 class Dl:
     def __init__(self):
-        self.__batch = False
         self.__input = None
 
         self.__board = None
@@ -54,9 +52,6 @@ class Dl:
             self.__dir = Path() / dirs.get_download_dir() / 'chan/8chan'
             self.__url_base = 'https://8kun.top/'
 
-            # TODO
-            raise NotImplementedError
-
     def dl(self):
         utils.run_cmd(f'chandl -d {self.__save_dir_full} -t {os.cpu_count()} -url "{self.__url}"')
 
@@ -66,16 +61,6 @@ class Dl:
         self.dl()
 
     def main(self):
-        if not self.__batch:
-            try:
-                self.__save_dir_full = self.__input[0]
-                self.__url = self.__input[1]
-                self.dl()
-                raise SystemExit
-            except IndexError:
-                print(f'Example: {utils.get_script_name()} <save dir> <link>')
-                raise SystemExit
-
         for c in self.__thread_list:
             self.__board = c[0]
             self.__thread = c[1]
@@ -83,32 +68,10 @@ class Dl:
 
             self.dl_batch()
 
-    def run(self, args):
-        if args.input_files is not None:
-            self.__input = args.input_files
-        if args.batch:
-            self.__batch = True
-
-        self.main()
-
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('input_files',
-                        action='store',
-                        type=str,
-                        nargs='*',
-                        default=None,
-                        help=argparse.SUPPRESS)
-    parser.add_argument('-b', '--batch',
-                        action='store_true',
-                        help='run batch file')
-    args = parser.parse_args()
-
-    utils.args_required_else_help()
-
     run = Dl()
-    run.run(args)
+    run.main()
 
 
 if __name__ == '__main__':
