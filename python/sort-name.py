@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.4.1
-# 2020-10-04
+# 2.0.0
+# 2020-11-10
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -23,28 +23,18 @@ from pathlib import Path
 from loguru import logger
 
 from utils import confirm
-from utils import editor
-from utils import dirs
 from utils import utils
 
-
-# file format for
-# self.__list_final and self.__list_type
-# =============
-# save_dir ./sort
-# pattern
-# pattern2 override
-# pattern-3
-# =============
-# first entry will match *pattern* and be saved to pattern
-# second entry will match *pattern2* and be saved to override
-# third entry will match *pattern*3* and be saved to pattern-3
+try:
+    from private.sort_list import SortList
+except ImportError:
+    print('Missing config file, see python/template/sort_list.py')
+    raise SystemExit(1)
 
 
 class Sort:
     def __init__(self):
-        self.__list_final = dirs.get_extra_dir() / 'sort-name-final'
-        self.__list_type = dirs.get_extra_dir() / 'sort-name-type'
+        self.__mode = None
 
         self.__list_sort = None
         self.__dest = None
@@ -57,56 +47,13 @@ class Sort:
 
         self.__job = None
 
-        self.__total_after = 0
-        self.__total_before = utils.run_cmd("ls -1A | wc -l", sh_wrap=True, to_stdout=True)
-
-    def get_dest_dir(self, dest_file):
-        # format to decalre save dir is
-        # save_dir <location>
-        # can be a relative or absolute path
-        # first hit wins
-
-        if self.__use_test_dir:
-            return
-
-        c = 0
-        for line in Path.open(dest_file):
-            c += 1
-
-            if c > 10:
-                # 10 limes is an abstract limit but save_dir should be set
-                # within this limit
-                logger.error(f'save_dir not declared within first 10 lines')
-                raise SystemExit
-
-            line = line.strip('\n').split(' ')
-            if line[0].startswith('#'):
-                continue
-
-            if line[0].startswith('save_dir'):
-                try:
-                    self.__dest = line[1]
-                    logger.debug(f'Setting dest dir: {line[1]}')
-                except IndexError:
-                    logger.critical(f'Invalid format for save_dir on line: {c}')
-                    raise SystemExit
-                break
+        # self.__total_after = 0
+        # self.__total_before = utils.run_cmd("ls -1A | wc -l", sh_wrap=True, to_stdout=True)
 
     def main_sort(self):
-        for line in Path.open(self.__list_sort):
-            line = line.strip('\n').split(' ')
-            if line[0].startswith('#'):
-                # logger.debug(f'Skipping comment: {line}')
-                continue
-            if line[0].startswith('save_dir'):
-                continue
-
-            self.__sort_name = line[0]
-
-            try:
-                self.__sort_override = line[1]
-            except IndexError:
-                self.__sort_override = None
+        for items in self.__list_sort:
+            self.__sort_name = items[0]
+            self.__sort_override = items[1]
 
             self.name_sort()
 
@@ -136,7 +83,7 @@ class Sort:
 
     def main(self):
         print(f'Prerun info\n'
-              f'MODE\t\t: {Path(self.__list_sort).name}\n'
+              f'MODE\t\t: {self.__mode}\n'
               f'Running from\t: {Path.cwd()}\n'
               f'Dest is\t\t: {self.__dest}\n'
               '\nMake sure everything has been processed correctly\n'
@@ -168,18 +115,18 @@ class Sort:
         if args.test:
             self.__use_test_dir = True
             self.__dest = self.__test_dir
-        if args.edit_type:
-            editor.edit_conf(self.__list_final)
-        if args.edit_final:
-            editor.edit_conf(self.__list_type)
+
+        # set sort type
         if args.final:
-            self.__list_sort = self.__list_final
+            self.__mode = 'sort_name_final'
+            self.__list_sort = SortList.SORT_NAME_FINAL
             if not self.__dest:
-                self.get_dest_dir(self.__list_final)
+                self.__dest = SortList.SAVE_DIR
         if args.type:
-            self.__list_sort = self.__list_type
+            self.__mode = 'sort_name_type'
+            self.__list_sort = SortList.SORT_NAME_TYPE
             if not self.__dest:
-                self.get_dest_dir(self.__list_type)
+                self.__dest = SortList.SAVE_DIR
 
         self.main()
 
@@ -189,14 +136,7 @@ def main():
     parser.add_argument('-T', '--test',
                         action='store_true',
                         help='Use test dir as dest \'/tmp/test\'')
-    edit = parser.add_argument_group('EDIT')
-    edit.add_argument('-e', '--edit-type',
-                      action='store_true',
-                      help='')
-    edit.add_argument('-E', '--edit-final',
-                      action='store_true',
-                      help='')
-    lst = parser.add_argument_group('EDIT')
+    lst = parser.add_argument_group('RUNNING')
     lst.add_argument('-f', '--final',
                      action='store_true',
                      help='')
