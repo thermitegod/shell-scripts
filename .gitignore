@@ -24,6 +24,5 @@ __pycache__/
 
 
 # configs
-python/utils/config_lxd.py
-python/utils/private.py
+python/private
 
