@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# 2.0.0
+# 2.1.0
 # 2020-11-11
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -23,6 +23,7 @@ import argparse
 import os
 from pathlib import Path
 
+from utils import output_dir
 from utils import utils
 from utils.get_files import GetFiles
 
@@ -114,13 +115,7 @@ class Decompress:
         # other
         if args.output_dir:
             self.__extract_to = True
-            out = Path.resolve(Path(args.output_dir[0]))
-            if not Path.is_dir(out):
-                if Path.exists(out):
-                    print(f'selected output dir \'{out}\' exists but is not a directory')
-                    raise SystemExit(1)
-                out.mkdir(parents=True, exist_ok=True)
-            self.__output_dir = out
+            self.__output_dir = output_dir.set_output_dir(directory=args.output_dir)
 
         GetFiles.get_only_files(function=self.run_extraction, input_files=args.input_files, only_files=args.files)
 

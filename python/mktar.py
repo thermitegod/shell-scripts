@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# 2.0.1
+# 2.1.0
 # 2020-11-11
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -29,6 +29,7 @@ import os
 import shutil
 from pathlib import Path
 
+from utils import output_dir
 from utils import utils
 from utils.get_files import GetFiles
 
@@ -95,13 +96,7 @@ class Compress:
             self.__destructive = True
         # other
         if args.output_dir:
-            out = Path.resolve(Path(args.output_dir[0]))
-            if not Path.is_dir(out):
-                if Path.exists(out):
-                    print(f'selected output dir \'{out}\' exists but is not a directory')
-                    raise SystemExit(1)
-                out.mkdir(parents=True, exist_ok=True)
-            self.__output_dir = out
+            self.__output_dir = output_dir.set_output_dir(directory=args.output_dir)
         if args.verbose:
             self.__tar_verbose = 'v'
         if args.exclude:
@@ -124,7 +119,6 @@ def main():
                         help=argparse.SUPPRESS)
     parser.add_argument('-e', '--exclude',
                         metavar='EX',
-                        type=list,
                         nargs='*',
                         help='exclude files from archive')
     parser.add_argument('-v', '--verbose',

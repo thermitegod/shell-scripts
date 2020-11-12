@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# 3.0.1
+# 3.1.0
 # 2020-11-11
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -29,6 +29,7 @@ import os
 import shutil
 from pathlib import Path
 
+from utils import output_dir
 from utils import utils
 from utils.get_files import GetFiles
 from utils.script import Script
@@ -114,13 +115,7 @@ class Compress:
             self.__destructive = True
         # other
         if args.output_dir:
-            out = Path.resolve(Path(args.output_dir[0]))
-            if not Path.is_dir(out):
-                if Path.exists(out):
-                    print(f'selected output dir \'{out}\' exists but is not a directory')
-                    raise SystemExit(1)
-                out.mkdir(parents=True, exist_ok=True)
-            self.__output_dir = out
+            self.__output_dir = output_dir.set_output_dir(directory=args.output_dir)
         if args.verbose:
             self.__tar_verbose = 'v'
         if args.exclude:
@@ -156,7 +151,6 @@ def main():
                         help='enable verbose tar')
     parser.add_argument('-o', '--output-dir',
                         metavar='DIR',
-                        type=list,
                         nargs=1,
                         help='create the archive[s] in this directory')
     batch = parser.add_argument_group('BATCH CREATION')

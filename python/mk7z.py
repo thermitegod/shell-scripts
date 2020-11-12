@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# 2.0.1
+# 2.1.0
 # 2020-11-11
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -29,6 +29,7 @@ import os
 import shutil
 from pathlib import Path
 
+from utils import output_dir
 from utils import utils
 from utils.colors import Colors
 from utils.get_files import GetFiles
@@ -124,13 +125,7 @@ class Compress:
         if args.disable_tests:
             self.__run_tests = False
         if args.output_dir:
-            out = Path.resolve(Path(args.output_dir[0]))
-            if not Path.is_dir(out):
-                if Path.exists(out):
-                    print(f'selected output dir \'{out}\' exists but is not a directory')
-                    raise SystemExit(1)
-                out.mkdir(parents=True, exist_ok=True)
-            self.__output_dir = out
+            self.__output_dir = output_dir.set_output_dir(directory=args.output_dir)
         # profile
         if args.single:
             self.__threads = 'off'
@@ -173,7 +168,6 @@ def main():
                         help='disable post compression test')
     parser.add_argument('-o', '--output-dir',
                         metavar='DIR',
-                        type=list,
                         nargs=1,
                         help='create the archive[s] in this directory')
     profile = parser.add_argument_group('PROFILE')
