@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 2.1.0
-# 2020-11-09
+# 2.1.1
+# 2020-11-11
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -33,8 +33,6 @@ except ImportError:
 
 class Dl:
     def __init__(self):
-        self.__input = None
-
         self.__board = None
         self.__thread = None
         self.__save_dir = None
