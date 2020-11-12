@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 1.0.0
+# 1.1.0
 # 2020-11-11
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -23,10 +23,9 @@ from typing import Callable
 
 class _GetFiles:
     def __init__(self):
-        pass
+        self.__dir_listing = []
 
-    @staticmethod
-    def get_files(function: Callable, input_files: list = None,
+    def get_files(self, function: Callable, input_files: list = None,
                   only_directories: bool = False, only_files: bool = False):
         """
         :param function:
@@ -37,11 +36,11 @@ class _GetFiles:
         """
 
         if only_directories or only_files:
-            dir_listing = []
+            self.__dir_listing = []
             for f in Path(Path.cwd()).iterdir():
-                dir_listing.append(f)
+                self.__dir_listing.append(f)
 
-            for f in dir_listing:
+            for f in self.__dir_listing:
                 if Path.is_dir(f) and only_directories:
                     function(filename=f, compressing_dir=True)
                 elif Path.is_file(f) and only_files:
@@ -58,8 +57,7 @@ class _GetFiles:
         else:
             pass
 
-    @staticmethod
-    def get_only_files(function: Callable, input_files: list = None, only_files: bool = False):
+    def get_only_files(self, function: Callable, input_files: list = None, only_files: bool = False):
         """
         :param function:
         :param input_files:
@@ -68,11 +66,11 @@ class _GetFiles:
         """
 
         if only_files:
-            dir_listing = []
+            self.__dir_listing = []
             for f in Path(Path.cwd()).iterdir():
-                dir_listing.append(f)
+                self.__dir_listing.append(f)
 
-            for f in dir_listing:
+            for f in self.__dir_listing:
                 if Path.is_file(f) and only_files:
                     function(filename=f)
 
