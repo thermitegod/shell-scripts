@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 2.2.0
-# 2020-11-11
+# 2.2.1
+# 2020-11-12
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -363,10 +363,7 @@ class Container:
             elif self.__clean_lockfiles:
                 self.rtorrent_clean_lock()
             elif self.__clean_torrents:
-                # self.set_dirs()
                 self.rtorrent_clean_torrent()
-            elif self.__print:
-                self.print_config()
 
     def run(self, args):
         # container
