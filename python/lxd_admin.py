@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 2.2.1
-# 2020-11-12
+# 2.3.0
+# 2020-11-21
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -22,8 +22,8 @@ from pathlib import Path
 
 from loguru import logger
 
-from python.utils import lxd
 from python.utils import utils
+from python.utils.lxd import Lxd
 
 try:
     from python.private.config_lxd import LxdConfig
@@ -43,6 +43,8 @@ except ImportError:
 
 class Container:
     def __init__(self):
+        super().__init__()
+
         self.__CONFIG_VERSION = 5
 
         if self.__CONFIG_VERSION != LxdConfig.CONFIG_VERSION:
@@ -103,7 +105,7 @@ class Container:
               f'Template            : {self.__container_type}\n'
               f'Distro              : {self.__container_distro}\n'
               f'IPV4                : {self.__container_ipv4}\n'
-              f'Running             : {lxd.get_state(container=self.__container_fullname)}\n'
+              f'Running             : {Lxd.get_state(container=self.__container_fullname)}\n'
               f'Autostart           : {self.__container_autostart}\n'
               f'Container User      : {self.__container_user}')
         if verbose:
@@ -180,14 +182,14 @@ class Container:
                       to_stdout=True)
 
     def stop(self):
-        if not lxd.get_state(container=self.__container_fullname):
+        if not Lxd.get_state(container=self.__container_fullname):
             return
 
         logger.info(f'Stopping container: {self.__container_fullname}')
         utils.run_cmd(f'lxc stop {self.__container_fullname}', to_stdout=True)
 
     def start(self):
-        if lxd.get_state(container=self.__container_fullname):
+        if Lxd.get_state(container=self.__container_fullname):
             logger.info(f'Already started: {self.__container_fullname}')
             return
 
@@ -204,7 +206,7 @@ class Container:
         utils.run_cmd(f'lxc start {self.__container_fullname}', to_stdout=True)
 
     def delete(self):
-        if lxd.get_state(container=self.__container_fullname):
+        if Lxd.get_state(container=self.__container_fullname):
             logger.warning(f'Must stop before deleting {self.__container_fullname}')
             return
 
@@ -212,28 +214,28 @@ class Container:
         utils.run_cmd(f'lxc delete {self.__container_fullname}', to_stdout=True)
 
     def restart(self):
-        if not lxd.get_state(container=self.__container_fullname):
+        if not Lxd.get_state(container=self.__container_fullname):
             return
 
         logger.info(f'Restarting container: {self.__container_fullname}')
         utils.run_cmd(f'lxc restart {self.__container_fullname}', to_stdout=True)
 
     def forcestop(self):
-        if not lxd.get_state(container=self.__container_fullname):
+        if not Lxd.get_state(container=self.__container_fullname):
             return
 
         logger.info(f'Force Stopping container: {self.__container_fullname}')
         utils.run_cmd(f'lxc stop --force {self.__container_fullname}', to_stdout=True)
 
     def restart_service(self):
-        if not lxd.get_state(container=self.__container_fullname):
+        if not Lxd.get_state(container=self.__container_fullname):
             return
 
         logger.info(f'Restarting \'{self.__service}\' on \'{self.__container_fullname}\'')
         utils.run_cmd(f'lxc exec {self.__container_fullname} rc-service {self.__service} restart', to_stdout=True)
 
     def rtorrent_clean_lock(self):
-        if lxd.get_state(container=self.__container_fullname):
+        if Lxd.get_state(container=self.__container_fullname):
             logger.warning(f'Not cleaning lock on running {self.__container_fullname}')
             return
 
@@ -256,11 +258,11 @@ class Container:
                 f.unlink()
 
     def update(self):
-        if lxd.get_state(container=self.__container_fullname):
+        if Lxd.get_state(container=self.__container_fullname):
             logger.error(f'Not updating running container: {self.__container_fullname}')
             return
 
-        if lxd.get_state(container=self.__container_template):
+        if Lxd.get_state(container=self.__container_template):
             # could stop template here but it could be doing something, ie updating
             logger.error(f'Not running update when template is running: {self.__container_template}')
             return

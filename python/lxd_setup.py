@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.6.0
-# 2020-11-11
+# 1.7.0
+# 2020-11-21
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -21,22 +21,24 @@ import sys
 
 from loguru import logger
 
-from python.utils import lxd
 from python.utils import utils
+from python.utils.lxd import Lxd
 
 
 class Container:
     def __init__(self):
-        self.__base_container = 'dev-gentoo-clang-minimal'
-        self.__base_rutorrent = 'base-gentoo-rutorrent'
-        self.__base_transmission = 'base-gentoo-transmission'
+        super().__init__()
+
+        self.__base_container = Lxd.base_container
+        self.__base_rutorrent = Lxd.base_rutorrent
+        self.__base_transmission = Lxd.base_transmission
 
     def stop_base(self):
         logger.info(f'Stopping {self.__base_container}')
         utils.run_cmd(f'lxc stop {self.__base_container}', to_stdout=True)
 
     def update_generic(self, container, setup_script):
-        if lxd.get_state(container=container):
+        if Lxd.get_state(container=container):
             logger.info(f'Stopping {container}')
             utils.run_cmd(f'lxc stop {container}', to_stdout=True)
 

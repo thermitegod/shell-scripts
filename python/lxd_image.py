@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.6.0
-# 2020-11-11
+# 1.7.0
+# 2020-11-21
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -23,12 +23,14 @@ from pathlib import Path
 
 from loguru import logger
 
-from python.utils import lxd
 from python.utils import utils
+from python.utils.lxd import Lxd
 
 
 class Container:
     def __init__(self):
+        super().__init__()
+
         time = datetime.datetime.now()
         year = str(time.year)
         month = str(time.month)
@@ -44,7 +46,7 @@ class Container:
                 raise SystemExit(1)
             self.__backup_dir.mkdir(parents=True, exist_ok=True)
 
-        if lxd.get_state(container=container):
+        if Lxd.get_state(container=container):
             logger.info(f'Stoping {container}')
             utils.run_cmd(f'lxc stop {container}', to_stdout=True)
 
