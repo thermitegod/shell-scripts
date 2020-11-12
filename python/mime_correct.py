@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.8.0
-# 2020-11-11
+# 1.9.0
+# 2020-11-12
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -23,12 +23,12 @@ from pathlib import Path
 from loguru import logger
 
 from python.utils import hash
-from python.utils import mimecheck
 from python.utils.colors import Colors
+from python.utils.mimecheck import Mimecheck
 from python.utils.script import Script
 
 
-class Mimecheck:
+class MimeCorrect:
     def __init__(self):
         self.__list_only = False
         self.__rm_hash_collision = False
@@ -44,13 +44,13 @@ class Mimecheck:
             if Path.is_dir(f):
                 continue
 
-            if not mimecheck.check_if_image(f):
+            if not Mimecheck.check_if_image(f):
                 logger.debug(f'Skipping non image file: {f}')
                 continue
 
             total += 1
 
-            mimeext = mimecheck.get_mimetype_ext(filename=f)
+            mimeext = Mimecheck.get_mimetype_ext(filename=f)
 
             if 'bmp' in mimeext:
                 mimeext = 'bmp'
@@ -161,5 +161,5 @@ def main():
     logger.remove()
     logger.add(sys.stdout, level=args.loglevel, colorize=True)
 
-    run = Mimecheck()
+    run = MimeCorrect()
     run.run(args)

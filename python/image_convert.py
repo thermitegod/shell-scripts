@@ -25,8 +25,8 @@ from pathlib import Path
 from loguru import logger
 from pgmagick import Blob, Image
 
-from python.utils import mimecheck
 from python.utils import utils
+from python.utils.mimecheck import Mimecheck
 
 
 # TODO
@@ -88,7 +88,7 @@ class Convert:
         from pgmagick.api import Image
 
         for filename in Path(self.__directory).iterdir():
-            if mimecheck.check_if_image(filename=filename):
+            if Mimecheck.check_if_image(filename=filename):
                 img = Image(str(filename))
                 if print_only:
                     print(f'{img.width}x{img.height}')
@@ -173,7 +173,7 @@ class Convert:
             shutil.rmtree(orig)
 
         for filename in Path(self.__directory).iterdir():
-            if mimecheck.check_if_image(filename=filename):
+            if Mimecheck.check_if_image(filename=filename):
                 c2 += 1
 
         if c1 != c2:

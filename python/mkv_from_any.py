@@ -23,9 +23,9 @@ import shutil
 import tempfile
 from pathlib import Path
 
-from python.utils import mimecheck
 from python.utils import utils
 from python.utils.get_files import GetFiles
+from python.utils.mimecheck import Mimecheck
 
 
 class Convert:
@@ -72,7 +72,7 @@ class Convert:
 
             return
         else:
-            if not mimecheck.check_if_video(filename=filename):
+            if not Mimecheck.check_if_video(filename=filename):
                 return
 
             original = Path.cwd() / 'original'

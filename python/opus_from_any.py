@@ -22,9 +22,9 @@ import shutil
 import tempfile
 from pathlib import Path
 
-from python.utils import mimecheck
 from python.utils import utils
 from python.utils.get_files import GetFiles
+from python.utils.mimecheck import Mimecheck
 
 
 class Convert:
@@ -45,8 +45,8 @@ class Convert:
         if ext == 'opus':
             return
 
-        if not mimecheck.check_if_video(filename=filename) or \
-                not mimecheck.check_if_audio(filename=filename):
+        if not Mimecheck.check_if_video(filename=filename) or \
+                not Mimecheck.check_if_audio(filename=filename):
             return
 
         original = Path.cwd() / 'original'

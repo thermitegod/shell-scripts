@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.2.0
-# 2020-10-28
+# 1.3.0
+# 2020-11-12
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -21,26 +21,31 @@ import mimetypes
 from . import utils
 
 
-def get_mimetype_ext(filename):
-    return utils.run_cmd(f'file -b --mime-type -- "{filename}"', to_stdout=True).strip('\n').split('/')[1]
+class _Mimecheck:
+    def __init__(self):
+        super().__init__()
+
+    @staticmethod
+    def get_mimetype_ext(filename):
+        return utils.run_cmd(f'file -b --mime-type -- "{filename}"', to_stdout=True).strip('\n').split('/')[1]
+
+    def check_if_video(self, filename):
+        return self.__check_mimetype(filename=filename, mime_type='video')
+
+    def check_if_audio(self, filename):
+        return self.__check_mimetype(filename=filename, mime_type='audio')
+
+    def check_if_image(self, filename):
+        return self.__check_mimetype(filename=filename, mime_type='image')
+
+    @staticmethod
+    def __check_mimetype(filename, mime_type: str):
+        try:
+            if mime_type in mimetypes.guess_type(str(filename))[0]:
+                return True
+        except TypeError:
+            pass
+        return False
 
 
-def check_if_video(filename):
-    return __check_mimetype(filename=filename, mime_type='video')
-
-
-def check_if_audio(filename):
-    return __check_mimetype(filename=filename, mime_type='audio')
-
-
-def check_if_image(filename):
-    return __check_mimetype(filename=filename, mime_type='image')
-
-
-def __check_mimetype(filename, mime_type: str):
-    try:
-        if mime_type in mimetypes.guess_type(str(filename))[0]:
-            return True
-    except TypeError:
-        pass
-    return False
+Mimecheck = _Mimecheck()
