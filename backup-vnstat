@@ -1,1 +1,6 @@
-python/backup-vnstat.py
+#!/usr/bin/env python3
+from python import backup_vnstat
+try:
+    backup_vnstat.main()
+except KeyboardInterrupt:
+    raise SystemExit

@@ -1,1 +1,6 @@
-python/mk7z.py
+#!/usr/bin/env python3
+from python import mk7z
+try:
+    mk7z.main()
+except KeyboardInterrupt:
+    raise SystemExit

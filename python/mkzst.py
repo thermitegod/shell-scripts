@@ -1,5 +1,5 @@
-#!/usr/bin/env python3
-# 3.1.0
+# -*- coding: utf-8 -*-
+# 3.2.0
 # 2020-11-11
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -29,10 +29,10 @@ import os
 import shutil
 from pathlib import Path
 
-from utils import output_dir
-from utils import utils
-from utils.get_files import GetFiles
-from utils.script import Script
+from python.utils import output_dir
+from python.utils import utils
+from python.utils.get_files import GetFiles
+from python.utils.script import Script
 
 
 class Compress:
@@ -171,9 +171,3 @@ def main():
     run = Compress()
     run.run(args)
 
-
-if __name__ == '__main__':
-    try:
-        main()
-    except KeyboardInterrupt:
-        raise SystemExit

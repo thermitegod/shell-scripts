@@ -1,1 +1,6 @@
-python/mkgpg.py
+#!/usr/bin/env python3
+from python import mkgpg
+try:
+    mkgpg.main()
+except KeyboardInterrupt:
+    raise SystemExit

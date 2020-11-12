@@ -1,1 +1,6 @@
-python/tape-utils.py
+#!/usr/bin/env python3
+from python import tape_utils
+try:
+    tape_utils.main()
+except KeyboardInterrupt:
+    raise SystemExit

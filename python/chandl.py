@@ -1,5 +1,5 @@
-#!/usr/bin/env python3
-# 2.5.1
+# -*- coding: utf-8 -*-
+# 2.6.0
 # 2020-11-11
 
 # Original
@@ -36,7 +36,7 @@ from urllib.parse import urlparse
 
 import requests
 
-from utils import utils
+from python.utils import utils
 
 
 class Chandl:
@@ -314,10 +314,3 @@ def main():
 
     run = Chandl()
     run.run(args)
-
-
-if __name__ == '__main__':
-    try:
-        main()
-    except KeyboardInterrupt:
-        raise SystemExit

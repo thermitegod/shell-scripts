@@ -1,1 +1,6 @@
-python/mkzst.py
+#!/usr/bin/env python3
+from python import mkzst
+try:
+    mkzst.main()
+except KeyboardInterrupt:
+    raise SystemExit

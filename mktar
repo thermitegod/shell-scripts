@@ -1,1 +1,6 @@
-python/mktar.py
+#!/usr/bin/env python3
+from python import mktar
+try:
+    mktar.main()
+except KeyboardInterrupt:
+    raise SystemExit

@@ -1,1 +1,6 @@
-python/backup-meta.py
+#!/usr/bin/env python3
+from python import backup_meta
+try:
+    backup_meta.main()
+except KeyboardInterrupt:
+    raise SystemExit

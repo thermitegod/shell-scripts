@@ -1,1 +1,6 @@
-python/mkzip.py
+#!/usr/bin/env python3
+from python import mkzip
+try:
+    mkzip.main()
+except KeyboardInterrupt:
+    raise SystemExit

@@ -1,1 +1,6 @@
-python/chromium-default.py
+#!/usr/bin/env python3
+from python import chromium_default
+try:
+    chromium_default.main()
+except KeyboardInterrupt:
+    raise SystemExit

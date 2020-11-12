@@ -1,1 +1,6 @@
-python/set-gpu-powerstate.py
+#!/usr/bin/env python3
+from python import set_gpu_powerstate
+try:
+    set_gpu_powerstate.main()
+except KeyboardInterrupt:
+    raise SystemExit

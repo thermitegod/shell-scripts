@@ -1,1 +1,6 @@
-python/gentoo-emerge-resume.py
+#!/usr/bin/env python3
+from python import gentoo_emerge_resume
+try:
+    gentoo_emerge_resume.main()
+except KeyboardInterrupt:
+    raise SystemExit

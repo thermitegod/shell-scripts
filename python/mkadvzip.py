@@ -1,6 +1,6 @@
-#!/usr/bin/env python3
-# 1.1.0
-# 2020-10-08
+# -*- coding: utf-8 -*-
+# 1.2.0
+# 2020-11-11
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -20,7 +20,7 @@ import argparse
 import os
 from pathlib import Path
 
-from utils import utils
+from python.utils import utils
 
 
 class Optimize:
@@ -70,10 +70,3 @@ def main():
 
     run = Optimize()
     run.run(args)
-
-
-if __name__ == '__main__':
-    try:
-        main()
-    except KeyboardInterrupt:
-        raise SystemExit

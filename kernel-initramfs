@@ -1,1 +1,6 @@
-python/kernel-initramfs.py
+#!/usr/bin/env python3
+from python import kernel_initramfs
+try:
+    kernel_initramfs.main()
+except KeyboardInterrupt:
+    raise SystemExit

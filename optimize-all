@@ -1,1 +1,6 @@
-python/optimize-all.py
+#!/usr/bin/env python3
+from python import optimize_all
+try:
+    optimize_all.main()
+except KeyboardInterrupt:
+    raise SystemExit

@@ -1,1 +1,6 @@
-python/lxd-setup.py
+#!/usr/bin/env python3
+from python import lxd_setup
+try:
+    lxd_setup.main()
+except KeyboardInterrupt:
+    raise SystemExit

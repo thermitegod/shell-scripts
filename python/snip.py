@@ -1,6 +1,6 @@
-#!/usr/bin/env python3
-# 4.3.0
-# 2020-08-20
+# -*- coding: utf-8 -*-
+# 4.4.0
+# 2020-11-11
 
 # Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -20,7 +20,7 @@
 import time
 from pathlib import Path
 
-from utils import utils
+from python.utils import utils
 
 
 def main():
@@ -32,10 +32,3 @@ def main():
     cmd += f'{Path.home()}/{int(time.time())}.png'
 
     utils.run_cmd(cmd)
-
-
-if __name__ == '__main__':
-    try:
-        main()
-    except KeyboardInterrupt:
-        raise SystemExit

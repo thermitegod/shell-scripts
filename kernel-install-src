@@ -1,1 +1,6 @@
-python/kernel-install-src.py
+#!/usr/bin/env python3
+from python import kernel_install_src
+try:
+    kernel_install_src.main()
+except KeyboardInterrupt:
+    raise SystemExit

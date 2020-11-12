@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.0.0
-# 2020-10-04
+# 2.0.0
+# 2020-11-11
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -27,7 +27,7 @@ class Symlink:
         self.__bin = Path.home() / '.bin'
         self.__bin_py = Path.home() / '.bin/python'
 
-    def symlink_main(self):
+    def write_stubs(self):
         os.chdir(self.__bin_py)
         for f in Path(Path.cwd()).iterdir():
             if Path.is_dir(f):
@@ -36,40 +36,53 @@ class Symlink:
             os.chdir(self.__bin)
 
             # remove .py, do not use .strip('.py)
-            symlink = Path(f.name[:-3])
-            real_path = Path() / 'python' / f.name
+            script = Path(f.name[:-3])
+            stub_file = Path(f.name[:-3].replace('_', '-'))
 
-            if Path.is_symlink(symlink):
-                continue
+            stub = f'#!/usr/bin/env python3\n' \
+                   f'from python import {script}\n' \
+                   f'try:\n' \
+                   f'    {script}.main()\n' \
+                   f'except KeyboardInterrupt:\n' \
+                   f'    raise SystemExit\n' \
 
-            os.symlink(real_path, symlink)
+            os.chdir(self.__bin)
+
+            if Path.is_file(stub_file):
+                stub_file.unlink()
+
+            stub_file.write_text(stub)
+            Path.chmod(stub_file, 0o700)
+
+        # print(stub)
 
     def symlink_special(self):
+        # (real, symlink)
         targets = (
-            ('python/4chan-dl.py', '8chan-dl'),
+            # ('4chan-dl', '8chan-dl'),
 
-            ('python/chromium-default.py', 'chromium-sandbox'),
+            ('chromium-default', 'chromium-sandbox'),
 
-            ('python/backup-meta.py', 'backup-chromium'),
-            ('python/backup-meta.py', 'backup-user-bin'),
-            ('python/backup-meta.py', 'backup-user-config'),
-            ('python/backup-meta.py', 'backup-user-local'),
+            ('backup-meta', 'backup-chromium'),
+            ('backup-meta', 'backup-user-bin'),
+            ('backup-meta', 'backup-user-config'),
+            ('backup-meta', 'backup-user-local'),
 
-            ('python/count-image.py', 'count-archive'),
-            ('python/count-image.py', 'count-video'),
+            ('count-image', 'count-archive'),
+            ('count-image', 'count-video'),
 
-            ('python/madokami-manga.py', 'madokami-manga-publishing'),
-            ('python/madokami-manga.py', 'madokami-novels-publishing'),
+            ('madokami-manga', 'madokami-manga-publishing'),
+            ('madokami-manga', 'madokami-novels-publishing'),
 
-            ('python/mkzst.py', 'mkgz'),
-            ('python/mkzst.py', 'mklz4'),
-            ('python/mkzst.py', 'mkxz'),
+            ('mkzst', 'mkgz'),
+            ('mkzst', 'mklz4'),
+            ('mkzst', 'mkxz'),
 
-            ('python/optimize-all.py', 'optimize-gif'),
-            ('python/optimize-all.py', 'optimize-jpg'),
-            ('python/optimize-all.py', 'optimize-png'),
+            ('optimize-all', 'optimize-gif'),
+            ('optimize-all', 'optimize-jpg'),
+            ('optimize-all', 'optimize-png'),
 
-            ('python/snip.py', 'snip-root'),
+            ('snip', 'snip-root'),
         )
 
         os.chdir(self.__bin)
@@ -84,7 +97,7 @@ class Symlink:
                 os.symlink(real, symlink)
 
     def run(self):
-        self.symlink_main()
+        self.write_stubs()
         self.symlink_special()
 
 

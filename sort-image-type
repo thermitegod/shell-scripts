@@ -1,1 +1,6 @@
-python/sort-image-type.py
+#!/usr/bin/env python3
+from python import sort_image_type
+try:
+    sort_image_type.main()
+except KeyboardInterrupt:
+    raise SystemExit

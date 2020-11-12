@@ -1,1 +1,6 @@
-python/kernel-clean-src.py
+#!/usr/bin/env python3
+from python import kernel_clean_src
+try:
+    kernel_clean_src.main()
+except KeyboardInterrupt:
+    raise SystemExit

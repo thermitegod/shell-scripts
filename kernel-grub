@@ -1,1 +1,6 @@
-python/kernel-grub.py
+#!/usr/bin/env python3
+from python import kernel_grub
+try:
+    kernel_grub.main()
+except KeyboardInterrupt:
+    raise SystemExit

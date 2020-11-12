@@ -1,6 +1,6 @@
-#!/usr/bin/env python3
-# 6.6.0
-# 2020-10-18
+# -*- coding: utf-8 -*-
+# 6.7.0
+# 2020-11-11
 
 # Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -18,11 +18,9 @@
 
 import argparse
 
-import pyperclip
-
-from utils import clipboard
-from utils import net
-from utils import utils
+from python.utils import clipboard
+from python.utils import net
+from python.utils import utils
 
 
 class Ytdl:
@@ -79,10 +77,3 @@ def main():
 
     run = Ytdl()
     run.run(args)
-
-
-if __name__ == '__main__':
-    try:
-        main()
-    except KeyboardInterrupt:
-        raise SystemExit

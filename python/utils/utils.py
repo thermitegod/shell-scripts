@@ -23,7 +23,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from utils.colors import Colors
+from python.utils.colors import Colors
 
 
 def root_check(require_root: bool):

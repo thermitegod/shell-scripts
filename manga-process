@@ -1,1 +1,6 @@
-python/manga-process.py
+#!/usr/bin/env python3
+from python import manga_process
+try:
+    manga_process.main()
+except KeyboardInterrupt:
+    raise SystemExit

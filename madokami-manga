@@ -1,1 +1,6 @@
-python/madokami-manga.py
+#!/usr/bin/env python3
+from python import madokami_manga
+try:
+    madokami_manga.main()
+except KeyboardInterrupt:
+    raise SystemExit

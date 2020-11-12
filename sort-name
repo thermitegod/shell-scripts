@@ -1,1 +1,6 @@
-python/sort-name.py
+#!/usr/bin/env python3
+from python import sort_name
+try:
+    sort_name.main()
+except KeyboardInterrupt:
+    raise SystemExit

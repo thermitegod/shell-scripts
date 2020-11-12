@@ -1,1 +1,6 @@
-python/digest-ebuild.py
+#!/usr/bin/env python3
+from python import digest_ebuild
+try:
+    digest_ebuild.main()
+except KeyboardInterrupt:
+    raise SystemExit

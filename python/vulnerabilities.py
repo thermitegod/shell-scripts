@@ -1,6 +1,6 @@
-#!/usr/bin/env python3
-# 1.1.0
-# 2020-10-28
+# -*- coding: utf-8 -*-
+# 1.2.0
+# 2020-11-11
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -19,7 +19,7 @@
 
 from pathlib import Path
 
-from utils.colors import Colors
+from python.utils.colors import Colors
 
 
 def main():
@@ -29,10 +29,3 @@ def main():
         name = f.name
         state = (f.read_text().strip('\n'))
         print(f'{Colors.YEL}{name: >20}{Colors.NC} : {state}')
-
-
-if __name__ == '__main__':
-    try:
-        main()
-    except KeyboardInterrupt:
-        raise SystemExit

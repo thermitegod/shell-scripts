@@ -1,1 +1,6 @@
-python/mkv-from-any.py
+#!/usr/bin/env python3
+from python import mkv_from_any
+try:
+    mkv_from_any.main()
+except KeyboardInterrupt:
+    raise SystemExit

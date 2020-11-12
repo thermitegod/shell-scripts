@@ -1,1 +1,6 @@
-python/image-convert.py
+#!/usr/bin/env python3
+from python import image_convert
+try:
+    image_convert.main()
+except KeyboardInterrupt:
+    raise SystemExit

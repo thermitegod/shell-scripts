@@ -1,1 +1,6 @@
-python/count-image.py
+#!/usr/bin/env python3
+from python import count_image
+try:
+    count_image.main()
+except KeyboardInterrupt:
+    raise SystemExit

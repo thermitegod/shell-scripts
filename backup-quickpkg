@@ -1,1 +1,6 @@
-python/backup-quickpkg.py
+#!/usr/bin/env python3
+from python import backup_quickpkg
+try:
+    backup_quickpkg.main()
+except KeyboardInterrupt:
+    raise SystemExit

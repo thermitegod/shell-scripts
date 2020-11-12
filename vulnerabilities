@@ -1,1 +1,6 @@
-python/vulnerabilities.py
+#!/usr/bin/env python3
+from python import vulnerabilities
+try:
+    vulnerabilities.main()
+except KeyboardInterrupt:
+    raise SystemExit
