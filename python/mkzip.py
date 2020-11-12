@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# 2.0.0
+# 2.0.1
 # 2020-11-11
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -25,10 +25,8 @@
 # are separated into unique scripts
 
 import argparse
-import atexit
 import os
 import shutil
-import tempfile
 from pathlib import Path
 
 from utils import utils
@@ -37,9 +35,6 @@ from utils.get_files import GetFiles
 
 class Compress:
     def __init__(self):
-        atexit.register(self.remove_tmpdir)
-        self.__tmpdir = tempfile.mkdtemp()
-
         self.__output_dir = Path.cwd()
 
         self.__exclude = ''
@@ -50,9 +45,6 @@ class Compress:
         self.__junk_paths = '--junk-paths'
 
         self.__destructive = False
-
-    def remove_tmpdir(self):
-        shutil.rmtree(self.__tmpdir)
 
     def run_tests(self):
         if self.__run_tests:
