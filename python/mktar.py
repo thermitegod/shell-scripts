@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# 2.0.0
+# 2.0.1
 # 2020-11-11
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -100,7 +100,7 @@ class Compress:
                 if Path.exists(out):
                     print(f'selected output dir \'{out}\' exists but is not a directory')
                     raise SystemExit(1)
-                Path(out).mkdir(parents=True, exist_ok=True)
+                out.mkdir(parents=True, exist_ok=True)
             self.__output_dir = out
         if args.verbose:
             self.__tar_verbose = 'v'

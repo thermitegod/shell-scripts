@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.1.0
-# 2020-09-18
+# 1.1.1
+# 2020-11-11
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -40,7 +40,7 @@ class Microcode:
     def run(self):
         with TemporaryDirectory() as tmpdir:
             full_path = Path() / tmpdir / self.__dir_structure
-            Path(full_path).mkdir(parents=True, exist_ok=True)
+            full_path.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(self.__amd_micro, Path() / full_path / self.__amd_micro_name)
             os.chdir(tmpdir)
             utils.run_cmd(f'echo {self.__dir_structure}/{self.__amd_micro_name} | '

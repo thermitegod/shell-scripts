@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.5.2
-# 2020-10-08
+# 1.5.3
+# 2020-11-11
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -42,7 +42,7 @@ class Container:
             if Path.exists(self.__backup_dir):
                 print(f'Backup dir \'{self.__backup_dir}\' exists but is not a directory')
                 raise SystemExit(1)
-            Path(self.__backup_dir).mkdir(parents=True, exist_ok=True)
+            self.__backup_dir.mkdir(parents=True, exist_ok=True)
 
         if lxd.get_state(container=container):
             logger.info(f'Stoping {container}')

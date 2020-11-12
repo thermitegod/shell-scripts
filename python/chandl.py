@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 2.5.0
-# 2020-11-09
+# 2.5.1
+# 2020-11-11
 
 # Original
 # https://github.com/JLDevOps/ChanDL
@@ -162,7 +162,7 @@ class Chandl:
         self.datapath = Path() / top_dir / '.chandl'
         if not Path.exists(Path(top_dir)):
             Path(top_dir).mkdir(parents=True, exist_ok=True)
-            Path(self.datapath).mkdir(parents=True, exist_ok=True)
+            self.datapath.mkdir(parents=True, exist_ok=True)
 
     def thread_watcher(self):
         i = 0

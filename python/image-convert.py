@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 2.7.1
-# 2020-10-04
+# 2.7.2
+# 2020-11-11
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -116,7 +116,7 @@ class Convert:
 
         orig = Path('orig')
         if not Path.is_dir(orig):
-            Path(orig).mkdir(parents=True, exist_ok=True)
+            orig.mkdir(parents=True, exist_ok=True)
 
         c1 = 0
         c2 = 0

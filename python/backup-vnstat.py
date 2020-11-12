@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.1.1
-# 2020-05-06
+# 1.1.2
+# 2020-11-11
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -31,7 +31,7 @@ def main():
     target_src = Path() / '/var/lib/vnstat' / db
     target_dst = Path() / '/mnt/data/backup/vnstat-database' / year / month / day / db
 
-    Path(target_dst).mkdir(parents=True, exist_ok=True)
+    target_dst.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(target_src, target_dst)
 
 
