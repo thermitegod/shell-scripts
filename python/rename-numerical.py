@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.2.1
-# 2020-10-04
+# 1.3.0
+# 2020-11-11
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -17,7 +17,6 @@
 #    along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import argparse
-import os
 import sys
 from pathlib import Path
 
@@ -25,6 +24,7 @@ from loguru import logger
 
 from utils import hash
 from utils import natural_sort
+from utils.recursion import Recursion
 
 
 class Count:
@@ -81,13 +81,6 @@ class Count:
 
             count += 1
 
-    def recursive_find(self):
-        for f in Path(Path.cwd()).iterdir():
-            if f.is_dir():
-                os.chdir(f)
-                self.main_rename()
-                self.recursive_find()
-
     def main_rename(self):
         self.count_files()
 
@@ -103,7 +96,7 @@ class Count:
         if args.pretend:
             self.__pretend = True
         if args.batch:
-            self.recursive_find()
+            Recursion.recursive_find(function=self.main_rename)
         else:
             self.main_rename()
 

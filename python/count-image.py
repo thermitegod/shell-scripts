@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.1.0
-# 2020-10-04
+# 1.2.0
+# 2020-11-11
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -17,11 +17,9 @@
 #    along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import argparse
-import os
-
-from pathlib import Path
 
 from utils import utils
+from utils.recursion import Recursion
 
 
 class Count:
@@ -47,16 +45,8 @@ class Count:
 
         self.__file_list = []
 
-    def recursive_find(self):
-        for f in Path(Path.cwd()).iterdir():
-            if f.is_file():
-                self.__file_list.append(str(f))
-            elif f.is_dir():
-                os.chdir(f)
-                self.recursive_find()
-
     def main_count(self):
-        self.recursive_find()
+        self.__file_list = Recursion.recursive_find_files()
 
         for ext in self.__mode:
             for f in self.__file_list:
@@ -74,7 +64,7 @@ class Count:
             print(f'Total\t: {self.__counter_total}')
 
     def main_list(self):
-        self.recursive_find()
+        self.__file_list = Recursion.recursive_find_files()
 
         for ext in self.__mode:
             print(f'Listing all of: {ext[1:].upper()}')

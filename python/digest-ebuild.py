@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.0.0
-# 2020-10-04
+# 1.1.0
+# 2020-11-11
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -17,13 +17,13 @@
 #    along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import argparse
-import os
 import sys
 from pathlib import Path
 
 from loguru import logger
 
 from utils import utils
+from utils.recursion import Recursion
 
 
 class Digest:
@@ -42,17 +42,10 @@ class Digest:
 
         utils.run_cmd(f'ebuild {ebuild_list[-1]} manifest')
 
-    def recursive_find(self):
-        for f in Path(Path.cwd()).iterdir():
-            if f.is_dir():
-                os.chdir(f)
-                self.digest()
-                self.recursive_find()
-
     def run(self, args):
         # general
         if args.all:
-            self.recursive_find()
+            Recursion.recursive_find(function=self.digest)
             raise SystemExit
 
         self.digest()
