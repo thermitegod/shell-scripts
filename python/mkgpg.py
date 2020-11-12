@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.3.1
-# 2020-10-08
+# 2.0.0
+# 2020-11-11
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -20,33 +20,16 @@ import argparse
 from pathlib import Path
 
 from utils import utils
+from utils.get_files import GetFiles
 
 
 class Compress:
     def __init__(self):
         self.__decrypt = False
 
-        self.__input_files = None
         self.__output_dir = Path.cwd()
 
         self.__user = None
-
-        self.__files = False
-
-    def get_files(self):
-        if self.__files:
-            dir_listing = []
-            for f in Path(Path.cwd()).iterdir():
-                dir_listing.append(f)
-
-            for f in dir_listing:
-                if Path.is_file(f):
-                    self.compress(filename=f)
-        elif self.__input_files is not None:
-            for f in self.__input_files:
-                f = Path(f)
-                if Path.is_file(f):
-                    self.compress(filename=f)
 
     def compress(self, filename):
         if self.__decrypt:
@@ -59,10 +42,7 @@ class Compress:
 
     def run(self, args):
         # compression type
-        if args.files:
-            self.__files = True
         if args.decrypt_dir:
-            self.__files = True
             self.__decrypt = True
         if args.user:
             self.__user = args.user
@@ -71,8 +51,6 @@ class Compress:
             utils.run_cmd('gpg --list-secret-keys --keyid-format LONG')
             raise SystemExit
         # other
-        if args.input_files is not None:
-            self.__input_files = args.input_files
         if args.output_dir:
             out = Path.resolve(Path(args.output_dir[0]))
             if not Path.is_dir(out):
@@ -85,7 +63,7 @@ class Compress:
             # TODO
             raise NotImplementedError
 
-        self.get_files()
+        GetFiles.get_only_files(function=self.compress, input_files=args.input_files, only_files=args.files)
 
 
 def main():

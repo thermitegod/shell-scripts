@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.1.0
-# 2020-09-24
+# 2.0.0
+# 2020-11-11
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -25,6 +25,7 @@ from pathlib import Path
 
 from utils import mimecheck
 from utils import utils
+from utils.get_files import GetFiles
 
 
 class Convert:
@@ -33,10 +34,7 @@ class Convert:
 
         self.__tmpdir = Path(tempfile.mkdtemp())
 
-        self.__files = False
         self.__inc_iso = False
-
-        self.__input_files = None
 
     def remove_tmpdir(self):
         shutil.rmtree(self.__tmpdir)
@@ -87,29 +85,11 @@ class Convert:
             utils.run_cmd(f'mv -- "{self.__tmpdir}/{basename}.mkv" "{Path.cwd()}"')
             utils.run_cmd(f'mv -- "{Path.cwd()}/{filename}" "{original}"')
 
-    def get_files(self):
-        if self.__files:
-            dir_listing = []
-            for f in Path(Path.cwd()).iterdir():
-                dir_listing.append(str(f))
-
-            for f in dir_listing:
-                if Path.is_file(Path(f)) and self.__files:
-                    self.convert_main(filename=f)
-        elif self.__input_files is not None:
-            for f in self.__input_files:
-                if Path.is_file(Path(f)):
-                    self.convert_main(filename=f)
-
     def run(self, args):
         if args.iso:
             self.__inc_iso = True
-        if args.files:
-            self.__files = True
-        if args.input_files is not None:
-            self.__input_files = args.input_files
 
-        self.get_files()
+        GetFiles.get_only_files(function=self.convert_main, input_files=args.input_files, only_files=args.files)
 
 
 def main():

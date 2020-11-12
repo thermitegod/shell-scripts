@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.6.0
-# 2020-10-20
+# 2.0.0
+# 2020-11-11
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -30,57 +30,29 @@ import shutil
 from pathlib import Path
 
 from utils import utils
+from utils.get_files import GetFiles
 
 
 class Compress:
     def __init__(self):
-        self.__input_files = None
         self.__output_dir = Path.cwd()
 
         self.__exclude = ''
 
         self.__junk_paths = False
 
-        self.__compressing_dir = True
-
-        self.__directories = False
-        self.__files = False
-
         self.__tar_verbose = ''
 
         self.__destructive = False
 
-    def get_files(self):
-        if self.__directories or self.__files:
-            dir_listing = []
-            for f in Path(Path.cwd()).iterdir():
-                dir_listing.append(f)
-
-            for f in dir_listing:
-                if Path.is_dir(f) and self.__directories:
-                    self.__compressing_dir = True
-                    self.compress(file=f)
-                elif Path.is_file(f) and self.__files:
-                    self.__compressing_dir = False
-                    self.compress(file=f)
-        elif self.__input_files is not None:
-            for f in self.__input_files:
-                f = Path(f)
-                if Path.is_dir(f):
-                    self.__compressing_dir = True
-                    self.compress(file=f)
-                elif Path.is_file(f):
-                    self.__compressing_dir = False
-                    self.compress(file=f)
-
-    def compress(self, file):
-        test_file = Path() / self.__output_dir / f'{file}.tar'
+    def compress(self, filename, compressing_dir):
+        test_file = Path() / self.__output_dir / f'{filename}.tar'
         if Path.exists(test_file):
             print(f'Skipping, archive already exists at: \'{test_file}\'')
             return
 
-        os.chdir(Path(file).parent)
-        file_name = Path(file).name
+        os.chdir(Path(filename).parent)
+        file_name = Path(filename).name
 
         if self.__junk_paths:
             # simulates zip --junk-path
@@ -99,7 +71,7 @@ class Compress:
             for f in file_list:
                 file_list_comp += f'"{f}" '
 
-            cmd = f'tar {self.__exclude} --directory="{file.resolve()}" -{self.__tar_verbose}Scf ' \
+            cmd = f'tar {self.__exclude} --directory="{filename.resolve()}" -{self.__tar_verbose}Scf ' \
                   f'"{self.__output_dir}/{file_name}.tar" {file_list_comp}'
         else:
             cmd = f'tar {self.__exclude} --xattrs -{self.__tar_verbose}Scf ' \
@@ -109,26 +81,19 @@ class Compress:
 
         if Path.exists(test_file):
             if self.__destructive:
-                if self.__compressing_dir:
-                    shutil.rmtree(file)
+                if compressing_dir:
+                    shutil.rmtree(filename)
                 else:
-                    Path.unlink(file)
+                    Path.unlink(filename)
         else:
-            print(f'ERROR: archive not created for: \'{file}\'')
+            print(f'ERROR: archive not created for: \'{filename}\'')
             raise SystemExit(1)
 
     def run(self, args):
-        # compression type
-        if args.directories:
-            self.__directories = True
-        if args.files:
-            self.__files = True
         # destructive
         if args.destructive:
             self.__destructive = True
         # other
-        if args.input_files is not None:
-            self.__input_files = args.input_files
         if args.output_dir:
             out = Path.resolve(Path(args.output_dir[0]))
             if not Path.is_dir(out):
@@ -145,7 +110,8 @@ class Compress:
         if args.junk_paths:
             self.__junk_paths = True
 
-        self.get_files()
+        GetFiles.get_files(function=self.compress, input_files=args.input_files,
+                           only_directories=args.directories, only_files=args.files)
 
 
 def main():

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.6.1
-# 2020-10-08
+# 2.0.0
+# 2020-11-11
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -32,6 +32,7 @@ import tempfile
 from pathlib import Path
 
 from utils import utils
+from utils.get_files import GetFiles
 
 
 class Compress:
@@ -39,15 +40,9 @@ class Compress:
         atexit.register(self.remove_tmpdir)
         self.__tmpdir = tempfile.mkdtemp()
 
-        self.__input_files = None
         self.__output_dir = Path.cwd()
 
         self.__exclude = ''
-
-        self.__compressing_dir = True
-
-        self.__directories = False
-        self.__files = False
 
         self.__run_tests = True
         self.__file_list = []
@@ -59,71 +54,42 @@ class Compress:
     def remove_tmpdir(self):
         shutil.rmtree(self.__tmpdir)
 
-    def get_files(self):
-        if self.__directories or self.__files:
-            dir_listing = []
-            for f in Path(Path.cwd()).iterdir():
-                dir_listing.append(f)
-
-            for f in dir_listing:
-                if Path.is_dir(f) and self.__directories:
-                    self.__compressing_dir = True
-                    self.compress(file=f)
-                elif Path.is_file(f) and self.__files:
-                    self.__compressing_dir = False
-                    self.compress(file=f)
-        elif self.__input_files is not None:
-            for f in self.__input_files:
-                f = Path(f)
-                if Path.is_dir(f):
-                    self.__compressing_dir = True
-                    self.compress(file=f)
-                elif Path.is_file(f):
-                    self.__compressing_dir = False
-                    self.compress(file=f)
-
+    def run_tests(self):
         if self.__run_tests:
             for f in self.__file_list:
                 utils.run_cmd(f'mk7z -T "{f}"')
 
-    def compress(self, file):
-        file = Path(file).name
-        test_file = Path() / self.__output_dir / f'{file}.zip'
+    def compress(self, filename, compressing_dir):
+        filename = Path(filename).name
+        test_file = Path() / self.__output_dir / f'{filename}.zip'
         if Path.exists(test_file):
             print(f'Skipping, archive already exists at: \'{test_file}\'')
             return
 
-        self.__file_list.append(f'{self.__output_dir}/{file}.zip')
+        self.__file_list.append(f'{self.__output_dir}/{filename}.zip')
 
-        os.chdir(Path(file).parent)
+        os.chdir(Path(filename).parent)
 
         utils.run_cmd(f'nice -19 zip {self.__exclude} -rv -9 '
-                      f'{self.__junk_paths} "{self.__output_dir}/{file}.zip" "{file}"')
+                      f'{self.__junk_paths} "{self.__output_dir}/{filename}.zip" "{filename}"')
 
         if Path.exists(test_file):
             if self.__destructive:
-                if self.__compressing_dir:
-                    shutil.rmtree(file)
+                if compressing_dir:
+                    shutil.rmtree(filename)
                 else:
-                    Path.unlink(file)
+                    Path.unlink(Path(filename))
         else:
-            print(f'ERROR: archive not created for: \'{file}\'')
+            print(f'ERROR: archive not created for: \'{filename}\'')
             raise SystemExit(1)
 
     def run(self, args):
-        # compression type
-        if args.directories:
-            self.__directories = True
-        if args.files:
-            self.__files = True
         # destructive
         if args.no_junk_paths:
             self.__junk_paths = ''
         if args.destructive:
             self.__destructive = True
         # other
-        if args.input_files is not None:
-            self.__input_files = args.input_files
         if args.disable_tests:
             self.__run_tests = False
         if args.output_dir:
@@ -138,7 +104,10 @@ class Compress:
             for e in args.exclude:
                 self.__exclude += f'--exclude="{e}" '
 
-        self.get_files()
+        GetFiles.get_files(function=self.compress, input_files=args.input_files,
+                           only_directories=args.directories, only_files=args.files)
+
+        self.run_tests()
 
 
 def main():

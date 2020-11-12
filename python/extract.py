@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.7.1
-# 2020-10-08
+# 2.0.0
+# 2020-11-11
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -24,15 +24,12 @@ import os
 from pathlib import Path
 
 from utils import utils
+from utils.get_files import GetFiles
 
 
 class Decompress:
     def __init__(self):
-        self.__input_files = None
-
         self.__output_dir = None
-
-        self.__files = False
 
         self.__extract_to = False
         self.__extract_to_subdir = True
@@ -53,6 +50,8 @@ class Decompress:
         os.chdir(extract_location)
 
     def run_extraction(self, filename: str):
+        filename = str(filename)
+
         if self.__extract_to:
             self.extract_to(filename=filename)
 
@@ -108,30 +107,11 @@ class Decompress:
         else:
             print(f'cannot extract: \'{filename_path}\'')
 
-    def get_files(self):
-        if self.__files:
-            dir_listing = []
-            for f in Path(Path.cwd()).iterdir():
-                dir_listing.append(str(f))
-
-            for f in dir_listing:
-                if Path.is_file(Path(f)) and self.__files:
-                    self.run_extraction(filename=f)
-        elif self.__input_files is not None:
-            for f in self.__input_files:
-                f = str(Path(f).resolve())
-                if Path.is_file(Path(f)):
-                    self.run_extraction(filename=f)
-
     def run(self, args):
         # decompression type
-        if args.files:
-            self.__files = True
         if args.no_subdir:
             self.__extract_to_subdir = False
         # other
-        if args.input_files is not None:
-            self.__input_files = args.input_files
         if args.output_dir:
             self.__extract_to = True
             out = Path.resolve(Path(args.output_dir[0]))
@@ -142,7 +122,7 @@ class Decompress:
                 out.mkdir(parents=True, exist_ok=True)
             self.__output_dir = out
 
-        self.get_files()
+        GetFiles.get_only_files(function=self.run_extraction, input_files=args.input_files, only_files=args.files)
 
 
 def main():
@@ -158,7 +138,6 @@ def main():
                         help='decompress all files in cwd')
     parser.add_argument('-o', '--output-dir',
                         metavar='DIR',
-                        type=list,
                         nargs=1,
                         help='create the archive[s] in this directory')
     opts = parser.add_argument_group('EXTRACTION OPTIONS')

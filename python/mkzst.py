@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 2.11.0
-# 2020-10-28
+# 3.0.0
+# 2020-11-11
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -30,6 +30,7 @@ import shutil
 from pathlib import Path
 
 from utils import utils
+from utils.get_files import GetFiles
 from utils.script import Script
 
 
@@ -38,17 +39,12 @@ class Compress:
         self.__cmd = None
         self.__ext = None
 
-        self.__input_files = None
         self.__output_dir = Path.cwd()
 
         self.__ultra = False
 
         self.__exclude = ''
 
-        self.__compressing_dir = True
-
-        self.__directories = False
-        self.__files = False
         self.__status = False
 
         self.__tar_verbose = ''
@@ -73,69 +69,42 @@ class Compress:
             self.__cmd = 'zstd --format=gzip -9'
             self.__ext = 'gz'
 
-    def get_files(self):
-        if self.__directories or self.__files:
-            dir_listing = []
-            for f in Path(Path.cwd()).iterdir():
-                dir_listing.append(f)
-
-            for f in dir_listing:
-                if Path.is_dir(f) and self.__directories:
-                    self.__compressing_dir = True
-                    self.compress(file=f)
-                elif Path.is_file(f) and self.__files:
-                    self.__compressing_dir = False
-                    self.compress(file=f)
-        elif self.__input_files is not None:
-            for f in self.__input_files:
-                f = Path(f)
-                if Path.is_dir(f):
-                    self.__compressing_dir = True
-                    self.compress(file=f)
-                elif Path.is_file(f):
-                    self.__compressing_dir = False
-                    self.compress(file=f)
-
-    def compress(self, file):
-        if self.__compressing_dir:
-            test_file = Path() / self.__output_dir / f'{file}.tar.{self.__ext}'
+    def compress(self, filename, compressing_dir):
+        if compressing_dir:
+            test_file = Path() / self.__output_dir / f'{filename}.tar.{self.__ext}'
         else:
-            test_file = Path() / self.__output_dir / f'{file}.{self.__ext}'
+            test_file = Path() / self.__output_dir / f'{filename}.{self.__ext}'
 
         if Path.exists(test_file):
             print(f'Skipping, archive already exists at: \'{test_file}\'')
             return
 
-        die = f'die "Compression failed for \'{Path.resolve(file)}\'"'
+        die = f'die "Compression failed for \'{Path.resolve(filename)}\'"'
 
-        os.chdir(Path(file).parent)
+        os.chdir(Path(filename).parent)
 
-        if self.__compressing_dir:
-            text = f'tar {self.__exclude} --xattrs -{self.__tar_verbose}Scf - "{Path(file).name}" -P | '
+        if compressing_dir:
+            text = f'tar {self.__exclude} --xattrs -{self.__tar_verbose}Scf - "{Path(filename).name}" -P | '
             if self.__status:
-                text += f'pv -s "$(du -sb "{Path.resolve(file)}" | awk \'{{print $1}}\')" | '
-            text += f'{self.__cmd} >| "{self.__output_dir}/{Path(file).name}.tar.{self.__ext}" || {die}'
+                text += f'pv -s "$(du -sb "{Path.resolve(filename)}" | awk \'{{print $1}}\')" | '
+            text += f'{self.__cmd} >| "{self.__output_dir}/{Path(filename).name}.tar.{self.__ext}" || {die}'
         else:
-            text = f'{self.__cmd} --output-dir-flat="{self.__output_dir}" -- "{file}" || {die}'
+            text = f'{self.__cmd} --output-dir-flat="{self.__output_dir}" -- "{filename}" || {die}'
 
         Script.execute_script_shell(text=text)
 
         if Path.exists(test_file):
             if self.__destructive:
-                if self.__compressing_dir:
-                    shutil.rmtree(file)
+                if compressing_dir:
+                    shutil.rmtree(filename)
                 else:
-                    Path.unlink(file)
+                    Path.unlink(filename)
         else:
-            print(f'ERROR: archive not created for: \'{file}\'')
+            print(f'ERROR: archive not created for: \'{filename}\'')
             raise SystemExit(1)
 
     def run(self, args):
         # compression type
-        if args.directories:
-            self.__directories = True
-        if args.files:
-            self.__files = True
         if args.status:
             self.__status = True
         if args.ultra:
@@ -144,8 +113,6 @@ class Compress:
         if args.destructive:
             self.__destructive = True
         # other
-        if args.input_files is not None:
-            self.__input_files = args.input_files
         if args.output_dir:
             out = Path.resolve(Path(args.output_dir[0]))
             if not Path.is_dir(out):
@@ -161,7 +128,9 @@ class Compress:
                 self.__exclude += f'--exclude="{e}" '
 
         self.get_mode()
-        self.get_files()
+
+        GetFiles.get_files(function=self.compress, input_files=args.input_files,
+                           only_directories=args.directories, only_files=args.files)
 
 
 def main():

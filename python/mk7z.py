@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.9.0
-# 2020-10-28
+# 2.0.0
+# 2020-11-11
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -31,20 +31,15 @@ from pathlib import Path
 
 from utils import utils
 from utils.colors import Colors
+from utils.get_files import GetFiles
 from utils.script import Script
 
 
 class Compress:
     def __init__(self):
-        self.__input_files = None
         self.__output_dir = Path.cwd()
 
-        self.__compressing_dir = True
-
         self.__exclude = ''
-
-        self.__directories = False
-        self.__files = False
 
         self.__run_tests = True
         self.__file_list = []
@@ -90,66 +85,42 @@ class Compress:
             if self.__test_failed != 0:
                 print(f'{Colors.RED}FAILED{Colors.NC}\t{self.__test_failed}')
 
-    def get_files(self):
-        if self.__directories or self.__files:
-            dir_listing = []
-            for f in Path(Path.cwd()).iterdir():
-                dir_listing.append(f)
-
-            for f in dir_listing:
-                if Path.is_dir(f) and self.__directories:
-                    self.__compressing_dir = True
-                    self.compress(file=f)
-                elif Path.is_file(f) and self.__files:
-                    self.__compressing_dir = False
-                    self.compress(file=f)
-        elif self.__input_files is not None:
-            for f in self.__input_files:
-                f = Path(f)
-                if Path.is_dir(f):
-                    self.__compressing_dir = True
-                    self.compress(file=f)
-                elif Path.is_file(f):
-                    self.__compressing_dir = False
-                    self.compress(file=f)
-
+    def run_tests(self):
         if self.__run_tests:
             for f in self.__file_list:
                 self.test_archive(filename=f)
             self.test_print_results()
 
-    def compress(self, file):
-        test_file = Path() / self.__output_dir / f'{file}.7z'
+    def compress(self, filename, compressing_dir):
+        test_file = Path() / self.__output_dir / f'{filename}.7z'
         if Path.exists(test_file):
             print(f'Skipping, archive already exists at: \'{test_file}\'')
             return
 
-        self.__file_list.append(f'{self.__output_dir}/{Path(file).name}.7z')
+        self.__file_list.append(f'{self.__output_dir}/{Path(filename).name}.7z')
 
-        os.chdir(Path(file).parent)
+        os.chdir(Path(filename).parent)
 
         text = f'nice -19 ' \
                f'7zr a -t7z -m0=lzma2 -md=1024m -mmf=bt4 -mmt={self.__threads} -mmtf={self.__threads} ' \
                f'-myx=9 -mx=9 -mfb=276 -mhc=on -ms=on -mtm=off -mtc=off -mta=off {self.__exclude}' \
-               f'-o="{self.__output_dir}" "{Path(file).name}.7z" "{Path(file).name}" || ' \
-               f'die "Compression failed for \'{Path.resolve(file)}\'"'
+               f'-o="{self.__output_dir}" "{Path(filename).name}.7z" "{Path(filename).name}" || ' \
+               f'die "Compression failed for \'{Path.resolve(filename)}\'"'
 
         Script.execute_script_shell(text=text)
 
         if Path.exists(test_file):
             if self.__destructive:
-                if self.__compressing_dir:
-                    shutil.rmtree(file)
+                if compressing_dir:
+                    shutil.rmtree(filename)
                 else:
-                    Path.unlink(file)
+                    Path.unlink(filename)
         else:
-            print(f'ERROR: archive not created for: \'{file}\'')
+            print(f'ERROR: archive not created for: \'{filename}\'')
             raise SystemExit(1)
 
     def run(self, args):
         # other
-        if args.input_files is not None:
-            self.__input_files = args.input_files
         if args.disable_tests:
             self.__run_tests = False
         if args.output_dir:
@@ -160,11 +131,6 @@ class Compress:
                     raise SystemExit(1)
                 Path(out).mkdir(parents=True, exist_ok=True)
             self.__output_dir = out
-        # compression type
-        if args.directories:
-            self.__directories = True
-        if args.files:
-            self.__files = True
         # profile
         if args.single:
             self.__threads = 'off'
@@ -172,7 +138,7 @@ class Compress:
             self.__threads = 'on'
         # tests
         if args.test:
-            for f in self.__input_files:
+            for f in args.input_files:
                 self.test_archive(filename=f)
             self.test_print_results()
             raise SystemExit
@@ -183,7 +149,10 @@ class Compress:
             for e in args.exclude:
                 self.__exclude += f'-x "{e}" '
 
-        self.get_files()
+        GetFiles.get_files(function=self.compress, input_files=args.input_files,
+                           only_directories=args.directories, only_files=args.files)
+
+        self.run_tests()
 
 
 def main():
