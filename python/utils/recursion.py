@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.0.0
-# 2020-11-11
+# 1.0.1
+# 2020-11-12
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -27,6 +27,10 @@ class _Recursion:
         pass
 
     def recursive_find(self, function: Callable):
+        """
+        :param function:
+            runs this function in each sub dir
+        """
         for f in Path(Path.cwd()).iterdir():
             if f.is_dir():
                 os.chdir(f)
@@ -34,6 +38,9 @@ class _Recursion:
                 self.recursive_find(function=function)
 
     def recursive_find_files(self):
+        """
+        gets a list of all files in every sub dir
+        """
         for f in Path(Path.cwd()).iterdir():
             if f.is_file():
                 self.__file_list.append(str(f))
