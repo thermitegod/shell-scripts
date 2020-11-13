@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.0.0
-# 2020-11-11
+# 1.1.0
+# 2020-11-12
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -19,13 +19,21 @@
 from pathlib import Path
 
 
-def set_output_dir(directory: list):
-    out = Path.resolve(Path(directory[0]))
+class _OutputDir:
+    def __init__(self):
+        super().__init__()
 
-    if not Path.is_dir(out):
-        if Path.exists(out):
-            print(f'selected output dir \'{out}\' exists but is not a directory')
-            raise SystemExit(1)
-        out.mkdir(parents=True, exist_ok=True)
+    @staticmethod
+    def set_output_dir(directory: list):
+        out = Path.resolve(Path(directory[0]))
 
-    return out
+        if not Path.is_dir(out):
+            if Path.exists(out):
+                print(f'selected output dir \'{out}\' exists but is not a directory')
+                raise SystemExit(1)
+            out.mkdir(parents=True, exist_ok=True)
+
+        return out
+
+
+OutputDir = _OutputDir()

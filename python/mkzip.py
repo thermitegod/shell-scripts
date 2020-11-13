@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 2.2.0
-# 2020-11-11
+# 2.3.0
+# 2020-11-12
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -29,9 +29,9 @@ import os
 import shutil
 from pathlib import Path
 
-from python.utils import output_dir
 from python.utils import utils
 from python.utils.get_files import GetFiles
+from python.utils.output_dir import OutputDir
 
 
 class Compress:
@@ -86,7 +86,7 @@ class Compress:
         if args.disable_tests:
             self.__run_tests = False
         if args.output_dir:
-            self.__output_dir = output_dir.set_output_dir(directory=args.output_dir)
+            self.__output_dir = OutputDir.set_output_dir(directory=args.output_dir)
         if args.exclude:
             for e in args.exclude:
                 self.__exclude += f'--exclude="{e}" '
