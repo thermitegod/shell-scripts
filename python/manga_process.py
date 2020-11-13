@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.4.0
-# 2020-11-11
+# 1.5.0
+# 2020-11-12
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -120,7 +120,8 @@ class Process:
 
         if self.__comp_advzip and not self.__archivetype == 3:
             # does not need to be run for 7z
-            utils.run_cmd('mkadvzip')
+            # utils.run_cmd('mkadvzip')
+            pass
 
         if self.__comp_test:
             utils.run_cmd('mk7z -t -- *', sh_wrap=True)
