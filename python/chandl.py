@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 2.6.0
-# 2020-11-11
+# 2.7.0
+# 2020-11-15
 
 # Original
 # https://github.com/JLDevOps/ChanDL
@@ -152,7 +152,7 @@ class Chandl:
         plain_url = self.thread.strip('.json')
         r = requests.get(self.thread)
         if r.status_code == 404:
-            logger.info(f'API returned 404: \'{plain_url}\'')
+            logger.warning(f'API returned 404: \'{plain_url}\'')
             raise SystemExit
         else:
             logger.info(f'Downloading thread: \'{plain_url}\'')
