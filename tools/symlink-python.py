@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 2.0.0
-# 2020-11-11
+# 2.1.0
+# 2020-11-21
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -35,9 +35,8 @@ class Symlink:
 
             os.chdir(self.__bin)
 
-            # remove .py, do not use .strip('.py)
-            script = Path(f.name[:-3])
-            stub_file = Path(f.name[:-3].replace('_', '-'))
+            script = Path(f.name.removesuffix('.py'))
+            stub_file = Path(f.name.removesuffix('.py').replace('_', '-'))
 
             stub = f'#!/usr/bin/env python3\n' \
                    f'from python import {script}\n' \
