@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 2.4.0
+# 2.5.0
 # 2020-11-21
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -60,6 +60,8 @@ class Container:
         self.__create_missing_dirs = False
 
         self.__service = None
+
+        self.__print_verbose = False
 
         self.__ip4_brd = '192.168.0.255'
         self.__ip4_gateway = '192.168.0.1'
@@ -367,6 +369,8 @@ class Container:
                 self.rtorrent_clean_lock()
             elif self.__clean_torrents:
                 self.rtorrent_clean_torrent()
+            elif self.__action == 'print':
+                self.print_config(self.__print_verbose)
 
     def run(self, args):
         # container
@@ -399,9 +403,10 @@ class Container:
             self.__clean_torrents = True
         # other
         if args.print:
-            self.print_config()
+            self.__action = 'print'
         if args.print_verbose:
-            self.print_config(verbose=True)
+            self.__action = 'print'
+            self.__print_verbose = True
 
         self.main()
 
