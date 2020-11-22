@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 2.22.0
+# 2.23.0
 # 2020-11-21
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -212,18 +212,18 @@ class Build:
         for line in Path.open(self.__kernel_config):
             if 'CONFIG_RD_ZSTD=y' in line:
                 self.__initramfs_compression = 'zstd'
-                return
+                break
             elif 'CONFIG_RD_LZ4=y' in line:
                 self.__initramfs_compression = 'lz4'
-                return
+                break
             elif 'CONFIG_RD_LZO=y' in line:
                 self.__initramfs_compression = 'lzo'
-                return
+                break
             elif 'CONFIG_RD_XZ=y' in line:
                 self.__initramfs_compression = 'xz'
-                return
+                break
 
-            logger.debug(f'initramfs compression: {self.__initramfs_compression}')
+        logger.debug(f'initramfs compression: {self.__initramfs_compression}')
 
     def run_compiler(self, act='', force_gcc=False, return_only=False):
         # keep CC/LD to override env, probably not needed though
