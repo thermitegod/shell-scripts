@@ -26,15 +26,15 @@ import base64
 import copy
 import hashlib
 import multiprocessing
-import sys
 import re
+import sys
 import threading
 import time
-from loguru import logger
 from pathlib import Path
 from urllib.parse import urlparse
 
 import requests
+from loguru import logger
 
 from python.utils import utils
 

@@ -16,9 +16,9 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-import xxhash
-
 from pathlib import Path
+
+import xxhash
 
 
 def file_hash_compare(file1: Path, file2: Path):
