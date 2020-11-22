@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 7.3.0
+# 7.4.0
 # 2020-11-21
 
 # Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
@@ -29,7 +29,7 @@ class Chrome:
         self.__chrome = None
         self.__chrome_profile = None
 
-        self.__script_name = utils.get_script_name()
+        self.__script_name = utils.get_script_name().removeprefix('chromium-')
 
         self.__display_server = 'x11'
         try:
@@ -64,7 +64,7 @@ class Chrome:
             # script/symlinks must be named chromium-<profile> to work
             # or this can be changed
             # e.g. ln -s chromium-default chromium-<profile>
-            self.__chrome_profile = f'{self.__chrome}-{self.__script_name[9:]}'
+            self.__chrome_profile = f'{self.__chrome}-{self.__script_name}'
 
         profile_path = Path() / os.environ['XDG_CONFIG_HOME'] / 'chrome' / self.__chrome_profile
 
