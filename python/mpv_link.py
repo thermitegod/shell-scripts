@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.3.0
-# 2020-11-11
+# 1.4.0
+# 2020-11-21
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -20,7 +20,7 @@ import argparse
 
 from python.utils import clipboard
 from python.utils import net
-from python.utils import utils
+from python.utils.execute import Execute
 
 
 class Mpv:
@@ -31,7 +31,7 @@ class Mpv:
         self.__link = clipboard.from_flag_else_clipboard(args.url)
 
         net.link_check(self.__link)
-        utils.run_cmd(f'mpv {self.__link}')
+        Execute(f'mpv {self.__link}')
 
 
 def main():

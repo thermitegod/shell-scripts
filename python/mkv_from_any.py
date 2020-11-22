@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 2.1.0
-# 2020-11-11
+# 2.2.0
+# 2020-11-21
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -23,7 +23,7 @@ import shutil
 import tempfile
 from pathlib import Path
 
-from python.utils import utils
+from python.utils.execute import Execute
 from python.utils.get_files import GetFiles
 from python.utils.mimecheck import Mimecheck
 
@@ -50,7 +50,7 @@ class Convert:
             # TODO - test iso conversion
             input('Important, not tested but should work\n')
 
-            utils.run_cmd(f'extract {filename}')
+            Execute(f'extract {filename}')
 
             if not Path.exists(Path('VIDEO_TS')):
                 print(f'missing VIDEO_TS iso dir from: {filename}')
@@ -58,17 +58,17 @@ class Convert:
             os.chdir('VIDEO_TS')
 
             # TODO - convert to native python
-            utils.run_cmd(f'rm -- *BUP *IFO')
-            utils.run_cmd(f'find . -maxdepth 1 -type f -size +0k -size -5M -exec rm -- "{{}}" \\;')
+            Execute(f'rm -- *BUP *IFO')
+            Execute(f'find . -maxdepth 1 -type f -size +0k -size -5M -exec rm -- "{{}}" \\;')
 
             for v in Path(Path.cwd()).iterdir():
                 iso_basename = str(v).rpartition('.')[0]
-                utils.run_cmd(f'ffmpeg -hide_banner -i "{v}" '
-                              f'-c:a copy -c:v copy -c:s copy "{self.__tmpdir}/{basename}-{iso_basename}.mkv"')
+                Execute(f'ffmpeg -hide_banner -i "{v}" '
+                        f'-c:a copy -c:v copy -c:s copy "{self.__tmpdir}/{basename}-{iso_basename}.mkv"')
 
             os.chdir('..')
-            utils.run_cmd(f'mv -- "{self.__tmpdir}/{basename}.mkv" "{Path.cwd()}"')
-            utils.run_cmd(f'rm -rf -- ./AUDIO_TS ./VIDEO_TS')
+            Execute(f'mv -- "{self.__tmpdir}/{basename}.mkv" "{Path.cwd()}"')
+            Execute(f'rm -rf -- ./AUDIO_TS ./VIDEO_TS')
 
             return
         else:
@@ -78,12 +78,12 @@ class Convert:
             original = Path.cwd() / 'original'
             original.mkdir(parents=True, exist_ok=True)
 
-            utils.run_cmd(f'ffmpeg -hide_banner -i "{filename}" '
-                          f'-c:a copy -c:v copy -c:s copy "{self.__tmpdir}/{basename}.mkv"')
+            Execute(f'ffmpeg -hide_banner -i "{filename}" '
+                    f'-c:a copy -c:v copy -c:s copy "{self.__tmpdir}/{basename}.mkv"')
 
             # Path.rename does not like crossing partitions
-            utils.run_cmd(f'mv -- "{self.__tmpdir}/{basename}.mkv" "{Path.cwd()}"')
-            utils.run_cmd(f'mv -- "{Path.cwd()}/{filename}" "{original}"')
+            Execute(f'mv -- "{self.__tmpdir}/{basename}.mkv" "{Path.cwd()}"')
+            Execute(f'mv -- "{Path.cwd()}/{filename}" "{original}"')
 
     def run(self, args):
         if args.iso:

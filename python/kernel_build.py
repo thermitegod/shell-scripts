@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 2.21.0
-# 2020-11-11
+# 2.22.0
+# 2020-11-21
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -50,6 +50,7 @@ from packaging import version
 
 from python.utils import kernel
 from python.utils import utils
+from python.utils.execute import Execute
 from python.utils.script import Script
 
 
@@ -159,7 +160,7 @@ class Build:
                   f'kernel module dir  : /lib/modules/{self.__kernel_module_dir}\n'
                   f'Tempdir            : {self.__tmpdir}\n'
                   f'Experimental opts  : {self.__experimental}')
-            utils.run_cmd('eselect kernel list')
+            Execute('eselect kernel list')
 
         print()
         input('Enter to start kernel build ')
@@ -246,7 +247,7 @@ class Build:
         if return_only:
             return kmake
 
-        utils.run_cmd(kmake, sh_wrap=True)
+        Execute(kmake, sh_wrap=True)
 
     def kernel_bump(self):
         # CONFIG_MODULES and CONFIG_KALLSYMS are required to build zfs
@@ -371,9 +372,9 @@ class Build:
             Script.execute_script_shell(text=text)
 
             os.chdir(Path() / zfs_build_path / zfs_build_version)
-            utils.run_cmd(f'./copy-builtin {self.__kernel_src}')
+            Execute(f'./copy-builtin {self.__kernel_src}')
             os.chdir(zfs_build_path)
-            utils.run_cmd(f'mkzst {zfs_build_version}')
+            Execute(f'mkzst {zfs_build_version}')
             shutil.move(Path(f'{zfs_build_version}.tar.zst'),
                         Path() / self.__zfs_kmod_src)
 
@@ -384,7 +385,7 @@ class Build:
                 # when using clang to run 'make prepare' get error when running zfs configure
                 # 'Unable to build an empty module.'
                 # so clean kernel src since gcc was used in prepare
-                utils.run_cmd('kernel-clean-src -c')
+                Execute('kernel-clean-src -c')
 
         else:
             if not Path.is_file(self.__zfs_kmod_src):
@@ -392,9 +393,9 @@ class Build:
                 raise SystemExit(1)
 
             archive = Path() / self.__storage_kernel_individual / self.__zfs_kmod_archive
-            utils.run_cmd(f'extract -s -o {self.__tmpdir} {archive}')
+            Execute(f'extract -s -o {self.__tmpdir} {archive}')
             os.chdir(Path() / self.__tmpdir / f'{self.__zfs_kmod_build_path}-{self.__zfs_version}')
-            utils.run_cmd(f'./copy-builtin {self.__kernel_src}')
+            Execute(f'./copy-builtin {self.__kernel_src}')
 
     def build_kernel(self):
         self.cdkdir()
@@ -410,16 +411,16 @@ class Build:
             if self.__run_emerge:
                 if self.__run_kmod_build:
                     if self.__use_zfs_release_version:
-                        utils.run_cmd('emerge --ignore-default-opts --oneshot --quiet --update sys-fs/zfs')
+                        Execute('emerge --ignore-default-opts --oneshot --quiet --update sys-fs/zfs')
                     else:
                         # will always rebuild zfs when using git
-                        utils.run_cmd('emerge --ignore-default-opts --oneshot --quiet sys-fs/zfs')
+                        Execute('emerge --ignore-default-opts --oneshot --quiet sys-fs/zfs')
                 if self.__kernel_has_module_support:
-                    utils.run_cmd('emerge --ignore-default-opts --oneshot --jobs @module-rebuild')
-            utils.run_cmd(f'kernel-initramfs -c {self.__initramfs_compression} -k {self.__kernel_module_dir}')
-            utils.run_cmd('kernel-grub')
+                    Execute('emerge --ignore-default-opts --oneshot --jobs @module-rebuild')
+            Execute(f'kernel-initramfs -c {self.__initramfs_compression} -k {self.__kernel_module_dir}')
+            Execute('kernel-grub')
             if self.__clean_kernel_src:
-                utils.run_cmd('kernel-clean-src -c')
+                Execute('kernel-clean-src -c')
 
     def build(self):
         self.modules_check()

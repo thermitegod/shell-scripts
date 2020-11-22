@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 2.3.0
-# 2020-11-12
+# 2.4.0
+# 2020-11-21
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -30,6 +30,7 @@ import shutil
 from pathlib import Path
 
 from python.utils import utils
+from python.utils.execute import Execute
 from python.utils.get_files import GetFiles
 from python.utils.output_dir import OutputDir
 
@@ -50,7 +51,7 @@ class Compress:
     def run_tests(self):
         if self.__run_tests:
             for f in self.__file_list:
-                utils.run_cmd(f'mk7z -T "{f}"')
+                Execute(f'mk7z -T "{f}"')
 
     def compress(self, filename, compressing_dir):
         filename = Path(filename).name
@@ -63,8 +64,8 @@ class Compress:
 
         os.chdir(Path(filename).parent)
 
-        utils.run_cmd(f'nice -19 zip {self.__exclude} -rv -9 '
-                      f'{self.__junk_paths} "{self.__output_dir}/{filename}.zip" "{filename}"')
+        Execute(f'nice -19 zip {self.__exclude} -rv -9 '
+                f'{self.__junk_paths} "{self.__output_dir}/{filename}.zip" "{filename}"')
 
         if Path.exists(test_file):
             if self.__destructive:

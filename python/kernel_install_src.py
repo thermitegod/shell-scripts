@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 4.1.0
-# 2020-11-11
+# 4.2.0
+# 2020-11-21
 
 # Copyright (C) 2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -20,6 +20,7 @@ import argparse
 from pathlib import Path
 
 from python.utils import utils
+from python.utils.execute import Execute
 
 
 class Install:
@@ -38,11 +39,11 @@ class Install:
         elif args.vanilla:
             self.__kernel_ebuild = 'sys-kernel/vanilla-sources'
 
-        utils.run_cmd(f'emerge --ignore-default-opts --oneshot --{self.__verbose} {self.__kernel_ebuild}')
+        Execute(f'emerge --ignore-default-opts --oneshot --{self.__verbose} {self.__kernel_ebuild}')
 
         kernel_config = Path() / '/proc/config.gz'
         if Path.is_file(kernel_config):
-            utils.run_cmd(f'zcat {kernel_config} >| /usr/src/linux/.config', sh_wrap=True)
+            Execute(f'zcat {kernel_config} >| /usr/src/linux/.config', sh_wrap=True)
 
 
 def main():

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 2.3.0
-# 2020-11-12
+# 2.4.0
+# 2020-11-21
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -31,6 +31,7 @@ from pathlib import Path
 
 from python.utils import utils
 from python.utils.colors import Colors
+from python.utils.execute import Execute
 from python.utils.get_files import GetFiles
 from python.utils.output_dir import OutputDir
 from python.utils.script import Script
@@ -62,8 +63,8 @@ class Compress:
             # double quotes dont work around filename becuse sh_wrap will provide its own double
             # quotes. this is the cleanest solution for dealing with garbage filenames other than
             # renaming them
-            status = utils.run_cmd(f'nice -19 7z t -- {utils.shell_escape(str(filename))} | grep Ok',
-                                   sh_wrap=True, to_stdout=True)
+            status = Execute(f'nice -19 7z t -- {utils.shell_escape(str(filename))} | grep Ok',
+                             sh_wrap=True, to_stdout=True).get_out()
 
             if 'Everything is Ok' in status:
                 print(f'\r{Colors.GRE}PASSED{Colors.NC}\t{filename}')

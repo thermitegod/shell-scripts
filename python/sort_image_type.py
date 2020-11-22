@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.2.0
-# 2020-11-11
+# 1.3.0
+# 2020-11-21
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -22,7 +22,7 @@ from pathlib import Path
 
 from loguru import logger
 
-from python.utils import utils
+from python.utils.execute import Execute
 
 
 class Sort:
@@ -36,9 +36,9 @@ class Sort:
             dest = ext[1:]
             cwd = Path.cwd()
             if self.__mode == 'dir_check':
-                utils.run_cmd(f'find . -maxdepth 1 -type f -iname "*{ext}" -exec mkdir -p "{cwd}/{dest}" \\; -quit')
+                Execute(f'find . -maxdepth 1 -type f -iname "*{ext}" -exec mkdir -p "{cwd}/{dest}" \\; -quit')
             elif self.__mode == 'loop_main':
-                utils.run_cmd(f'find . -maxdepth 1 -type f -iname "*{ext}" -exec mv -i -- "{{}}" "{cwd}/{dest}" \\;')
+                Execute(f'find . -maxdepth 1 -type f -iname "*{ext}" -exec mv -i -- "{{}}" "{cwd}/{dest}" \\;')
 
     def run(self, args):
         self.__mode = 'dir_check'

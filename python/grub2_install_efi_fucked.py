@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.1.0
-# 2020-11-11
+# 1.2.0
+# 2020-11-21
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -18,7 +18,7 @@
 
 import argparse
 
-from python.utils import utils
+from python.utils.execute import Execute
 
 
 def main():
@@ -29,10 +29,10 @@ def main():
     args = parser.parse_args()
 
     print('Someone fucked up the boot loader, again')
-    utils.run_cmd('grub-install --target=x86_64-efi --efi-directory=/boot/efi')
+    Execute('grub-install --target=x86_64-efi --efi-directory=/boot/efi')
 
     if args.mkconf:
-        utils.run_cmd('kernel-grub')
+        Execute('kernel-grub')
 
     print('\n\nCheck below is correct\n\n')
-    utils.run_cmd('/usr/sbin/efibootmgr')
+    Execute('/usr/sbin/efibootmgr')

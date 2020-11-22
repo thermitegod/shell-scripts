@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 2.3.0
-# 2020-11-12
+# 2.4.0
+# 2020-11-21
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -24,6 +24,7 @@ import os
 from pathlib import Path
 
 from python.utils import utils
+from python.utils.execute import Execute
 from python.utils.get_files import GetFiles
 from python.utils.output_dir import OutputDir
 
@@ -61,49 +62,49 @@ class Decompress:
         filename_path = Path(filename).resolve()
 
         if filename.endswith(('.tar.bz2', '.tbz2')):
-            utils.run_cmd(f'tar -xvjf "{filename_path}"')
+            Execute(f'tar -xvjf "{filename_path}"')
 
         elif filename.endswith(('.tar.gz', '.tgz')):
-            utils.run_cmd(f'tar -xvzf "{filename_path}"')
+            Execute(f'tar -xvzf "{filename_path}"')
 
         elif filename.endswith(('.tar.xz', '.txz')):
-            utils.run_cmd(f'tar -xvJf "{filename_path}"')
+            Execute(f'tar -xvJf "{filename_path}"')
 
         elif filename.endswith('.tar.zst'):
-            utils.run_cmd(f'zstd -dc --long=31 \'{filename_path}\' | tar xvf -', sh_wrap=True)
+            Execute(f'zstd -dc --long=31 \'{filename_path}\' | tar xvf -', sh_wrap=True)
 
         elif filename.endswith('.tar.lz4'):
-            utils.run_cmd(f'lz4 -dc \'{filename_path}\' | tar xvf -', sh_wrap=True)
+            Execute(f'lz4 -dc \'{filename_path}\' | tar xvf -', sh_wrap=True)
 
         elif filename.endswith('.tar.lzma'):
-            utils.run_cmd(f'tarlzma -xvf "{filename_path}"')
+            Execute(f'tarlzma -xvf "{filename_path}"')
 
         elif filename.endswith('.tar.lrz'):
-            utils.run_cmd(f'lrzuntar "{filename_path}"')
+            Execute(f'lrzuntar "{filename_path}"')
 
         elif filename.endswith(('.rar', '.RAR', '.cbr')):
-            utils.run_cmd(f'unrar "{filename_path}"')
+            Execute(f'unrar "{filename_path}"')
 
         elif filename.endswith('.gz'):
-            utils.run_cmd(f'gunzip -k "{filename_path}"')
+            Execute(f'gunzip -k "{filename_path}"')
 
         elif filename.endswith('.xz'):
-            utils.run_cmd(f'unxz -k "{filename_path}"')
+            Execute(f'unxz -k "{filename_path}"')
 
         elif filename.endswith('.bz2'):
-            utils.run_cmd(f'bzip2 -dk "{filename_path}"')
+            Execute(f'bzip2 -dk "{filename_path}"')
 
         elif filename.endswith('.zst'):
-            utils.run_cmd(f'unzstd -d --long=31 "{filename_path}"')
+            Execute(f'unzstd -d --long=31 "{filename_path}"')
 
         elif filename.endswith('.tar'):
-            utils.run_cmd(f'tar -xvf "{filename_path}"')
+            Execute(f'tar -xvf "{filename_path}"')
 
         elif filename.endswith(('.zip', '.cbz')):
-            utils.run_cmd(f'unzip "{filename_path}"')
+            Execute(f'unzip "{filename_path}"')
 
         elif filename.endswith(('.7z', '.iso', '.ISO')):
-            utils.run_cmd(f'7z x "{filename_path}"')
+            Execute(f'7z x "{filename_path}"')
 
         else:
             print(f'cannot extract: \'{filename_path}\'')

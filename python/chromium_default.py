@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 7.2.0
-# 2020-11-11
+# 7.3.0
+# 2020-11-21
 
 # Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -21,6 +21,7 @@ import os
 from pathlib import Path
 
 from python.utils import utils
+from python.utils.execute import Execute
 
 
 class Chrome:
@@ -38,7 +39,7 @@ class Chrome:
             pass
 
     def start_chrome(self, profile_path):
-        utils.run_cmd(f'{self.__chrome} --user-data-dir={profile_path} --ozone-platform={self.__display_server}')
+        Execute(f'{self.__chrome} --user-data-dir={profile_path} --ozone-platform={self.__display_server}')
 
     def run(self, args):
         if args.chrome == 'chromium':

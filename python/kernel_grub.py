@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 3.6.0
-# 2020-11-11
+# 3.7.0
+# 2020-11-21
 
 # Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -22,6 +22,7 @@ from tempfile import TemporaryDirectory
 
 from python.utils import hash
 from python.utils import utils
+from python.utils.execute import Execute
 
 
 def main():
@@ -34,7 +35,7 @@ def main():
         cfgnew = Path() / tmpdir / cfg
 
         cmd = f'grub-mkconfig -o {cfgnew}'
-        utils.run_cmd(cmd)
+        Execute(cmd)
 
         if not Path.is_file(cfgnew):
             print('grub did not create new cfg file')

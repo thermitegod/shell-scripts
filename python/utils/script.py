@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.0.0
-# 2020-10-28
+# 1.1.0
+# 2020-11-21
 
 # Copyright (C) 2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -22,7 +22,7 @@ import shutil
 import tempfile
 from pathlib import Path
 
-from . import utils
+from python.utils.execute import Execute
 
 
 class _Script:
@@ -53,7 +53,7 @@ class _Script:
         Path.chmod(self.__script, 0o700)
 
         if execute_script:
-            utils.run_cmd(str(self.__script))
+            Execute(str(self.__script))
 
             # some scripts will generate multiple shell scripts
             # and these need to be removed after each run

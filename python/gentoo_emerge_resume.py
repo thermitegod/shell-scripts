@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.3.0
-# 2020-11-11
+# 1.4.0
+# 2020-11-21
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -26,6 +26,7 @@ from pathlib import Path
 
 from python.utils import confirm
 from python.utils import utils
+from python.utils.execute import Execute
 
 
 class Backup:
@@ -40,14 +41,14 @@ class Backup:
         shutil.rmtree(self.__tmpdir)
 
     def backup(self):
-        utils.run_cmd(f'mkzst -o {self.__backup_dir} {self.__mtimdb}')
+        Execute(f'mkzst -o {self.__backup_dir} {self.__mtimdb}')
         Path.rename(self.__backup_dir / 'mtimedb.zst', self.__backup_dir / f'mtimedb-{int(time.time())}.zst')
 
     def list(self):
         if not Path.exists(self.__backup_dir):
             print('Run a backup first')
             raise SystemExit(1)
-        utils.run_cmd(f'ls -1A {self.__backup_dir}')
+        Execute(f'ls -1A {self.__backup_dir}')
 
     def restore(self):
         utils.root_check(require_root=True)
@@ -55,7 +56,7 @@ class Backup:
         file = input('Enter file to restore: ')
         shutil.copyfile(self.__backup_dir / file, self.__tmpdir / 'mtimedb.zst')
         os.chdir(self.__tmpdir)
-        utils.run_cmd(f'unzstd --long=31 mtimedb.zst')
+        Execute(f'unzstd --long=31 mtimedb.zst')
         if Path.exists(self.__mtimdb):
             Path.unlink(self.__mtimdb)
         shutil.copyfile(self.__tmpdir / 'mtimedb', self.__mtimdb)

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 1.7.0
+# 1.8.0
 # 2020-11-21
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -24,6 +24,7 @@ from pathlib import Path
 from loguru import logger
 
 from python.utils import utils
+from python.utils.execute import Execute
 from python.utils.lxd import Lxd
 
 
@@ -48,9 +49,9 @@ class Container:
 
         if Lxd.get_state(container=container):
             logger.info(f'Stoping {container}')
-            utils.run_cmd(f'lxc stop {container}', to_stdout=True)
+            Execute(f'lxc stop {container}', to_stdout=True)
 
-        utils.run_cmd(f'lxc export {container} {self.__backup_dir}/{container}.tar.gz')
+        Execute(f'lxc export {container} {self.__backup_dir}/{container}.tar.gz')
 
     @staticmethod
     def install_container(container: Path):
@@ -59,7 +60,7 @@ class Container:
             raise SystemExit
 
         logger.info(f'Importing {container}')
-        utils.run_cmd(f'lxc import {container}', to_stdout=True)
+        Execute(f'lxc import {container}', to_stdout=True)
 
     def run(self, args):
         if args.export:

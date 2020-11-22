@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 1.7.0
+# 1.8.0
 # 2020-11-21
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -21,7 +21,7 @@ import sys
 
 from loguru import logger
 
-from python.utils import utils
+from python.utils.execute import Execute
 from python.utils.lxd import Lxd
 
 
@@ -35,27 +35,27 @@ class Container:
 
     def stop_base(self):
         logger.info(f'Stopping {self.__base_container}')
-        utils.run_cmd(f'lxc stop {self.__base_container}', to_stdout=True)
+        Execute(f'lxc stop {self.__base_container}', to_stdout=True)
 
     def update_generic(self, container, setup_script):
         if Lxd.get_state(container=container):
             logger.info(f'Stopping {container}')
-            utils.run_cmd(f'lxc stop {container}', to_stdout=True)
+            Execute(f'lxc stop {container}', to_stdout=True)
 
         logger.info(f'Deleting {container}')
-        utils.run_cmd(f'lxc delete {container}', to_stdout=True)
+        Execute(f'lxc delete {container}', to_stdout=True)
 
         logger.info(f'copying {self.__base_container} to {container}')
-        utils.run_cmd(f'lxc copy {self.__base_container} {container}', to_stdout=True)
+        Execute(f'lxc copy {self.__base_container} {container}', to_stdout=True)
 
         logger.info(f'Starting {container}')
-        utils.run_cmd(f'lxc start {container}', to_stdout=True)
+        Execute(f'lxc start {container}', to_stdout=True)
 
         logger.info(f'Running setup script for {container}')
-        utils.run_cmd(f'lxc exec {container} {setup_script}', to_stdout=True)
+        Execute(f'lxc exec {container} {setup_script}', to_stdout=True)
 
         logger.info(f'Stopping {container}')
-        utils.run_cmd(f'lxc stop {container}', to_stdout=True)
+        Execute(f'lxc stop {container}', to_stdout=True)
 
     def run(self, args):
         self.stop_base()

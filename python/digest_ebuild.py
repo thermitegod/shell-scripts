@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.2.0
-# 2020-11-11
+# 1.3.0
+# 2020-11-21
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -22,7 +22,7 @@ from pathlib import Path
 
 from loguru import logger
 
-from python.utils import utils
+from python.utils.execute import Execute
 from python.utils.recursion import Recursion
 
 
@@ -40,7 +40,7 @@ class Digest:
 
         ebuild_list.sort()
 
-        utils.run_cmd(f'ebuild {ebuild_list[-1]} manifest')
+        Execute(f'ebuild {ebuild_list[-1]} manifest')
 
     def run(self, args):
         # general

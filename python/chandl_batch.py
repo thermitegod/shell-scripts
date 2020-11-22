@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 2.2.0
-# 2020-11-11
+# 2.3.0
+# 2020-11-21
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -22,7 +22,7 @@ import os
 from pathlib import Path
 
 from python.utils import dirs
-from python.utils import utils
+from python.utils.execute import Execute
 
 try:
     from python.private.thread_list import ThreadList
@@ -51,7 +51,7 @@ class Dl:
         #     self.__url_base = 'https://8kun.top/'
 
     def dl(self):
-        utils.run_cmd(f'chandl -d {self.__save_dir_full} -t {os.cpu_count()} -url "{self.__url}"')
+        Execute(f'chandl -d {self.__save_dir_full} -t {os.cpu_count()} -url "{self.__url}"')
 
     def dl_batch(self):
         self.__url = f'{self.__url_base}/{self.__board}/thread/{self.__thread}'

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.2.0
-# 2020-10-04
+# 1.3.0
+# 2020-11-21
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -20,7 +20,8 @@ import argparse
 import os
 from pathlib import Path
 
-from utils import utils
+from python.utils import utils
+from python.utils.execute import Execute
 
 
 class Symlink:
@@ -44,10 +45,10 @@ class Symlink:
     def run(self, args):
         if args.stow_bin:
             os.chdir(self.__home)
-            utils.run_cmd(f'stow {self.__ignore} -v --target={self.__local_bin} .bin')
+            Execute(f'stow {self.__ignore} -v --target={self.__local_bin} .bin')
         if args.unstow_bin:
             os.chdir(self.__home)
-            utils.run_cmd(f'stow {self.__ignore} -D -v --target={self.__local_bin} .bin')
+            Execute(f'stow {self.__ignore} -D -v --target={self.__local_bin} .bin')
 
 
 def main():

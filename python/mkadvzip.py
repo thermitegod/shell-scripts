@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.2.0
-# 2020-11-11
+# 1.3.0
+# 2020-11-21
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -20,7 +20,7 @@ import argparse
 import os
 from pathlib import Path
 
-from python.utils import utils
+from python.utils.execute import Execute
 
 
 class Optimize:
@@ -43,10 +43,10 @@ class Optimize:
         if self.__verbose:
             self.get_size(start=True)
 
-        utils.run_cmd(f'find . -type f -iname \'*.zip\' -print0 | '
-                      f'nice -19 xargs --max-args=1 --max-procs={self.__cpu} --null '
-                      f'advzip -z -4',
-                      sh_wrap=True)
+        Execute(f'find . -type f -iname \'*.zip\' -print0 | '
+                f'nice -19 xargs --max-args=1 --max-procs={self.__cpu} --null '
+                f'advzip -z -4',
+                sh_wrap=True)
 
         if self.__verbose:
             self.get_size(start=False)

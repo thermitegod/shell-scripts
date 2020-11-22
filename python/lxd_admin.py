@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 2.3.0
+# 2.4.0
 # 2020-11-21
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -23,6 +23,7 @@ from pathlib import Path
 from loguru import logger
 
 from python.utils import utils
+from python.utils.execute import Execute
 from python.utils.lxd import Lxd
 
 try:
@@ -33,7 +34,7 @@ except ImportError:
 
 
 # TODO
-#   utils.run_cmd() will block until cmd returns,
+#   Execute() will block until cmd returns,
 #       therfore forking to speed up commands does not work
 #   possible config changes
 #       more limits
@@ -168,25 +169,25 @@ class Container:
                 self.__container_path_save.mkdir(parents=True, exist_ok=True)
 
     def attach_dirs(self):
-        utils.run_cmd(f'lxc config device add {self.__container_fullname} storage disk '
-                      f'source="{self.__container_path_save}" path="{self.__container_inside_path_data}"',
-                      to_stdout=True)
-        utils.run_cmd(f'lxc config device add {self.__container_fullname} session disk '
-                      f'source="{self.__container_path_session}" path="{self.__container_inside_path_session}"',
-                      to_stdout=True)
-        utils.run_cmd(f'lxc config device add {self.__container_fullname} watch disk '
-                      f'source="{self.__container_path_watch}" path="{self.__container_inside_path_watch}"',
-                      to_stdout=True)
-        utils.run_cmd(f'lxc config device add {self.__container_fullname} ru disk '
-                      f'source="{self.__container_path_rushare}" path={self.__container_inside_path_rushare}',
-                      to_stdout=True)
+        Execute(f'lxc config device add {self.__container_fullname} storage disk '
+                f'source="{self.__container_path_save}" path="{self.__container_inside_path_data}"',
+                to_stdout=True)
+        Execute(f'lxc config device add {self.__container_fullname} session disk '
+                f'source="{self.__container_path_session}" path="{self.__container_inside_path_session}"',
+                to_stdout=True)
+        Execute(f'lxc config device add {self.__container_fullname} watch disk '
+                f'source="{self.__container_path_watch}" path="{self.__container_inside_path_watch}"',
+                to_stdout=True)
+        Execute(f'lxc config device add {self.__container_fullname} ru disk '
+                f'source="{self.__container_path_rushare}" path={self.__container_inside_path_rushare}',
+                to_stdout=True)
 
     def stop(self):
         if not Lxd.get_state(container=self.__container_fullname):
             return
 
         logger.info(f'Stopping container: {self.__container_fullname}')
-        utils.run_cmd(f'lxc stop {self.__container_fullname}', to_stdout=True)
+        Execute(f'lxc stop {self.__container_fullname}', to_stdout=True)
 
     def start(self):
         if Lxd.get_state(container=self.__container_fullname):
@@ -199,11 +200,11 @@ class Container:
         # remove rtorrent lockfiles since they can persist
         # and do not always work even between restart of the same
         # container, overall they are just annoying
-        # utils.run_cmd(f'{utils.get_script_name()} -c -O {self.__container_fullname}')
+        # Execute(f'{utils.get_script_name()} -c -O {self.__container_fullname}')
         self.rtorrent_clean_torrent()
 
         logger.info(f'Starting container: {self.__container_fullname}')
-        utils.run_cmd(f'lxc start {self.__container_fullname}', to_stdout=True)
+        Execute(f'lxc start {self.__container_fullname}', to_stdout=True)
 
     def delete(self):
         if Lxd.get_state(container=self.__container_fullname):
@@ -211,28 +212,28 @@ class Container:
             return
 
         logger.info(f'Deleting container: {self.__container_fullname}')
-        utils.run_cmd(f'lxc delete {self.__container_fullname}', to_stdout=True)
+        Execute(f'lxc delete {self.__container_fullname}', to_stdout=True)
 
     def restart(self):
         if not Lxd.get_state(container=self.__container_fullname):
             return
 
         logger.info(f'Restarting container: {self.__container_fullname}')
-        utils.run_cmd(f'lxc restart {self.__container_fullname}', to_stdout=True)
+        Execute(f'lxc restart {self.__container_fullname}', to_stdout=True)
 
     def forcestop(self):
         if not Lxd.get_state(container=self.__container_fullname):
             return
 
         logger.info(f'Force Stopping container: {self.__container_fullname}')
-        utils.run_cmd(f'lxc stop --force {self.__container_fullname}', to_stdout=True)
+        Execute(f'lxc stop --force {self.__container_fullname}', to_stdout=True)
 
     def restart_service(self):
         if not Lxd.get_state(container=self.__container_fullname):
             return
 
         logger.info(f'Restarting \'{self.__service}\' on \'{self.__container_fullname}\'')
-        utils.run_cmd(f'lxc exec {self.__container_fullname} rc-service {self.__service} restart', to_stdout=True)
+        Execute(f'lxc exec {self.__container_fullname} rc-service {self.__service} restart', to_stdout=True)
 
     def rtorrent_clean_lock(self):
         if Lxd.get_state(container=self.__container_fullname):
@@ -269,34 +270,34 @@ class Container:
 
         logger.info(f'Running update for: {self.__container_fullname}')
 
-        check_exists = utils.run_cmd(f'lxc list | grep {self.__container_fullname}',
-                                     sh_wrap=True, to_stdout=True)
+        check_exists = Execute(f'lxc list | grep {self.__container_fullname}',
+                               sh_wrap=True, to_stdout=True).get_out()
         if check_exists:
             logger.info(f'Deleting: {self.__container_fullname}')
-            utils.run_cmd(f'lxc delete {self.__container_fullname}', to_stdout=True)
+            Execute(f'lxc delete {self.__container_fullname}', to_stdout=True)
 
         logger.info(f'Copying: {self.__container_template} to {self.__container_fullname}')
-        utils.run_cmd(f'lxc copy {self.__container_template} {self.__container_fullname}')
+        Execute(f'lxc copy {self.__container_template} {self.__container_fullname}')
 
         # removes unneeded access to filesystem on gentoo containers
         logger.info(f'Removing unneeded access to filesystem')
-        utils.run_cmd(f'lxc config device remove {self.__container_fullname} distfiles', to_stdout=True)
-        utils.run_cmd(f'lxc config device remove {self.__container_fullname} packages', to_stdout=True)
-        utils.run_cmd(f'lxc config device remove {self.__container_fullname} repos', to_stdout=True)
+        Execute(f'lxc config device remove {self.__container_fullname} distfiles', to_stdout=True)
+        Execute(f'lxc config device remove {self.__container_fullname} packages', to_stdout=True)
+        Execute(f'lxc config device remove {self.__container_fullname} repos', to_stdout=True)
 
         # set cpu/mem limits
         if self.__container_limit_cpu != '0':
             logger.info(f'Setting CPU Limit to {self.__container_limit_cpu}')
-            utils.run_cmd(f'lxc config set {self.__container_fullname} '
-                          f'limits.cpu {self.__container_limit_cpu}', to_stdout=True)
+            Execute(f'lxc config set {self.__container_fullname} '
+                    f'limits.cpu {self.__container_limit_cpu}', to_stdout=True)
         if self.__container_limit_cpu_allowance != '0':
             logger.info(f'Setting CPU Allowance Limit to {self.__container_limit_cpu_allowance}')
-            utils.run_cmd(f'lxc config set {self.__container_fullname} '
-                          f'limits.cpu.allowance {self.__container_limit_cpu_allowance}', to_stdout=True)
+            Execute(f'lxc config set {self.__container_fullname} '
+                    f'limits.cpu.allowance {self.__container_limit_cpu_allowance}', to_stdout=True)
         if self.__container_limit_mem != '0':
             logger.info(f'Setting MEM Limit to {self.__container_limit_mem}')
-            utils.run_cmd(f'lxc config set {self.__container_fullname} '
-                          f'limits.memory {self.__container_limit_mem}', to_stdout=True)
+            Execute(f'lxc config set {self.__container_fullname} '
+                    f'limits.memory {self.__container_limit_mem}', to_stdout=True)
 
         # remove rtorrent lockfiles since they can persist
         # and do not work between container upgrades
@@ -312,7 +313,7 @@ class Container:
 
         net_tmp.write_text(net_config)
 
-        utils.run_cmd(f'lxc file push {net_tmp} {net_real}')
+        Execute(f'lxc file push {net_tmp} {net_real}')
         net_tmp.unlink()
 
         # attach storage dirs to container

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 2.2.0
-# 2020-11-11
+# 2.3.0
+# 2020-11-21
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -19,6 +19,7 @@
 import argparse
 
 from python.utils import utils
+from python.utils.execute import Execute
 
 
 class Initramfs:
@@ -51,7 +52,7 @@ class Initramfs:
         if not self.__no_firmware:
             cmd += '-i /lib/firmware /lib/firmware '
 
-        utils.run_cmd(cmd)
+        Execute(cmd)
 
     def run(self, args):
         if args.compression:

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 5.8.0
-# 2020-11-11
+# 5.9.0
+# 2020-11-21
 
 # Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -21,6 +21,7 @@ import time
 from pathlib import Path
 
 from python.utils import utils
+from python.utils.execute import Execute
 
 
 def main():
@@ -95,10 +96,10 @@ def main():
         if args.snapshot:
             snapshot_time = time.strftime('%F-%H%M', time.localtime())
             cmd += f'@manual-{snapshot_time}'
-        utils.run_cmd(cmd)
+        Execute(cmd)
 
     if args.export:
         utils.root_check(require_root=True)
         target = args.export
-        utils.run_cmd(f'zfs send {target} | zstd -T0 >| {Path.cwd()}/{Path(target).name}.zst',
-                      sh_wrap=True)
+        Execute(f'zfs send {target} | zstd -T0 >| {Path.cwd()}/{Path(target).name}.zst',
+                sh_wrap=True)

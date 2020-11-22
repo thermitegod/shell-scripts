@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 2.1.0
-# 2020-11-11
+# 2.2.0
+# 2020-11-21
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -22,7 +22,7 @@ import shutil
 import tempfile
 from pathlib import Path
 
-from python.utils import utils
+from python.utils.execute import Execute
 from python.utils.get_files import GetFiles
 from python.utils.mimecheck import Mimecheck
 
@@ -52,13 +52,13 @@ class Convert:
         original = Path.cwd() / 'original'
         original.mkdir(parents=True, exist_ok=True)
 
-        utils.run_cmd(f'ffmpeg -hide_banner -i "{filename}" '
-                      f' -acodec libopus -b:a 128k -vbr on -compression_level 10 '
-                      f'-map_metadata 0 -id3v2_version 3 "{self.__tmpdir}/{basename}.opus"')
+        Execute(f'ffmpeg -hide_banner -i "{filename}" '
+                f' -acodec libopus -b:a 128k -vbr on -compression_level 10 '
+                f'-map_metadata 0 -id3v2_version 3 "{self.__tmpdir}/{basename}.opus"')
 
         # Path.rename does not like crossing partitions
-        utils.run_cmd(f'mv -- "{self.__tmpdir}/{basename}.opus" "{Path.cwd()}"')
-        utils.run_cmd(f'mv -- "{Path.cwd()}/{filename}" "{original}"')
+        Execute(f'mv -- "{self.__tmpdir}/{basename}.opus" "{Path.cwd()}"')
+        Execute(f'mv -- "{Path.cwd()}/{filename}" "{original}"')
 
     def run(self, args):
         GetFiles.get_only_files(function=self.convert_main, input_files=args.input_files, only_files=args.files)

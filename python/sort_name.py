@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 2.1.0
-# 2020-11-11
+# 2.2.0
+# 2020-11-21
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -24,6 +24,7 @@ from loguru import logger
 
 from python.utils import confirm
 from python.utils import utils
+from python.utils.execute import Execute
 
 try:
     from python.private.sort_list import SortList
@@ -48,7 +49,7 @@ class Sort:
         self.__job = None
 
         # self.__total_after = 0
-        # self.__total_before = utils.run_cmd("ls -1A | wc -l", sh_wrap=True, to_stdout=True)
+        # self.__total_before = Execute("ls -1A | wc -l", sh_wrap=True, to_stdout=True).get_ret()
 
     def main_sort(self):
         for items in self.__list_sort:
@@ -71,15 +72,15 @@ class Sort:
 
         # TODO - try to port to native python?
         if self.__job == 'dir_check':
-            utils.run_cmd(f'find . -maxdepth 1 -type f -iname "*{arc}*" '
-                          f'-exec mkdir -p -- "{self.__dest}/{move_to_dir}" \\; -quit')
+            Execute(f'find . -maxdepth 1 -type f -iname "*{arc}*" '
+                    f'-exec mkdir -p -- "{self.__dest}/{move_to_dir}" \\; -quit')
         elif self.__job == 'sort_main':
-            utils.run_cmd(f'find . -maxdepth 1 -type f -iname "*{arc}*" '
-                          f'-exec mv -n -- "{{}}" "{self.__dest}/{move_to_dir}" \\;')
+            Execute(f'find . -maxdepth 1 -type f -iname "*{arc}*" '
+                    f'-exec mv -n -- "{{}}" "{self.__dest}/{move_to_dir}" \\;')
         elif self.__job == 'sort_local':
-            utils.run_cmd(f'find . -maxdepth 1 -type f -iname "*{arc}*" '
-                          f'-exec mkdir -p -- "{Path.cwd()}/{move_to_dir}" \\;'
-                          f'-exec mv -i -- "{{}}" "{Path.cwd()}/{move_to_dir}" \\;')
+            Execute(f'find . -maxdepth 1 -type f -iname "*{arc}*" '
+                    f'-exec mkdir -p -- "{Path.cwd()}/{move_to_dir}" \\;'
+                    f'-exec mv -i -- "{{}}" "{Path.cwd()}/{move_to_dir}" \\;')
 
     def main(self):
         print(f'Prerun info\n'

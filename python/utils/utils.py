@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.26.0
-# 2020-10-28
+# 1.27.0
+# 2020-11-21
 
 # Copyright (C) 2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -18,12 +18,11 @@
 
 import os
 import re
-import shlex
-import subprocess
 import sys
 from pathlib import Path
 
 from python.utils.colors import Colors
+from python.utils.execute import Execute
 
 
 def root_check(require_root: bool):
@@ -48,24 +47,6 @@ def shell_escape(string: str):
     return re.escape(string).replace("'", r"\'")
 
 
-def run_cmd(cmd: str, sh_wrap: bool = False, to_stdout: bool = False):
-    """
-    :param cmd:
-        shell command to run
-    :param sh_wrap:
-        wrap command in 'sh -c ""', required if using pipes
-    :param to_stdout:
-        send output to stdout
-    """
-    if sh_wrap:
-        cmd = f'sh -c "{cmd}"'
-
-    if to_stdout:
-        return subprocess.run(shlex.split(cmd), stdout=subprocess.PIPE).stdout.decode('utf-8')
-    else:
-        return subprocess.run(shlex.split(cmd))
-
-
 def get_script_name():
     return Path(sys.argv[0]).name
 
@@ -74,5 +55,5 @@ def args_required_else_help():
     try:
         sys.argv[1]
     except IndexError:
-        run_cmd(f'{sys.argv[0]} -h')
+        Execute(f'{sys.argv[0]} -h')
         raise SystemExit

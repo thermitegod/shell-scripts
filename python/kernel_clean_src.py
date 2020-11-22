@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 5.8.0
-# 2020-11-11
+# 5.9.0
+# 2020-11-21
 
 # Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -27,6 +27,7 @@ from loguru import logger
 
 from python.utils import kernel
 from python.utils import utils
+from python.utils.execute import Execute
 
 
 class Clean:
@@ -49,11 +50,11 @@ class Clean:
                 tmpdir = Path() / tmpdir
                 kernel.kernel_conf_move(src=self.__kdir, dst=tmpdir)
                 os.chdir(self.__kdir)
-                utils.run_cmd(cmd)
+                Execute(cmd)
                 kernel.kernel_conf_move(src=tmpdir, dst=self.__kdir)
         else:
             os.chdir(self.__kdir)
-            utils.run_cmd(cmd)
+            Execute(cmd)
 
     def run(self, args):
         if args.rm:

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.3.0
-# 2020-11-11
+# 1.4.0
+# 2020-11-21
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -27,6 +27,7 @@ from pathlib import Path
 
 from python.utils import dirs
 from python.utils import utils
+from python.utils.execute import Execute
 
 
 class Backup:
@@ -52,7 +53,7 @@ class Backup:
         os.chdir(self.__tmpdir)
         for f in Path.cwd().iterdir():
             if f.is_file():
-                utils.run_cmd(f'mv -- {f} {dest}')
+                Execute(f'mv -- {f} {dest}')
 
     def backup(self):
         if self.__mode == 'backup-chromium':
@@ -62,8 +63,8 @@ class Backup:
             os.chdir(target_source)
             for f in Path.cwd().iterdir():
                 if f.is_dir():
-                    utils.run_cmd(f'mkzst --exclude "{f.name}/Default/File System" '
-                                  f'{self.__verbose} -o {self.__tmpdir} {f.name}')
+                    Execute(f'mkzst --exclude "{f.name}/Default/File System" '
+                            f'{self.__verbose} -o {self.__tmpdir} {f.name}')
 
             self.move_finished(dest=target_dest)
 
@@ -71,7 +72,7 @@ class Backup:
             target_dest = Path() / self.__backup_dir / self.__user / 'bin' / self.__date
 
             os.chdir(Path.home())
-            utils.run_cmd(f'mkzst {self.__verbose} -o {self.__tmpdir} ".bin"')
+            Execute(f'mkzst {self.__verbose} -o {self.__tmpdir} ".bin"')
 
             self.move_finished(dest=target_dest)
 
@@ -79,11 +80,11 @@ class Backup:
             target_dest = Path() / self.__backup_dir / self.__user / 'config' / self.__date
 
             os.chdir(Path.home())
-            utils.run_cmd(f'mkzst --exclude ".config/*chrom*" '
-                          f'".config/rtorrent/session" '
-                          f'".config/transmission/resume" '
-                          f'".config/transmission/torrents" '
-                          f'{self.__verbose} -o {self.__tmpdir} ".config"')
+            Execute(f'mkzst --exclude ".config/*chrom*" '
+                    f'".config/rtorrent/session" '
+                    f'".config/transmission/resume" '
+                    f'".config/transmission/torrents" '
+                    f'{self.__verbose} -o {self.__tmpdir} ".config"')
 
             self.move_finished(dest=target_dest)
 
@@ -91,13 +92,13 @@ class Backup:
             target_dest = Path() / self.__backup_dir / self.__user / 'local' / self.__date
 
             os.chdir(Path.home())
-            utils.run_cmd(f'mkzst --exclude ".local/share/Trash" '
-                          f'{self.__verbose} -o {self.__tmpdir} ".local"')
+            Execute(f'mkzst --exclude ".local/share/Trash" '
+                    f'{self.__verbose} -o {self.__tmpdir} ".local"')
 
             self.move_finished(dest=target_dest)
 
         elif self.__mode == 'backup-meta':
-            utils.run_cmd(f'{sys.argv[0]} -h')
+            Execute(f'{sys.argv[0]} -h')
             raise SystemExit
 
     def run(self, args):

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.3.0
-# 2020-11-12
+# 1.4.0
+# 2020-11-21
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -18,7 +18,7 @@
 
 import mimetypes
 
-from . import utils
+from python.utils.execute import Execute
 
 
 class _Mimecheck:
@@ -27,7 +27,8 @@ class _Mimecheck:
 
     @staticmethod
     def get_mimetype_ext(filename):
-        return utils.run_cmd(f'file -b --mime-type -- "{filename}"', to_stdout=True).strip('\n').split('/')[1]
+        mime = Execute(f'file -b --mime-type -- "{filename}"', to_stdout=True).get_out()
+        return mime.strip('\n').split('/')[1]
 
     def check_if_video(self, filename):
         return self.__check_mimetype(filename=filename, mime_type='video')

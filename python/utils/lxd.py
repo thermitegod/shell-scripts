@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.3.0
-# 2020-11-12
+# 1.4.0
+# 2020-11-21
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -18,7 +18,7 @@
 
 from loguru import logger
 
-from . import utils
+from python.utils.execute import Execute
 
 
 class _Lxd:
@@ -31,7 +31,7 @@ class _Lxd:
 
     @staticmethod
     def get_state(container: str):
-        state = utils.run_cmd(f'lxc info {container} 2>|/dev/null | grep Running', sh_wrap=True, to_stdout=True)
+        state = Execute(f'lxc info {container} 2>|/dev/null | grep Running', sh_wrap=True, to_stdout=True).get_out()
 
         if 'Running' in state:
             logger.debug(f'container state is running for {container}')

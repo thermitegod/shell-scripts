@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 4.4.0
-# 2020-11-11
+# 4.5.0
+# 2020-11-21
 
 # Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -21,6 +21,7 @@ import time
 from pathlib import Path
 
 from python.utils import utils
+from python.utils.execute import Execute
 
 
 def main():
@@ -31,4 +32,4 @@ def main():
 
     cmd += f'{Path.home()}/{int(time.time())}.png'
 
-    utils.run_cmd(cmd)
+    Execute(cmd)

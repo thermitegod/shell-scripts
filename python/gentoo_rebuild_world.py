@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.2.0
-# 2020-11-11
+# 1.3.0
+# 2020-11-21
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -20,6 +20,7 @@ import argparse
 from pathlib import Path
 
 from python.utils import utils
+from python.utils.execute import Execute
 
 
 def main():
@@ -55,11 +56,11 @@ def main():
                   'media-fonts/liberation-fonts'
         virtual = 'virtual/*'
         user_group = 'acct-group/* acct-user/*'
-        utils.run_cmd('emerge --jobs --oneshot --emptytree @world '
-                      f'--exclude \'{gcc_req_ebuilds}\' '
-                      f'--exclude \'{virtual}\' '
-                      f'--exclude \'{user_group}\' '
-                      f'--exclude \'{bin_pkg}\'')
+        Execute('emerge --jobs --oneshot --emptytree @world '
+                f'--exclude \'{gcc_req_ebuilds}\' '
+                f'--exclude \'{virtual}\' '
+                f'--exclude \'{user_group}\' '
+                f'--exclude \'{bin_pkg}\'')
 
     if args.rebuild_gcc:
-        utils.run_cmd(f'emerge --jobs --oneshot {gcc_req_ebuilds}')
+        Execute(f'emerge --jobs --oneshot {gcc_req_ebuilds}')

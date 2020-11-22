@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.4.0
-# 2020-11-11
+# 1.5.0
+# 2020-11-21
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -22,6 +22,7 @@ from pathlib import Path
 
 from python.utils import confirm
 from python.utils import utils
+from python.utils.execute import Execute
 
 
 class Backup:
@@ -30,22 +31,22 @@ class Backup:
         self.__target = None
 
     def t_rewind(self):
-        utils.run_cmd(f'mt -f \'{self.__tape}\' rewind')
+        Execute(f'mt -f \'{self.__tape}\' rewind')
 
     def t_status(self):
-        utils.run_cmd(f'mt -f \'{self.__tape}\' status')
+        Execute(f'mt -f \'{self.__tape}\' status')
 
     def t_reten(self):
-        utils.run_cmd(f'mt -f \'{self.__tape}\' retension')
+        Execute(f'mt -f \'{self.__tape}\' retension')
 
     def t_eject(self):
-        utils.run_cmd(f'mt -f \'{self.__tape}\' eject')
+        Execute(f'mt -f \'{self.__tape}\' eject')
 
     def t_erase(self):
-        utils.run_cmd(f'mt -f \'{self.__tape}\' erase')
+        Execute(f'mt -f \'{self.__tape}\' erase')
 
     def t_list(self):
-        utils.run_cmd(f'tar -tf \'{self.__tape}\'')
+        Execute(f'tar -tf \'{self.__tape}\'')
 
     def t_cdloc(self):
         # dont tar unneeded paths
@@ -68,22 +69,22 @@ class Backup:
         self.t_cdloc()
 
         # move to end last tar on tape
-        utils.run_cmd(f'mt -f \'{self.__tape}\' eod')
-        utils.run_cmd(f'tar -cvf \'{self.__tape}\' \'{self.__target}\'')
+        Execute(f'mt -f \'{self.__tape}\' eod')
+        Execute(f'tar -cvf \'{self.__tape}\' \'{self.__target}\'')
 
     def t_backup_overwrite(self):
         self.t_cdloc()
         self.t_rewind()
-        utils.run_cmd(f'tar -cvf \'{self.__tape}\' \'{self.__target}\'')
+        Execute(f'tar -cvf \'{self.__tape}\' \'{self.__target}\'')
 
     def t_restore(self):
         self.t_rewind()
         self.__target.mkdir(parents=True, exist_ok=True)
-        utils.run_cmd(f'tar -xvf \'{self.__tape}\' -C \'{self.__target}\'')
+        Execute(f'tar -xvf \'{self.__tape}\' -C \'{self.__target}\'')
 
     def t_verify(self):
         self.t_rewind()
-        utils.run_cmd(f'tar -tvf \'{self.__tape}\'')
+        Execute(f'tar -tvf \'{self.__tape}\'')
 
     def run(self, args):
         # general

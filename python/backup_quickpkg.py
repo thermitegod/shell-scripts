@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.3.0
-# 2020-11-11
+# 1.4.0
+# 2020-11-21
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -25,6 +25,7 @@ import time
 from pathlib import Path
 
 from python.utils import utils
+from python.utils.execute import Execute
 
 
 class Backup:
@@ -50,7 +51,7 @@ class Backup:
         os.chdir(self.__tmpdir)
         for f in Path.cwd().iterdir():
             if f.is_file():
-                utils.run_cmd(f'mv -- {f} {dest}')
+                Execute(f'mv -- {f} {dest}')
 
     def backup(self):
         print(self.__mode)
@@ -62,16 +63,16 @@ class Backup:
             pkgdir = Path() / self.__tmpdir / f'packages-{self.__date}'
             pkgdir.mkdir(parents=True, exist_ok=True)
 
-            utils.run_cmd(f'PKGDIR={pkgdir} quickpkg --include-config=y "*/*"', sh_wrap=True)
+            Execute(f'PKGDIR={pkgdir} quickpkg --include-config=y "*/*"', sh_wrap=True)
 
-            utils.run_cmd(f'mv -i -- {pkgdir} {target_dest}')
+            Execute(f'mv -i -- {pkgdir} {target_dest}')
 
         elif self.__mode == '2':
             # repos
             target_dest = Path() / self.__backup_dir / 'repos' / self.__date
 
             os.chdir('/var/db')
-            utils.run_cmd(f'mkzst {self.__verbose} -o {self.__tmpdir} repos')
+            Execute(f'mkzst {self.__verbose} -o {self.__tmpdir} repos')
 
             self.move_finished(dest=target_dest)
 
@@ -80,7 +81,7 @@ class Backup:
             target_dest = Path() / self.__backup_dir / 'portage' / self.__date
 
             os.chdir('/etc')
-            utils.run_cmd(f'mkzst {self.__verbose} -o {self.__tmpdir} portage')
+            Execute(f'mkzst {self.__verbose} -o {self.__tmpdir} portage')
 
             self.move_finished(dest=target_dest)
 
@@ -89,16 +90,16 @@ class Backup:
             target_dest = Path() / self.__backup_dir / 'world' / self.__date
 
             os.chdir('/var/lib/portage')
-            utils.run_cmd(f'mkzst {self.__verbose} -o {self.__tmpdir} world')
+            Execute(f'mkzst {self.__verbose} -o {self.__tmpdir} world')
 
             self.move_finished(dest=target_dest)
 
         elif self.__mode == '5':
             # all
-            utils.run_cmd(f'{utils.get_script_name()} -m 1')
-            utils.run_cmd(f'{utils.get_script_name()} -m 2')
-            utils.run_cmd(f'{utils.get_script_name()} -m 3')
-            utils.run_cmd(f'{utils.get_script_name()} -m 4')
+            Execute(f'{utils.get_script_name()} -m 1')
+            Execute(f'{utils.get_script_name()} -m 2')
+            Execute(f'{utils.get_script_name()} -m 3')
+            Execute(f'{utils.get_script_name()} -m 4')
 
     def run(self, args):
         if args.verbose:

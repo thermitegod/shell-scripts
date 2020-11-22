@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 10.2.0
-# 2020-11-11
+# 10.3.0
+# 2020-11-21
 
 # Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -23,6 +23,7 @@ from pathlib import Path
 from python.utils import clipboard
 from python.utils import net
 from python.utils import utils
+from python.utils.execute import Execute
 
 try:
     from python.private.manga_list import MangaList
@@ -70,7 +71,7 @@ class Download:
               f'{self.__link}'
 
         print(f'downloading: {self.__link}')
-        utils.run_cmd(cmd)
+        Execute(cmd)
         print(f'downloaded: {self.__link}')
         print(f'save path:  {save_path_full}')
 

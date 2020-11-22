@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.2.0
-# 2020-11-11
+# 1.3.0
+# 2020-11-31
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -23,11 +23,11 @@
 
 import os
 import shutil
-
-from tempfile import TemporaryDirectory
 from pathlib import Path
+from tempfile import TemporaryDirectory
 
 from python.utils import utils
+from python.utils.execute import Execute
 
 
 class Microcode:
@@ -43,9 +43,9 @@ class Microcode:
             full_path.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(self.__amd_micro, Path() / full_path / self.__amd_micro_name)
             os.chdir(tmpdir)
-            utils.run_cmd(f'echo {self.__dir_structure}/{self.__amd_micro_name} | '
-                          f'bsdcpio -o -H newc -R 0:0 >| {self.__amd_micro_boot}',
-                          sh_wrap=True)
+            Execute(f'echo {self.__dir_structure}/{self.__amd_micro_name} | '
+                    f'bsdcpio -o -H newc -R 0:0 >| {self.__amd_micro_boot}',
+                    sh_wrap=True)
 
 
 def main():

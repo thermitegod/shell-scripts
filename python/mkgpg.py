@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 2.3.0
-# 2020-11-12
+# 2.4.0
+# 2020-11-21
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -20,6 +20,7 @@ import argparse
 from pathlib import Path
 
 from python.utils import utils
+from python.utils.execute import Execute
 from python.utils.get_files import GetFiles
 from python.utils.output_dir import OutputDir
 
@@ -36,10 +37,10 @@ class Compress:
         if self.__decrypt:
             basename = str(filename).rpartition('.')[0]
             print(f'Decrypting : {filename}')
-            utils.run_cmd(f'nice -19 gpg --output "{basename}" --decrypt "{filename}"')
+            Execute(f'nice -19 gpg --output "{basename}" --decrypt "{filename}"')
         else:
             print(f'Encrypting : {filename}')
-            utils.run_cmd(f'nice -19 gpg --yes --batch -e -r "{self.__user}" "{filename}"')
+            Execute(f'nice -19 gpg --yes --batch -e -r "{self.__user}" "{filename}"')
 
     def run(self, args):
         # compression type
@@ -49,7 +50,7 @@ class Compress:
             self.__user = args.user
         # general
         if args.list_keys:
-            utils.run_cmd('gpg --list-secret-keys --keyid-format LONG')
+            Execute('gpg --list-secret-keys --keyid-format LONG')
             raise SystemExit
         # other
         if args.output_dir:

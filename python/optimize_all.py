@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.6.0
-# 2020-11-11
+# 1.7.0
+# 2020-11-21
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -17,13 +17,14 @@
 #    along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import argparse
-import sys
 import os
+import sys
 from pathlib import Path
 
 from loguru import logger
 
 from python.utils import utils
+from python.utils.execute import Execute
 
 
 class Optimize:
@@ -47,43 +48,43 @@ class Optimize:
             self.__size_end = size
 
     def optimize_jpg(self):
-        utils.run_cmd(f'find . -type f -iname \'*.jp**\' -print0 | '
-                      f'nice -19 xargs --max-args=1 --max-procs={self.__cpu} --null '
-                      f'jpegoptim --strip-all --preserve --preserve-perms',
-                      sh_wrap=True)
+        Execute(f'find . -type f -iname \'*.jp**\' -print0 | '
+                f'nice -19 xargs --max-args=1 --max-procs={self.__cpu} --null '
+                f'jpegoptim --strip-all --preserve --preserve-perms',
+                sh_wrap=True)
 
     def optimize_png(self):
         if self.__png_oxipng:
             # use oxipng
             level = 'max'
 
-            utils.run_cmd(f'find . -type f -iname \'*.png\' -print0 | '
-                          f'nice -19 xargs --max-args=1 --max-procs={int(self.__cpu / 4)} --null '
-                          f'oxipng --threads {int(self.__cpu / 2)} -o {level} --strip all --preserve',
-                          sh_wrap=True)
+            Execute(f'find . -type f -iname \'*.png\' -print0 | '
+                    f'nice -19 xargs --max-args=1 --max-procs={int(self.__cpu / 4)} --null '
+                    f'oxipng --threads {int(self.__cpu / 2)} -o {level} --strip all --preserve',
+                    sh_wrap=True)
         else:
             # use optipng
             level = '5'
             if self.__png_max:
                 level = '7'
 
-            utils.run_cmd(f'find . -type f -iname \'*.png\' -print0 | '
-                          f'nice -19 xargs --max-args=1 --max-procs={self.__cpu} --null '
-                          f'optipng -o{level} -strip all -preserve',
-                          sh_wrap=True)
+            Execute(f'find . -type f -iname \'*.png\' -print0 | '
+                    f'nice -19 xargs --max-args=1 --max-procs={self.__cpu} --null '
+                    f'optipng -o{level} -strip all -preserve',
+                    sh_wrap=True)
 
     def optimize_gif(self):
-        utils.run_cmd(f'find . -type f -iname \'*.gif\' -print0 | '
-                      f'nice -19 xargs --max-args=1 --max-procs={self.__cpu} --null '
-                      f'gifsicle -bO3 -V',
-                      sh_wrap=True)
+        Execute(f'find . -type f -iname \'*.gif\' -print0 | '
+                f'nice -19 xargs --max-args=1 --max-procs={self.__cpu} --null '
+                f'gifsicle -bO3 -V',
+                sh_wrap=True)
 
     def main(self):
         if self.__verbose:
             self.get_size(start=True)
 
         if not self.__disable_mimecheck:
-            utils.run_cmd('mime-correct -A')
+            Execute('mime-correct -A')
 
         if self.__mode == 'optimize-all':
             self.optimize_gif()

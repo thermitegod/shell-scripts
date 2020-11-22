@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 2.8.0
-# 2020-11-11
+# 2.9.0
+# 2020-11-21
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -25,7 +25,7 @@ from pathlib import Path
 from loguru import logger
 from pgmagick import Blob, Image
 
-from python.utils import utils
+from python.utils.execute import Execute
 from python.utils.mimecheck import Mimecheck
 
 
@@ -122,7 +122,7 @@ class Convert:
         c2 = 0
 
         if self.__mimecheck:
-            utils.run_cmd('mime-correct')
+            Execute('mime-correct')
 
         for filename in Path(self.__directory).iterdir():
             if mimecheck.check_if_image(filename=filename):

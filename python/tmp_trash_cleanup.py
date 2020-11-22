@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.2.0
-# 2020-11-11
+# 1.3.0
+# 2020-11-21
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -20,7 +20,7 @@ import argparse
 import shutil
 from pathlib import Path
 
-from python.utils import utils
+from python.utils.execute import Execute
 
 
 class Trash:
@@ -33,8 +33,8 @@ class Trash:
 
     def size(self):
         if Path.is_dir(self.__trashdir):
-            utils.run_cmd(f'du -h {self.__trashdir} | tail -n1 | awk \'{{print $1}}\'',
-                          sh_wrap=True)
+            Execute(f'du -h {self.__trashdir} | tail -n1 | awk \'{{print $1}}\'',
+                    sh_wrap=True)
         else:
             print(f'There is no trash dir: {self.__trashdir}')
 

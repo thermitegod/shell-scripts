@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.5.0
-# 2020-11-12
+# 1.6.0
+# 2020-11-21
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -20,6 +20,7 @@ import argparse
 import time
 
 from python.utils import utils
+from python.utils.execute import Execute
 
 
 class Process:
@@ -54,37 +55,37 @@ class Process:
 
     def process_main(self):
         if self.__detect_nested_dirs:
-            nest_dirs = utils.run_cmd('find . -mindepth 2 -path \'*/*\' -type d', to_stdout=True)
+            nest_dirs = Execute('find . -mindepth 2 -path \'*/*\' -type d', to_stdout=True).get_out()
             if nest_dirs:
                 print(f'Nested directories detected\n\n{nest_dirs}\n\n')
 
         if self.__remove_junk:
-            utils.run_cmd('remove-junk-files -l')
-            utils.run_cmd('remove-junk-files -Ar')
+            Execute('remove-junk-files -l')
+            Execute('remove-junk-files -Ar')
 
-        detected_credits = utils.run_cmd('remove-manga-credits -l', to_stdout=True)
+        detected_credits = Execute('remove-manga-credits -l', to_stdout=True).get_out()
         if detected_credits:
             print(f'{detected_credits}\n\n')
             if self.__mode == 'alt':
                 input('Enter to remove found credits')
                 if self.__match_zzz:
-                    utils.run_cmd('remove-manga-credits -mz')
+                    Execute('remove-manga-credits -mz')
                 else:
-                    utils.run_cmd('remove-manga-credits -m')
+                    Execute('remove-manga-credits -m')
             else:
                 print('Printing found, will NOT remove, use -m to remove')
 
         if self.__numerical_rename:
-            utils.run_cmd(f'rename-numerical-batch')
+            Execute(f'rename-numerical-batch')
 
         if self.__mime_check:
-            utils.run_cmd(f'mime-correct -A')
+            Execute(f'mime-correct -A')
             print('\n\n')
 
         print(f'\n\nMode is \'{self.__mode}\'\n\n')
-        utils.run_cmd('count-archive')
-        utils.run_cmd('count-image')
-        size = utils.run_cmd('du -h | tail -n1 | awk \'{print $1}\'', sh_wrap=True, to_stdout=True).strip('\n')
+        Execute('count-archive')
+        Execute('count-image')
+        size = Execute('du -h | tail -n1 | awk \'{print $1}\'', sh_wrap=True, to_stdout=True).get_out().strip('\n')
         print(f'\nSize : {size}\n')
 
         if self.__set_compressor_interactive:
@@ -109,22 +110,22 @@ class Process:
         self.get_time(start=True)
 
         if self.__optimize:
-            utils.run_cmd('optimize-all -Mv')
+            Execute('optimize-all -Mv')
 
         if self.__archivetype == 1:
-            utils.run_cmd('mkzip -dzP')
+            Execute('mkzip -dzP')
         elif self.__archivetype == 2:
-            utils.run_cmd('mkzip -dZjP')
+            Execute('mkzip -dZjP')
         elif self.__archivetype == 3:
-            utils.run_cmd('mk7z -dzP')
+            Execute('mk7z -dzP')
 
         if self.__comp_advzip and not self.__archivetype == 3:
             # does not need to be run for 7z
-            # utils.run_cmd('mkadvzip')
+            # Execute('mkadvzip')
             pass
 
         if self.__comp_test:
-            utils.run_cmd('mk7z -t -- *', sh_wrap=True)
+            Execute('mk7z -t -- *', sh_wrap=True)
 
         if self.__show_time:
             self.get_time(start=False)

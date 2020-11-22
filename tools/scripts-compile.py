@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.0.0
-# 2020-10-04
+# 1.1.0
+# 2020-11-21
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -21,7 +21,7 @@ import os
 
 from pathlib import Path
 
-from utils import utils
+from python.utils.execute import Execute
 
 
 class Compile:
@@ -30,7 +30,7 @@ class Compile:
 
     def compile(self):
         os.chdir(self.__bin)
-        utils.run_cmd(f'python -m compileall .')
+        Execute(f'python -m compileall .')
 
 
 def main():

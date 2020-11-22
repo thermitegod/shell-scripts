@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 6.7.0
-# 2020-11-11
+# 6.8.0
+# 2020-11-21
 
 # Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -21,6 +21,7 @@ import argparse
 from python.utils import clipboard
 from python.utils import net
 from python.utils import utils
+from python.utils.execute import Execute
 
 
 class Ytdl:
@@ -47,7 +48,7 @@ class Ytdl:
         cmd += self.__link
 
         print(f'downloading: {self.__link}')
-        utils.run_cmd(cmd)
+        Execute(cmd)
         print(f'downloaded: {self.__link}\n')
 
     def run(self, args):

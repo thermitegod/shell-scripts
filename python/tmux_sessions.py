@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.1.0
-# 2020-11-11
+# 1.2.0
+# 2020-11-21
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -16,13 +16,13 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-from python.utils import utils
+from python.utils.execute import Execute
 
 
 def main():
     print('Current tmux sessions\n')
     print('===================')
-    utils.run_cmd('tmux list-session -F \'#S\'')
+    Execute('tmux list-session -F \'#S\'')
     print('===================\n')
     session = input('Enter session name to connect: ')
-    utils.run_cmd(f'tmux attach -t {session}')
+    Execute(f'tmux attach -t {session}')
