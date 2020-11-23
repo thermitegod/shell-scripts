@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 2.23.0
-# 2020-11-21
+# 2.24.0
+# 2020-11-22
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -48,9 +48,9 @@ from pathlib import Path
 from loguru import logger
 from packaging import version
 
-from python.utils import kernel
 from python.utils import utils
 from python.utils.execute import Execute
+from python.utils.kernel import Kernel
 from python.utils.script import Script
 
 
@@ -71,7 +71,7 @@ class Build:
         # script is run as root but tmpdir needs to be rw for portage
         Path.chmod(self.__tmpdir, 0o777)
 
-        self.__kernel_src = kernel.get_kernel_dir()
+        self.__kernel_src = Kernel.get_kernel_dir()
         self.__kernel_config = Path() / self.__kernel_src / '.config'
 
         if not Path.is_file(self.__kernel_config):
@@ -252,7 +252,7 @@ class Build:
     def kernel_bump(self):
         # CONFIG_MODULES and CONFIG_KALLSYMS are required to build zfs
         # but are not needed at runtime if zfs is build into the kernel.
-        kernel.kernel_conf_copy(src=self.__kernel_src, dst=self.__tmpdir)
+        Kernel.kernel_conf_copy(src=self.__kernel_src, dst=self.__tmpdir)
         while True:
             c1, c2, c3 = False, False, False
             for line in Path.open(self.__kernel_config):
@@ -285,8 +285,8 @@ class Build:
             else:
                 break
 
-        kernel.kernel_conf_move(src=self.__kernel_config, dst=self.__kernel_switch_config)
-        kernel.kernel_conf_copy(src=self.__tmpdir, dst=self.__kernel_src)
+        Kernel.kernel_conf_move(src=self.__kernel_config, dst=self.__kernel_switch_config)
+        Kernel.kernel_conf_copy(src=self.__tmpdir, dst=self.__kernel_src)
 
         print('\n\nSwitch config created, rerun script\n')
         raise SystemExit
@@ -346,8 +346,8 @@ class Build:
 
             if not self.__kernel_has_module_support:
                 if Path.is_file(self.__kernel_switch_config):
-                    kernel.kernel_conf_move(src=self.__kernel_src, dst=self.__tmpdir)
-                    kernel.kernel_conf_copy(src=self.__kernel_switch_config, dst=self.__kernel_src)
+                    Kernel.kernel_conf_move(src=self.__kernel_src, dst=self.__tmpdir)
+                    Kernel.kernel_conf_copy(src=self.__kernel_switch_config, dst=self.__kernel_src)
                 else:
                     logger.critical(f'missing switch config \'{self.__kernel_switch_config}\'')
                     raise SystemExit(1)
@@ -379,7 +379,7 @@ class Build:
                         Path() / self.__zfs_kmod_src)
 
             if not self.__kernel_has_module_support:
-                kernel.kernel_conf_move(src=self.__tmpdir, dst=self.__kernel_src)
+                Kernel.kernel_conf_move(src=self.__tmpdir, dst=self.__kernel_src)
 
             if self.__cc_use_clang:
                 # when using clang to run 'make prepare' get error when running zfs configure

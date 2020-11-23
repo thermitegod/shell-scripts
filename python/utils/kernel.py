@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.5.0
-# 2020-10-04
+# 1.6.0
+# 2020-11-22
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -22,43 +22,51 @@ from pathlib import Path
 from loguru import logger
 
 
-def get_kernel_dir():
-    src = Path.resolve(Path('/usr/src/linux'))
-    if not Path.exists(src):
-        logger.critical(f'{src}: is not a valid symlink')
-        raise SystemExit(1)
+class _Kernel:
+    def __init__(self):
+        super().__init__()
 
-    return src
+        self.__src = Path.resolve(Path('/usr/src/linux'))
+        if not Path.exists(self.__src):
+            logger.critical(f'{self.__src}: is not a valid symlink')
+            raise SystemExit(1)
+
+    def get_kernel_dir(self):
+        return self.__src
+
+    @staticmethod
+    def _kernel_conf_action(src: Path, dst: Path, act: str):
+        # src and dst can be either a directory containing the
+        # kernel .config or the full path to the kernel .config
+        # if src or dst is a directory then the kernel .config will
+        # be appended
+
+        src_config = src
+        dst_config = dst
+
+        if Path.is_dir(src_config):
+            src_config = Path() / src_config / '.config'
+
+        if Path.is_dir(dst_config):
+            dst_config = Path() / dst_config / '.config'
+
+        if not Path.is_file(src_config):
+            logger.critical(f'No kernel config found: {src_config}')
+            raise SystemExit(1)
+
+        if Path.is_file(dst_config):
+            Path.unlink(dst_config)
+
+        if act == 'move':
+            shutil.move(src_config, dst_config)
+        elif act == 'copy':
+            shutil.copyfile(src_config, dst_config)
+
+    def kernel_conf_copy(self, src: Path, dst: Path):
+        self._kernel_conf_action(src=src, dst=dst, act='copy')
+
+    def kernel_conf_move(self, src: Path, dst: Path):
+        self._kernel_conf_action(src=src, dst=dst, act='move')
 
 
-def __kernel_conf_action(src: Path, dst: Path, act: str):
-    # src and dst can be either a directory containing the
-    # kernel .config or the full path to the kernel .config
-    # if src or dst is a directory then the kernel .config will
-    # be appended
-
-    if Path.is_dir(src):
-        src = Path() / src / '.config'
-
-    if Path.is_dir(dst):
-        dst = Path() / dst / '.config'
-
-    if not Path.is_file(src):
-        logger.critical(f'No kernel config found: {src}')
-        raise SystemExit(1)
-
-    if Path.is_file(dst):
-        Path.unlink(dst)
-
-    if act == 'move':
-        shutil.move(src, dst)
-    elif act == 'copy':
-        shutil.copyfile(src, dst)
-
-
-def kernel_conf_copy(src: Path, dst: Path):
-    __kernel_conf_action(src=src, dst=dst, act='copy')
-
-
-def kernel_conf_move(src: Path, dst: Path):
-    __kernel_conf_action(src=src, dst=dst, act='move')
+Kernel = _Kernel()

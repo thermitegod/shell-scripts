@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 5.9.0
-# 2020-11-21
+# 5.10.0
+# 2020-11-22
 
 # Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -25,14 +25,14 @@ from tempfile import TemporaryDirectory
 
 from loguru import logger
 
-from python.utils import kernel
 from python.utils import utils
 from python.utils.execute import Execute
+from python.utils.kernel import Kernel
 
 
 class Clean:
     def __init__(self):
-        self.__kdir = kernel.get_kernel_dir()
+        self.__kdir = Kernel.get_kernel_dir()
 
     def kernel_rm(self):
         if Path.is_symlink(self.__kdir):
@@ -48,10 +48,10 @@ class Clean:
         if Path.exists(Path() / self.__kdir / '.config'):
             with TemporaryDirectory() as tmpdir:
                 tmpdir = Path() / tmpdir
-                kernel.kernel_conf_move(src=self.__kdir, dst=tmpdir)
+                Kernel.kernel_conf_move(src=self.__kdir, dst=tmpdir)
                 os.chdir(self.__kdir)
                 Execute(cmd)
-                kernel.kernel_conf_move(src=tmpdir, dst=self.__kdir)
+                Kernel.kernel_conf_move(src=tmpdir, dst=self.__kdir)
         else:
             os.chdir(self.__kdir)
             Execute(cmd)
