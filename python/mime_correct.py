@@ -25,7 +25,7 @@ from loguru import logger
 from python.utils import hash
 from python.utils.colors import Colors
 from python.utils.mimecheck import Mimecheck
-from python.utils.script import Script
+from python.utils.script import ExecuteScript
 
 
 class MimeCorrect:
@@ -120,7 +120,7 @@ class MimeCorrect:
         if args.check_all:
             text = f'find {Path.cwd()} -path \'*/*\' -type d \\( ! -name . \\) | ' \
                    f'while read -r dir ; do cd "${{dir}}" && {Path(sys.argv[0])} ; done\n'
-            Script.execute_script_shell(text=text)
+            ExecuteScript(text)
             raise SystemExit
         if args.list:
             self.__list_only = True

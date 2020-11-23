@@ -32,7 +32,7 @@ from pathlib import Path
 from python.utils import utils
 from python.utils.get_files import GetFiles
 from python.utils.output_dir import OutputDir
-from python.utils.script import Script
+from python.utils.script import ExecuteScript
 
 
 class Compress:
@@ -92,7 +92,7 @@ class Compress:
         else:
             text = f'{self.__cmd} --output-dir-flat="{self.__output_dir}" -- "{filename}" || {die}'
 
-        Script.execute_script_shell(text=text)
+        ExecuteScript(text)
 
         if Path.exists(test_file):
             if self.__destructive:

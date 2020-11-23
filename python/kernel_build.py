@@ -51,7 +51,7 @@ from packaging import version
 from python.utils import utils
 from python.utils.execute import Execute
 from python.utils.kernel import Kernel
-from python.utils.script import Script
+from python.utils.script import ExecuteScript
 
 
 # TODO
@@ -369,7 +369,7 @@ class Build:
             text = f'{portage_env}\n' \
                    f'EXTRA_ECONF="--with-linux={self.__kernel_src} --enable-linux-builtin" ebuild ' \
                    f'{self.__zfs_ebuild_path} configure || die "build failed"\n'
-            Script.execute_script_shell(text=text)
+            ExecuteScript(text)
 
             os.chdir(Path() / zfs_build_path / zfs_build_version)
             Execute(f'./copy-builtin {self.__kernel_src}')

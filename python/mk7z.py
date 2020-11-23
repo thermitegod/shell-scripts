@@ -34,7 +34,7 @@ from python.utils.colors import Colors
 from python.utils.execute import Execute
 from python.utils.get_files import GetFiles
 from python.utils.output_dir import OutputDir
-from python.utils.script import Script
+from python.utils.script import ExecuteScript
 
 
 class Compress:
@@ -109,7 +109,7 @@ class Compress:
                f'-o="{self.__output_dir}" "{Path(filename).name}.7z" "{Path(filename).name}" || ' \
                f'die "Compression failed for \'{Path.resolve(filename)}\'"'
 
-        Script.execute_script_shell(text=text)
+        ExecuteScript(text)
 
         if Path.exists(test_file):
             if self.__destructive:
