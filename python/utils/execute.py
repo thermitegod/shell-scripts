@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.0.0
-# 2020-11-21
+# 1.1.0
+# 2020-11-22
 
 # Copyright (C) 2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -31,6 +31,8 @@ class Execute:
             send output to stdout, required if using get_out().
             Can also be used to silence command output.
         """
+
+        super().__init__()
 
         self.__cmd = cmd
         self.__ret = None
