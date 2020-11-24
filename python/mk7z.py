@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 2.4.0
-# 2020-11-21
+# 2.5.0
+# 2020-11-23
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -126,7 +126,7 @@ class Compress:
         if args.disable_tests:
             self.__run_tests = False
         if args.output_dir:
-            self.__output_dir = OutputDir.set_output_dir(directory=args.output_dir)
+            self.__output_dir = OutputDir(directory=args.output_dir).get_dir()
         # profile
         if args.single:
             self.__threads = 'off'

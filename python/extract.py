@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 2.4.0
-# 2020-11-21
+# 2.5.0
+# 2020-11-23
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -116,7 +116,7 @@ class Decompress:
         # other
         if args.output_dir:
             self.__extract_to = True
-            self.__output_dir = OutputDir.set_output_dir(directory=args.output_dir)
+            self.__output_dir = OutputDir(directory=args.output_dir).get_dir()
 
         GetFiles.get_only_files(function=self.run_extraction, input_files=args.input_files, only_files=args.files)
 
