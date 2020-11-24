@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.0.1
-# 2020-11-12
+# 2.0.0
+# 2020-11-24
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -21,34 +21,42 @@ from pathlib import Path
 from typing import Callable
 
 
-class _Recursion:
+class RecursiveFindFiles:
     def __init__(self):
+        super().__init__()
+
         self.__file_list = []
-        pass
 
-    def recursive_find(self, function: Callable):
-        """
-        :param function:
-            runs this function in each sub dir
-        """
-        for f in Path(Path.cwd()).iterdir():
-            if f.is_dir():
-                os.chdir(f)
-                function()
-                self.recursive_find(function=function)
+        self._recursive_find_files()
 
-    def recursive_find_files(self):
+    def _recursive_find_files(self):
         """
         gets a list of all files in every sub dir
         """
+
         for f in Path(Path.cwd()).iterdir():
             if f.is_file():
                 self.__file_list.append(str(f))
             elif f.is_dir():
                 os.chdir(f)
-                self.recursive_find_files()
+                self._recursive_find_files()
 
+    def get_files(self):
         return self.__file_list
 
 
-Recursion = _Recursion()
+class RecursiveExecute:
+    def __init__(self, function: Callable):
+        """
+        :param function:
+            run this function in each sub dir,
+            function takes no args
+        """
+
+        super().__init__()
+
+        for f in Path(Path.cwd()).iterdir():
+            if f.is_dir():
+                os.chdir(f)
+                function()
+                RecursiveExecute(function=function)

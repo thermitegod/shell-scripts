@@ -19,7 +19,7 @@
 import argparse
 
 from python.utils import utils
-from python.utils.recursion import Recursion
+from python.utils.recursion import RecursiveFindFiles
 
 
 class Count:
@@ -46,7 +46,7 @@ class Count:
         self.__file_list = []
 
     def main_count(self):
-        self.__file_list = Recursion.recursive_find_files()
+        self.__file_list = RecursiveFindFiles().get_files()
 
         for ext in self.__mode:
             for f in self.__file_list:
@@ -64,7 +64,7 @@ class Count:
             print(f'Total\t: {self.__counter_total}')
 
     def main_list(self):
-        self.__file_list = Recursion.recursive_find_files()
+        self.__file_list = RecursiveFindFiles().get_files()
 
         for ext in self.__mode:
             print(f'Listing all of: {ext[1:].upper()}')

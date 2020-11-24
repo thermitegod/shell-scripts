@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.3.0
-# 2020-11-21
+# 1.4.0
+# 2020-11-24
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -23,7 +23,7 @@ from pathlib import Path
 from loguru import logger
 
 from python.utils.execute import Execute
-from python.utils.recursion import Recursion
+from python.utils.recursion import RecursiveExecute
 
 
 class Digest:
@@ -45,7 +45,7 @@ class Digest:
     def run(self, args):
         # general
         if args.all:
-            Recursion.recursive_find(function=self.digest)
+            RecursiveExecute(function=self.digest)
             raise SystemExit
 
         self.digest()

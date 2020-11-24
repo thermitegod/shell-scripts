@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.4.0
-# 2020-11-11
+# 1.5.0
+# 2020-11-24
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -24,7 +24,7 @@ from loguru import logger
 
 from python.utils import hash
 from python.utils import natural_sort
-from python.utils.recursion import Recursion
+from python.utils.recursion import RecursiveExecute
 
 
 class Count:
@@ -96,7 +96,7 @@ class Count:
         if args.pretend:
             self.__pretend = True
         if args.batch:
-            Recursion.recursive_find(function=self.main_rename)
+            RecursiveExecute(function=self.main_rename)
         else:
             self.main_rename()
 
