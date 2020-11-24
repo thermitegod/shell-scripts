@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 2.2.0
-# 2020-11-21
+# 2.3.0
+# 2020-11-23
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -23,7 +23,7 @@ import tempfile
 from pathlib import Path
 
 from python.utils.execute import Execute
-from python.utils.get_files import GetFiles
+from python.utils.get_files import GetOnlyFiles
 from python.utils.mimecheck import Mimecheck
 
 
@@ -61,7 +61,7 @@ class Convert:
         Execute(f'mv -- "{Path.cwd()}/{filename}" "{original}"')
 
     def run(self, args):
-        GetFiles.get_only_files(function=self.convert_main, input_files=args.input_files, only_files=args.files)
+        GetOnlyFiles(function=self.convert_main, input_files=args.input_files, only_files=args.files)
 
 
 def main():

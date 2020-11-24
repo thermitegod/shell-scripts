@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 3.4.0
+# 3.5.0
 # 2020-11-23
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -124,8 +124,8 @@ class Compress:
 
         self.get_mode()
 
-        GetFiles.get_files(function=self.compress, input_files=args.input_files,
-                           only_directories=args.directories, only_files=args.files)
+        GetFiles(function=self.compress, input_files=args.input_files,
+                 only_directories=args.directories, only_files=args.files)
 
 
 def main():
@@ -170,4 +170,3 @@ def main():
 
     run = Compress()
     run.run(args)
-

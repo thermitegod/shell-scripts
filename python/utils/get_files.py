@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.1.0
-# 2020-11-11
+# 2.0.0
+# 2020-11-23
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -21,26 +21,32 @@ from pathlib import Path
 from typing import Callable
 
 
-class _GetFiles:
-    def __init__(self):
-        self.__dir_listing = []
-
-    def get_files(self, function: Callable, input_files: list = None,
-                  only_directories: bool = False, only_files: bool = False):
+class GetFiles:
+    def __init__(self, function: Callable, input_files: list = None,
+                 only_directories: bool = False, only_files: bool = False):
         """
+        Can be run for all directories, all files, all directories and files, or
+        a list of files
+
         :param function:
+            callback function, function(filename, compressing_dir)
         :param input_files:
+            list of files to run on
         :param only_directories:
+            only run on directories ignoring files
         :param only_files:
+            only run on files ignoring directories
         :return:
         """
 
-        if only_directories or only_files:
-            self.__dir_listing = []
-            for f in Path(Path.cwd()).iterdir():
-                self.__dir_listing.append(f)
+        super().__init__()
 
-            for f in self.__dir_listing:
+        if only_directories or only_files:
+            dir_listing = []
+            for f in Path(Path.cwd()).iterdir():
+                dir_listing.append(f)
+
+            for f in dir_listing:
                 if Path.is_dir(f) and only_directories:
                     function(filename=f, compressing_dir=True)
                 elif Path.is_file(f) and only_files:
@@ -54,24 +60,31 @@ class _GetFiles:
                 elif Path.is_file(f):
                     function(filename=f, compressing_dir=False)
 
-        else:
-            pass
 
-    def get_only_files(self, function: Callable, input_files: list = None, only_files: bool = False):
+class GetOnlyFiles:
+    def __init__(self, function: Callable, input_files: list = None,
+                 only_files: bool = False):
         """
+        Can be run for all files, or a list of files
+
         :param function:
+            callback function, function(filename)
         :param input_files:
+            list of files to run on
         :param only_files:
+            only run on files ignoring directories
         :return:
         """
 
-        if only_files:
-            self.__dir_listing = []
-            for f in Path(Path.cwd()).iterdir():
-                self.__dir_listing.append(f)
+        super().__init__()
 
-            for f in self.__dir_listing:
-                if Path.is_file(f) and only_files:
+        if only_files:
+            dir_listing = []
+            for f in Path(Path.cwd()).iterdir():
+                dir_listing.append(f)
+
+            for f in dir_listing:
+                if Path.is_file(f):
                     function(filename=f)
 
         elif input_files is not None:
@@ -79,6 +92,3 @@ class _GetFiles:
                 f = Path(f).resolve()
                 if Path.is_file(f):
                     function(filename=f)
-
-
-GetFiles = _GetFiles()

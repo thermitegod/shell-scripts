@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 2.5.0
+# 2.6.0
 # 2020-11-23
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -21,7 +21,7 @@ from pathlib import Path
 
 from python.utils import utils
 from python.utils.execute import Execute
-from python.utils.get_files import GetFiles
+from python.utils.get_files import GetOnlyFiles
 from python.utils.output_dir import OutputDir
 
 
@@ -59,7 +59,7 @@ class Compress:
             # TODO
             raise NotImplementedError
 
-        GetFiles.get_only_files(function=self.compress, input_files=args.input_files, only_files=args.files)
+        GetOnlyFiles(function=self.compress, input_files=args.input_files, only_files=args.files)
 
 
 def main():

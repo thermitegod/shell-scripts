@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 2.5.0
+# 2.6.0
 # 2020-11-23
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -92,8 +92,8 @@ class Compress:
             for e in args.exclude:
                 self.__exclude += f'--exclude="{e}" '
 
-        GetFiles.get_files(function=self.compress, input_files=args.input_files,
-                           only_directories=args.directories, only_files=args.files)
+        GetFiles(function=self.compress, input_files=args.input_files,
+                 only_directories=args.directories, only_files=args.files)
 
         self.run_tests()
 
