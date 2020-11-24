@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.3.0
-# 2020-11-11
+# 1.3.1
+# 2020-11-24
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -31,9 +31,9 @@ class Count:
 
         script = utils.get_script_name()
         if script == 'count-image':
-            self.__mode = self.__type_archive
-        elif script == 'count-archive':
             self.__mode = self.__type_image
+        elif script == 'count-archive':
+            self.__mode = self.__type_archive
         elif script == 'count-video':
             self.__mode = self.__type_video
         else:
