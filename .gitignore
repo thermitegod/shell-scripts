@@ -1,9 +1,11 @@
 chromium-e*
+chromium-g*
 chromium-s*
 chromium-h*
 chromium-p*
 
-tools/symlink-chrome.py
+tools-symlink-chrome
+python/tools_symlink_chrome.py
 
 # shell symlinks
 remove-ja*
