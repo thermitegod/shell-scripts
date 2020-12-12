@@ -1,0 +1,6 @@
+#!/usr/bin/env python3
+from python import tools_symlink_shell
+try:
+    tools_symlink_shell.main()
+except KeyboardInterrupt:
+    raise SystemExit

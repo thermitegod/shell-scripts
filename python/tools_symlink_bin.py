@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.3.0
-# 2020-11-21
+# 1.4.0
+# 2020-12-03
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -69,10 +69,3 @@ def main():
 
     run = Symlink()
     run.run(args)
-
-
-if __name__ == '__main__':
-    try:
-        main()
-    except KeyboardInterrupt:
-        raise SystemExit
