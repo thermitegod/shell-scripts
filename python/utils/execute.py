@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.1.0
-# 2020-11-22
+# 1.2.0
+# 2020-12-12
 
 # Copyright (C) 2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -35,7 +35,7 @@ class Execute:
         super().__init__()
 
         self.__cmd = cmd
-        self.__ret = None
+        self.__out = None
 
         if sh_wrap:
             self.__cmd = f'sh -c "{self.__cmd}"'
