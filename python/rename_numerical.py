@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.6.0
-# 2020-12-11
+# 1.7.0
+# 2020-12-12
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -59,11 +59,10 @@ class Count:
         self.__file_list = []
 
     def rename_files(self):
-        count = 1
-        for f in self.__file_list:
-            ext = f.rpartition('.')[-1]
-            file_original = Path(f).resolve()
-            file_new = Path() / Path.cwd() / f'{count:{self.__padding}}.{ext}'
+        for idx, item in enumerate(self.__file_list, start=1):
+            ext = item.rpartition('.')[-1]
+            file_original = Path(item).resolve()
+            file_new = Path() / Path.cwd() / f'{idx:{self.__padding}}.{ext}'
 
             if not Path.exists(Path(file_new)):
                 if self.__pretend:
@@ -78,8 +77,6 @@ class Count:
                 else:
                     logger.critical(f'===SHOULD NEVER BE SEEN===')
                     logger.critical(f'Name collision with a diffrent file: \'{file_new}\'')
-
-            count += 1
 
     def main_rename(self):
         self.count_files()
