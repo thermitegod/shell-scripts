@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 1.7.0
+# 1.8.0
 # 2020-12-12
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -22,8 +22,8 @@ from pathlib import Path
 
 from loguru import logger
 
-from python.utils import hash
 from python.utils import natural_sort
+from python.utils.hash_compare import HashCompare
 from python.utils.recursion import RecursiveExecute
 
 
@@ -72,7 +72,7 @@ class Count:
                 Path.rename(file_original, file_new)
                 logger.debug(f'Renamed \'{file_original}\' -> \'{file_new}\'')
             else:
-                if hash.file_hash_compare(file_original, file_new):
+                if HashCompare(file_original, file_new).results():
                     logger.debug(f'Same File not renaming: \'{file_new}\'')
                 else:
                     logger.critical(f'===SHOULD NEVER BE SEEN===')

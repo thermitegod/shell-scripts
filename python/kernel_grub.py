@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 3.7.0
-# 2020-11-21
+# 3.8.0
+# 2020-12-12
 
 # Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -20,9 +20,9 @@ import shutil
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-from python.utils import hash
 from python.utils import utils
 from python.utils.execute import Execute
+from python.utils.hash_compare import HashCompare
 
 
 def main():
@@ -42,7 +42,7 @@ def main():
             raise SystemExit(1)
 
         if Path.exists(cfgold):
-            if not hash.file_hash_compare(cfgold, cfgnew):
+            if not HashCompare(cfgold, cfgnew).results():
                 Path.unlink(cfgold)
                 shutil.move(cfgnew, cfgold)
             else:

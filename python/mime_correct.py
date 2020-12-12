@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.9.0
-# 2020-11-12
+# 1.10.0
+# 2020-12-12
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -22,8 +22,8 @@ from pathlib import Path
 
 from loguru import logger
 
-from python.utils import hash
 from python.utils.colors import Colors
+from python.utils.hash_compare import HashCompare
 from python.utils.mimecheck import Mimecheck
 from python.utils.script import ExecuteScript
 
@@ -75,7 +75,7 @@ class MimeCorrect:
                 correct_name = Path(f'{name}.{mimeext}')
 
                 if Path.exists(correct_name) and Path.exists(current_name):
-                    if hash.file_hash_compare(correct_name, current_name):
+                    if HashCompare(correct_name, current_name).results():
                         logger.debug(f'File collision is same file: \'{current_name}\' \'{correct_name}\'')
                     else:
                         logger.debug(f'File collision with different files: \'{current_name}\' \'{correct_name}\'')

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.2.0
-# 2020-10-23
+# 2.0.0
+# 2020-12-12
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -21,14 +21,22 @@ from pathlib import Path
 import xxhash
 
 
-def file_hash_compare(file1: Path, file2: Path):
-    hash_list = []
-    for filename in [file1, file2]:
-        hasher = xxhash.xxh3_64()
-        with Path.open(filename, 'rb') as f:
-            hasher.update(f.read())
-            hash_list.append(hasher.hexdigest())
+class HashCompare:
+    def __init__(self, file1: Path, file2: Path):
+        super().__init__()
 
-    if hash_list[0] == hash_list[1]:
-        return True
-    return False
+        self.__hash_results = None
+
+        hash_list = []
+        for filename in [file1, file2]:
+            hasher = xxhash.xxh3_64()
+            with Path.open(filename, 'rb') as f:
+                hasher.update(f.read())
+                hash_list.append(hasher.hexdigest())
+
+        if hash_list[0] == hash_list[1]:
+            self.__hash_results = True
+        self.__hash_results = False
+
+    def results(self):
+        return self.__hash_results
