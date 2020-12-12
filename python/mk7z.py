@@ -27,6 +27,7 @@
 import argparse
 import os
 import shutil
+import re
 from pathlib import Path
 
 from python.utils import utils
@@ -54,6 +55,12 @@ class Compress:
         self.__test_passed = 0
         self.__test_failed = 0
 
+    @staticmethod
+    def shell_escape(string: str):
+        # to get full shell escape have to use .replace because re.escape will not
+        # escape single quotes
+        return re.escape(string).replace("'", r"\'")
+
     def test_archive(self, filename):
         filename = Path(filename)
         if Path.is_file(filename) and str(filename).endswith(('.7z', '.zip')):
@@ -63,7 +70,7 @@ class Compress:
             # double quotes dont work around filename becuse sh_wrap will provide its own double
             # quotes. this is the cleanest solution for dealing with garbage filenames other than
             # renaming them
-            status = Execute(f'nice -19 7z t -- {utils.shell_escape(str(filename))} | grep Ok',
+            status = Execute(f'nice -19 7z t -- {self.shell_escape(str(filename))} | grep Ok',
                              sh_wrap=True, to_stdout=True).get_out()
 
             if 'Everything is Ok' in status:
