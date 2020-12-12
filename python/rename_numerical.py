@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.5.0
-# 2020-11-24
+# 1.6.0
+# 2020-12-11
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -47,10 +47,10 @@ class Count:
         natural_sort.alphanumeric_sort(self.__file_list)
 
     def set_padding(self):
-        if self.__file_counter >= 1000:
-            self.__padding = f'04'
-        else:
+        if self.__file_counter <= 1000:
             self.__padding = f'03'
+        else:
+            self.__padding = f'0{len(str(self.__file_counter))}'
 
     def reset_vars(self):
         self.__file_counter = 0
