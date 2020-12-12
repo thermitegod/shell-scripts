@@ -156,7 +156,7 @@ def main():
                        help='Levels: %(choices)s')
     args = parser.parse_args()
 
-    # utils.args_required_else_help()
+    # CheckEnv.args_required_else_help()
 
     logger.remove()
     logger.add(sys.stdout, level=args.loglevel, colorize=True)

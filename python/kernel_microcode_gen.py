@@ -26,7 +26,7 @@ import shutil
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-from python.utils import utils
+from python.utils.check_env import CheckEnv
 from python.utils.execute import Execute
 
 
@@ -49,7 +49,7 @@ class Microcode:
 
 
 def main():
-    utils.root_check(require_root=True)
+    CheckEnv.root_check(require_root=True)
 
     run = Microcode()
     run.run()

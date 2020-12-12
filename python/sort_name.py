@@ -23,7 +23,7 @@ from pathlib import Path
 from loguru import logger
 
 from python.utils import confirm
-from python.utils import utils
+from python.utils.check_env import CheckEnv
 from python.utils.execute import Execute
 
 try:
@@ -88,7 +88,7 @@ class Sort:
               f'Running from\t: {Path.cwd()}\n'
               f'Dest is\t\t: {self.__dest}\n'
               '\nMake sure everything has been processed correctly\n'
-              f'\nRunning script is: {utils.get_script_name()}\n')
+              f'\nRunning script is: {CheckEnv.get_script_name()}\n')
 
         if confirm.confirm_run():
             # all target dirs should exits before running
@@ -153,7 +153,7 @@ def main():
                        help='Levels: %(choices)s')
     args = parser.parse_args()
 
-    utils.args_required_else_help()
+    CheckEnv.args_required_else_help()
 
     logger.remove()
     logger.add(sys.stdout, level=args.loglevel, colorize=True)

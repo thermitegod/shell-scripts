@@ -25,7 +25,7 @@ import time
 from pathlib import Path
 
 from python.utils import confirm
-from python.utils import utils
+from python.utils.check_env import CheckEnv
 from python.utils.execute import Execute
 
 
@@ -51,7 +51,7 @@ class Backup:
         Execute(f'ls -1A {self.__backup_dir}')
 
     def restore(self):
-        utils.root_check(require_root=True)
+        CheckEnv.root_check(require_root=True)
         self.list()
         file = input('Enter file to restore: ')
         shutil.copyfile(self.__backup_dir / file, self.__tmpdir / 'mtimedb.zst')
@@ -93,7 +93,7 @@ def main():
                         help='remove backuped mtimdb')
     args = parser.parse_args()
 
-    utils.args_required_else_help()
+    CheckEnv.args_required_else_help()
 
     run = Backup()
     run.run(args)

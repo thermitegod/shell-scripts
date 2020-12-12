@@ -23,7 +23,7 @@ from pathlib import Path
 
 from loguru import logger
 
-from python.utils import utils
+from python.utils.check_env import CheckEnv
 from python.utils.execute import Execute
 from python.utils.lxd import Lxd
 
@@ -87,7 +87,7 @@ def main():
                        help='Levels: %(choices)s')
     args = parser.parse_args()
 
-    utils.args_required_else_help()
+    CheckEnv.args_required_else_help()
 
     logger.remove()
     logger.add(sys.stdout, level=args.loglevel, colorize=True)

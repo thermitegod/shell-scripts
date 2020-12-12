@@ -29,7 +29,7 @@ import os
 import shutil
 from pathlib import Path
 
-from python.utils import utils
+from python.utils.check_env import CheckEnv
 from python.utils.get_files import GetFiles
 from python.utils.output_dir import OutputDir
 from python.utils.script import ExecuteScript
@@ -53,7 +53,7 @@ class Compress:
         self.__destructive = False
 
     def get_mode(self):
-        mode = utils.get_script_name()
+        mode = CheckEnv.get_script_name()
         if 'zst' in mode:
             if self.__ultra:
                 self.__cmd = 'zstd -T0 --ultra -22 --long=31'
@@ -166,7 +166,7 @@ def main():
                     help='Delete original after it is compressed')
     args = parser.parse_args()
 
-    utils.args_required_else_help()
+    CheckEnv.args_required_else_help()
 
     run = Compress()
     run.run(args)

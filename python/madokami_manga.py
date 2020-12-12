@@ -22,7 +22,7 @@ from pathlib import Path
 
 from python.utils import clipboard
 from python.utils import net
-from python.utils import utils
+from python.utils.check_env import CheckEnv
 from python.utils.execute import Execute
 
 try:
@@ -42,7 +42,7 @@ class Download:
     def __init__(self):
         self.__user, self.__pass = mado_pass.mado_login()
 
-        self.__mode = utils.get_script_name()
+        self.__mode = CheckEnv.get_script_name()
         self.__link = ''
         self.__save_path = Path('/mnt/data')
         self.__symlink = True
@@ -117,7 +117,7 @@ def main():
                         help='supply a url, otherwise will get link from clipboard')
     args = parser.parse_args()
 
-    utils.root_check(require_root=False)
+    CheckEnv.root_check(require_root=False)
 
     run = Download()
     run.run(args)

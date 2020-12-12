@@ -20,13 +20,13 @@ import shutil
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-from python.utils import utils
+from python.utils.check_env import CheckEnv
 from python.utils.execute import Execute
 from python.utils.hash_compare import HashCompare
 
 
 def main():
-    utils.root_check(require_root=True)
+    CheckEnv.root_check(require_root=True)
 
     with TemporaryDirectory() as tmpdir:
         cfg = 'grub.cfg'

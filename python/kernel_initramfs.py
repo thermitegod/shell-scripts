@@ -18,7 +18,7 @@
 
 import argparse
 
-from python.utils import utils
+from python.utils.check_env import CheckEnv
 from python.utils.execute import Execute
 
 
@@ -85,7 +85,7 @@ def main():
                         help='kernel version to gen initramfs for')
     args = parser.parse_args()
 
-    utils.root_check(require_root=True)
+    CheckEnv.root_check(require_root=True)
 
     run = Initramfs()
     run.run(args)

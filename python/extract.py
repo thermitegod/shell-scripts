@@ -23,7 +23,7 @@ import argparse
 import os
 from pathlib import Path
 
-from python.utils import utils
+from python.utils.check_env import CheckEnv
 from python.utils.execute import Execute
 from python.utils.get_files import GetOnlyFiles
 from python.utils.output_dir import OutputDir
@@ -142,7 +142,7 @@ def main():
                       help='Extract files to output dir without creating sub directories, req -o')
     args = parser.parse_args()
 
-    utils.args_required_else_help()
+    CheckEnv.args_required_else_help()
 
     run = Decompress()
     run.run(args)

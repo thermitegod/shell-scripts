@@ -20,7 +20,7 @@ import argparse
 import os
 from pathlib import Path
 
-from python.utils import utils
+from python.utils.check_env import CheckEnv
 from python.utils.execute import Execute
 
 
@@ -29,7 +29,7 @@ class Chrome:
         self.__chrome = None
         self.__chrome_profile = None
 
-        self.__script_name = utils.get_script_name().removeprefix('chromium-')
+        self.__script_name = CheckEnv.get_script_name().removeprefix('chromium-')
 
         self.__display_server = 'x11'
         try:
@@ -89,7 +89,7 @@ def main():
                          help='set specific chrome version to use, [%(choices)s]')
     args = parser.parse_args()
 
-    utils.root_check(require_root=False)
+    CheckEnv.root_check(require_root=False)
 
     run = Chrome()
     run.run(args)

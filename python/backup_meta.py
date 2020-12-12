@@ -26,7 +26,7 @@ import time
 from pathlib import Path
 
 from python.utils import dirs
-from python.utils import utils
+from python.utils.check_env import CheckEnv
 from python.utils.execute import Execute
 
 
@@ -39,7 +39,7 @@ class Backup:
 
         self.__backup_dir = Path() / '/mnt/data/backup'
 
-        self.__mode = utils.get_script_name()
+        self.__mode = CheckEnv.get_script_name()
 
         self.__user = None
 

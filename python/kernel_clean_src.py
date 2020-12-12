@@ -25,7 +25,7 @@ from tempfile import TemporaryDirectory
 
 from loguru import logger
 
-from python.utils import utils
+from python.utils.check_env import CheckEnv
 from python.utils.execute import Execute
 from python.utils.kernel import Kernel
 
@@ -80,9 +80,9 @@ def main():
                        help='Levels: %(choices)s')
     args = parser.parse_args()
 
-    utils.args_required_else_help()
+    CheckEnv.args_required_else_help()
 
-    utils.root_check(require_root=True)
+    CheckEnv.root_check(require_root=True)
 
     logger.remove()
     logger.add(sys.stdout, level=args.loglevel, colorize=True)

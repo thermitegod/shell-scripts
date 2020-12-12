@@ -40,7 +40,7 @@ class Dl:
         self.__url = None
         self.__save_dir_full = None
 
-        # script_name = utils.get_script_name()
+        # script_name = CheckEnv.get_script_name()
         # if script_name == '4chan-dl':
         self.__thread_list = ThreadList.THREADS_4CHAN
         self.__dir = Path() / dirs.get_download_dir() / 'chan/4chan'

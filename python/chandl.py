@@ -36,7 +36,7 @@ from urllib.parse import urlparse
 import requests
 from loguru import logger
 
-from python.utils import utils
+from python.utils.check_env import CheckEnv
 
 
 class Chandl:
@@ -307,7 +307,7 @@ def main():
                        help='Levels: %(choices)s')
     args = parser.parse_args()
 
-    utils.args_required_else_help()
+    CheckEnv.args_required_else_help()
 
     logger.remove()
     logger.add(sys.stdout, level=args.loglevel, colorize=True)

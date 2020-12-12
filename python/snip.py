@@ -20,14 +20,14 @@
 import time
 from pathlib import Path
 
-from python.utils import utils
+from python.utils.check_env import CheckEnv
 from python.utils.execute import Execute
 
 
 def main():
     cmd = 'gm import '
 
-    if utils.get_script_name() == 'snip-root':
+    if CheckEnv.get_script_name() == 'snip-root':
         cmd += '-window root '
 
     cmd += f'{Path.home()}/{int(time.time())}.png'

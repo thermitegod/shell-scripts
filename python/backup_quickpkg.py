@@ -24,7 +24,7 @@ import tempfile
 import time
 from pathlib import Path
 
-from python.utils import utils
+from python.utils.check_env import CheckEnv
 from python.utils.execute import Execute
 
 
@@ -96,10 +96,10 @@ class Backup:
 
         elif self.__mode == '5':
             # all
-            Execute(f'{utils.get_script_name()} -m 1')
-            Execute(f'{utils.get_script_name()} -m 2')
-            Execute(f'{utils.get_script_name()} -m 3')
-            Execute(f'{utils.get_script_name()} -m 4')
+            Execute(f'{CheckEnv.get_script_name()} -m 1')
+            Execute(f'{CheckEnv.get_script_name()} -m 2')
+            Execute(f'{CheckEnv.get_script_name()} -m 3')
+            Execute(f'{CheckEnv.get_script_name()} -m 4')
 
     def run(self, args):
         if args.verbose:
@@ -128,7 +128,7 @@ def main():
                         help='Selects backup to run',)
     args = parser.parse_args()
 
-    utils.root_check(require_root=True)
+    CheckEnv.root_check(require_root=True)
 
     run = Backup()
     run.run(args)

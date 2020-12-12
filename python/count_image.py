@@ -18,7 +18,7 @@
 
 import argparse
 
-from python.utils import utils
+from python.utils.check_env import CheckEnv
 from python.utils.recursion import RecursiveFindFiles
 
 
@@ -29,7 +29,7 @@ class Count:
         self.__type_image = ('.png', '.jpg', '.jpeg', '.jpe', '.gif', '.bmp', '.ico', )
         self.__type_video = ('.webm', '.mp4', '.mkv', '.avi', '.mov', '.wmv')
 
-        script = utils.get_script_name()
+        script = CheckEnv.get_script_name()
         if script == 'count-image':
             self.__mode = self.__type_image
         elif script == 'count-archive':

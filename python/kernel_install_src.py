@@ -19,7 +19,7 @@
 import argparse
 from pathlib import Path
 
-from python.utils import utils
+from python.utils.check_env import CheckEnv
 from python.utils.execute import Execute
 
 
@@ -60,7 +60,7 @@ def main():
                         help='install sys-kernel/vanilla-sources')
     args = parser.parse_args()
 
-    utils.root_check(require_root=True)
+    CheckEnv.root_check(require_root=True)
 
     run = Install()
     run.run(args)

@@ -20,7 +20,7 @@ import argparse
 import time
 from pathlib import Path
 
-from python.utils import utils
+from python.utils.check_env import CheckEnv
 from python.utils.execute import Execute
 
 
@@ -70,7 +70,7 @@ def main():
         selected_pool = args.list
 
     if args.snapshot:
-        utils.root_check(require_root=True)
+        CheckEnv.root_check(require_root=True)
         cmd += 'snapshot '
         selected_pool = args.snapshot
 
@@ -99,7 +99,7 @@ def main():
         Execute(cmd)
 
     if args.export:
-        utils.root_check(require_root=True)
+        CheckEnv.root_check(require_root=True)
         target = args.export
         Execute(f'zfs send {target} | zstd -T0 >| {Path.cwd()}/{Path(target).name}.zst',
                 sh_wrap=True)

@@ -19,7 +19,7 @@
 import argparse
 from pathlib import Path
 
-from python.utils import utils
+from python.utils.check_env import CheckEnv
 from python.utils.colors import Colors
 
 
@@ -37,7 +37,7 @@ class Powerstate:
                 print(f'GPU state is already \'{self.__current_state}\'')
                 raise SystemExit
 
-            utils.root_check(require_root=True)
+            CheckEnv.root_check(require_root=True)
 
             print(f'Current GPU power state is \'{self.__current_state}\', switching state to \'{new_state}\'')
             self.__card.write_text(new_state)
@@ -54,7 +54,7 @@ def main():
                         help='Set GPU power state')
     args = parser.parse_args()
 
-    utils.args_required_else_help()
+    CheckEnv.args_required_else_help()
 
     run = Powerstate()
     run.run(args)

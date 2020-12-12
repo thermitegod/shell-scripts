@@ -30,7 +30,7 @@ import shutil
 import re
 from pathlib import Path
 
-from python.utils import utils
+from python.utils.check_env import CheckEnv
 from python.utils.colors import Colors
 from python.utils.execute import Execute
 from python.utils.get_files import GetFiles
@@ -202,7 +202,7 @@ def main():
                     help='Delete original after it is compressed')
     args = parser.parse_args()
 
-    utils.args_required_else_help()
+    CheckEnv.args_required_else_help()
 
     run = Compress()
     run.run(args)

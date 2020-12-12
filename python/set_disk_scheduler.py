@@ -19,7 +19,7 @@
 import argparse
 from pathlib import Path
 
-from python.utils import utils
+from python.utils.check_env import CheckEnv
 from python.utils.colors import Colors
 
 
@@ -44,7 +44,7 @@ class Scheduler:
             # not really needed with current setup but still porting from sh in case
             # it ever is needed for some reason
 
-            utils.root_check(require_root=True)
+            CheckEnv.root_check(require_root=True)
             new_sched = args.set
             for disk in self.__disks:
                 # will strip opening and closing []
@@ -69,7 +69,7 @@ def main():
                         help='Set GPU power state')
     args = parser.parse_args()
 
-    utils.args_required_else_help()
+    CheckEnv.args_required_else_help()
 
     run = Scheduler()
     run.run(args)

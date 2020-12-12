@@ -20,7 +20,7 @@ import argparse
 
 from python.utils import clipboard
 from python.utils import net
-from python.utils import utils
+from python.utils.check_env import CheckEnv
 from python.utils.execute import Execute
 
 
@@ -74,7 +74,7 @@ def main():
                         help='supply a video url, otherwise will get link from clipboard')
     args = parser.parse_args()
 
-    utils.root_check(require_root=False)
+    CheckEnv.root_check(require_root=False)
 
     run = Ytdl()
     run.run(args)

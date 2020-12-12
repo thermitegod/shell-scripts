@@ -22,7 +22,7 @@ from pathlib import Path
 
 from loguru import logger
 
-from python.utils import utils
+from python.utils.check_env import CheckEnv
 from python.utils.execute import Execute
 from python.utils.lxd import Lxd
 
@@ -202,7 +202,7 @@ class Container:
         # remove rtorrent lockfiles since they can persist
         # and do not always work even between restart of the same
         # container, overall they are just annoying
-        # Execute(f'{utils.get_script_name()} -c -O {self.__container_fullname}')
+        # Execute(f'{CheckEnv.get_script_name()} -c -O {self.__container_fullname}')
         self.rtorrent_clean_torrent()
 
         logger.info(f'Starting container: {self.__container_fullname}')
@@ -466,7 +466,7 @@ def main():
                    help='Levels: %(choices)s')
     args = p.parse_args()
 
-    utils.args_required_else_help()
+    CheckEnv.args_required_else_help()
 
     logger.remove()
     logger.add(sys.stdout, level=args.loglevel, colorize=True)
