@@ -4,9 +4,6 @@ chromium-s*
 chromium-h*
 chromium-p*
 
-tools-symlink-chrome
-python/tools_symlink_chrome.py
-
 # shell symlinks
 remove-ja*
 remove-ff*
@@ -26,5 +23,5 @@ __pycache__/
 
 
 # configs
-python/private
+python/private/*.py
 
