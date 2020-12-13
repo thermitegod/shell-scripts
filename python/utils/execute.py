@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 1.3.0
+# 1.4.0
 # 2020-12-13
 
 # Copyright (C) 2019,2020 Brandon Zorn <brandonzorn@cock.li>
@@ -18,11 +18,11 @@
 
 import shlex
 import subprocess
-from typing import Any
 
 
 class Execute:
-    def __init__(self, cmd: str, sh_wrap: bool = False, to_stdout: bool = False):
+    def __init__(self, cmd: str, sh_wrap: bool = False,
+                 to_stdout: bool = False, shell: bool = False):
         """
         :param cmd:
             shell command to run
@@ -31,23 +31,30 @@ class Execute:
         :param to_stdout:
             send output to stdout, required if using get_out().
             Can also be used to silence command output.
+        :param shell:
+            use subprocess arg shell=True
         """
 
         super().__init__()
 
         self.__cmd: str = cmd
-        self.__out: Any = None
+        self.__out: str = ''
 
         if sh_wrap:
             self.__cmd = f'sh -c "{self.__cmd}"'
 
+        self.__cmd = shlex.split(self.__cmd)
+
         if to_stdout:
-            self.__out = subprocess.run(shlex.split(self.__cmd), stdout=subprocess.PIPE).stdout.decode('utf-8')
+            out = subprocess.run(self.__cmd,
+                                 stdout=subprocess.PIPE,
+                                 shell=shell)
+            self.__out = out.stdout.decode('utf-8')
         else:
             # need to use to_stdout to get the generated output,
             # will return none if get_out() is used instead of ''
             # when tyring to assign to self.__out
-            subprocess.run(shlex.split(self.__cmd))
+            subprocess.run(self.__cmd)
 
     def get_out(self):
         return self.__out
