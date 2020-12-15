@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.4.0
-# 2020-12-13
+# 1.5.0
+# 2020-12-15
 
 # Copyright (C) 2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -21,7 +21,7 @@ import subprocess
 
 
 class Execute:
-    def __init__(self, cmd: str, sh_wrap: bool = False,
+    def __init__(self, cmd: str, *, sh_wrap: bool = False,
                  to_stdout: bool = False, shell: bool = False):
         """
         :param cmd:
