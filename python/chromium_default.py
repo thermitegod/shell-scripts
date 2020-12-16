@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 7.4.0
-# 2020-11-21
+# 8.0.0
+# 2020-12-15
 
 # Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -29,7 +29,7 @@ class Chrome:
         self.__chrome = None
         self.__chrome_profile = None
 
-        self.__script_name = CheckEnv.get_script_name().removeprefix('chromium-')
+        self.__profile_name = CheckEnv.get_script_name().removeprefix('chromium-')
 
         self.__display_server = 'x11'
         try:
@@ -39,7 +39,10 @@ class Chrome:
             pass
 
     def start_chrome(self, profile_path):
-        Execute(f'{self.__chrome} --user-data-dir={profile_path} --ozone-platform={self.__display_server}')
+        Execute(f'{self.__chrome} '
+                f'--user-data-dir={profile_path}  '
+                f'--ozone-platform={self.__display_server} '
+                f'--no-default-browser-check')
 
     def run(self, args):
         if args.chrome == 'chromium':
@@ -51,20 +54,13 @@ class Chrome:
         else:
             self.__chrome = 'google-chrome'
 
-        # will create temp profile that is deleted after closed
-        if args.sandbox or 'sandbox' in self.__script_name:
-            from tempfile import TemporaryDirectory
-            with TemporaryDirectory() as profile_path:
-                self.start_chrome(profile_path=profile_path)
-            raise SystemExit
-
-        if args.custom is not None:
+        if args.custom:
             self.__chrome_profile = f'{self.__chrome}-{args.extra}'
         else:
             # script/symlinks must be named chromium-<profile> to work
             # or this can be changed
             # e.g. ln -s chromium-default chromium-<profile>
-            self.__chrome_profile = f'{self.__chrome}-{self.__script_name}'
+            self.__chrome_profile = f'{self.__chrome}-{self.__profile_name}'
 
         profile_path = Path() / os.environ['XDG_CONFIG_HOME'] / 'chrome' / self.__chrome_profile
 
@@ -78,9 +74,6 @@ def main():
                           default=None,
                           metavar='PROFILE',
                           help='custom profile, supplied str is used as the profile name')
-    profiles.add_argument('-s', '--sandbox',
-                          action='store_true',
-                          help='sandbox, all data deleted on close, ignores all other profile flags and script name')
     browser = parser.add_argument_group('BROWSER', 'which browser version to use')
     browser.add_argument('-c', '--chrome',
                          default='chromium',
