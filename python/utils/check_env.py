@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 2.0.0
-# 2020-12-12
+# 2.1.0
+# 2020-12-13
 
 # Copyright (C) 2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -28,7 +28,7 @@ class _CheckEnv:
     def __init__(self):
         super().__init__()
 
-        self.__script_args = sys.argv
+        self.__script_args: list = sys.argv
 
     @staticmethod
     def root_check(require_root: bool):

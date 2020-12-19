@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.2.0
-# 2020-12-12
+# 1.3.0
+# 2020-12-13
 
 # Copyright (C) 2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -18,6 +18,7 @@
 
 import shlex
 import subprocess
+from typing import Any
 
 
 class Execute:
@@ -34,8 +35,8 @@ class Execute:
 
         super().__init__()
 
-        self.__cmd = cmd
-        self.__out = None
+        self.__cmd: str = cmd
+        self.__out: Any = None
 
         if sh_wrap:
             self.__cmd = f'sh -c "{self.__cmd}"'

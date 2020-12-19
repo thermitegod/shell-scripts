@@ -32,7 +32,7 @@ class OutputDir:
 
         super().__init__()
 
-        self.__out = Path.resolve(Path(directory[0]))
+        self.__out: Path = Path.resolve(Path(directory[0]))
 
         if not Path.is_dir(self.__out):
             if Path.exists(self.__out):

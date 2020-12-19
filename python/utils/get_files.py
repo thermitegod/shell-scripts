@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 2.0.0
-# 2020-11-23
+# 2.1.0
+# 2020-11-13
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -42,7 +42,7 @@ class GetFiles:
         super().__init__()
 
         if only_directories or only_files:
-            dir_listing = []
+            dir_listing: list[Path] = []
             for f in Path(Path.cwd()).iterdir():
                 dir_listing.append(f)
 
@@ -79,7 +79,7 @@ class GetOnlyFiles:
         super().__init__()
 
         if only_files:
-            dir_listing = []
+            dir_listing: list[Path] = []
             for f in Path(Path.cwd()).iterdir():
                 dir_listing.append(f)
 

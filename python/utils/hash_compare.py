@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 2.0.0
-# 2020-12-12
+# 2.1.0
+# 2020-12-13
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -25,9 +25,9 @@ class HashCompare:
     def __init__(self, file1: Path, file2: Path):
         super().__init__()
 
-        self.__hash_results = None
+        self.__hash_results: bool = False
 
-        hash_list = []
+        hash_list: list[str] = []
         for filename in [file1, file2]:
             hasher = xxhash.xxh3_64()
             with Path.open(filename, 'rb') as f:

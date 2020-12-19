@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.6.0
-# 2020-11-22
+# 1.7.0
+# 2020-12-13
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -26,7 +26,7 @@ class _Kernel:
     def __init__(self):
         super().__init__()
 
-        self.__src = Path.resolve(Path('/usr/src/linux'))
+        self.__src: Path = Path.resolve(Path('/usr/src/linux'))
         if not Path.exists(self.__src):
             logger.critical(f'{self.__src}: is not a valid symlink')
             raise SystemExit(1)
@@ -41,8 +41,8 @@ class _Kernel:
         # if src or dst is a directory then the kernel .config will
         # be appended
 
-        src_config = src
-        dst_config = dst
+        src_config: Path = src
+        dst_config: Path = dst
 
         if Path.is_dir(src_config):
             src_config = Path() / src_config / '.config'

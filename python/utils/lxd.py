@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.4.0
-# 2020-11-21
+# 1.5.0
+# 2020-12-13
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -25,13 +25,14 @@ class _Lxd:
     def __init__(self):
         super().__init__()
 
-        self.base_container = 'dev-gentoo-clang-minimal'
-        self.base_rutorrent = 'base-gentoo-rutorrent'
-        self.base_transmission = 'base-gentoo-transmission'
+        self.base_container: str = 'dev-gentoo-clang-minimal'
+        self.base_rutorrent: str = 'base-gentoo-rutorrent'
+        self.base_transmission: str = 'base-gentoo-transmission'
 
     @staticmethod
     def get_state(container: str):
-        state = Execute(f'lxc info {container} 2>|/dev/null | grep Running', sh_wrap=True, to_stdout=True).get_out()
+        state: str = Execute(f'lxc info {container} 2>|/dev/null | grep Running',
+                             sh_wrap=True, to_stdout=True).get_out()
 
         if 'Running' in state:
             logger.debug(f'container state is running for {container}')

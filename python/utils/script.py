@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 2.0.0
-# 2020-11-22
+# 2.1.0
+# 2020-12-13
 
 # Copyright (C) 2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -43,12 +43,12 @@ class ExecuteScript:
         super().__init__()
 
         atexit.register(self._remove_tmpdir)
-        self.__tmpdir = Path(tempfile.mkdtemp())
+        self.__tmpdir: Path = Path(tempfile.mkdtemp())
 
-        script_file = Path() / self.__tmpdir / 'tmp.sh'
-        script = '#!/usr/bin/env sh\n' \
-                 f'die(){{ /bin/echo -e $*;kill {os.getpid()};exit; }}\n' \
-                 f'{cmd}\n'
+        script_file: Path = Path() / self.__tmpdir / 'tmp.sh'
+        script: str = '#!/usr/bin/env sh\n' \
+                      f'die(){{ /bin/echo -e $*;kill {os.getpid()};exit; }}\n' \
+                      f'{cmd}\n'
 
         script_file.write_text(script)
         Path.chmod(script_file, 0o700)

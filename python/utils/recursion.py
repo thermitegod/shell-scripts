@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 2.0.0
-# 2020-11-24
+# 2.1.0
+# 2020-12-13
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -25,7 +25,7 @@ class RecursiveFindFiles:
     def __init__(self):
         super().__init__()
 
-        self.__file_list = []
+        self.__file_list: list[str] = []
 
         self._recursive_find_files()
 

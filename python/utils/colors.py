@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.1.1
-# 2020-11-22
+# 1.2.0
+# 2020-12-13
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -22,77 +22,77 @@ class _Colors:
         super().__init__()
 
         # reset
-        self.NC = '\033[0m'
+        self.NC: str = '\033[0m'
 
         # regular
-        self.BLA = '\033[0;30m'
-        self.RED = '\033[0;31m'
-        self.GRE = '\033[0;32m'
-        self.YEL = '\033[0;33m'
-        self.BLU = '\033[0;34m'
-        self.PUR = '\033[0;35m'
-        self.CYA = '\033[0;36m'
-        self.WHI = '\033[0;37m'
+        self.BLA: str = '\033[0;30m'
+        self.RED: str = '\033[0;31m'
+        self.GRE: str = '\033[0;32m'
+        self.YEL: str = '\033[0;33m'
+        self.BLU: str = '\033[0;34m'
+        self.PUR: str = '\033[0;35m'
+        self.CYA: str = '\033[0;36m'
+        self.WHI: str = '\033[0;37m'
 
         # bold
-        self.BBLA = '\033[1;30m'
-        self.BRED = '\033[1;31m'
-        self.BGRE = '\033[1;32m'
-        self.BYEL = '\033[1;33m'
-        self.BBLU = '\033[1;34m'
-        self.BPUR = '\033[1;35m'
-        self.BCYA = '\033[1;36m'
-        self.BWHI = '\033[1;37m'
+        self.BBLA: str = '\033[1;30m'
+        self.BRED: str = '\033[1;31m'
+        self.BGRE: str = '\033[1;32m'
+        self.BYEL: str = '\033[1;33m'
+        self.BBLU: str = '\033[1;34m'
+        self.BPUR: str = '\033[1;35m'
+        self.BCYA: str = '\033[1;36m'
+        self.BWHI: str = '\033[1;37m'
 
         # underline
-        self.UBLA = '\033[4;30m'
-        self.URED = '\033[4;31m'
-        self.UGRE = '\033[4;32m'
-        self.UYEL = '\033[4;33m'
-        self.UBLU = '\033[4;34m'
-        self.UPUR = '\033[4;35m'
-        self.UCYA = '\033[4;36m'
-        self.UWHI = '\033[4;37m'
+        self.UBLA: str = '\033[4;30m'
+        self.URED: str = '\033[4;31m'
+        self.UGRE: str = '\033[4;32m'
+        self.UYEL: str = '\033[4;33m'
+        self.UBLU: str = '\033[4;34m'
+        self.UPUR: str = '\033[4;35m'
+        self.UCYA: str = '\033[4;36m'
+        self.UWHI: str = '\033[4;37m'
 
         # high intensity
-        self.IBLA = '\033[0;90m'
-        self.IRED = '\033[0;91m'
-        self.IGRE = '\033[0;92m'
-        self.IYEL = '\033[0;93m'
-        self.IBLU = '\033[0;94m'
-        self.IPUR = '\033[0;95m'
-        self.ICYA = '\033[0;96m'
-        self.IWHI = '\033[0;97m'
+        self.IBLA: str = '\033[0;90m'
+        self.IRED: str = '\033[0;91m'
+        self.IGRE: str = '\033[0;92m'
+        self.IYEL: str = '\033[0;93m'
+        self.IBLU: str = '\033[0;94m'
+        self.IPUR: str = '\033[0;95m'
+        self.ICYA: str = '\033[0;96m'
+        self.IWHI: str = '\033[0;97m'
 
         # bold high intensity
-        self.BIBLA = '\033[1;90m'
-        self.BIRED = '\033[1;91m'
-        self.BIGRE = '\033[1;92m'
-        self.BIYEL = '\033[1;93m'
-        self.BIBLU = '\033[1;94m'
-        self.BIPUR = '\033[1;95m'
-        self.BICYA = '\033[1;96m'
-        self.BIWHI = '\033[1;97m'
+        self.BIBLA: str = '\033[1;90m'
+        self.BIRED: str = '\033[1;91m'
+        self.BIGRE: str = '\033[1;92m'
+        self.BIYEL: str = '\033[1;93m'
+        self.BIBLU: str = '\033[1;94m'
+        self.BIPUR: str = '\033[1;95m'
+        self.BICYA: str = '\033[1;96m'
+        self.BIWHI: str = '\033[1;97m'
 
         # background
-        self.ON_BLA = '\033[40m'
-        self.ON_RED = '\033[41m'
-        self.ON_GRE = '\033[42m'
-        self.ON_YEL = '\033[43m'
-        self.ON_BLU = '\033[44m'
-        self.ON_PUR = '\033[45m'
-        self.ON_CYA = '\033[46m'
-        self.ON_WHI = '\033[47m'
+        self.ON_BLA: str = '\033[40m'
+        self.ON_RED: str = '\033[41m'
+        self.ON_GRE: str = '\033[42m'
+        self.ON_YEL: str = '\033[43m'
+        self.ON_BLU: str = '\033[44m'
+        self.ON_PUR: str = '\033[45m'
+        self.ON_CYA: str = '\033[46m'
+        self.ON_WHI: str = '\033[47m'
 
         # high intensity backgrounds
-        self.ON_IBLA = '\033[0;100m'
-        self.ON_IRED = '\033[0;101m'
-        self.ON_IGRE = '\033[0;102m'
-        self.ON_IYEL = '\033[0;103m'
-        self.ON_IBLU = '\033[0;104m'
-        self.ON_IPUR = '\033[0;105m'
-        self.ON_ICYA = '\033[0;106m'
-        self.ON_IWHI = '\033[0;107m'
+        self.ON_IBLA: str = '\033[0;100m'
+        self.ON_IRED: str = '\033[0;101m'
+        self.ON_IGRE: str = '\033[0;102m'
+        self.ON_IYEL: str = '\033[0;103m'
+        self.ON_IBLU: str = '\033[0;104m'
+        self.ON_IPUR: str = '\033[0;105m'
+        self.ON_ICYA: str = '\033[0;106m'
+        self.ON_IWHI: str = '\033[0;107m'
 
 
 Colors = _Colors()
