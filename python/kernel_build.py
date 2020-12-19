@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 2.24.0
-# 2020-11-22
+# 2.25.0
+# 2020-12-13
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -62,55 +62,55 @@ from python.utils.script import ExecuteScript
 
 class Build:
     def __init__(self):
-        self.__MIN_KERNEL_VERSION = '4.17.0'
-        self.__MIN_ZFS_VERSION = '0.8.0'
+        self.__MIN_KERNEL_VERSION: str = '4.17.0'
+        self.__MIN_ZFS_VERSION: str = '0.8.0'
 
         atexit.register(self.remove_tmpdir)
 
-        self.__tmpdir = Path(tempfile.mkdtemp())
+        self.__tmpdir: Path = Path(tempfile.mkdtemp())
         # script is run as root but tmpdir needs to be rw for portage
         Path.chmod(self.__tmpdir, 0o777)
 
-        self.__kernel_src = Kernel.get_kernel_dir()
-        self.__kernel_config = Path() / self.__kernel_src / '.config'
+        self.__kernel_src: Path = Kernel.get_kernel_dir()
+        self.__kernel_config: Path = Path() / self.__kernel_src / '.config'
 
         if not Path.is_file(self.__kernel_config):
             logger.critical('ERROR: no config in kenrel directory')
             raise SystemExit(1)
 
-        self.__use_zfs_release_version = True
-        self.__use_zfs_local_ebuild = False
+        self.__use_zfs_release_version: bool = True
+        self.__use_zfs_local_ebuild: bool = False
 
-        self.__run_kernel_bump = False
-        self.__force_bump_check = False
+        self.__run_kernel_bump: bool = False
+        self.__force_bump_check: bool = False
 
-        self.__cc_use_clang = True
-        self.__use_local_distdir = False
-        self.__experimental = False
-        self.__gentoo_repo_path = None
-        self.__clean_kernel_src = True
+        self.__cc_use_clang: bool = True
+        self.__use_local_distdir: bool = False
+        self.__experimental: bool = False
+        self.__gentoo_repo_path: Path = Path()
+        self.__clean_kernel_src: bool = True
 
-        self.__zfs_ebuild = 'sys-fs/zfs-kmod'
-        self.__zfs_ebuild_path = None
-        self.__zfs_version = None
-        self.__zfs_kmod_build_path = None
+        self.__zfs_ebuild: Path = Path('sys-fs/zfs-kmod')
+        self.__zfs_ebuild_path: Path = Path()
+        self.__zfs_version: Path = Path()
+        self.__zfs_kmod_build_path: Path = Path()
 
-        self.__run_intro = True
-        self.__run_intro_extra = False
+        self.__run_intro: bool = True
+        self.__run_intro_extra: bool = False
 
-        self.__run_zfs_checks = True
-        self.__run_zfs_build = True
-        self.__run_kmod_build = False
+        self.__run_zfs_checks: bool = True
+        self.__run_zfs_build: bool = True
+        self.__run_kmod_build: bool = False
 
-        self.__run_kernel_build = True
-        self.__run_kernel_post = True
-        self.__run_kernel_install = True
+        self.__run_kernel_build: bool = True
+        self.__run_kernel_post: bool = True
+        self.__run_kernel_install: bool = True
 
-        self.__run_emerge = False
+        self.__run_emerge: bool = False
 
-        self.__kernel_has_module_support = False
+        self.__kernel_has_module_support: bool = False
 
-        self.__initramfs_compression = 'zstd'
+        self.__initramfs_compression: str = 'zstd'
 
         # gets module version for 'dracut -k' and versioned storage path for saved work
         self.__kernel_module_dir = self.__kernel_src.name[6:]
