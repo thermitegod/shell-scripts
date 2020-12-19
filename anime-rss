@@ -1,0 +1,6 @@
+#!/usr/bin/env python3
+from python import anime_rss
+try:
+    anime_rss.main()
+except KeyboardInterrupt:
+    raise SystemExit
