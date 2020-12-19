@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.4.0
-# 2020-12-03
+# 1.5.0
+# 2020-12-17
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -28,9 +28,7 @@ class Symlink:
     def __init__(self):
         # since root is req to do this Path.home() will return
         # /root so create wanted home path
-        self.__user = 'brandon'
-
-        self.__home = Path() / '/home' / self.__user
+        self.__home = None
         self.__local_bin = Path() / '/usr/local/bin'
 
         self.__ignore = '--ignore=".git" ' \
@@ -43,6 +41,8 @@ class Symlink:
                         '--ignore="utils" '
 
     def run(self, args):
+        if args.user:
+            self.__home = Path() / '/home' / args.user
         if args.stow_bin:
             os.chdir(self.__home)
             Execute(f'stow {self.__ignore} -v --target={self.__local_bin} .bin')
@@ -53,6 +53,10 @@ class Symlink:
 
 def main():
     parser = argparse.ArgumentParser()
+    parser.add_argument('-u', '--user',
+                        metavar='USER',
+                        default='brandon',
+                        help='user')
     stow = parser.add_argument_group('STOW')
     stow.add_argument('-b', '--stow-bin',
                       action='store_true',
