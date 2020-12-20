@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.3.1
-# 2020-11-24
+# 1.4.0
+# 2020-12-20
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -49,8 +49,8 @@ class Count:
         self.__file_list = RecursiveFindFiles().get_files()
 
         for ext in self.__mode:
-            for f in self.__file_list:
-                if f.endswith(ext):
+            for idx, item in enumerate(self.__file_list):
+                if item.endswith(ext):
                     # TODO - get incorrect count when removing
                     # self.__file_list.remove(f)
                     self.__counter += 1
