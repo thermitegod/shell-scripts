@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 3.0.0
-# 2020-12-13
+# 3.1.0
+# 2020-12-20
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -22,7 +22,7 @@ import os
 from pathlib import Path
 
 try:
-    from python.private.chrome_symlinks import Symlinks
+    from python.private.chrome_symlinks import ChromeSymlinks
 except ImportError:
     print('Missing config file, see python/template/chrome_symlinks.py')
     raise SystemExit(1)
@@ -35,9 +35,9 @@ class Symlink:
     def symlink_main(self):
         os.chdir(self.__bin)
 
-        for f in Symlinks.CHROME_SYMLINKS:
-            real = Path(f[0])
-            symlink = Path(f[1])
+        for f in ChromeSymlinks.CHROME_SYMLINKS:
+            real = Path(f.real)
+            symlink = Path(f.symlink)
 
             if Path.is_symlink(symlink):
                 continue

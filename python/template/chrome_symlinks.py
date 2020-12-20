@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.0.0
-# 2020-12-13
+# 1.1.0
+# 2020-12-20
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -16,18 +16,18 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+from collections import namedtuple
 
-class _Symlinks:
+
+class _ChromeSymlinks:
     def __init__(self):
-        """
-        Format (real, symlink)
-        """
+        Symlinks = namedtuple('Symlinks', ['real', 'symlink'])
 
         self.CHROME_SYMLINKS = (
-            # ('chromium-default', ''),
-            # ('chromium-default', ''),
-            # ('chromium-default', ''),
+            Symlinks('chromium-default', 'chromium-'),
+            Symlinks('chromium-default', 'chromium-'),
+            # Symlinks('chromium-default', 'chromium-'),
         )
 
 
-Symlinks = _Symlinks()
+ChromeSymlinks = _ChromeSymlinks()
