@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.0.0
-# 2020-11-09
+# 1.1.0
+# 2020-12-20
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -15,6 +15,8 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+from collections import namedtuple
 
 
 class _SortList:
@@ -31,18 +33,20 @@ class _SortList:
         # third entry will match *pattern*3* and be saved to pattern-3
         """
 
+        Sort = namedtuple('Symlinks', ['pattern', 'save_override'])
+
         self.SAVE_DIR = './sort'
 
         self.SORT_NAME_FINAL = (
-            # ('', ''),
-            # ('', ''),
-            # ('', ''),
+            Sort('', ''),
+            # Sort('', ''),
+            # Sort('', ''),
         )
 
         self.SORT_NAME_TYPE = (
-            # ('', ''),
-            # ('', ''),
-            # ('', ''),
+            Sort('', ''),
+            # Sort('', ''),
+            # Sort('', ''),
         )
 
 

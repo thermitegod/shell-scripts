@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 2.2.0
-# 2020-11-21
+# 2.3.0
+# 2020-12-20
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -52,9 +52,9 @@ class Sort:
         # self.__total_before = Execute("ls -1A | wc -l", sh_wrap=True, to_stdout=True).get_ret()
 
     def main_sort(self):
-        for items in self.__list_sort:
-            self.__sort_name = items[0]
-            self.__sort_override = items[1]
+        for idx, item in enumerate(self.__list_sort):
+            self.__sort_name = item.pattern
+            self.__sort_override = item.save_override
 
             self.name_sort()
 
