@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 1.2.0
+# 1.2.1
 # 2020-12-20
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -79,7 +79,7 @@ class Count:
                 self.__counter = 0
 
         if self.__counter_total != 0:
-            print(f'\nTotal\t: {self.__counter_total}')
+            print(f'\nTotal\t\t: {self.__counter_total}')
 
     def run(self):
         self.main_count()
