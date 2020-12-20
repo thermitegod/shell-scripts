@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.0.0
-# 2020-12-19
+# 1.1.0
+# 2020-12-20
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -58,12 +58,11 @@ class Count:
         self.__file_list = RecursiveFindFiles().get_files()
 
         for ranges in self.__size_ranges:
-            for f in self.__file_list:
-                size = Path.stat(Path(f)).st_size
+            for idx, item in enumerate(self.__file_list):
+                size = Path.stat(Path(item)).st_size
 
                 if ranges.lower <= size <= ranges.upper:
                     self.__counter += 1
-                    continue
 
             if self.__counter != 0:
                 print(f'{ranges.group} \t: {self.__counter}')
