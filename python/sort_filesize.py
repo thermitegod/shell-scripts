@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.0.0
-# 2020-12-19
+# 1.1.0
+# 2020-12-20
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -47,6 +47,7 @@ class Count:
             Ranges('100G', 10 * 1024 * 1024 * 1024, 100 * 1024 * 1024 * 1024),
         )
 
+        self.__file_list_done = []
         self.__file_list = []
         for f in Path(Path.cwd()).iterdir():
             if f.is_file():
@@ -54,6 +55,9 @@ class Count:
 
     def main_move(self):
         for ranges in self.__size_ranges:
+            if len(self.__file_list) == 0:
+                break
+
             dest = Path(ranges.dest).resolve()
             for idx, item in enumerate(self.__file_list):
                 try:
@@ -66,6 +70,11 @@ class Count:
                     if not Path.exists(dest):
                         dest.mkdir(parents=True, exist_ok=True)
                     Path.rename(file, Path() / dest / file.name)
+                    self.__file_list_done.append(item)
+
+            for idx, item in enumerate(self.__file_list_done):
+                self.__file_list.remove(item)
+            self.__file_list_done = []
 
     def run(self, args):
         self.main_move()
