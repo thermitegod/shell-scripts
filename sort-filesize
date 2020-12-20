@@ -1,1 +1,6 @@
-shell/sort-filesize.sh
+#!/usr/bin/env python3
+from python import sort_filesize
+try:
+    sort_filesize.main()
+except KeyboardInterrupt:
+    raise SystemExit
