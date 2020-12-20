@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 2.2.0
-# 2020-12-03
+# 2.3.0
+# 2020-12-20
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -18,7 +18,7 @@
 
 
 import os
-
+from collections import namedtuple
 from pathlib import Path
 
 
@@ -56,39 +56,40 @@ class Symlink:
         # print(stub)
 
     def symlink_special(self):
-        # (real, symlink)
+        Symlinks = namedtuple('Symlinks', ['real', 'symlink'])
+
         targets = (
             # ('4chan-dl', '8chan-dl'),
 
-            ('chromium-default', 'chromium-sandbox'),
+            Symlinks('chromium-default', 'chromium-sandbox'),
 
-            ('backup-meta', 'backup-chromium'),
-            ('backup-meta', 'backup-user-bin'),
-            ('backup-meta', 'backup-user-config'),
-            ('backup-meta', 'backup-user-local'),
+            Symlinks('backup-meta', 'backup-chromium'),
+            Symlinks('backup-meta', 'backup-user-bin'),
+            Symlinks('backup-meta', 'backup-user-config'),
+            Symlinks('backup-meta', 'backup-user-local'),
 
-            ('count-image', 'count-archive'),
-            ('count-image', 'count-video'),
+            Symlinks('count-image', 'count-archive'),
+            Symlinks('count-image', 'count-video'),
 
-            ('madokami-manga', 'madokami-manga-publishing'),
-            ('madokami-manga', 'madokami-novels-publishing'),
+            Symlinks('madokami-manga', 'madokami-manga-publishing'),
+            Symlinks('madokami-manga', 'madokami-novels-publishing'),
 
-            ('mkzst', 'mkgz'),
-            ('mkzst', 'mklz4'),
-            ('mkzst', 'mkxz'),
+            Symlinks('mkzst', 'mkgz'),
+            Symlinks('mkzst', 'mklz4'),
+            Symlinks('mkzst', 'mkxz'),
 
-            ('optimize-all', 'optimize-gif'),
-            ('optimize-all', 'optimize-jpg'),
-            ('optimize-all', 'optimize-png'),
+            Symlinks('optimize-all', 'optimize-gif'),
+            Symlinks('optimize-all', 'optimize-jpg'),
+            Symlinks('optimize-all', 'optimize-png'),
 
-            ('snip', 'snip-root'),
+            Symlinks('snip', 'snip-root'),
         )
 
         os.chdir(self.__bin)
 
-        for f in targets:
-            real = Path(f[0])
-            symlink = Path(f[1])
+        for idx, item in enumerate(targets):
+            real = Path(item.real)
+            symlink = Path(item.symlink)
 
             if Path.is_symlink(symlink):
                 continue
