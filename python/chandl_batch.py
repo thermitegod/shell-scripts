@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 2.3.0
-# 2020-11-21
+# 2.4.0
+# 2020-12-20
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -60,9 +60,9 @@ class Dl:
 
     def main(self):
         for c in self.__thread_list:
-            self.__board = c[0]
-            self.__thread = c[1]
-            self.__save_dir = c[2]
+            self.__board = c.board
+            self.__thread = c.thread_number
+            self.__save_dir = c.save_dir
 
             self.dl_batch()
 

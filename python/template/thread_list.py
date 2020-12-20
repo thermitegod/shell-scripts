@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.0.0
-# 2020-11-09
+# 1.1.0
+# 2020-12-20
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -18,32 +18,28 @@
 
 # copy to python/private/thread_list.py to use
 
+from collections import namedtuple
+
 
 class _ThreadList:
     def __init__(self):
-        """
-        Current format
-
-        # Board
-        # thread number
-        # relative download path
-        """
+        Threads = namedtuple('Threads', ['board', 'thread_number', 'save_dir'])
 
         self.THREADS_4CHAN = (
             # /a/
-            # ('a', '', ''),
-            # ('a', '', ''),
-            # ('a', '', ''),
+            Threads('a', '', ''),
+            # Threads('a', '', ''),
+            # Threads('a', '', ''),
 
             # /w/
-            # ('w', '', ''),
-            # ('w', '', ''),
-            # ('w', '', ''),
+            Threads('w', '', ''),
+            # Threads('w', '', ''),
+            # Threads('w', '', ''),
         )
 
         self.THREADS_8KUN = (
             # /tech/
-            # ('tech', '', ''),
+            # Threads('tech', '', ''),
         )
 
 
