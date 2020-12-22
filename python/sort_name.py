@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 3.0.0
+# 3.1.0
 # 2020-12-21
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -24,16 +24,12 @@ from loguru import logger
 
 from python.utils import confirm
 from python.utils.check_env import CheckEnv
-from python.utils.execute import Execute
 
 try:
     from python.private.sort_list import SortList
 except ImportError:
     print('Missing config file, see python/template/sort_list.py')
     raise SystemExit(1)
-
-# TODO
-#   port 'find' commands to native python
 
 
 class Sort:
@@ -46,43 +42,72 @@ class Sort:
         self.__use_test_dir = False
         self.__test_dir = Path() / '/tmp/test'
 
-        self.__sort_name = None
-        self.__sort_override = None
+        self.__file_list_done = []
+        self.__file_list = []
+        for f in Path(Path.cwd()).iterdir():
+            if f.is_file():
+                self.__file_list.append(f)
 
-        self.__job = None
+        self.__total_after = None
+        self.__total_before = len(self.__file_list)
 
-        # self.__total_after = 0
-        # self.__total_before = Execute("ls -1A | wc -l", sh_wrap=True, to_stdout=True).get_ret()
+    def sort(self):
+        if self.__total_before == 0:
+            logger.info(f'No files found')
+            raise SystemExit
 
-    def main_sort(self):
         for idx, item in enumerate(self.__list_sort):
-            self.__sort_name = item.pattern
-            self.__sort_override = item.save_override
+            if len(self.__file_list) == 0:
+                break
 
-            self.name_sort()
+            pattern = item.pattern
+            save_override = item.save_override
 
-    def name_sort(self):
-        arc = self.__sort_name.replace('-', r'*')
-        if self.__sort_override:
-            move_to_dir = Path() / self.__sort_override
-        else:
-            move_to_dir = Path() / self.__sort_name
+            pattern_glob = pattern.replace('-', r'*').lower()
+            if save_override:
+                pattern_target_dir = Path() / save_override
+            else:
+                pattern_target_dir = Path() / pattern
 
-        logger.trace(f'====================')
-        logger.trace(f'Name\t: {self.__sort_name}')
-        logger.trace(f'Arc\t: {arc}')
-        logger.trace(f'Dir\t: {move_to_dir}')
+            logger.trace(f'====================')
+            logger.trace(f'Name\t: {pattern}')
+            logger.trace(f'Glob\t: {pattern_glob}')
+            logger.trace(f'Dest\t: {pattern_target_dir}')
+            logger.trace(f'IDX\t: {idx}')
 
-        if self.__job == 'dir_check':
-            Execute(f'find . -maxdepth 1 -type f -iname "*{arc}*" '
-                    f'-exec mkdir -p -- "{self.__dest}/{move_to_dir}" \\; -quit')
-        elif self.__job == 'sort_main':
-            Execute(f'find . -maxdepth 1 -type f -iname "*{arc}*" '
-                    f'-exec mv -n -- "{{}}" "{self.__dest}/{move_to_dir}" \\;')
-        elif self.__job == 'sort_local':
-            Execute(f'find . -maxdepth 1 -type f -iname "*{arc}*" '
-                    f'-exec mkdir -p -- "{Path.cwd()}/{move_to_dir}" \\;'
-                    f'-exec mv -i -- "{{}}" "{Path.cwd()}/{move_to_dir}" \\;')
+            for f in self.__file_list:
+                # case insensitive pattern matching
+                fake_file = Path(str(f).lower())
+                if not fake_file.match(f'*{pattern_glob}*'):
+                    continue
+
+                file = Path(f)
+                target = Path(self.__dest, pattern_target_dir).resolve()
+                if not Path.exists(target):
+                    # all target dirs should exits before running
+                    # otherwise you are going to have a bad time
+                    target.mkdir(parents=True, exist_ok=True)
+
+                if not Path.is_file(Path(target, file.name).resolve()):
+                    # move maches to dest
+                    Path.rename(file, Path(target, file.name).resolve())
+                else:
+                    # file already exists in dest so sort into CWD, has to be delt w/ manually
+                    logger.info(f'fallback used for: {f}')
+                    fallback_path = Path() / Path.cwd() / pattern_target_dir
+                    if not Path.exists(fallback_path):
+                        pattern_target_dir.mkdir(parents=True, exist_ok=True)
+                    if not Path.is_file(Path(fallback_path, file.name)):
+                        Path.rename(file, Path(fallback_path, file.name))
+                    else:
+                        # fallback path has to already have the same filename in it already
+                        logger.warning(f'Unable to sort: {f}')
+
+                self.__file_list_done.append(f)
+
+            for f in self.__file_list_done:
+                self.__file_list.remove(f)
+            self.__file_list_done = []
 
     def main(self):
         print(f'Prerun info\n'
@@ -92,26 +117,18 @@ class Sort:
               '\nMake sure everything has been processed correctly\n'
               f'\nRunning script is: {CheckEnv.get_script_name()}\n')
 
-        if confirm.confirm_run():
-            # all target dirs should exits before running
-            # otherwise you are going to have a bad time
-            logger.debug(f'running dir_check')
-            self.__job = 'dir_check'
-            self.main_sort()
-
-            # move maches to dest
-            logger.debug(f'running sort_main')
-            self.__job = 'sort_main'
-            self.main_sort()
-
-            # deal w/ name collisions in dest by sorting into $pwd, to be delt w/ manually
-            logger.debug(f'running sort_local')
-            self.__job = 'sort_local'
-            self.main_sort()
-            pass
-        else:
+        if not confirm.confirm_run():
             print('Did not confirm, Exiting')
             raise SystemExit(1)
+
+        self.sort()
+
+        self.__total_after = len(self.__file_list)
+
+        print(f'\nTotal sorted')
+        print(f'Before\t: {self.__total_before}')
+        print(f'After\t: {self.__total_after}')
+        print(f'Total\t: {self.__total_before - self.__total_after }')
 
     def run(self, args):
         if args.test:
