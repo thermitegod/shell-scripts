@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 2.0.0
-# 2020-12-21
+# 2.0.1
+# 2020-12-22
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -37,7 +37,7 @@ class _SortList:
 
         self.SAVE_DIR = './sort'
 
-        Sort = namedtuple('Symlinks', ['pattern', 'save_override'])
+        Sort = namedtuple('Sort', ['pattern', 'save_override'])
 
         self.Sort_Table = {
             'NAME_FINAL': (
