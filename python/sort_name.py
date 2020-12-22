@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 2.3.0
-# 2020-12-20
+# 3.0.0
+# 2020-12-21
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -31,6 +31,9 @@ try:
 except ImportError:
     print('Missing config file, see python/template/sort_list.py')
     raise SystemExit(1)
+
+# TODO
+#   port 'find' commands to native python
 
 
 class Sort:
@@ -70,7 +73,6 @@ class Sort:
         logger.trace(f'Arc\t: {arc}')
         logger.trace(f'Dir\t: {move_to_dir}')
 
-        # TODO - try to port to native python?
         if self.__job == 'dir_check':
             Execute(f'find . -maxdepth 1 -type f -iname "*{arc}*" '
                     f'-exec mkdir -p -- "{self.__dest}/{move_to_dir}" \\; -quit')
@@ -112,38 +114,42 @@ class Sort:
             raise SystemExit(1)
 
     def run(self, args):
-        # general
         if args.test:
             self.__use_test_dir = True
             self.__dest = self.__test_dir
-
-        # set sort type
-        if args.final:
-            self.__mode = 'sort_name_final'
-            self.__list_sort = SortList.SORT_NAME_FINAL
-            if not self.__dest:
-                self.__dest = SortList.SAVE_DIR
-        if args.type:
-            self.__mode = 'sort_name_type'
-            self.__list_sort = SortList.SORT_NAME_TYPE
-            if not self.__dest:
-                self.__dest = SortList.SAVE_DIR
+        if args.print:
+            print(f'IDX\tLIST')
+            print('===================')
+            for idx, item in enumerate(SortList.Sort_Table, start=1):
+                print(f'{idx}\t{item}')
+            raise SystemExit
+        if args.sort_table:
+            for idx, item in enumerate(SortList.Sort_Table, start=1):
+                if args.sort_table == idx:
+                    self.__mode = item
+                    self.__list_sort = SortList.Sort_Table[item]
+                    if self.__list_sort is None:
+                        print(f'Empty list was choosen: {item}')
+                        raise SystemExit
+                    if not self.__dest:
+                        self.__dest = SortList.SAVE_DIR
 
         self.main()
 
 
 def main():
     parser = argparse.ArgumentParser()
+    parser.add_argument('-s', '--sort-table',
+                        metavar='SORT',
+                        type=int,
+                        choices=[1, 2, 3, 4, 5, 6, 7, 8, 9],
+                        help='Choose sorting table to use')
     parser.add_argument('-T', '--test',
                         action='store_true',
                         help='Use test dir as dest \'/tmp/test\'')
-    lst = parser.add_argument_group('RUNNING')
-    lst.add_argument('-f', '--final',
-                     action='store_true',
-                     help='')
-    lst.add_argument('-t', '--type',
-                     action='store_true',
-                     help='')
+    parser.add_argument('-p', '--print',
+                        action='store_true',
+                        help='Print available sorting lists')
     debug = parser.add_argument_group('DEBUG')
     debug.add_argument('-L', '--loglevel',
                        default='INFO',

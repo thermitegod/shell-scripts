@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.1.0
-# 2020-12-20
+# 2.0.0
+# 2020-12-21
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -33,21 +33,31 @@ class _SortList:
         # third entry will match *pattern*3* and be saved to pattern-3
         """
 
-        Sort = namedtuple('Symlinks', ['pattern', 'save_override'])
+        super().__init__()
 
         self.SAVE_DIR = './sort'
 
-        self.SORT_NAME_FINAL = (
-            Sort('', ''),
-            # Sort('', ''),
-            # Sort('', ''),
-        )
+        Sort = namedtuple('Symlinks', ['pattern', 'save_override'])
 
-        self.SORT_NAME_TYPE = (
-            Sort('', ''),
-            # Sort('', ''),
-            # Sort('', ''),
-        )
+        self.Sort_Table = {
+            'NAME_FINAL': (
+                Sort('', None),
+                Sort('', None),
+                Sort('', None),
+            ),
+            'NAME_TYPE': (
+                Sort('', None),
+                Sort('', None),
+                Sort('', None),
+            ),
+            'EMPTY3': None,
+            'EMPTY4': None,
+            'EMPTY5': None,
+            'EMPTY6': None,
+            'EMPTY7': None,
+            'EMPTY8': None,
+            'EMPTY9': None,
+        }
 
 
 SortList = _SortList()
