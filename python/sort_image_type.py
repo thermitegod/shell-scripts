@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.3.0
-# 2020-11-21
+# 2.0.0
+# 2020-12-22
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -18,33 +18,85 @@
 
 import argparse
 import sys
+from collections import namedtuple
 from pathlib import Path
 
 from loguru import logger
 
-from python.utils.execute import Execute
 
-
-class Sort:
+class SortImg:
     def __init__(self):
-        self.__type = ('.jpg', '.png', '.gif', '.webm', '.mp4', '.zip', '.mkv', '.rar')
+        super().__init__()
 
-        self.__mode = None
+        Sort = namedtuple('Symlinks', ['ext', 'save'])
 
-    def main_sort(self):
-        for ext in self.__type:
-            dest = ext[1:]
-            cwd = Path.cwd()
-            if self.__mode == 'dir_check':
-                Execute(f'find . -maxdepth 1 -type f -iname "*{ext}" -exec mkdir -p "{cwd}/{dest}" \\; -quit')
-            elif self.__mode == 'loop_main':
-                Execute(f'find . -maxdepth 1 -type f -iname "*{ext}" -exec mv -i -- "{{}}" "{cwd}/{dest}" \\;')
+        self.__list_sort = (
+            Sort('.jpg', 'JPG'),
+            Sort('.jpeg', 'JEPG'),
+            Sort('.png', 'PNG'),
+            Sort('.gif', 'GIF'),
+
+            Sort('.webm', 'WEBM'),
+            Sort('.mp4', 'MP4'),
+            Sort('.mkv', 'MKV'),
+
+            Sort('.zip', 'ZIP'),
+            Sort('.rar', 'RAR'),
+        )
+
+        self.__file_list_done = []
+        self.__file_list = []
+        for f in Path(Path.cwd()).iterdir():
+            if f.is_file():
+                self.__file_list.append(f)
+
+        self.__total_after = None
+        self.__total_before = len(self.__file_list)
+
+    def sort(self):
+        if self.__total_before == 0:
+            logger.info(f'No files found')
+            raise SystemExit
+
+        for idx, item in enumerate(self.__list_sort):
+            if len(self.__file_list) == 0:
+                break
+
+            ext = item.ext
+            target = Path.cwd() / item.save
+
+            for f in self.__file_list:
+                # case insensitive pattern matching
+                file = Path(f)
+                if not file.suffix.lower() == ext:
+                    continue
+
+                if not Path.exists(target):
+                    # all target dirs should exits before running
+                    # otherwise you are going to have a bad time
+                    target.mkdir(parents=True, exist_ok=True)
+
+                if not Path.is_file(Path(target, file.name)):
+                    # move maches to dest
+                    Path.rename(file, Path(target, file.name))
+                else:
+                    logger.warning(f'Unable to sort: {f}')
+
+                self.__file_list_done.append(f)
+
+            for f in self.__file_list_done:
+                self.__file_list.remove(f)
+            self.__file_list_done = []
 
     def run(self, args):
-        self.__mode = 'dir_check'
-        self.main_sort()
-        self.__mode = 'loop_main'
-        self.main_sort()
+        self.sort()
+
+        self.__total_after = len(self.__file_list)
+
+        print(f'\nTotal sorted')
+        print(f'Before\t: {self.__total_before}')
+        print(f'After\t: {self.__total_after}')
+        print(f'Total\t: {self.__total_before - self.__total_after }')
 
 
 def main():
@@ -61,5 +113,5 @@ def main():
     logger.remove()
     logger.add(sys.stdout, level=args.loglevel, colorize=True)
 
-    run = Sort()
+    run = SortImg()
     run.run(args)
