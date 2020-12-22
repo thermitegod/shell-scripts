@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.1.0
-# 2020-12-20
+# 1.2.0
+# 2020-12-21
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -51,7 +51,7 @@ class Count:
         self.__file_list = []
         for f in Path(Path.cwd()).iterdir():
             if f.is_file():
-                self.__file_list.append(str(f))
+                self.__file_list.append(f)
 
     def main_move(self):
         for ranges in self.__size_ranges:
