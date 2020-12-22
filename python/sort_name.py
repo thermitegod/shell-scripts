@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 3.1.0
-# 2020-12-21
+# 3.2.0
+# 2020-12-22
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -88,9 +88,9 @@ class Sort:
                     # otherwise you are going to have a bad time
                     target.mkdir(parents=True, exist_ok=True)
 
-                if not Path.is_file(Path(target, file.name).resolve()):
+                if not Path.is_file(Path(target, file.name)):
                     # move maches to dest
-                    Path.rename(file, Path(target, file.name).resolve())
+                    Path.rename(file, Path(target, file.name))
                 else:
                     # file already exists in dest so sort into CWD, has to be delt w/ manually
                     logger.info(f'fallback used for: {f}')
