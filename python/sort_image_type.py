@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 2.0.0
-# 2020-12-22
+# 2.0.1
+# 2020-12-26
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -28,7 +28,7 @@ class SortImg:
     def __init__(self):
         super().__init__()
 
-        Sort = namedtuple('Symlinks', ['ext', 'save'])
+        Sort = namedtuple('Sort', ['ext', 'save'])
 
         self.__list_sort = (
             Sort('.jpg', 'JPG'),
