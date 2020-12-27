@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 2.0.1
-# 2020-12-22
+# 3.0.0
+# 2020-12-26
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -17,13 +17,13 @@
 #    along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 from collections import namedtuple
+from pathlib import Path
 
 
 class _SortList:
     def __init__(self):
         """
-        Current format
-
+        Pattern format
         ('patern', None'),
         ('patern2', 'override'),
         ('patern-3', None),
@@ -35,22 +35,40 @@ class _SortList:
 
         super().__init__()
 
-        self.SAVE_DIR = './sort'
-
+        Format = namedtuple('Format', ['sort_dest', 'sort_confirm', 'sort_disable_fallback', 'sort_list'])
         Sort = namedtuple('Sort', ['pattern', 'save_override'])
 
         self.Sort_Table = {
-            'NAME_FINAL': (
-                Sort('', None),
-                Sort('', None),
-                Sort('', None),
-            ),
-            'NAME_TYPE': (
-                Sort('', None),
-                Sort('', None),
-                Sort('', None),
-            ),
-            'EMPTY3': None,
+            'NAME_FINAL':
+                Format(
+                    sort_dest=Path('./sort').resolve(),
+                    sort_confirm=True,
+                    sort_disable_fallback=False,
+                    sort_list=(
+                        Sort('', None),
+                        Sort('', None),
+                    ),
+                ),
+            'NAME_TYPE':
+                Format(
+                    sort_dest=Path('./sort').resolve(),
+                    sort_confirm=True,
+                    sort_disable_fallback=False,
+                    sort_list=(
+                        Sort('', None),
+                        Sort('', None),
+                    ),
+                ),
+            'IMG_EXT':
+                Format(
+                    sort_dest=Path.cwd(),
+                    sort_confirm=False,
+                    sort_disable_fallback=True,
+                    sort_list=(
+                        Sort('', None),
+                        Sort('', None),
+                    ),
+                ),
             'EMPTY4': None,
             'EMPTY5': None,
             'EMPTY6': None,

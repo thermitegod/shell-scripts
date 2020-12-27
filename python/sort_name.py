@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 3.2.0
-# 2020-12-22
+# 3.3.0
+# 2020-12-26
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -34,12 +34,11 @@ except ImportError:
 
 class Sort:
     def __init__(self):
-        self.__mode = None
+        self.__disable_fallback = False
 
         self.__list_sort = None
         self.__dest = None
 
-        self.__use_test_dir = False
         self.__test_dir = Path() / '/tmp/test'
 
         self.__file_list_done = []
@@ -47,6 +46,8 @@ class Sort:
         for f in Path(Path.cwd()).iterdir():
             if f.is_file():
                 self.__file_list.append(f)
+
+        self.__sort_table = SortList.Sort_Table
 
         self.__total_after = None
         self.__total_before = len(self.__file_list)
@@ -93,6 +94,9 @@ class Sort:
                     Path.rename(file, Path(target, file.name))
                 else:
                     # file already exists in dest so sort into CWD, has to be delt w/ manually
+                    if self.__disable_fallback:
+                        continue
+
                     logger.info(f'fallback used for: {f}')
                     fallback_path = Path() / Path.cwd() / pattern_target_dir
                     if not Path.exists(fallback_path):
@@ -109,17 +113,17 @@ class Sort:
                 self.__file_list.remove(f)
             self.__file_list_done = []
 
-    def main(self):
+    def main(self, sort_list: str, sort_confirm: bool):
         print(f'Prerun info\n'
-              f'MODE\t\t: {self.__mode}\n'
+              f'TABLE\t\t: {sort_list}\n'
               f'Running from\t: {Path.cwd()}\n'
               f'Dest is\t\t: {self.__dest}\n'
-              '\nMake sure everything has been processed correctly\n'
-              f'\nRunning script is: {CheckEnv.get_script_name()}\n')
+              '\nMake sure everything has been processed correctly\n')
 
-        if not confirm.confirm_run():
-            print('Did not confirm, Exiting')
-            raise SystemExit(1)
+        if sort_confirm:
+            if not confirm.confirm_run():
+                print('Did not confirm, Exiting')
+                raise SystemExit(1)
 
         self.sort()
 
@@ -132,26 +136,37 @@ class Sort:
 
     def run(self, args):
         if args.test:
-            self.__use_test_dir = True
             self.__dest = self.__test_dir
         if args.print:
             print(f'IDX\tLIST')
             print('===================')
-            for idx, item in enumerate(SortList.Sort_Table, start=1):
+            for idx, item in enumerate(self.__sort_table, start=1):
                 print(f'{idx}\t{item}')
             raise SystemExit
         if args.sort_table:
-            for idx, item in enumerate(SortList.Sort_Table, start=1):
-                if args.sort_table == idx:
-                    self.__mode = item
-                    self.__list_sort = SortList.Sort_Table[item]
-                    if self.__list_sort is None:
-                        print(f'Empty list was choosen: {item}')
-                        raise SystemExit
-                    if not self.__dest:
-                        self.__dest = SortList.SAVE_DIR
+            if args.sort_table > len(self.__sort_table):
+                print(f'No sorting table exists for: {args.sort_table}')
+                raise SystemExit
 
-        self.main()
+            for idx, item in enumerate(self.__sort_table, start=1):
+                if not args.sort_table == idx:
+                    continue
+
+                try:
+                    self.__list_sort = self.__sort_table[item].sort_list
+                    self.__disable_fallback = self.__sort_table[item].sort_disable_fallback
+                except AttributeError:
+                    print(f'Empty list was chosen: {item}')
+                    raise SystemExit
+
+                if self.__dest is None:
+                    self.__dest = self.__sort_table[item].sort_dest
+
+                self.main(sort_list=item, sort_confirm=self.__sort_table[item].sort_confirm)
+                raise SystemExit
+
+        # required=True is not the solution
+        print(f'Invalid flags req \'-s\'')
 
 
 def main():
@@ -159,7 +174,6 @@ def main():
     parser.add_argument('-s', '--sort-table',
                         metavar='SORT',
                         type=int,
-                        choices=[1, 2, 3, 4, 5, 6, 7, 8, 9],
                         help='Choose sorting table to use')
     parser.add_argument('-T', '--test',
                         action='store_true',
