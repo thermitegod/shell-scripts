@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 3.7.0
+# 3.8.0
 # 2020-12-27
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -149,7 +149,7 @@ class Sort:
             raise SystemExit
         if args.sort_table:
             if args.sort_table > len(self.__sort_table):
-                print(f'No sorting table exists for: {args.sort_table}')
+                print(f'No sorting table exists at position: {args.sort_table}')
                 raise SystemExit
 
             for idx, item in enumerate(self.__sort_table, start=1):
@@ -159,15 +159,13 @@ class Sort:
                 try:
                     self.__list_sort = self.__sort_table[item].sort_list
                     self.__disable_fallback = self.__sort_table[item].sort_disable_fallback
+
+                    if self.__dest is None:
+                        self.__dest = self.__sort_table[item].sort_dest
+
+                    self.main(sort_list=item, sort_confirm=self.__sort_table[item].sort_confirm)
                 except AttributeError:
-                    print(f'Empty list was chosen: {item}')
-                    raise SystemExit
-
-                if self.__dest is None:
-                    self.__dest = self.__sort_table[item].sort_dest
-
-                self.main(sort_list=item, sort_confirm=self.__sort_table[item].sort_confirm)
-                raise SystemExit
+                    print(f'Empty or malformed list was chosen: {item}')
 
 
 def main():
