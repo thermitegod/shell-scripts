@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 3.5.0
+# 3.6.0
 # 2020-12-27
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -114,13 +114,13 @@ class Sort:
             self.__file_list_done = []
 
     def main(self, sort_list: str, sort_confirm: bool):
-        print(f'Prerun info\n'
-              f'TABLE\t\t: {sort_list}\n'
-              f'Running from\t: {Path.cwd()}\n'
-              f'Dest is\t\t: {self.__dest}\n'
-              '\nMake sure everything has been processed correctly\n')
-
         if sort_confirm:
+            print(f'Prerun info\n'
+                  f'TABLE\t\t: {sort_list}\n'
+                  f'Running from\t: {Path.cwd()}\n'
+                  f'Dest is\t\t: {self.__dest}\n'
+                  '\nMake sure everything has been processed correctly\n')
+
             if not confirm.confirm_run():
                 print('Did not confirm, Exiting')
                 raise SystemExit(1)
