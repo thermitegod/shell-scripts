@@ -32,7 +32,7 @@ class SortImg:
 
         self.__list_sort = (
             Sort('.jpg', 'JPG'),
-            Sort('.jpeg', 'JEPG'),
+            Sort('.jpeg', 'JPEG'),
             Sort('.png', 'PNG'),
             Sort('.gif', 'GIF'),
 

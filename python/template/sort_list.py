@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 3.1.0
+# 3.2.0
 # 2020-12-27
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -60,13 +60,23 @@ class _SortList:
                     ),
                 ),
             'IMG_EXT':
+            # replaces sort_image_type.py
                 Format(
                     sort_dest=Path.cwd(),
                     sort_confirm=False,
                     sort_disable_fallback=True,
                     sort_list=(
-                        Sort('', None),
-                        Sort('', None),
+                        Sort('.jpg', 'JPG'),
+                        Sort('.jpeg', 'JPEG'),
+                        Sort('.png', 'PNG'),
+                        Sort('.gif', 'GIF'),
+
+                        Sort('.webm', 'WEBM'),
+                        Sort('.mp4', 'MP4'),
+                        Sort('.mkv', 'MKV'),
+
+                        Sort('.zip', 'ZIP'),
+                        Sort('.rar', 'RAR'),
                     ),
                 ),
             'EMPTY4': None,
