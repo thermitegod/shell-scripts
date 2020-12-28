@@ -24,4 +24,6 @@ __pycache__/
 
 # configs
 python/private/*.py
+python/private/.git
+python/private/.gitignore
 
