@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 3.4.0
+# 3.5.0
 # 2020-12-27
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -64,11 +64,11 @@ class Sort:
             pattern = item.pattern
             save_override = item.save_override
 
-            pattern_glob = pattern.replace('-', r'*').lower()
+            pattern_glob = pattern.replace(' ', r'*').lower()
             if save_override:
                 pattern_target_dir = Path() / save_override
             else:
-                pattern_target_dir = Path() / pattern
+                pattern_target_dir = Path() / pattern.replace(' ', '-')
 
             logger.trace(f'====================')
             logger.trace(f'Name\t: {pattern}')

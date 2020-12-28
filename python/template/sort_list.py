@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 3.0.0
-# 2020-12-26
+# 3.1.0
+# 2020-12-27
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -23,10 +23,10 @@ from pathlib import Path
 class _SortList:
     def __init__(self):
         """
-        Pattern format
+        Pattern format, patterns are space delimited
         ('patern', None'),
         ('patern2', 'override'),
-        ('patern-3', None),
+        ('patern 3', None),
         # =============
         # first entry will match *pattern* and be saved to pattern
         # second entry will match *pattern2* and be saved to override
