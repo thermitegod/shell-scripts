@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 3.6.0
+# 3.7.0
 # 2020-12-27
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
@@ -23,7 +23,6 @@ from pathlib import Path
 from loguru import logger
 
 from python.utils import confirm
-from python.utils.check_env import CheckEnv
 
 try:
     from python.private.sort_list import SortList
@@ -132,7 +131,7 @@ class Sort:
         print(f'\nTotal sorted')
         print(f'Before\t: {self.__total_before}')
         print(f'After\t: {self.__total_after}')
-        print(f'Total\t: {self.__total_before - self.__total_after }')
+        print(f'Total\t: {self.__total_before - self.__total_after}')
 
     def run(self, args):
         if args.test:
@@ -170,22 +169,20 @@ class Sort:
                 self.main(sort_list=item, sort_confirm=self.__sort_table[item].sort_confirm)
                 raise SystemExit
 
-        # required=True is not the solution
-        print(f'Invalid flags req \'-s\'')
-
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-s', '--sort-table',
-                        metavar='SORT',
-                        type=int,
-                        help='Choose sorting table to use')
     parser.add_argument('-T', '--test',
                         action='store_true',
                         help='Use test dir as dest \'/tmp/test\'')
-    parser.add_argument('-p', '--print',
-                        action='store_true',
-                        help='Print available sorting lists')
+    required = parser.add_mutually_exclusive_group(required=True)
+    required.add_argument('-s', '--sort-table',
+                          metavar='SORT',
+                          type=int,
+                          help='Choose sorting table to use')
+    required.add_argument('-p', '--print',
+                          action='store_true',
+                          help='Print available sorting lists')
     debug = parser.add_argument_group('DEBUG')
     debug.add_argument('-L', '--loglevel',
                        default='INFO',
@@ -194,8 +191,6 @@ def main():
                        choices=['NONE', 'CRITICAL', 'ERROR', 'WARNING', 'INFO', 'VERBOSE', 'DEBUG', 'TRACE'],
                        help='Levels: %(choices)s')
     args = parser.parse_args()
-
-    CheckEnv.args_required_else_help()
 
     logger.remove()
     logger.add(sys.stdout, level=args.loglevel, colorize=True)
