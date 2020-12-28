@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 3.3.0
-# 2020-12-26
+# 3.4.0
+# 2020-12-27
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -138,10 +138,15 @@ class Sort:
         if args.test:
             self.__dest = self.__test_dir
         if args.print:
-            print(f'IDX\tLIST')
-            print('===================')
+            print(f'IDX\tENTRIES\t\tTABLE')
+            print('====================================')
             for idx, item in enumerate(self.__sort_table, start=1):
-                print(f'{idx}\t{item}')
+                try:
+                    entries = len(self.__sort_table[item].sort_list)
+                except AttributeError:
+                    entries = 0
+
+                print(f'{idx}\t{entries}\t\t{item}')
             raise SystemExit
         if args.sort_table:
             if args.sort_table > len(self.__sort_table):
