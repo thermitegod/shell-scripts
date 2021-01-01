@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 8.1.0
+# 8.2.0
 # 2021-01-01
 
 # Copyright (C) 2018,2019,2020,2021 Brandon Zorn <brandonzorn@cock.li>
@@ -22,6 +22,7 @@ from pathlib import Path
 
 from python.utils.check_env import CheckEnv
 from python.utils.execute import Execute
+from python.utils.root_check import RootCheck
 
 
 class Chrome:
@@ -82,7 +83,7 @@ def main():
                          help='set specific chrome version to use, [%(choices)s]')
     args = parser.parse_args()
 
-    CheckEnv.root_check(require_root=False)
+    RootCheck(require_root=False)
 
     run = Chrome()
     run.run(args)

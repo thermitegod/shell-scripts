@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 3.8.0
-# 2020-12-12
+# 3.9.0
+# 2021-01-01
 
 # Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -20,13 +20,13 @@ import shutil
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-from python.utils.check_env import CheckEnv
 from python.utils.execute import Execute
 from python.utils.hash_compare import HashCompare
+from python.utils.root_check import RootCheck
 
 
 def main():
-    CheckEnv.root_check(require_root=True)
+    RootCheck(require_root=True)
 
     with TemporaryDirectory() as tmpdir:
         cfg = 'grub.cfg'

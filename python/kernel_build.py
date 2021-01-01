@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 2.26.0
+# 2.27.0
 # 2021-01-01
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
@@ -48,9 +48,9 @@ from pathlib import Path
 from loguru import logger
 from packaging import version
 
-from python.utils.check_env import CheckEnv
 from python.utils.execute import Execute
 from python.utils.kernel import Kernel
+from python.utils.root_check import RootCheck
 from python.utils.script import ExecuteScript
 
 
@@ -562,7 +562,7 @@ def main():
                        help='Levels: %(choices)s')
     args = parser.parse_args()
 
-    CheckEnv.root_check(require_root=True)
+    RootCheck(require_root=True)
 
     logger.remove()
     logger.add(sys.stdout, level=args.loglevel, colorize=True)

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 1.4.0
+# 1.5.0
 # 2021-01-01
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
@@ -19,8 +19,8 @@
 import argparse
 from pathlib import Path
 
-from python.utils.check_env import CheckEnv
 from python.utils.execute import Execute
+from python.utils.root_check import RootCheck
 
 
 def main():
@@ -34,7 +34,7 @@ def main():
                           help='rebuils all pkgs build with clang')
     args = parser.parse_args()
 
-    CheckEnv.root_check(require_root=True)
+    RootCheck(require_root=True)
 
     env = Path() / '/etc/portage/package.env'
     gcc_req_ebuilds = ''

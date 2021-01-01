@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-# 1.3.0
-# 2020-11-31
+# 1.4.0
+# 2021-01-01
 
-# Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
+# Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
 # This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License version 3
@@ -26,8 +26,8 @@ import shutil
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-from python.utils.check_env import CheckEnv
 from python.utils.execute import Execute
+from python.utils.root_check import RootCheck
 
 
 class Microcode:
@@ -49,7 +49,7 @@ class Microcode:
 
 
 def main():
-    CheckEnv.root_check(require_root=True)
+    RootCheck(require_root=True)
 
     run = Microcode()
     run.run()

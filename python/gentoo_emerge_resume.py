@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 1.5.0
+# 1.6.0
 # 2021-01-01
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
@@ -25,8 +25,8 @@ import time
 from pathlib import Path
 
 from python.utils import confirm
-from python.utils.check_env import CheckEnv
 from python.utils.execute import Execute
+from python.utils.root_check import RootCheck
 
 
 class Backup:
@@ -51,7 +51,7 @@ class Backup:
         Execute(f'ls -1A {self.__backup_dir}')
 
     def restore(self):
-        CheckEnv.root_check(require_root=True)
+        RootCheck(require_root=True)
         self.list()
         file = input('Enter file to restore: ')
         shutil.copyfile(self.__backup_dir / file, self.__tmpdir / 'mtimedb.zst')

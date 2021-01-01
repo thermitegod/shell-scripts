@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# 1.6.0
+# 1.7.0
 # 2021-01-01
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
@@ -20,8 +20,8 @@ import argparse
 import os
 from pathlib import Path
 
-from python.utils.check_env import CheckEnv
 from python.utils.execute import Execute
+from python.utils.root_check import RootCheck
 
 
 class Symlink:
@@ -67,7 +67,7 @@ def main():
                         help='')
     args = parser.parse_args()
 
-    CheckEnv.root_check(require_root=True)
+    RootCheck(require_root=True)
 
     run = Symlink()
     run.run(args)

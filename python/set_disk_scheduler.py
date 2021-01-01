@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 1.4.0
+# 1.5.0
 # 2021-01-01
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
@@ -19,8 +19,8 @@
 import argparse
 from pathlib import Path
 
-from python.utils.check_env import CheckEnv
 from python.utils.colors import Colors
+from python.utils.root_check import RootCheck
 
 
 class Scheduler:
@@ -44,7 +44,7 @@ class Scheduler:
             # not really needed with current setup but still porting from sh in case
             # it ever is needed for some reason
 
-            CheckEnv.root_check(require_root=True)
+            RootCheck(require_root=True)
             new_sched = args.set
             for disk in self.__disks:
                 # will strip opening and closing []

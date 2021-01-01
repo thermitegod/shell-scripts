@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 1.4.0
+# 1.5.0
 # 2021-01-01
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
@@ -19,8 +19,8 @@
 import argparse
 from pathlib import Path
 
-from python.utils.check_env import CheckEnv
 from python.utils.colors import Colors
+from python.utils.root_check import RootCheck
 
 
 class Powerstate:
@@ -37,7 +37,7 @@ class Powerstate:
                 print(f'GPU state is already \'{self.__current_state}\'')
                 raise SystemExit
 
-            CheckEnv.root_check(require_root=True)
+            RootCheck(require_root=True)
 
             print(f'Current GPU power state is \'{self.__current_state}\', switching state to \'{new_state}\'')
             self.__card.write_text(new_state)

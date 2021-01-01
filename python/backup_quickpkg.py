@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-# 1.4.0
-# 2020-11-21
+# 1.5.0
+# 2021-01-01
 
-# Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
+# Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
 # This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License version 3
@@ -26,6 +26,7 @@ from pathlib import Path
 
 from python.utils.check_env import CheckEnv
 from python.utils.execute import Execute
+from python.utils.root_check import RootCheck
 
 
 class Backup:
@@ -128,7 +129,7 @@ def main():
                         help='Selects backup to run',)
     args = parser.parse_args()
 
-    CheckEnv.root_check(require_root=True)
+    RootCheck(require_root=True)
 
     run = Backup()
     run.run(args)

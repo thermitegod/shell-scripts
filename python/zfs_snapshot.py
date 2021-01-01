@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 5.10.0
+# 5.11.0
 # 2021-01-01
 
 # Copyright (C) 2018,2019,2020,2021 Brandon Zorn <brandonzorn@cock.li>
@@ -20,8 +20,8 @@ import argparse
 import time
 from pathlib import Path
 
-from python.utils.check_env import CheckEnv
 from python.utils.execute import Execute
+from python.utils.root_check import RootCheck
 
 
 def main():
@@ -70,7 +70,7 @@ def main():
         selected_pool = args.list
 
     if args.snapshot:
-        CheckEnv.root_check(require_root=True)
+        RootCheck(require_root=True)
         cmd += 'snapshot '
         selected_pool = args.snapshot
 
@@ -99,7 +99,7 @@ def main():
         Execute(cmd)
 
     if args.export:
-        CheckEnv.root_check(require_root=True)
+        RootCheck(require_root=True)
         target = args.export
         Execute(f'zfs send {target} | zstd -T0 >| {Path.cwd()}/{Path(target).name}.zst',
                 sh_wrap=True)

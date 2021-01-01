@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-# 10.3.0
-# 2020-11-21
+# 10.4.0
+# 2021-01-01
 
-# Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
+# Copyright (C) 2018,2019,2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
 # This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License version 3
@@ -24,6 +24,7 @@ from python.utils import clipboard
 from python.utils import net
 from python.utils.check_env import CheckEnv
 from python.utils.execute import Execute
+from python.utils.root_check import RootCheck
 
 try:
     from python.private.manga_list import MangaList
@@ -117,7 +118,7 @@ def main():
                         help='supply a url, otherwise will get link from clipboard')
     args = parser.parse_args()
 
-    CheckEnv.root_check(require_root=False)
+    RootCheck(require_root=False)
 
     run = Download()
     run.run(args)

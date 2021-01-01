@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 1.6.0
+# 1.7.0
 # 2021-01-01
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
@@ -21,8 +21,8 @@ import os
 from pathlib import Path
 
 from python.utils import confirm
-from python.utils.check_env import CheckEnv
 from python.utils.execute import Execute
+from python.utils.root_check import RootCheck
 
 
 class Backup:
@@ -162,7 +162,7 @@ def main():
                            help='erase/rewind/eject tape')
     args = parser.parse_args()
 
-    CheckEnv.root_check(require_root=True)
+    RootCheck(require_root=True)
 
     run = Backup()
     run.run(args)

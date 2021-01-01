@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 4.3.0
+# 4.4.0
 # 2021-01-01
 
 # Copyright (C) 2019,2020,2021 Brandon Zorn <brandonzorn@cock.li>
@@ -19,8 +19,8 @@
 import argparse
 from pathlib import Path
 
-from python.utils.check_env import CheckEnv
 from python.utils.execute import Execute
+from python.utils.root_check import RootCheck
 
 
 class Install:
@@ -60,7 +60,7 @@ def main():
                         help='install sys-kernel/vanilla-sources')
     args = parser.parse_args()
 
-    CheckEnv.root_check(require_root=True)
+    RootCheck(require_root=True)
 
     run = Install()
     run.run(args)

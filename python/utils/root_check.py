@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 3.0.0
+# 1.0.0
 # 2021-01-01
 
 # Copyright (C) 2019,2020,2021 Brandon Zorn <brandonzorn@cock.li>
@@ -16,27 +16,29 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-import sys
-from pathlib import Path
+import os
 
-from python.utils.execute import Execute
+from python.utils.colors import Colors
 
 
-class _CheckEnv:
-    def __init__(self):
+class RootCheck:
+    def __init__(self, require_root: bool):
+        """
+        :param require_root:
+            If True, running as root is required otherwise will terminate.
+            If False, running as root will terminate.
+        """
+
         super().__init__()
 
-        self.__script_args: list = sys.argv
+        if require_root:
+            if not os.geteuid() != 0:
+                return
+            msg = 'Requires root, exiting'
+        else:
+            if not os.geteuid() == 0:
+                return
+            msg = 'Do not run as root, exiting'
 
-    def get_script_name(self):
-        return Path(self.__script_args[0]).name
-
-    def args_required_else_help(self):
-        try:
-            self.__script_args[1]
-        except IndexError:
-            Execute(f'{self.__script_args[0]} -h')
-            raise SystemExit
-
-
-CheckEnv = _CheckEnv()
+        print(f'{Colors.BRED}\n\n{msg}\n\n{Colors.NC}')
+        raise SystemExit(1)

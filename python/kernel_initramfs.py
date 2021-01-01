@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 2.4.0
+# 2.5.0
 # 2021-01-01
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
@@ -18,8 +18,8 @@
 
 import argparse
 
-from python.utils.check_env import CheckEnv
 from python.utils.execute import Execute
+from python.utils.root_check import RootCheck
 
 
 class Initramfs:
@@ -85,7 +85,7 @@ def main():
                         help='kernel version to gen initramfs for')
     args = parser.parse_args()
 
-    CheckEnv.root_check(require_root=True)
+    RootCheck(require_root=True)
 
     run = Initramfs()
     run.run(args)
