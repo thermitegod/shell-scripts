@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 2.10.0
+# 2.11.0
 # 2021-01-01
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
@@ -125,7 +125,7 @@ class Convert:
             Execute('mime-correct')
 
         for filename in Path(self.__directory).iterdir():
-            if mimecheck.check_if_image(filename=filename):
+            if Mimecheck.check_if_image(filename=filename):
                 c1 += 1
 
                 filename_basename = Path(filename).name
