@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-# 5.9.0
-# 2020-11-21
+# 5.10.0
+# 2021-01-01
 
-# Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
+# Copyright (C) 2018,2019,2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
 # This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License version 3
@@ -26,13 +26,13 @@ from python.utils.execute import Execute
 
 def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
-    general = parser.add_argument_group('GENERAL')
+    general = parser.add_argument_group('general')
     general.add_argument('-B', '--export',
                          help='export passed snapshot')
     general.add_argument('-e', '--extra',
                          action='store_true',
                          help='Print extra info and exit')
-    pools = parser.add_argument_group('Valid pools',
+    pools = parser.add_argument_group('valid pools',
                                       '0: all [list only]\n'
                                       '1: zroot/ROOT/gentoo [list adds /var/{db/pkg}]\n'
                                       '2: zroot/HOME/brandon\n'

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-# 2.3.0
-# 2020-11-21
+# 2.4.0
+# 2021-01-01
 
-# Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
+# Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
 # This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License version 3
@@ -67,7 +67,7 @@ class Initramfs:
 
 def main():
     parser = argparse.ArgumentParser()
-    group1 = parser.add_argument_group('Initramfs', 'Control initramfs generation')
+    group1 = parser.add_argument_group('initramfs', 'control initramfs generation')
     group1.add_argument('-c', '--compression',
                         default='zstd',
                         type=str,

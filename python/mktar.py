@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-# 2.6.0
-# 2020-11-23
+# 2.7.0
+# 2021-01-01
 
-# Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
+# Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
 # This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License version 3
@@ -133,14 +133,14 @@ def main():
                         type=list,
                         nargs=1,
                         help='create the archive[s] in this directory')
-    batch = parser.add_argument_group('BATCH CREATION')
+    batch = parser.add_argument_group('batch creation')
     batch.add_argument('-d', '--directories',
                        action='store_true',
                        help='compress all directories in cwd')
     batch.add_argument('-f', '--files',
                        action='store_true',
                        help='compress all files in cwd')
-    rm = parser.add_argument_group('DESTRUCTIVE')
+    rm = parser.add_argument_group('destructive')
     rm.add_argument('-z', '--destructive',
                     action='store_true',
                     help='Delete original after it is compressed')

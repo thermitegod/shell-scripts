@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-# 4.2.0
-# 2020-11-21
+# 4.3.0
+# 2021-01-01
 
-# Copyright (C) 2019,2020 Brandon Zorn <brandonzorn@cock.li>
+# Copyright (C) 2019,2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
 # This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License version 3
@@ -51,7 +51,7 @@ def main():
     parser.add_argument('-v', '--verbose',
                         action='store_true',
                         help='verbose install')
-    group1 = parser.add_argument_group('Kernels', 'Default kernel to install is sys-kernel/gentoo-sources')
+    group1 = parser.add_argument_group('kernels', 'default kernel to install is sys-kernel/gentoo-sources')
     group1.add_argument('-G', '--git',
                         action='store_true',
                         help='install sys-kernel/git-sources')

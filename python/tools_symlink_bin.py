@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-# 1.5.0
-# 2020-12-17
+# 1.6.0
+# 2021-01-01
 
-# Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
+# Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
 # This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License version 3
@@ -57,17 +57,15 @@ def main():
                         metavar='USER',
                         default='brandon',
                         help='user')
-    stow = parser.add_argument_group('STOW')
+    stow = parser.add_argument_group('stow').add_mutually_exclusive_group(required=True)
     stow.add_argument('-b', '--stow-bin',
                       action='store_true',
                       help='')
-    unstow = parser.add_argument_group('UNSTOW')
+    unstow = parser.add_argument_group('unstow')
     unstow.add_argument('-B', '--unstow-bin',
                         action='store_true',
                         help='')
     args = parser.parse_args()
-
-    CheckEnv.args_required_else_help()
 
     CheckEnv.root_check(require_root=True)
 

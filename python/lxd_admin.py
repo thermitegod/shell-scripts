@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-# 2.5.0
-# 2020-11-21
+# 2.6.0
+# 2021-01-01
 
-# Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
+# Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
 # This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License version 3
@@ -22,7 +22,6 @@ from pathlib import Path
 
 from loguru import logger
 
-from python.utils.check_env import CheckEnv
 from python.utils.execute import Execute
 from python.utils.lxd import Lxd
 
@@ -412,61 +411,59 @@ class Container:
 
 
 def main():
-    p = argparse.ArgumentParser()
-    c = p.add_argument_group('CONTAINER')
-    c.add_argument('-O', '--only',
-                   metavar='CONTAINER',
-                   help='Only operate in the supplied container, requires full container name')
-    s = p.add_argument_group('CONTAINER SERVICES')
-    s.add_argument('-S', '--service',
-                   metavar='SERVICE',
-                   help='restart service passed as arg')
-    s.add_argument('--create-dirs',
-                   action='store_true',
-                   help='Create container storage dirs if the do not exist')
-    g = p.add_argument_group('CONTAINER GENERAL')
-    g.add_argument('-d', '--delete',
-                   action='store_true',
-                   help='Delete containers')
-    g.add_argument('-r', '--restart',
-                   action='store_true',
-                   help='Restart containers')
-    g.add_argument('-s', '--start',
-                   action='store_true',
-                   help='Start containers')
-    g.add_argument('-u', '--update',
-                   action='store_true',
-                   help='Update containers')
-    g.add_argument('-z', '--stop',
-                   action='store_true',
-                   help='Stop containers')
-    g.add_argument('-Z', '--force-stop',
-                   action='store_true',
-                   help='Force stop containers')
-    x = p.add_argument_group('SPECIFIC, rutorrent only, no other flags req')
-    x.add_argument('-c', '--rutorrent-lockfile',
-                   action='store_true',
-                   help='rtorrent lockfile cleanup')
-    x.add_argument('-C', '--rutorrent-torrents',
-                   action='store_true',
-                   help='rutorrent cleanup only, remove *.torrent files in $config/rutorrent/share/torrents/')
-    o = p.add_argument_group('OTHER')
-    o.add_argument('-p', '--print',
-                   action='store_true',
-                   help='Print all container vars')
-    o.add_argument('-P', '--print-verbose',
-                   action='store_true',
-                   help='Print limited container vars')
-    d = p.add_argument_group('DEBUG')
-    d.add_argument('-L', '--loglevel',
-                   default='INFO',
-                   metavar='LEVEL',
-                   type=str.upper,
-                   choices=['NONE', 'CRITICAL', 'ERROR', 'WARNING', 'INFO', 'VERBOSE', 'DEBUG', 'TRACE'],
-                   help='Levels: %(choices)s')
-    args = p.parse_args()
-
-    CheckEnv.args_required_else_help()
+    parser = argparse.ArgumentParser()
+    container = parser.add_argument_group('container')
+    container.add_argument('-O', '--only',
+                           metavar='CONTAINER',
+                           help='Only operate in the supplied container, requires full container name')
+    service = parser.add_argument_group('container services')
+    service.add_argument('-S', '--service',
+                         metavar='SERVICE',
+                         help='restart service passed as arg')
+    service.add_argument('--create-dirs',
+                         action='store_true',
+                         help='Create container storage dirs if the do not exist')
+    required = parser.add_argument_group('container general').add_mutually_exclusive_group(required=True)
+    required.add_argument('-d', '--delete',
+                          action='store_true',
+                          help='Delete containers')
+    required.add_argument('-r', '--restart',
+                          action='store_true',
+                          help='Restart containers')
+    required.add_argument('-s', '--start',
+                          action='store_true',
+                          help='Start containers')
+    required.add_argument('-u', '--update',
+                          action='store_true',
+                          help='Update containers')
+    required.add_argument('-z', '--stop',
+                          action='store_true',
+                          help='Stop containers')
+    required.add_argument('-Z', '--force-stop',
+                          action='store_true',
+                          help='Force stop containers')
+    clean = parser.add_argument_group('rutorrent only').add_mutually_exclusive_group()
+    clean.add_argument('-c', '--rutorrent-lockfile',
+                       action='store_true',
+                       help='rtorrent lockfile cleanup')
+    clean.add_argument('-C', '--rutorrent-torrents',
+                       action='store_true',
+                       help='rutorrent cleanup only, remove *.torrent files in $config/rutorrent/share/torrents/')
+    dbg_print = parser.add_argument_group('print container vars').add_mutually_exclusive_group()
+    dbg_print.add_argument('-p', '--print',
+                           action='store_true',
+                           help='Print all container vars')
+    dbg_print.add_argument('-P', '--print-verbose',
+                           action='store_true',
+                           help='Print limited container vars')
+    debug = parser.add_argument_group('debug')
+    debug.add_argument('-L', '--loglevel',
+                       default='INFO',
+                       metavar='LEVEL',
+                       type=str.upper,
+                       choices=['NONE', 'CRITICAL', 'ERROR', 'WARNING', 'INFO', 'VERBOSE', 'DEBUG', 'TRACE'],
+                       help='Levels: %(choices)s')
+    args = parser.parse_args()
 
     logger.remove()
     logger.add(sys.stdout, level=args.loglevel, colorize=True)

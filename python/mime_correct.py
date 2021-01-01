@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-# 1.10.0
-# 2020-12-12
+# 1.11.0
+# 2021-01-01
 
-# Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
+# Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
 # This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License version 3
@@ -142,12 +142,12 @@ def main():
                         help='list only in $PWD, no corrections')
     parser.add_argument('-r', '--rm-hash-collision',
                         action='store_true',
-                        help='if two files collide with the same sha1 hash, '
+                        help='if two files collide with the same hash, '
                              'remove the file with the incorrect file extension')
     parser.add_argument('-v', '--verbose',
                         action='store_true',
                         help='extra information in reports')
-    debug = parser.add_argument_group('DEBUG')
+    debug = parser.add_argument_group('debug')
     debug.add_argument('-L', '--loglevel',
                        default='INFO',
                        metavar='LEVEL',
@@ -155,8 +155,6 @@ def main():
                        choices=['NONE', 'CRITICAL', 'ERROR', 'WARNING', 'INFO', 'VERBOSE', 'DEBUG', 'TRACE'],
                        help='Levels: %(choices)s')
     args = parser.parse_args()
-
-    # CheckEnv.args_required_else_help()
 
     logger.remove()
     logger.add(sys.stdout, level=args.loglevel, colorize=True)

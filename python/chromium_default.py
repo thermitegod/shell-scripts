@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-# 8.0.0
-# 2020-12-15
+# 8.1.0
+# 2021-01-01
 
-# Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
+# Copyright (C) 2018,2019,2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
 # This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License version 3
@@ -69,12 +69,12 @@ class Chrome:
 
 def main():
     parser = argparse.ArgumentParser()
-    profiles = parser.add_argument_group('PROFILES')
+    profiles = parser.add_argument_group('profiles')
     profiles.add_argument('-C', '--custom',
                           default=None,
                           metavar='PROFILE',
                           help='custom profile, supplied str is used as the profile name')
-    browser = parser.add_argument_group('BROWSER', 'which browser version to use')
+    browser = parser.add_argument_group('browser', 'which browser version to use')
     browser.add_argument('-c', '--chrome',
                          default='chromium',
                          metavar='VERSION',

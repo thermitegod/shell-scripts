@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-# 3.8.0
-# 2020-12-27
+# 3.9.0
+# 2021-01-01
 
-# Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
+# Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
 # This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License version 3
@@ -169,11 +169,11 @@ class Sort:
 
 
 def main():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description='Sort files in CWD')
     parser.add_argument('-T', '--test',
                         action='store_true',
                         help='Use test dir as dest \'/tmp/test\'')
-    required = parser.add_mutually_exclusive_group(required=True)
+    required = parser.add_argument_group('required exclusive arguments').add_mutually_exclusive_group(required=True)
     required.add_argument('-s', '--sort-table',
                           metavar='SORT',
                           type=int,
@@ -181,7 +181,7 @@ def main():
     required.add_argument('-p', '--print',
                           action='store_true',
                           help='Print available sorting lists')
-    debug = parser.add_argument_group('DEBUG')
+    debug = parser.add_argument_group('debug')
     debug.add_argument('-L', '--loglevel',
                        default='INFO',
                        metavar='LEVEL',

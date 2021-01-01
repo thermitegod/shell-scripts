@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-# 5.10.0
-# 2020-11-22
+# 5.11.0
+# 2021-01-01
 
-# Copyright (C) 2018,2019,2020 Brandon Zorn <brandonzorn@cock.li>
+# Copyright (C) 2018,2019,2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
 # This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License version 3
@@ -65,13 +65,14 @@ class Clean:
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-c', '--clean',
-                        action='store_true',
-                        help='clean only /usr/src/linux symlink')
-    parser.add_argument('-r', '--rm',
-                        action='store_true',
-                        help='remove all /usr/src/linux/*')
-    debug = parser.add_argument_group('DEBUG')
+    required = parser.add_argument_group('required exclusive arguments').add_mutually_exclusive_group(required=True)
+    required.add_argument('-c', '--clean',
+                          action='store_true',
+                          help='clean only /usr/src/linux symlink')
+    required.add_argument('-r', '--rm',
+                          action='store_true',
+                          help='remove all /usr/src/linux/*')
+    debug = parser.add_argument_group('debug')
     debug.add_argument('-L', '--loglevel',
                        default='INFO',
                        metavar='LEVEL',
@@ -79,8 +80,6 @@ def main():
                        choices=['NONE', 'CRITICAL', 'ERROR', 'WARNING', 'INFO', 'VERBOSE', 'DEBUG', 'TRACE'],
                        help='Levels: %(choices)s')
     args = parser.parse_args()
-
-    CheckEnv.args_required_else_help()
 
     CheckEnv.root_check(require_root=True)
 

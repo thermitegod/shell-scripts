@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-# 1.3.0
-# 2020-11-21
+# 1.4.0
+# 2021-01-01
 
-# Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
+# Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
 # This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License version 3
@@ -25,12 +25,13 @@ from python.utils.execute import Execute
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-g', '--rebuild-gcc',
-                        action='store_true',
-                        help='rebuils all pkgs build with gcc')
-    parser.add_argument('-c', '--rebuild-clang',
-                        action='store_true',
-                        help='rebuils all pkgs build with clang')
+    required = parser.add_argument_group('required exclusive arguments').add_mutually_exclusive_group(required=True)
+    required.add_argument('-g', '--rebuild-gcc',
+                          action='store_true',
+                          help='rebuils all pkgs build with gcc')
+    required.add_argument('-c', '--rebuild-clang',
+                          action='store_true',
+                          help='rebuils all pkgs build with clang')
     args = parser.parse_args()
 
     CheckEnv.root_check(require_root=True)

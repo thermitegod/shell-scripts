@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-# 2.7.0
-# 2020-11-15
+# 2.8.0
+# 2021-01-01
 
 # Original
 # https://github.com/JLDevOps/ChanDL
 
 # Copyright (C) 2017 Gian Sass <gian.sass@outlook.de>
-# Copyright (C) 2019,2020 Brandon Zorn <brandonzorn@cock.li>
+# Copyright (C) 2019,2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
 # This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License version 3
@@ -35,8 +35,6 @@ from urllib.parse import urlparse
 
 import requests
 from loguru import logger
-
-from python.utils.check_env import CheckEnv
 
 
 class Chandl:
@@ -275,8 +273,10 @@ class Chandl:
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-url', '--url',
+                        required=True,
                         help='The URL of the thread you want to download (4chan and 8kun supported)')
     parser.add_argument('-d', '--destination',
+                        required=True,
                         help='Where the files are to be stored')
     parser.add_argument('-ext', '--extension',
                         default='*',
@@ -298,7 +298,7 @@ def main():
                         default=None,
                         type=str,
                         help='Generate hashlist from directory')
-    debug = parser.add_argument_group('DEBUG')
+    debug = parser.add_argument_group('debug')
     debug.add_argument('-L', '--loglevel',
                        default='INFO',
                        metavar='LEVEL',
@@ -306,8 +306,6 @@ def main():
                        choices=['NONE', 'CRITICAL', 'ERROR', 'WARNING', 'INFO', 'VERBOSE', 'DEBUG', 'TRACE'],
                        help='Levels: %(choices)s')
     args = parser.parse_args()
-
-    CheckEnv.args_required_else_help()
 
     logger.remove()
     logger.add(sys.stdout, level=args.loglevel, colorize=True)

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-# 1.3.0
-# 2020-11-11
+# 1.4.0
+# 2021-01-01
 
-# Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
+# Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
 # This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License version 3
@@ -59,17 +59,16 @@ class Scheduler:
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-c', '--current',
-                        action='store_true',
-                        help='Get current GPU power state')
-    parser.add_argument('-s', '--set',
-                        metavar='STATE',
-                        nargs=1,
-                        choices=['mq-deadline', 'none'],
-                        help='Set GPU power state')
+    required = parser.add_argument_group('required exclusive arguments').add_mutually_exclusive_group(required=True)
+    required.add_argument('-c', '--current',
+                          action='store_true',
+                          help='Get current GPU power state')
+    required.add_argument('-s', '--set',
+                          metavar='STATE',
+                          nargs=1,
+                          choices=['mq-deadline', 'none'],
+                          help='Set GPU power state')
     args = parser.parse_args()
-
-    CheckEnv.args_required_else_help()
 
     run = Scheduler()
     run.run(args)

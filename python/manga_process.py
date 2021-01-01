@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-# 1.6.0
-# 2020-11-21
+# 1.7.0
+# 2021-01-01
 
-# Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
+# Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
 # This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License version 3
@@ -19,7 +19,6 @@
 import argparse
 import time
 
-from python.utils.check_env import CheckEnv
 from python.utils.execute import Execute
 
 
@@ -27,8 +26,7 @@ class Process:
     def __init__(self):
         self.__mode = 'manga'
 
-        self.__input_files = None
-        self.__directories = False
+        self.__directories = True
 
         self.__time_start = 0
         self.__time_end = 0
@@ -135,14 +133,10 @@ class Process:
 
     def run(self, args):
         # general
-        if args.directories:
-            self.__directories = True
         if args.numerical:
             self.__numerical_rename = True
         if args.not_manga:
             self.__mode = 'alt'
-        if args.input_files is not None:
-            self.__input_files = args.input_files
         if args.compression == 0:
             self.__set_compressor_interactive = True
         else:
@@ -170,15 +164,6 @@ class Process:
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('input_files',
-                        action='store',
-                        type=str,
-                        nargs='*',
-                        default=None,
-                        help=argparse.SUPPRESS)
-    parser.add_argument('-d', '--directories',
-                        action='store_true',
-                        help='Run for all directories in CWD')
     parser.add_argument('-c', '--compression',
                         action='store',
                         type=int,
@@ -196,7 +181,7 @@ def main():
     parser.add_argument('-z', '--match-zzz',
                         action='store_true',
                         help='Match zzz in credits')
-    disable = parser.add_argument_group('DISABLE')
+    disable = parser.add_argument_group('disable')
     disable.add_argument('-A', '--disable-advzip',
                          action='store_true',
                          help='Disable running mkadvzip')
@@ -219,8 +204,6 @@ def main():
                          action='store_true',
                          help='Disable time total')
     args = parser.parse_args()
-
-    CheckEnv.args_required_else_help()
 
     run = Process()
     run.run(args)

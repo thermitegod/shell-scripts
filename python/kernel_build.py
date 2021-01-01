@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-# 2.25.0
-# 2020-12-13
+# 2.26.0
+# 2021-01-01
 
-# Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
+# Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
 # This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License version 3
@@ -493,7 +493,7 @@ class Build:
 
 def main():
     parser = argparse.ArgumentParser()
-    general = parser.add_argument_group('GENERAL')
+    general = parser.add_argument_group('general')
     general.add_argument('-b', '--force-no-bump',
                          action='store_true',
                          help='force disable kernel bump check')
@@ -509,7 +509,7 @@ def main():
     general.add_argument('-v', '--verbose',
                          action='store_true',
                          help='set verbose on')
-    zfs = parser.add_argument_group('ZFS')
+    zfs = parser.add_argument_group('zfs')
     zfs.add_argument('-c', '--force-rebuild-kmod',
                      action='store_true',
                      help='build kmod even if preconfigured sources exist')
@@ -525,7 +525,7 @@ def main():
     zfs.add_argument('-l', '--use-local-ebuild',
                      action='store_true',
                      help='use local repo in $PORTDIR_OVERLAY')
-    ker = parser.add_argument_group('KERNEL')
+    ker = parser.add_argument_group('kernel')
     ker.add_argument('-G', '--compiler',
                      action='store_true',
                      help='build kernel using gcc')
@@ -553,7 +553,7 @@ def main():
     ker.add_argument('-Z', '--experimental',
                      action='store_true',
                      help='enables experimental options, may or may not do something, or even work')
-    debug = parser.add_argument_group('DEBUG')
+    debug = parser.add_argument_group('debug')
     debug.add_argument('-L', '--loglevel',
                        default='INFO',
                        metavar='LEVEL',

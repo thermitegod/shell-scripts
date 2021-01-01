@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-# 1.4.0
-# 2020-11-21
+# 1.5.0
+# 2021-01-01
 
-# Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
+# Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
 # This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License version 3
@@ -79,21 +79,20 @@ class Backup:
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-b', '--backup',
-                        action='store_true',
-                        help='backup mtimdb')
-    parser.add_argument('-s', '--restore',
-                        action='store_true',
-                        help='retore backuped mtimdb')
-    parser.add_argument('-l', '--list',
-                        action='store_true',
-                        help='list backuped mtimdb')
-    parser.add_argument('-r', '--remove',
-                        action='store_true',
-                        help='remove backuped mtimdb')
+    required = parser.add_argument_group('required exclusive arguments').add_mutually_exclusive_group(required=True)
+    required.add_argument('-b', '--backup',
+                          action='store_true',
+                          help='backup mtimdb')
+    required.add_argument('-s', '--restore',
+                          action='store_true',
+                          help='retore backuped mtimdb')
+    required.add_argument('-l', '--list',
+                          action='store_true',
+                          help='list backuped mtimdb')
+    required.add_argument('-r', '--remove',
+                          action='store_true',
+                          help='remove backuped mtimdb')
     args = parser.parse_args()
-
-    CheckEnv.args_required_else_help()
 
     run = Backup()
     run.run(args)

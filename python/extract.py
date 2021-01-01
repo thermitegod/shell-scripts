@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-# 2.6.0
-# 2020-11-23
+# 2.7.0
+# 2021-01-01
 
-# Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
+# Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
 # This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License version 3
@@ -136,7 +136,7 @@ def main():
                         metavar='DIR',
                         nargs=1,
                         help='create the archive[s] in this directory')
-    opts = parser.add_argument_group('EXTRACTION OPTIONS')
+    opts = parser.add_argument_group('extraction options')
     opts.add_argument('-s', '--no-subdir',
                       action='store_true',
                       help='Extract files to output dir without creating sub directories, req -o')

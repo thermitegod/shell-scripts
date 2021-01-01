@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-# 2.9.0
-# 2020-11-21
+# 2.10.0
+# 2021-01-01
 
-# Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
+# Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
 # This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License version 3
@@ -274,7 +274,7 @@ class Convert:
 def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
 
-    general = parser.add_argument_group('GENERAL')
+    general = parser.add_argument_group('general')
     general.add_argument('-d', '--directory',
                          metavar='DIRECTORY',
                          nargs=1,
@@ -286,7 +286,7 @@ def main():
                          action='store_true',
                          help='get image size in current directory')
 
-    modify = parser.add_argument_group('FILE MODIFICATION')
+    modify = parser.add_argument_group('file modification')
     modify.add_argument('-e', '--no-strip-exif',
                         action='store_true',
                         help='Do not strip exif, can lead to runtime errors')
@@ -294,7 +294,7 @@ def main():
                         action='store_true',
                         help='disable mime check and correction')
 
-    batch = parser.add_argument_group('BATCH')
+    batch = parser.add_argument_group('batch')
     batch.add_argument('-B', '--batch',
                        action='store_true',
                        help='batch, must come before other args')
@@ -302,7 +302,7 @@ def main():
                        action='store_true',
                        help='batch, must come before other args, uses -r')
 
-    resize_size = parser.add_argument_group('RESIZE, keeps aspect',
+    resize_size = parser.add_argument_group('resize, keeps aspect',
                                             '0: use value provided\n'
                                             '1: 2400\n'
                                             '2: 1600\n'
@@ -314,14 +314,14 @@ def main():
     resize_size.add_argument('-W', '--width',
                              help='RESIZE Width, keeps aspect')
 
-    resize_percent = parser.add_argument_group('RESIZE PERCENT')
+    resize_percent = parser.add_argument_group('resize percent')
     resize_percent.add_argument('-S', '--percent',
                                 metavar='PERCENT',
                                 nargs=1,
                                 type=int,
                                 help='Any percent')
 
-    convert = parser.add_argument_group('CONVERT',
+    convert = parser.add_argument_group('convert',
                                         'value of \'0\' sets auto mode\n'
                                         'quality ranges, higher is better quality, JPG: 1-100, PNG:1-9\n')
     convert.add_argument('-J', '--jpg-to-jpg',
@@ -345,7 +345,7 @@ def main():
                          type=int,
                          help='convert png to jpg')
 
-    debug = parser.add_argument_group('DEBUG')
+    debug = parser.add_argument_group('debug')
     debug.add_argument('-L', '--loglevel',
                        default='INFO',
                        metavar='LEVEL',

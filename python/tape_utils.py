@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-# 1.5.0
-# 2020-11-21
+# 1.6.0
+# 2021-01-01
 
-# Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
+# Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
 # This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License version 3
@@ -120,50 +120,49 @@ class Backup:
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-b', '--backup',
-                        metavar='FILE/DIR',
-                        type=list,
-                        nargs=1,
-                        help='backup <input> at end of last backup on <tape>')
-    parser.add_argument('-B', '--backup-overwrite',
-                        metavar='FILE/DIR',
-                        type=list,
-                        nargs=1,
-                        help='backup <input> at start, overwriting existing, on <tape>')
-    parser.add_argument('-e', '--eject',
-                        store='store_true',
-                        help='eject tape')
-    parser.add_argument('-g', '--restore',
-                        metavar='DIR',
-                        type=list,
-                        nargs=1,
-                        help='restore from begining of <tape> to <input>')
-    parser.add_argument('-l', '--list',
-                        store='store_true',
-                        help='list contents of <tape>')
-    parser.add_argument('-R', '--retension',
-                        store='store_true',
-                        help='tape retensioning <only for tape read errors>')
-    parser.add_argument('-r', '--rewind',
-                        store='store_true',
-                        help='rewind tape')
-    parser.add_argument('-s', '--status',
-                        store='store_true',
-                        help='drive status')
-    parser.add_argument('-v', '--verify',
-                        store='store_true',
-                        help='verify files on current tape')
-    parser.add_argument('-z', '--erase',
-                        store='store_true',
-                        help='erase/rewind tape')
-    parser.add_argument('-Z', '--erase-eject',
-                        store='store_true',
-                        help='erase/rewind/eject tape')
+    exclusive = parser.add_argument_group('required exclusive arguments').add_mutually_exclusive_group(required=True)
+    exclusive.add_argument('-b', '--backup',
+                           metavar='FILE/DIR',
+                           type=list,
+                           nargs=1,
+                           help='backup <input> at end of last backup on <tape>')
+    exclusive.add_argument('-B', '--backup-overwrite',
+                           metavar='FILE/DIR',
+                           type=list,
+                           nargs=1,
+                           help='backup <input> at start, overwriting existing, on <tape>')
+    exclusive.add_argument('-e', '--eject',
+                           action='store_true',
+                           help='eject tape')
+    exclusive.add_argument('-g', '--restore',
+                           metavar='DIR',
+                           type=list,
+                           nargs=1,
+                           help='restore from begining of <tape> to <input>')
+    exclusive.add_argument('-l', '--list',
+                           action='store_true',
+                           help='list contents of <tape>')
+    exclusive.add_argument('-R', '--retension',
+                           action='store_true',
+                           help='tape retensioning <only for tape read errors>')
+    exclusive.add_argument('-r', '--rewind',
+                           action='store_true',
+                           help='rewind tape')
+    exclusive.add_argument('-s', '--status',
+                           action='store_true',
+                           help='drive status')
+    exclusive.add_argument('-v', '--verify',
+                           action='store_true',
+                           help='verify files on current tape')
+    exclusive.add_argument('-z', '--erase',
+                           action='store_true',
+                           help='erase/rewind tape')
+    exclusive.add_argument('-Z', '--erase-eject',
+                           action='store_true',
+                           help='erase/rewind/eject tape')
     args = parser.parse_args()
 
     CheckEnv.root_check(require_root=True)
-
-    CheckEnv.args_required_else_help()
 
     run = Backup()
     run.run(args)

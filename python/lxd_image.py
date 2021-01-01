@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-# 1.8.0
-# 2020-11-21
+# 1.9.0
+# 2021-01-01
 
-# Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
+# Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
 # This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License version 3
@@ -23,7 +23,6 @@ from pathlib import Path
 
 from loguru import logger
 
-from python.utils.check_env import CheckEnv
 from python.utils.execute import Execute
 from python.utils.lxd import Lxd
 
@@ -72,13 +71,14 @@ class Container:
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-e', '--export',
-                        metavar='CONTAINER',
-                        help='Export lxd container to file')
-    parser.add_argument('-i', '--install',
-                        metavar='FILE',
-                        help='Import lxd container from file')
-    debug = parser.add_argument_group('DEBUG')
+    required = parser.add_argument_group('required exclusive arguments').add_mutually_exclusive_group(required=True)
+    required.add_argument('-e', '--export',
+                          metavar='CONTAINER',
+                          help='Export lxd container to file')
+    required.add_argument('-i', '--install',
+                          metavar='FILE',
+                          help='Import lxd container from file')
+    debug = parser.add_argument_group('debug')
     debug.add_argument('-L', '--loglevel',
                        default='INFO',
                        metavar='LEVEL',
@@ -86,8 +86,6 @@ def main():
                        choices=['NONE', 'CRITICAL', 'ERROR', 'WARNING', 'INFO', 'VERBOSE', 'DEBUG', 'TRACE'],
                        help='Levels: %(choices)s')
     args = parser.parse_args()
-
-    CheckEnv.args_required_else_help()
 
     logger.remove()
     logger.add(sys.stdout, level=args.loglevel, colorize=True)
