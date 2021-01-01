@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 1.11.0
+# 1.12.0
 # 2021-01-01
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
@@ -25,7 +25,7 @@ from loguru import logger
 from python.utils.colors import Colors
 from python.utils.hash_compare import HashCompare
 from python.utils.mimecheck import Mimecheck
-from python.utils.script import ExecuteScript
+from python.utils.recursion import RecursiveExecute
 
 
 class MimeCorrect:
@@ -117,17 +117,15 @@ class MimeCorrect:
             logger.debug('total == 0')
 
     def run(self, args):
-        if args.check_all:
-            text = f'find {Path.cwd()} -path \'*/*\' -type d \\( ! -name . \\) | ' \
-                   f'while read -r dir ; do cd "${{dir}}" && {Path(sys.argv[0])} ; done\n'
-            ExecuteScript(text)
-            raise SystemExit
         if args.list:
             self.__list_only = True
         if args.rm_hash_collision:
             self.__rm_hash_collision = True
         if args.verbose:
             self.__verbose = True
+        if args.check_all:
+            RecursiveExecute(function=self.main)
+            raise SystemExit
 
         self.main()
 
