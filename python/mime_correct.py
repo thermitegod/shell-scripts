@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 1.13.0
+# 1.14.0
 # 2021-01-04
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
@@ -35,10 +35,16 @@ class MimeCorrect:
 
         self.__verbose = False
 
+        self.__total_checked = 0
+        self.__total_found = 0
+        self.__total_corrected = 0
+        self.__total_collision = 0
+
     def main(self):
-        total = 0
+        checked = 0
+        found = 0
+        corrected = 0
         collision = 0
-        fixed = 0
 
         for f in Path.cwd().iterdir():
             if Path.is_dir(f):
@@ -48,7 +54,8 @@ class MimeCorrect:
                 logger.debug(f'Skipping non image file: {f}')
                 continue
 
-            total += 1
+            checked += 1
+            self.__total_checked += 1
 
             mimeext = Mimecheck.get_mimetype_ext(filename=f)
 
@@ -79,6 +86,7 @@ class MimeCorrect:
                     else:
                         logger.debug(f'File collision with different files: \'{current_name}\' \'{correct_name}\'')
                     collision += 1
+                    self.__total_collision += 1
                     if self.__rm_hash_collision and not self.__list_only:
                         current_name.unlink()
 
@@ -87,33 +95,33 @@ class MimeCorrect:
                     logger.debug(f'Mismatch: {current_name.resolve()}')
 
                 if self.__list_only:
+                    found += 1
+                    self.__total_found += 1
                     continue
 
                 Path.rename(current_name, correct_name)
 
-                fixed += 1
+                corrected += 1
+                self.__total_corrected += 1
 
-        if total != 0:
-            total_out = f'{Colors.GRE}Checked{Colors.NC}: {total}'
+        if checked > 0:
+            self.print_totals(checked, found, corrected, collision)
 
-            if fixed != 0:
-                fixed_out = f'{Colors.YEL}Corrected{Colors.NC}: {fixed}'
-            else:
-                fixed_out = ''
-
-            if collision != 0:
-                collision_out = f'{Colors.RED}Collision{Colors.NC}: {collision}'
-            else:
-                collision_out = ''
-
-            if self.__verbose:
-                pwd_out = f'in: {Path.cwd()}'
-            else:
-                pwd_out = ''
-
-            print(f'{total_out}\t{fixed_out}\t{collision_out}\t{pwd_out}')
+    def print_totals(self, checked: int, found: int, corrected: int,
+                     collision: int, print_totals: bool = False):
+        checked_out = f'{Colors.GRE}Checked{Colors.NC}: {checked}'
+        if self.__list_only:
+            problematic_out = f'{Colors.YEL}Found{Colors.NC}: {found}'
         else:
-            logger.debug('total == 0')
+            problematic_out = f'{Colors.YEL}Corrected{Colors.NC}: {corrected}'
+        collision_out = f'{Colors.RED}Collision{Colors.NC}: {collision}'
+
+        if self.__verbose and not print_totals:
+            pwd_out = f'{Colors.BLU}Path{Colors.NC}: {Path.cwd()}'
+        else:
+            pwd_out = ''
+
+        print(f'{checked_out}\t{problematic_out}\t{collision_out}\t{pwd_out}')
 
     def run(self, args):
         if args.list:
@@ -124,16 +132,21 @@ class MimeCorrect:
             self.__verbose = True
         if args.check_all:
             RecursiveExecute(function=self.main)
-            raise SystemExit
+        else:
+            self.main()
 
-        self.main()
+        if self.__total_checked > 0:
+            print(f'\nTOTAL')
+            self.print_totals(self.__total_checked, self.__total_found,
+                              self.__total_corrected, self.__total_collision,
+                              print_totals=True)
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-A', '--check-all',
                         action='store_true',
-                        help='run in all sub-dirs of $PWD')
+                        help='run in all sub-dirs of CWD')
     parser.add_argument('-l', '--list',
                         action='store_true',
                         help='list only in $PWD, no corrections')
