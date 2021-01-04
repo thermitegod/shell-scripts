@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.12.0
-# 2021-01-01
+# 1.13.0
+# 2021-01-04
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -59,9 +59,8 @@ class MimeCorrect:
                 logger.debug(f'file type not supported: {mimeext}')
                 continue
 
-            name_split = str(f.name).rpartition('.')
-            name = name_split[0]
-            ext = name_split[-1]
+            name = f.stem
+            ext = f.suffix[1:]
 
             if mimeext == 'jpeg' and ext == 'jpg':
                 logger.debug(f'Skipping jpg {f}')
