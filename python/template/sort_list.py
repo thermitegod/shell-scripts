@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-# 3.2.0
-# 2020-12-27
+# 3.3.0
+# 2021-01-04
 
-# Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
+# Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
 # This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License version 3
@@ -68,6 +68,7 @@ class _SortList:
                     sort_list=(
                         Sort('.jpg', 'JPG'),
                         Sort('.jpeg', 'JPEG'),
+                        Sort('.jxl', 'JXL'),
                         Sort('.png', 'PNG'),
                         Sort('.gif', 'GIF'),
 
