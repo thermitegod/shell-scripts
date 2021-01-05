@@ -1,0 +1,6 @@
+#!/usr/bin/env python3
+from python import image_convert_jxl
+try:
+    image_convert_jxl.main()
+except KeyboardInterrupt:
+    raise SystemExit
