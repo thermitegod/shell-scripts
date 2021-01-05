@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-# 2.1.0
-# 2020-12-13
+# 2.2.0
+# 2020-01-04
 
-# Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
+# Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
 # This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License version 3
@@ -22,10 +22,12 @@ from typing import Callable
 
 
 class RecursiveFindFiles:
-    def __init__(self):
+    def __init__(self, use_pathlib: bool = False):
         super().__init__()
 
-        self.__file_list: list[str] = []
+        self.__file_list = []
+
+        self.__use_path_obj = use_pathlib
 
         self._recursive_find_files()
 
@@ -34,9 +36,12 @@ class RecursiveFindFiles:
         gets a list of all files in every sub dir
         """
 
-        for f in Path(Path.cwd()).iterdir():
+        for f in Path.cwd().iterdir():
             if f.is_file():
-                self.__file_list.append(str(f))
+                if self.__use_path_obj:
+                    self.__file_list.append(f)
+                else:
+                    self.__file_list.append(str(f))
             elif f.is_dir():
                 os.chdir(f)
                 self._recursive_find_files()

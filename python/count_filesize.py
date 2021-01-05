@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.3.0
-# 2021-01-01
+# 1.4.0
+# 2021-01-04
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -56,7 +56,7 @@ class Count:
         self.__file_list = []
 
     def main_count(self):
-        self.__file_list = RecursiveFindFiles().get_files()
+        self.__file_list = RecursiveFindFiles(use_pathlib=True).get_files()
 
         for ranges in self.__size_ranges:
             if len(self.__file_list) == 0:

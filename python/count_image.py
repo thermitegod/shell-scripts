@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 1.6.0
+# 1.7.0
 # 2021-01-04
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
@@ -47,14 +47,14 @@ class Count:
         self.__file_list = []
 
     def main_count(self):
-        self.__file_list = RecursiveFindFiles().get_files()
+        self.__file_list = RecursiveFindFiles(use_pathlib=True).get_files()
 
         for ext in self.__mode:
             if len(self.__file_list) == 0:
                 break
 
             for idx, item in enumerate(self.__file_list):
-                if item.endswith(ext):
+                if item.suffix == ext:
                     self.__counter += 1
                     self.__file_list_done.append(item)
 
