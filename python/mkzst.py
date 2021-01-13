@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 3.6.0
-# 2021-01-01
+# 3.7.0
+# 2021-01-13
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -85,7 +85,7 @@ class Compress:
         os.chdir(Path(filename).parent)
 
         if compressing_dir:
-            text = f'tar {self.__exclude} --xattrs -{self.__tar_verbose}Scf - "{Path(filename).name}" -P | '
+            text = f'tar {self.__exclude} --xattrs --sort=name -{self.__tar_verbose}cf - "{Path(filename).name}" -P | '
             if self.__status:
                 text += f'pv -s "$(du -sb "{Path.resolve(filename)}" | awk \'{{print $1}}\')" | '
             text += f'{self.__cmd} >| "{self.__output_dir}/{Path(filename).name}.tar.{self.__ext}" || {die}'
