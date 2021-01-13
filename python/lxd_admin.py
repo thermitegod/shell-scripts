@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 2.6.0
-# 2021-01-01
+# 2.7.0
+# 2021-01-12
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -423,7 +423,8 @@ def main():
     service.add_argument('--create-dirs',
                          action='store_true',
                          help='Create container storage dirs if the do not exist')
-    required = parser.add_argument_group('container general').add_mutually_exclusive_group(required=True)
+    # required = parser.add_argument_group('container general').add_mutually_exclusive_group(required=True)
+    required = parser.add_argument_group('container general').add_mutually_exclusive_group()
     required.add_argument('-d', '--delete',
                           action='store_true',
                           help='Delete containers')
