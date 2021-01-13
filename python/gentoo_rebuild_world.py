@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.5.0
-# 2021-01-01
+# 1.6.0
+# 2021-01-12
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -46,6 +46,7 @@ def main():
 
     if args.rebuild_clang:
         bin_pkg = 'www-client/google-chrome-unstable ' \
+                  'dev-lang/rust-bin ' \
                   'dev-util/clion ' \
                   'dev-util/pycharm-community ' \
                   'dev-java/openjdk-bin ' \
