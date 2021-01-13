@@ -1,1 +1,6 @@
-shell/remove-junk-files.sh
+#!/usr/bin/env python3
+from python import remove_junk_files
+try:
+    remove_junk_files.main()
+except KeyboardInterrupt:
+    raise SystemExit
