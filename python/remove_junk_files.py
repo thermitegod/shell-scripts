@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 1.0.0
+# 1.1.0
 # 2021-01-13
 
 # Copyright (C) 2021 Brandon Zorn <brandonzorn@cock.li>
@@ -44,7 +44,7 @@ class RemoveJunk:
         self.__file_list = []
 
     def main(self, list_only: bool = False):
-        self.__file_list = RecursiveFindFiles(inc_dirs=True, use_pathlib=True).get_files()
+        self.__file_list = RecursiveFindFiles(inc_dirs=True).get_files(pathlib=True)
 
         for junk in self.__junk:
             if len(self.__file_list) == 0:

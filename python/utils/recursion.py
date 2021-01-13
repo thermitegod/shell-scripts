@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 2.4.0
+# 2.5.0
 # 2020-01-13
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
@@ -22,19 +22,18 @@ from typing import Callable
 
 
 class RecursiveFindFiles:
-    def __init__(self, path: Path = None, inc_dirs: bool = False, use_pathlib: bool = False):
+    def __init__(self, path: Path = None, inc_dirs: bool = False):
         """
         :param path:
             will recursively find all files in this path, if None will use CWD
-        :param use_pathlib:
-            use path objects in returned list, otherwise will be str
+        :param inc_dirs:
+            include directories otherwise only include files
         """
 
         super().__init__()
 
         self.__file_list_str = []
         self.__file_list_pathlib = []
-        self.__use_path_obj = use_pathlib
         self.__inc_dirs = inc_dirs
 
         if path is not None:
@@ -59,8 +58,15 @@ class RecursiveFindFiles:
                 os.chdir(f)
                 self._recursive_find_files()
 
-    def get_files(self):
-        if self.__use_path_obj:
+    def get_files(self, pathlib: bool = False):
+        """
+        :param pathlib:
+            use path objects in returned list, otherwise will be str
+        :return:
+            list of files
+        """
+
+        if pathlib:
             return self.__file_list_pathlib
         else:
             return self.__file_list_str
