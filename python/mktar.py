@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 2.8.0
+# 2.9.0
 # 2021-01-13
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
@@ -72,14 +72,19 @@ class Compress:
 
             file_list_comp = ''
             for f in file_list:
-                file_list_comp += f'"{f}" '
+                # .partition() prevents tar error messages by removing
+                # leading '/'. the entire path will be junked anyway so
+                # its fine
+                # tar: Removing leading `/' from member names
+                # tar: Removing leading `/' from hard link targets
+                file_list_comp += f'"{f.partition("/")[-1]}" '
 
             # https://stackoverflow.com/questions/4898056/how-to-create-flat-tar-archive
             # --transform 's/.*\///g'
             remove_dir_structure = '--transform \'s/.*\\///g\''
 
             cmd = f'tar {self.__exclude} --directory="{filename.resolve()}" --sort=name -{self.__tar_verbose}cf ' \
-                  f'"{self.__output_dir}/{file_name}.tar" {remove_dir_structure} {file_list_comp}'
+                  f'"{self.__output_dir}/{file_name}.tar" {remove_dir_structure} -C / {file_list_comp}'
         else:
             cmd = f'tar {self.__exclude} --xattrs -{self.__tar_verbose}cf ' \
                   f'"{self.__output_dir}/{file_name}.tar" "{file_name}"'
