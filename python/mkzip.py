@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 2.7.0
-# 2021-01-01
+# 2.8.0
+# 2021-01-13
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -40,6 +40,7 @@ class Compress:
         self.__output_dir = Path.cwd()
 
         self.__exclude = ''
+        self.__compression_method = None
 
         self.__run_tests = True
         self.__file_list = []
@@ -64,7 +65,7 @@ class Compress:
 
         os.chdir(Path(filename).parent)
 
-        Execute(f'nice -19 zip {self.__exclude} -rv -9 '
+        Execute(f'nice -19 zip {self.__exclude} -rv -9 --compression-method={self.__compression_method} '
                 f'{self.__junk_paths} "{self.__output_dir}/{filename}.zip" "{filename}"')
 
         if Path.exists(test_file):
@@ -84,6 +85,8 @@ class Compress:
         if args.destructive:
             self.__destructive = True
         # other
+        if args.compression_method:
+            self.__compression_method = args.compression_method[0]
         if args.disable_tests:
             self.__run_tests = False
         if args.output_dir:
@@ -118,6 +121,13 @@ def main():
                         metavar='DIR',
                         nargs=1,
                         help='create the archive[s] in this directory')
+    batch = parser.add_argument_group('compression')
+    batch.add_argument('-cm', '--compression-method',
+                       default=['deflate'],
+                       nargs=1,
+                       metavar='CM',
+                       choices=['store', 'deflate', 'bzip2'],
+                       help='set zip compression methon, [store, defalte, bzip2]')
     batch = parser.add_argument_group('batch creation')
     batch.add_argument('-d', '--directories',
                        action='store_true',
