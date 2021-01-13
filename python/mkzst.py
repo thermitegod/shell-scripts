@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 3.7.0
+# 3.8.0
 # 2021-01-13
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
@@ -29,6 +29,7 @@ import os
 import shutil
 from pathlib import Path
 
+from python.utils.archive_utils import RemoveJunk
 from python.utils.check_env import CheckEnv
 from python.utils.get_files import GetFiles
 from python.utils.output_dir import OutputDir
@@ -81,6 +82,8 @@ class Compress:
             return
 
         die = f'die "Compression failed for \'{Path.resolve(filename)}\'"'
+
+        RemoveJunk(Path(filename))
 
         os.chdir(Path(filename).parent)
 

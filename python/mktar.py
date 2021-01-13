@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 2.9.0
+# 2.10.0
 # 2021-01-13
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
@@ -29,6 +29,7 @@ import os
 import shutil
 from pathlib import Path
 
+from python.utils.archive_utils import RemoveJunk
 from python.utils.check_env import CheckEnv
 from python.utils.execute import Execute
 from python.utils.get_files import GetFiles
@@ -53,6 +54,8 @@ class Compress:
         if Path.exists(test_file):
             print(f'Skipping, archive already exists at: \'{test_file}\'')
             return
+
+        RemoveJunk(Path(filename))
 
         os.chdir(Path(filename).parent)
         file_name = Path(filename).name

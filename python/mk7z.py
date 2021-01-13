@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 2.7.0
-# 2021-01-01
+# 2.8.0
+# 2021-01-13
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -30,6 +30,7 @@ import re
 import shutil
 from pathlib import Path
 
+from python.utils.archive_utils import RemoveJunk
 from python.utils.check_env import CheckEnv
 from python.utils.colors import Colors
 from python.utils.execute import Execute
@@ -107,6 +108,8 @@ class Compress:
             return
 
         self.__file_list.append(f'{self.__output_dir}/{Path(filename).name}.7z')
+
+        RemoveJunk(Path(filename))
 
         os.chdir(Path(filename).parent)
 
