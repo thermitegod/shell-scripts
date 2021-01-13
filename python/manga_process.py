@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.7.0
-# 2021-01-01
+# 1.8.0
+# 2021-01-13
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -88,9 +88,10 @@ class Process:
 
         if self.__set_compressor_interactive:
             print('Choose archive type [DEFAULT:1]\n'
-                  '1: zip destructive\n'
+                  '1: zip destructive junkpath\n'
                   '2: zip destructive nojunkpath\n'
-                  '3: 7z dir destructive\n')
+                  '3: 7z destructive nojunkpath\n'
+                  '4: tar destructive junkpath\n')
             self.__archivetype = input()
 
             if not self.__archivetype:
@@ -116,6 +117,8 @@ class Process:
             Execute('mkzip -dZjP')
         elif self.__archivetype == 3:
             Execute('mk7z -dzP')
+        elif self.__archivetype == 4:
+            Execute('mktar -dzj')
 
         if self.__comp_advzip and not self.__archivetype == 3:
             # does not need to be run for 7z
@@ -170,7 +173,7 @@ def main():
                         nargs=1,
                         metavar='COMP',
                         default=1,
-                        choices=[0, 1, 2, 3],
+                        choices=[0, 1, 2, 3, 4],
                         help='Sets default compression for dirs, use \'0\' to get interactive and compressor list')
     parser.add_argument('-r', '--numerical',
                         action='store_true',
