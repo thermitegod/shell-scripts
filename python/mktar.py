@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 2.7.0
-# 2021-01-01
+# 2.8.0
+# 2021-01-13
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -33,6 +33,7 @@ from python.utils.check_env import CheckEnv
 from python.utils.execute import Execute
 from python.utils.get_files import GetFiles
 from python.utils.output_dir import OutputDir
+from python.utils.recursion import RecursiveFindFiles
 
 
 class Compress:
@@ -61,22 +62,26 @@ class Compress:
 
             # Notes: archives all files in 'file' and creates archive
             # without a basedir. i.e. creates archive of only files
-            # but if nested dirs exist then they still get created
+            # without a directory structure
 
-            file_list = []
-            for f in Path(file_name).iterdir():
-                file_list.append(str(f.name))
-                if f.is_dir():
-                    print(f'SUBDIR will be created in archive: {f}')
+            if Path.is_file(filename):
+                print(f'ERROR: --junk-paths only works for directories')
+                return
+
+            file_list = RecursiveFindFiles(path=Path(filename)).get_files()
 
             file_list_comp = ''
             for f in file_list:
                 file_list_comp += f'"{f}" '
 
-            cmd = f'tar {self.__exclude} --directory="{filename.resolve()}" -{self.__tar_verbose}Scf ' \
-                  f'"{self.__output_dir}/{file_name}.tar" {file_list_comp}'
+            # https://stackoverflow.com/questions/4898056/how-to-create-flat-tar-archive
+            # --transform 's/.*\///g'
+            remove_dir_structure = '--transform \'s/.*\\///g\''
+
+            cmd = f'tar {self.__exclude} --directory="{filename.resolve()}" --sort=name -{self.__tar_verbose}cf ' \
+                  f'"{self.__output_dir}/{file_name}.tar" {remove_dir_structure} {file_list_comp}'
         else:
-            cmd = f'tar {self.__exclude} --xattrs -{self.__tar_verbose}Scf ' \
+            cmd = f'tar {self.__exclude} --xattrs -{self.__tar_verbose}cf ' \
                   f'"{self.__output_dir}/{file_name}.tar" "{file_name}"'
 
         Execute(cmd)
