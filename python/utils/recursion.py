@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 2.3.0
+# 2.4.0
 # 2020-01-13
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
@@ -22,7 +22,7 @@ from typing import Callable
 
 
 class RecursiveFindFiles:
-    def __init__(self, path: Path = None, use_pathlib: bool = False):
+    def __init__(self, path: Path = None, inc_dirs: bool = False, use_pathlib: bool = False):
         """
         :param path:
             will recursively find all files in this path, if None will use CWD
@@ -32,9 +32,10 @@ class RecursiveFindFiles:
 
         super().__init__()
 
-        self.__file_list = []
-
+        self.__file_list_str = []
+        self.__file_list_pathlib = []
         self.__use_path_obj = use_pathlib
+        self.__inc_dirs = inc_dirs
 
         if path is not None:
             os.chdir(path)
@@ -48,16 +49,21 @@ class RecursiveFindFiles:
 
         for f in Path.cwd().iterdir():
             if f.is_file():
-                if self.__use_path_obj:
-                    self.__file_list.append(f)
-                else:
-                    self.__file_list.append(str(f))
+                self.__file_list_str.append(str(f))
+                self.__file_list_pathlib.append(f)
             elif f.is_dir():
+                if self.__inc_dirs:
+                    self.__file_list_str.append(str(f))
+                    self.__file_list_pathlib.append(f)
+
                 os.chdir(f)
                 self._recursive_find_files()
 
     def get_files(self):
-        return self.__file_list
+        if self.__use_path_obj:
+            return self.__file_list_pathlib
+        else:
+            return self.__file_list_str
 
 
 class RecursiveExecute:
