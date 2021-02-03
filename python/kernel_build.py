@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 2.27.0
-# 2021-01-01
+# 2.28.0
+# 2021-02-03
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -292,12 +292,22 @@ class Build:
         raise SystemExit
 
     def zfs_checks(self):
+        repo_conf_dir = Path('/etc/portage/repos.conf')
+        if not repo_conf_dir.is_dir():
+            logger.error(f'must be a dir, {repo_conf_dir}')
+            raise SystemExit
+
         if self.__use_zfs_local_ebuild:
             repo_conf = 'local.conf'
         else:
             repo_conf = 'gentoo.conf'
 
-        for line in Path.open(Path() / '/etc/portage/repos.conf' / repo_conf):
+        repo_conf_full = Path() / repo_conf_dir / repo_conf
+        if not repo_conf_full.is_file():
+            logger.error(f'missing repo config file, {repo_conf_full}')
+            raise SystemExit
+
+        for line in Path.open(repo_conf_full):
             if 'location' in line:
                 self.__gentoo_repo_path = line.split()[2]
                 break
