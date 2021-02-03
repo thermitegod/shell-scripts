@@ -36,6 +36,13 @@
 # moves saved work/ in tar.zst file to /usr/src/linux
 # build kernel
 
+# required external scrips, must be in $PATH
+#   extract
+#   kernel-clean-src
+#   kernel-grub
+#   kernel-initramfs
+#   mkzst
+
 import argparse
 import atexit
 import multiprocessing
