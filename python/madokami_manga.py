@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 10.4.0
-# 2021-01-01
+# 10.4.1
+# 2021-02-03
 
 # Copyright (C) 2018,2019,2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -33,7 +33,7 @@ except ImportError:
     raise SystemExit(1)
 
 try:
-    from private import mado_pass
+    from python.private import mado_pass
 except ImportError:
     print('Missing config file, see python/template/mado_pass.py')
     raise SystemExit(1)
