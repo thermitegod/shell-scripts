@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 2.9.0
-# 2021-01-13
+# 2.10.0
+# 2021-02-10
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -56,22 +56,23 @@ class Compress:
                 Execute(f'mk7z -T "{f}"')
 
     def compress(self, filename, compressing_dir):
-        filename = Path(filename).name
-        test_file = Path() / self.__output_dir / f'{filename}.zip'
-        if Path.exists(test_file):
-            print(f'Skipping, archive already exists at: \'{test_file}\'')
+        basename = Path(filename).name
+        output_file = Path() / self.__output_dir / f'{basename}.zip'
+        if Path.exists(output_file):
+            print(f'Skipping, archive already exists at: \'{output_file}\'')
             return
 
-        self.__file_list.append(f'{self.__output_dir}/{filename}.zip')
+        self.__file_list.append(f'{self.__output_dir}/{basename}.zip')
 
         RemoveJunk(Path(filename))
 
         os.chdir(Path(filename).parent)
 
-        Execute(f'nice -19 zip {self.__exclude} -rv -9 --compression-method={self.__compression_method} '
-                f'{self.__junk_paths} "{self.__output_dir}/{filename}.zip" "{filename}"')
+        Execute(f'nice -19 zip {self.__exclude} -rv -9 '
+                f'--compression-method={self.__compression_method} '
+                f'{self.__junk_paths} "{output_file}" "{basename}"')
 
-        if Path.exists(test_file):
+        if Path.exists(output_file):
             if self.__destructive:
                 if compressing_dir:
                     shutil.rmtree(filename)
