@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.0.0
-# 2021-01-04
+# 1.1.0
+# 2021-02-10
 
 # Copyright (C) 2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -63,7 +63,7 @@ class Convert:
                 if filename_ext not in self.__jpeg_xl_supported_ext:
                     continue
 
-                Execute(f'{self.__jpeg_xl_binary} -s {self.__jpeg_xl_speed} {filename.name} {filename_base}.jxl')
+                Execute(f'{self.__jpeg_xl_binary} -s {self.__jpeg_xl_speed} -E 3 {filename.name} {filename_base}.jxl')
                 Path.rename(filename, Path() / orig / filename.name)
                 c1 += 1
 
