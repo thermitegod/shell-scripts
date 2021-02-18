@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 2.8.0
-# 2021-01-13
+# 2.9.0
+# 2021-02-18
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -64,7 +64,7 @@ class Compress:
 
     def test_archive(self, filename):
         filename = Path(filename)
-        if Path.is_file(filename) and str(filename).endswith(('.7z', '.zip')):
+        if Path.is_file(filename) and filename.suffix in ('.7z', '.zip'):
             print(f'\r{Colors.YEL}TEST{Colors.NC}\t{filename}', end='')
 
             # have to use shell_escape because syntax gets fucked up with when using sh_wrap=True.
