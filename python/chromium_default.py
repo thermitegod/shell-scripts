@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 8.2.0
-# 2021-01-01
+# 8.3.0
+# 2021-02-18
 
 # Copyright (C) 2018,2019,2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -77,7 +77,7 @@ def main():
                           help='custom profile, supplied str is used as the profile name')
     browser = parser.add_argument_group('browser', 'which browser version to use')
     browser.add_argument('-c', '--chrome',
-                         default='chromium',
+                         default='unstable',
                          metavar='VERSION',
                          choices=['chromium', 'unstable', 'beta', 'release'],
                          help='set specific chrome version to use, [%(choices)s]')
