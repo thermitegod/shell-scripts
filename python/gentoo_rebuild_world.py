@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.6.0
-# 2021-01-12
+# 1.7.0
+# 2021-02-23
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -58,11 +58,13 @@ def main():
                   'media-fonts/liberation-fonts'
         virtual = 'virtual/*'
         user_group = 'acct-group/* acct-user/*'
+        gcc = "sys-devel/gcc"
         Execute('emerge --jobs --oneshot --emptytree @world '
                 f'--exclude \'{gcc_req_ebuilds}\' '
                 f'--exclude \'{virtual}\' '
                 f'--exclude \'{user_group}\' '
                 f'--exclude \'{bin_pkg}\'')
+                f'--exclude \'{gcc}\'')
 
     if args.rebuild_gcc:
         Execute(f'emerge --jobs --oneshot {gcc_req_ebuilds}')
