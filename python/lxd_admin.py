@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 2.7.0
-# 2021-01-12
+# 2.8.0
+# 2021-03-13
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -33,8 +33,6 @@ except ImportError:
 
 
 # TODO
-#   Execute() will block until cmd returns,
-#       therfore forking to speed up commands does not work
 #   possible config changes
 #       more limits
 #       drop self.__container_type
@@ -188,7 +186,7 @@ class Container:
             return
 
         logger.info(f'Stopping container: {self.__container_fullname}')
-        Execute(f'lxc stop {self.__container_fullname}', to_stdout=True)
+        Execute(f'lxc stop {self.__container_fullname}', to_stdout=True, blocking=False)
 
     def start(self):
         if Lxd.get_state(container=self.__container_fullname):
@@ -227,7 +225,7 @@ class Container:
             return
 
         logger.info(f'Force Stopping container: {self.__container_fullname}')
-        Execute(f'lxc stop --force {self.__container_fullname}', to_stdout=True)
+        Execute(f'lxc stop --force {self.__container_fullname}', to_stdout=True, blocking=False)
 
     def restart_service(self):
         if not Lxd.get_state(container=self.__container_fullname):
