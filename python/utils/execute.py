@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-# 1.5.0
-# 2020-12-15
+# 1.6.0
+# 2021-03-13
 
-# Copyright (C) 2019,2020 Brandon Zorn <brandonzorn@cock.li>
+# Copyright (C) 2019,2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
 # This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License version 3
@@ -22,7 +22,8 @@ import subprocess
 
 class Execute:
     def __init__(self, cmd: str, *, sh_wrap: bool = False,
-                 to_stdout: bool = False, shell: bool = False):
+                 to_stdout: bool = False, shell: bool = False,
+                 blocking: bool = True):
         """
         :param cmd:
             shell command to run
@@ -33,6 +34,8 @@ class Execute:
             Can also be used to silence command output.
         :param shell:
             use subprocess arg shell=True
+        :param blocking:
+            use a non blocking version of subprocess, ignores to_stdout
         """
 
         super().__init__()
@@ -44,6 +47,13 @@ class Execute:
             self.__cmd = f'sh -c "{self.__cmd}"'
 
         self.__cmd = shlex.split(self.__cmd)
+
+        if not blocking:
+            subprocess.Popen(self.__cmd,
+                             stdout=subprocess.PIPE,
+                             shell=shell,
+                             start_new_session=True)
+            return
 
         if to_stdout:
             out = subprocess.run(self.__cmd,
