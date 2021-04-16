@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.7.0
-# 2021-02-23
+# 1.7.1
+# 2021-04-15
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -63,8 +63,8 @@ def main():
                 f'--exclude \'{gcc_req_ebuilds}\' '
                 f'--exclude \'{virtual}\' '
                 f'--exclude \'{user_group}\' '
+                f'--exclude \'{gcc}\' '
                 f'--exclude \'{bin_pkg}\'')
-                f'--exclude \'{gcc}\'')
 
     if args.rebuild_gcc:
         Execute(f'emerge --jobs --oneshot {gcc_req_ebuilds}')
