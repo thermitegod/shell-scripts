@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 8.3.0
-# 2021-02-18
+# 8.4.0
+# 2021-04-29
 
 # Copyright (C) 2018,2019,2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -26,7 +26,7 @@ from python.utils.root_check import RootCheck
 
 
 class Chrome:
-    def __init__(self):
+    def __init__(self, args: argparse = None):
         self.__chrome = None
         self.__chrome_profile = None
 
@@ -38,6 +38,8 @@ class Chrome:
                 self.__display_server = 'wayland'
         except KeyError:
             pass
+
+        self.run(args=args)
 
     def start_chrome(self, profile_path):
         Execute(f'{self.__chrome} '
@@ -85,5 +87,4 @@ def main():
 
     RootCheck(require_root=False)
 
-    run = Chrome()
-    run.run(args)
+    Chrome(args=args)

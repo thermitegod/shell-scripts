@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 2.10.0
-# 2021-01-13
+# 2.11.0
+# 2021-04-29
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -38,7 +38,7 @@ from python.utils.recursion import RecursiveFindFiles
 
 
 class Compress:
-    def __init__(self):
+    def __init__(self, args: argparse = None):
         self.__output_dir = Path.cwd()
 
         self.__exclude = ''
@@ -48,6 +48,8 @@ class Compress:
         self.__tar_verbose = ''
 
         self.__destructive = False
+
+        self.run(args=args)
 
     def compress(self, filename, compressing_dir):
         test_file = Path() / self.__output_dir / f'{filename}.tar'
@@ -161,5 +163,4 @@ def main():
 
     CheckEnv.args_required_else_help()
 
-    run = Compress()
-    run.run(args)
+    Compress(args=args)

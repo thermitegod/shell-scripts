@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.9.0
-# 2021-01-01
+# 1.10.0
+# 2021-04-29
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -28,7 +28,7 @@ from python.utils.recursion import RecursiveExecute
 
 
 class Count:
-    def __init__(self):
+    def __init__(self, args: argparse = None):
         self.__file_counter = 0
         self.__counter_total = 0
 
@@ -37,6 +37,8 @@ class Count:
         self.__file_list = []
 
         self.__pretend = False
+
+        self.run(args=args)
 
     def count_files(self):
         for f in Path(Path.cwd()).iterdir():
@@ -118,5 +120,4 @@ def main():
     logger.remove()
     logger.add(sys.stdout, level=args.loglevel, colorize=True)
 
-    run = Count()
-    run.run(args)
+    Count(args=args)

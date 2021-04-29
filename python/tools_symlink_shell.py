@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-# 1.1.0
-# 2020-12-03
+# 1.2.0
+# 2021-04-29
 
-# Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
+# Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
 # This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License version 3
@@ -27,6 +27,8 @@ class Symlink:
         self.__bin = Path.home() / '.bin'
         self.__bin_sh = Path.home() / '.bin/shell'
 
+        self.run()
+
     def symlink_main(self):
         os.chdir(self.__bin_sh)
         for f in Path(Path.cwd()).iterdir():
@@ -49,5 +51,4 @@ class Symlink:
 
 
 def main():
-    run = Symlink()
-    run.run()
+    Symlink()

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.5.0
-# 2021-01-01
+# 1.6.0
+# 2021-04-29
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -24,12 +24,14 @@ from python.utils.root_check import RootCheck
 
 
 class Scheduler:
-    def __init__(self):
+    def __init__(self, args: argparse = None):
         self.__pool_storage = ['sda', 'sdb', 'sdc', 'sdd', 'sde', 'sdf', 'sdg', 'sdh', 'sdk', 'sdi', 'sdm', 'sdn']
         self.__pool_torrents = ['sdm', 'sdn']
         self.__pool_ssd = ['sdl', 'sdj']
         self.__pool_root = ['nvme0n1', 'nvme1n1']
         self.__disks = self.__pool_storage + self.__pool_torrents + self.__pool_ssd + self.__pool_root
+
+        self.run(args=args)
 
     @staticmethod
     def get_scheduler(disk):
@@ -70,5 +72,4 @@ def main():
                           help='Set GPU power state')
     args = parser.parse_args()
 
-    run = Scheduler()
-    run.run(args)
+    Scheduler(args=args)

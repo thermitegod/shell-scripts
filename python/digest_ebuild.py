@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.5.0
-# 2021-01-01
+# 1.6.0
+# 2021-04-29
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -27,6 +27,9 @@ from python.utils.recursion import RecursiveExecute
 
 
 class Digest:
+    def __init__(self, args: argparse = None):
+        self.run(args=args)
+
     @staticmethod
     def digest():
         ebuild_list = []
@@ -68,5 +71,4 @@ def main():
     logger.remove()
     logger.add(sys.stdout, level=args.loglevel, colorize=True)
 
-    run = Digest()
-    run.run(args)
+    Digest(args=args)

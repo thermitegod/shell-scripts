@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 4.4.0
-# 2021-01-01
+# 4.5.0
+# 2021-04-29
 
 # Copyright (C) 2019,2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -24,11 +24,11 @@ from python.utils.root_check import RootCheck
 
 
 class Install:
-    def __init__(self):
+    def __init__(self, args: argparse = None):
         self.__verbose = 'quiet'
         self.__kernel_ebuild = 'sys-kernel/gentoo-sources'
 
-        pass
+        self.run(args=args)
 
     def run(self, args):
         if args.verbose:
@@ -62,5 +62,4 @@ def main():
 
     RootCheck(require_root=True)
 
-    run = Install()
-    run.run(args)
+    Install(args=args)

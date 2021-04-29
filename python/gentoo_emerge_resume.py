@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.6.0
-# 2021-01-01
+# 1.7.0
+# 2021-04-29
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -30,12 +30,14 @@ from python.utils.root_check import RootCheck
 
 
 class Backup:
-    def __init__(self):
+    def __init__(self, args: argparse = None):
         atexit.register(self.remove_tmpdir)
         self.__tmpdir = Path(tempfile.mkdtemp())
 
         self.__mtimdb = Path('/var/cache/edb/mtimedb')
         self.__backup_dir = Path('/mnt/data/backup/mtimedb')
+
+        self.run(args=args)
 
     def remove_tmpdir(self):
         shutil.rmtree(self.__tmpdir)
@@ -94,5 +96,4 @@ def main():
                           help='remove backuped mtimdb')
     args = parser.parse_args()
 
-    run = Backup()
-    run.run(args)
+    Backup(args=args)

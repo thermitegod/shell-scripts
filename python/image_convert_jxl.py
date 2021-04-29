@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.1.0
-# 2021-02-10
+# 1.2.0
+# 2021-04-29
 
 # Copyright (C) 2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -29,7 +29,7 @@ from python.utils.recursion import RecursiveExecute
 
 
 class Convert:
-    def __init__(self):
+    def __init__(self, args: argparse = None):
         self.__rm_orig = False
         self.__mimecheck = True
 
@@ -37,6 +37,8 @@ class Convert:
 
         self.__jpeg_xl_binary = None
         self.__jpeg_xl_speed = None
+
+        self.run(args=args)
 
     def convert_main(self):
         orig = Path.cwd() / 'orig'
@@ -153,5 +155,4 @@ def main():
     logger.remove()
     logger.add(sys.stdout, level=args.loglevel, colorize=True)
 
-    run = Convert()
-    run.run(args)
+    Convert(args=args)

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 2.5.0
-# 2021-01-01
+# 2.6.0
+# 2021-04-29
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -23,10 +23,12 @@ from python.utils.root_check import RootCheck
 
 
 class Initramfs:
-    def __init__(self):
+    def __init__(self, args: argparse = None):
         self.__compression = None
         self.__kernel_version = None
         self.__no_firmware = False
+
+        self.run(args=args)
 
     def gen_initramfs(self):
         cmd = '/usr/bin/dracut ' \
@@ -87,5 +89,4 @@ def main():
 
     RootCheck(require_root=True)
 
-    run = Initramfs()
-    run.run(args)
+    Initramfs(args=args)

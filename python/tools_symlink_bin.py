@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# 1.7.0
-# 2021-01-01
+# 1.8.0
+# 2021-04-29
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -25,7 +25,7 @@ from python.utils.root_check import RootCheck
 
 
 class Symlink:
-    def __init__(self):
+    def __init__(self, args: argparse = None):
         # since root is req to do this Path.home() will return
         # /root so create wanted home path
         self.__home = None
@@ -39,6 +39,8 @@ class Symlink:
                         '--ignore="shell" ' \
                         '--ignore="tools" ' \
                         '--ignore="utils" '
+
+        self.run(args=args)
 
     def run(self, args):
         if args.user:
@@ -69,5 +71,4 @@ def main():
 
     RootCheck(require_root=True)
 
-    run = Symlink()
-    run.run(args)
+    Symlink(args=args)

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.5.0
-# 2021-01-01
+# 1.6.0
+# 2021-04-29
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -24,9 +24,11 @@ from python.utils.root_check import RootCheck
 
 
 class Powerstate:
-    def __init__(self):
+    def __init__(self, args: argparse = None):
         self.__card = Path() / '/sys/class/drm/card0/device/power_dpm_force_performance_level'
         self.__current_state = Path.open(self.__card, 'r').read().rstrip()
+
+        self.run(args=args)
 
     def run(self, args):
         if args.current:
@@ -55,5 +57,4 @@ def main():
                           help='Set GPU power state')
     args = parser.parse_args()
 
-    run = Powerstate()
-    run.run(args)
+    Powerstate(args=args)

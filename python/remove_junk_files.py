@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.1.0
-# 2021-01-13
+# 1.2.0
+# 2021-04-29
 
 # Copyright (C) 2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -24,7 +24,7 @@ from python.utils.recursion import RecursiveFindFiles
 
 
 class RemoveJunk:
-    def __init__(self):
+    def __init__(self, args: argparse = None):
 
         Junk = namedtuple('Junk', ['name', 'is_dir'])
 
@@ -42,6 +42,8 @@ class RemoveJunk:
         self.__file_list_done = []
         self.__file_list_only = []
         self.__file_list = []
+
+        self.run(args=args)
 
     def main(self, list_only: bool = False):
         self.__file_list = RecursiveFindFiles(inc_dirs=True).get_files(pathlib=True)
@@ -88,5 +90,4 @@ def main():
                         help='List files that match patern')
     args = parser.parse_args()
 
-    run = RemoveJunk()
-    run.run(args)
+    RemoveJunk(args=args)

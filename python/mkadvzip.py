@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-# 1.3.0
-# 2020-11-21
+# 1.4.0
+# 2021-04-29
 
-# Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
+# Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
 # This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License version 3
@@ -24,13 +24,15 @@ from python.utils.execute import Execute
 
 
 class Optimize:
-    def __init__(self):
+    def __init__(self, args: argparse = None):
         self.__verbose = False
 
         self.__size_start = 0
         self.__size_end = 0
 
         self.__cpu = os.cpu_count()
+
+        self.run(args=args)
 
     def get_size(self, start: bool):
         size = sum(f.stat().st_size for f in Path.cwd().glob('**/*') if f.is_file())
@@ -68,5 +70,4 @@ def main():
                         help='Print change in dir size')
     args = parser.parse_args()
 
-    run = Optimize()
-    run.run(args)
+    Optimize(args=args)

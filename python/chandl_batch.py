@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # 2.4.0
-# 2020-12-20
+# 2021-04-29
 
 # Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -50,6 +50,8 @@ class Dl:
         #     self.__dir = Path() / dirs.get_download_dir() / 'chan/8chan'
         #     self.__url_base = 'https://8kun.top/'
 
+        self.main()
+
     def dl(self):
         Execute(f'chandl -d {self.__save_dir_full} -t {os.cpu_count()} -url "{self.__url}"')
 
@@ -68,5 +70,4 @@ class Dl:
 
 
 def main():
-    run = Dl()
-    run.main()
+    Dl()

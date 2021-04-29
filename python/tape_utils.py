@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.7.0
-# 2021-01-01
+# 1.8.0
+# 2021-04-29
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -26,9 +26,11 @@ from python.utils.root_check import RootCheck
 
 
 class Backup:
-    def __init__(self):
+    def __init__(self, args: argparse = None):
         self.__tape = '/dev/st0'
         self.__target = None
+
+        self.run(args=args)
 
     def t_rewind(self):
         Execute(f'mt -f \'{self.__tape}\' rewind')
@@ -164,5 +166,4 @@ def main():
 
     RootCheck(require_root=True)
 
-    run = Backup()
-    run.run(args)
+    Backup(args=args)

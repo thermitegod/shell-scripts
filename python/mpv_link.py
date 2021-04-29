@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-# 1.4.0
-# 2020-11-21
+# 1.5.0
+# 2021-04-29
 
-# Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
+# Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
 # This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License version 3
@@ -24,8 +24,10 @@ from python.utils.execute import Execute
 
 
 class Mpv:
-    def __init__(self):
+    def __init__(self, args: argparse = None):
         self.__link = None
+
+        self.run(args=args)
 
     def run(self, args):
         self.__link = clipboard.from_flag_else_clipboard(args.url)
@@ -43,5 +45,4 @@ def main():
                         help='supply a video url, otherwise will get link from clipboard')
     args = parser.parse_args()
 
-    run = Mpv()
-    run.run(args)
+    Mpv(args=args)

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.9.0
-# 2021-01-01
+# 1.10.0
+# 2021-04-29
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -28,7 +28,7 @@ from python.utils.lxd import Lxd
 
 
 class Container:
-    def __init__(self):
+    def __init__(self, args: argparse = None):
         super().__init__()
 
         time = datetime.datetime.now()
@@ -38,6 +38,8 @@ class Container:
         current_date = f'{year}-{month}-{day}'
 
         self.__backup_dir = Path() / '/mnt/data/backup/lxd' / current_date
+
+        self.run(args=args)
 
     def export_container(self, container):
         if not Path.is_dir(self.__backup_dir):
@@ -90,5 +92,4 @@ def main():
     logger.remove()
     logger.add(sys.stdout, level=args.loglevel, colorize=True)
 
-    run = Container()
-    run.run(args)
+    Container(args=args)

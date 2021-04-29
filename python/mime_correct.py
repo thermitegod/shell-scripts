@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.14.0
-# 2021-01-04
+# 1.15.0
+# 2021-04-29
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -29,7 +29,7 @@ from python.utils.recursion import RecursiveExecute
 
 
 class MimeCorrect:
-    def __init__(self):
+    def __init__(self, args: argparse = None):
         self.__list_only = False
         self.__rm_hash_collision = False
 
@@ -39,6 +39,8 @@ class MimeCorrect:
         self.__total_found = 0
         self.__total_corrected = 0
         self.__total_collision = 0
+
+        self.run(args=args)
 
     def main(self):
         checked = 0
@@ -169,5 +171,4 @@ def main():
     logger.remove()
     logger.add(sys.stdout, level=args.loglevel, colorize=True)
 
-    run = MimeCorrect()
-    run.run(args)
+    MimeCorrect(args=args)

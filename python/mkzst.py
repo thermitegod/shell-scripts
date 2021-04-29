@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 3.8.0
-# 2021-01-13
+# 3.9.0
+# 2021-04-29
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -37,7 +37,7 @@ from python.utils.script import ExecuteScript
 
 
 class Compress:
-    def __init__(self):
+    def __init__(self, args: argparse = None):
         self.__cmd = None
         self.__ext = None
 
@@ -52,6 +52,8 @@ class Compress:
         self.__tar_verbose = ''
 
         self.__destructive = False
+
+        self.run(args=args)
 
     def get_mode(self):
         mode = CheckEnv.get_script_name()
@@ -171,5 +173,4 @@ def main():
 
     CheckEnv.args_required_else_help()
 
-    run = Compress()
-    run.run(args)
+    Compress(args=args)

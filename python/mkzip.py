@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 2.10.0
-# 2021-02-10
+# 2.11.0
+# 2021-04-29
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -37,7 +37,7 @@ from python.utils.output_dir import OutputDir
 
 
 class Compress:
-    def __init__(self):
+    def __init__(self, args: argparse = None):
         self.__output_dir = Path.cwd()
 
         self.__exclude = ''
@@ -49,6 +49,8 @@ class Compress:
         self.__junk_paths = '--junk-paths'
 
         self.__destructive = False
+
+        self.run(args=args)
 
     def run_tests(self):
         if self.__run_tests:
@@ -150,5 +152,4 @@ def main():
 
     CheckEnv.args_required_else_help()
 
-    run = Compress()
-    run.run(args)
+    Compress(args=args)

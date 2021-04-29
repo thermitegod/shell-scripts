@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.8.0
-# 2021-01-13
+# 1.9.0
+# 2021-04-29
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -23,7 +23,7 @@ from python.utils.execute import Execute
 
 
 class Process:
-    def __init__(self):
+    def __init__(self, args: argparse = None):
         self.__mode = 'manga'
 
         self.__directories = True
@@ -43,6 +43,8 @@ class Process:
         self.__remove_junk = True
         self.__numerical_rename = False
         self.__detect_nested_dirs = True
+
+        self.run(args=args)
 
     def get_time(self, start: bool):
         current_time = time.strftime("%B %d %H:%M:%S", time.localtime())
@@ -208,5 +210,4 @@ def main():
                          help='Disable time total')
     args = parser.parse_args()
 
-    run = Process()
-    run.run(args)
+    Process(args=args)

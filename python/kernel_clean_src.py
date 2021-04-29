@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 5.12.0
-# 2021-01-01
+# 5.13.0
+# 2021-04-29
 
 # Copyright (C) 2018,2019,2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -31,8 +31,10 @@ from python.utils.root_check import RootCheck
 
 
 class Clean:
-    def __init__(self):
+    def __init__(self, args: argparse = None):
         self.__kdir = Kernel.get_kernel_dir()
+
+        self.run(args=args)
 
     def kernel_rm(self):
         if Path.is_symlink(self.__kdir):
@@ -86,5 +88,4 @@ def main():
     logger.remove()
     logger.add(sys.stdout, level=args.loglevel, colorize=True)
 
-    run = Clean()
-    run.run(args)
+    Clean(args=args)

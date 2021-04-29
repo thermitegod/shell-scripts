@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 6.9.0
-# 2021-01-01
+# 6.10.0
+# 2021-04-29
 
 # Copyright (C) 2018,2019,2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -25,9 +25,11 @@ from python.utils.root_check import RootCheck
 
 
 class Ytdl:
-    def __init__(self):
+    def __init__(self, args: argparse = None):
         self.__link = ''
         self.__audio_only = False
+
+        self.run(args=args)
 
     def dl(self):
         cmd = 'youtube-dl ' \
@@ -76,5 +78,4 @@ def main():
 
     RootCheck(require_root=False)
 
-    run = Ytdl()
-    run.run(args)
+    Ytdl(args=args)

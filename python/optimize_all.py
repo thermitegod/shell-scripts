@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.8.0
-# 2021-01-01
+# 1.9.0
+# 2021-04-29
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -28,7 +28,7 @@ from python.utils.execute import Execute
 
 
 class Optimize:
-    def __init__(self):
+    def __init__(self, args: argparse = None):
         self.__verbose = False
         self.__disable_mimecheck = False
         self.__mode = CheckEnv.get_script_name()
@@ -39,6 +39,8 @@ class Optimize:
         self.__size_end = 0
 
         self.__cpu = os.cpu_count()
+
+        self.run(args=args)
 
     def get_size(self, start: bool):
         size = sum(f.stat().st_size for f in Path.cwd().glob('**/*') if f.is_file())
@@ -148,5 +150,4 @@ def main():
     logger.remove()
     logger.add(sys.stdout, level=args.loglevel, colorize=True)
 
-    run = Optimize()
-    run.run(args)
+    Optimize(args=args)

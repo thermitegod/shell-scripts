@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 2.8.0
-# 2021-03-13
+# 2.9.0
+# 2021-04-29
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -40,7 +40,7 @@ except ImportError:
 
 
 class Container:
-    def __init__(self):
+    def __init__(self, args: argparse = None):
         super().__init__()
 
         self.__CONFIG_VERSION = 5
@@ -98,6 +98,8 @@ class Container:
         self.__container_limit_mem = None
         self.__container_name = None
         self.__container_save_override = None
+
+        self.run(args=args)
 
     def print_config(self, verbose: bool = False):
         print(f'Container Name      : {self.__container_fullname}\n'
@@ -467,5 +469,4 @@ def main():
     logger.remove()
     logger.add(sys.stdout, level=args.loglevel, colorize=True)
 
-    run = Container()
-    run.run(args)
+    Container(args=args)

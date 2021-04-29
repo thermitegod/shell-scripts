@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.3.0
-# 2021-01-01
+# 1.4.0
+# 2021-04-29
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -25,7 +25,7 @@ from loguru import logger
 
 
 class Count:
-    def __init__(self):
+    def __init__(self, args: argparse = None):
         Ranges = namedtuple('Ranges', ['dest', 'lower', 'upper'])
 
         self.__size_ranges = (
@@ -52,6 +52,8 @@ class Count:
         for f in Path(Path.cwd()).iterdir():
             if f.is_file():
                 self.__file_list.append(f)
+
+        self.run(args=args)
 
     def main_move(self):
         for ranges in self.__size_ranges:
@@ -94,5 +96,4 @@ def main():
     logger.remove()
     logger.add(sys.stdout, level=args.loglevel, colorize=True)
 
-    run = Count()
-    run.run(args)
+    Count(args=args)

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.8.0
-# 2021-01-13
+# 1.9.0
+# 2021-04-29
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -23,7 +23,7 @@ from python.utils.recursion import RecursiveFindFiles
 
 
 class Count:
-    def __init__(self):
+    def __init__(self, args: argparse = None):
         self.__type_archive = ('.zip', '.7z', '.rar', '.cbr', '.cbz', '.cb7', '.tar',
                                '.bz2', '.gz', '.lz4', '.lzo', '.xz', '.zst')
         self.__type_image = ('.png', '.jpg', '.jpeg', '.jxl', '.jpe', '.gif', '.bmp', '.ico', )
@@ -45,6 +45,8 @@ class Count:
 
         self.__file_list_done = []
         self.__file_list = []
+
+        self.run(args=args)
 
     def main_count(self):
         self.__file_list = RecursiveFindFiles().get_files(pathlib=True)
@@ -93,5 +95,4 @@ def main():
                         help='List files that match patern')
     args = parser.parse_args()
 
-    run = Count()
-    run.run(args)
+    Count(args=args)

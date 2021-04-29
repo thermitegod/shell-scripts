@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-# 2.3.0
-# 2020-11-23
+# 2.4.0
+# 2021-04-29
 
-# Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
+# Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
 # This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License version 3
@@ -29,12 +29,14 @@ from python.utils.mimecheck import Mimecheck
 
 
 class Convert:
-    def __init__(self):
+    def __init__(self, args: argparse = None):
         atexit.register(self.remove_tmpdir)
 
         self.__tmpdir = Path(tempfile.mkdtemp())
 
         self.__inc_iso = False
+
+        self.run(args=args)
 
     def remove_tmpdir(self):
         shutil.rmtree(self.__tmpdir)
@@ -108,5 +110,4 @@ def main():
                         help='')
     args = parser.parse_args()
 
-    run = Convert()
-    run.run(args)
+    Convert(args=args)

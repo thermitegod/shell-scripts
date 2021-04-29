@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-# 2.6.0
-# 2020-11-23
+# 2.7.0
+# 2021-04-29
 
-# Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
+# Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
 # This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License version 3
@@ -26,12 +26,14 @@ from python.utils.output_dir import OutputDir
 
 
 class Compress:
-    def __init__(self):
+    def __init__(self, args: argparse = None):
         self.__decrypt = False
 
         self.__output_dir = Path.cwd()
 
         self.__user = None
+
+        self.run(args=args)
 
     def compress(self, filename):
         if self.__decrypt:
@@ -92,5 +94,4 @@ def main():
 
     CheckEnv.args_required_else_help()
 
-    run = Compress()
-    run.run(args)
+    Compress(args=args)

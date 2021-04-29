@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 2.7.0
-# 2021-01-01
+# 2.8.0
+# 2021-04-29
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -30,11 +30,13 @@ from python.utils.output_dir import OutputDir
 
 
 class Decompress:
-    def __init__(self):
+    def __init__(self, args: argparse = None):
         self.__output_dir = None
 
         self.__extract_to = False
         self.__extract_to_subdir = True
+
+        self.run(args=args)
 
     def extract_to(self, filename):
         if self.__extract_to_subdir:
@@ -144,5 +146,4 @@ def main():
 
     CheckEnv.args_required_else_help()
 
-    run = Decompress()
-    run.run(args)
+    Decompress(args=args)

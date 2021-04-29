@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 10.4.1
-# 2021-02-03
+# 10.5.0
+# 2021-04-29
 
 # Copyright (C) 2018,2019,2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -40,13 +40,15 @@ except ImportError:
 
 
 class Download:
-    def __init__(self):
+    def __init__(self, args: argparse = None):
         self.__user, self.__pass = mado_pass.mado_login()
 
         self.__mode = CheckEnv.get_script_name()
         self.__link = ''
         self.__save_path = Path('/mnt/data')
         self.__symlink = True
+
+        self.run(args=args)
 
     def dl(self):
         net.link_check(self.__link)
@@ -120,5 +122,4 @@ def main():
 
     RootCheck(require_root=False)
 
-    run = Download()
-    run.run(args)
+    Download(args=args)

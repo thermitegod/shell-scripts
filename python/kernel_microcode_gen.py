@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.4.0
-# 2021-01-01
+# 1.5.0
+# 2021-04-29
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -37,6 +37,8 @@ class Microcode:
         self.__amd_micro_boot = Path('/boot/amd-uc.img')
         self.__amd_micro_name = 'AuthenticAMD.bin'
 
+        self.run()
+
     def run(self):
         with TemporaryDirectory() as tmpdir:
             full_path = Path() / tmpdir / self.__dir_structure
@@ -51,5 +53,4 @@ class Microcode:
 def main():
     RootCheck(require_root=True)
 
-    run = Microcode()
-    run.run()
+    Microcode()

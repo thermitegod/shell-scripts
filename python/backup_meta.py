@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-# 1.4.0
-# 2020-11-21
+# 1.5.0
+# 2021-04-29
 
-# Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
+# Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
 # This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License version 3
@@ -31,7 +31,7 @@ from python.utils.execute import Execute
 
 
 class Backup:
-    def __init__(self):
+    def __init__(self, args: argparse = None):
         atexit.register(self.remove_tmpdir)
         self.__tmpdir = tempfile.mkdtemp()
 
@@ -44,6 +44,8 @@ class Backup:
         self.__user = None
 
         self.__date = time.strftime('%Y-%m-%d', time.localtime())
+
+        self.run(args=args)
 
     def remove_tmpdir(self):
         shutil.rmtree(self.__tmpdir)
@@ -121,5 +123,4 @@ def main():
                         help='user')
     args = parser.parse_args()
 
-    run = Backup()
-    run.run(args)
+    Backup(args=args)

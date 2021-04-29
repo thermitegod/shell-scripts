@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 3.9.0
-# 2021-01-01
+# 3.10.0
+# 2021-04-29
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -32,7 +32,7 @@ except ImportError:
 
 
 class Sort:
-    def __init__(self):
+    def __init__(self, args: argparse = None):
         self.__disable_fallback = False
 
         self.__list_sort = None
@@ -50,6 +50,8 @@ class Sort:
 
         self.__total_after = None
         self.__total_before = len(self.__file_list)
+
+        self.run(args=args)
 
     def sort(self):
         if self.__total_before == 0:
@@ -193,5 +195,4 @@ def main():
     logger.remove()
     logger.add(sys.stdout, level=args.loglevel, colorize=True)
 
-    run = Sort()
-    run.run(args)
+    Sort(args=args)

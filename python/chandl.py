@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 2.8.0
-# 2021-01-01
+# 2.9.0
+# 2021-04-29
 
 # Original
 # https://github.com/JLDevOps/ChanDL
@@ -38,7 +38,7 @@ from loguru import logger
 
 
 class Chandl:
-    def __init__(self):
+    def __init__(self, args: argparse = None):
         self.board = None
         self.chan = None
         self.datapath = None
@@ -49,6 +49,8 @@ class Chandl:
         self.orig_filenames = False
         self.url_folder_regex = '.*\\/([.\\w+]+[^.html])'
         self.update_interval = 60
+
+        self.run(args=args)
 
     @staticmethod
     def chunks(seq, num):
@@ -310,5 +312,4 @@ def main():
     logger.remove()
     logger.add(sys.stdout, level=args.loglevel, colorize=True)
 
-    run = Chandl()
-    run.run(args)
+    Chandl(args=args)

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 2.28.0
-# 2021-02-03
+# 2.29.0
+# 2021-04-29
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -68,7 +68,7 @@ from python.utils.script import ExecuteScript
 #       single build, either debug or regular
 
 class Build:
-    def __init__(self):
+    def __init__(self, args: argparse = None):
         self.__MIN_KERNEL_VERSION: str = '4.17.0'
         self.__MIN_ZFS_VERSION: str = '0.8.0'
 
@@ -147,6 +147,8 @@ class Build:
 
         if not Path.is_file(self.__kernel_switch_config):
             self.__force_bump_check = True
+
+        self.run(args=args)
 
     def intro(self):
         print(f'kernel             : {self.__kernel_src}\n'
@@ -584,5 +586,4 @@ def main():
     logger.remove()
     logger.add(sys.stdout, level=args.loglevel, colorize=True)
 
-    run = Build()
-    run.run(args)
+    Build(args=args)

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.5.0
-# 2021-01-13
+# 1.6.0
+# 2021-04-29
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -55,6 +55,8 @@ class Count:
         self.__file_list_done = []
         self.__file_list = []
 
+        self.main_count()
+
     def main_count(self):
         self.__file_list = RecursiveFindFiles().get_files(pathlib=True)
 
@@ -81,9 +83,6 @@ class Count:
         if self.__counter_total != 0:
             print(f'\nTotal\t\t: {self.__counter_total}')
 
-    def run(self):
-        self.main_count()
-
 
 def main():
     parser = argparse.ArgumentParser()
@@ -99,5 +98,4 @@ def main():
     logger.remove()
     logger.add(sys.stdout, level=args.loglevel, colorize=True)
 
-    run = Count()
-    run.run()
+    Count()

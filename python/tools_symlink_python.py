@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-# 2.3.0
-# 2020-12-20
+# 2.4.0
+# 2021-04-29
 
-# Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
+# Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
 # This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License version 3
@@ -26,6 +26,9 @@ class Symlink:
     def __init__(self):
         self.__bin = Path.home() / '.bin'
         self.__bin_py = Path.home() / '.bin/python'
+
+        self.write_stubs()
+        self.symlink_special()
 
     def write_stubs(self):
         os.chdir(self.__bin_py)
@@ -96,11 +99,6 @@ class Symlink:
             else:
                 os.symlink(real, symlink)
 
-    def run(self):
-        self.write_stubs()
-        self.symlink_special()
-
 
 def main():
-    run = Symlink()
-    run.run()
+    Symlink()

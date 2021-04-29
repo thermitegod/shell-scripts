@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 2.11.0
-# 2021-01-01
+# 2.12.0
+# 2021-04-29
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -38,7 +38,7 @@ from python.utils.mimecheck import Mimecheck
 #   rezizing when w > h
 
 class Convert:
-    def __init__(self):
+    def __init__(self, args: argparse = None):
         self.__origext = None
         self.__newext = None
         self.__act = None
@@ -48,6 +48,8 @@ class Convert:
         self.__rm_orig = False
         self.__mimecheck = True
         self.__strip_exif = True
+
+        self.run(args=args)
 
     @staticmethod
     def test_size(img_orig, img_new):
@@ -358,5 +360,4 @@ def main():
     logger.remove()
     logger.add(sys.stdout, level=args.loglevel, colorize=True)
 
-    run = Convert()
-    run.run(args)
+    Convert(args=args)

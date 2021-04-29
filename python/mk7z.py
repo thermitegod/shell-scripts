@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 2.9.0
-# 2021-02-18
+# 2.10.0
+# 2021-04-29
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -40,7 +40,7 @@ from python.utils.script import ExecuteScript
 
 
 class Compress:
-    def __init__(self):
+    def __init__(self, args: argparse = None):
         self.__output_dir = Path.cwd()
 
         self.__exclude = ''
@@ -55,6 +55,8 @@ class Compress:
         self.__test_move_failed_file = True
         self.__test_passed = 0
         self.__test_failed = 0
+
+        self.run(args=args)
 
     @staticmethod
     def shell_escape(string: str):
@@ -207,5 +209,4 @@ def main():
 
     CheckEnv.args_required_else_help()
 
-    run = Compress()
-    run.run(args)
+    Compress(args=args)

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.9.0
-# 2021-01-01
+# 1.10.0
+# 2021-04-29
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -26,12 +26,14 @@ from python.utils.lxd import Lxd
 
 
 class Container:
-    def __init__(self):
+    def __init__(self, args: argparse = None):
         super().__init__()
 
         self.__base_container = Lxd.base_container
         self.__base_rutorrent = Lxd.base_rutorrent
         self.__base_transmission = Lxd.base_transmission
+
+        self.run(args=args)
 
     def stop_base(self):
         logger.info(f'Stopping {self.__base_container}')
@@ -91,5 +93,4 @@ def main():
     logger.remove()
     logger.add(sys.stdout, level=args.loglevel, colorize=True)
 
-    run = Container()
-    run.run(args)
+    Container(args=args)
