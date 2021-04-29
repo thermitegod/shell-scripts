@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 8.4.0
+# 8.5.0
 # 2021-04-29
 
 # Copyright (C) 2018,2019,2020,2021 Brandon Zorn <brandonzorn@cock.li>
@@ -18,7 +18,10 @@
 
 import argparse
 import os
+import sys
 from pathlib import Path
+
+from loguru import logger
 
 from python.utils.check_env import CheckEnv
 from python.utils.execute import Execute
@@ -83,7 +86,17 @@ def main():
                          metavar='VERSION',
                          choices=['chromium', 'unstable', 'beta', 'release'],
                          help='set specific chrome version to use, [%(choices)s]')
+    debug = parser.add_argument_group('debug')
+    debug.add_argument('-L', '--loglevel',
+                       default='INFO',
+                       metavar='LEVEL',
+                       type=str.upper,
+                       choices=['NONE', 'CRITICAL', 'ERROR', 'WARNING', 'INFO', 'VERBOSE', 'DEBUG', 'TRACE'],
+                       help='Levels: %(choices)s')
     args = parser.parse_args()
+
+    logger.remove()
+    logger.add(sys.stdout, level=args.loglevel, colorize=True)
 
     RootCheck(require_root=False)
 

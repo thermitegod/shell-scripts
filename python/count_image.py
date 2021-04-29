@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 1.9.0
+# 1.10.0
 # 2021-04-29
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
@@ -17,6 +17,9 @@
 #    along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import argparse
+import sys
+
+from loguru import logger
 
 from python.utils.check_env import CheckEnv
 from python.utils.recursion import RecursiveFindFiles
@@ -93,6 +96,16 @@ def main():
     parser.add_argument('-l', '--list',
                         action='store_true',
                         help='List files that match patern')
+    debug = parser.add_argument_group('debug')
+    debug.add_argument('-L', '--loglevel',
+                       default='INFO',
+                       metavar='LEVEL',
+                       type=str.upper,
+                       choices=['NONE', 'CRITICAL', 'ERROR', 'WARNING', 'INFO', 'VERBOSE', 'DEBUG', 'TRACE'],
+                       help='Levels: %(choices)s')
     args = parser.parse_args()
+
+    logger.remove()
+    logger.add(sys.stdout, level=args.loglevel, colorize=True)
 
     Count(args=args)

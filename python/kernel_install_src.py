@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 4.5.0
+# 4.6.0
 # 2021-04-29
 
 # Copyright (C) 2019,2020,2021 Brandon Zorn <brandonzorn@cock.li>
@@ -17,7 +17,10 @@
 #    along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import argparse
+import sys
 from pathlib import Path
+
+from loguru import logger
 
 from python.utils.execute import Execute
 from python.utils.root_check import RootCheck
@@ -58,7 +61,17 @@ def main():
     group1.add_argument('-V', '--vanilla',
                         action='store_true',
                         help='install sys-kernel/vanilla-sources')
+    debug = parser.add_argument_group('debug')
+    debug.add_argument('-L', '--loglevel',
+                       default='INFO',
+                       metavar='LEVEL',
+                       type=str.upper,
+                       choices=['NONE', 'CRITICAL', 'ERROR', 'WARNING', 'INFO', 'VERBOSE', 'DEBUG', 'TRACE'],
+                       help='Levels: %(choices)s')
     args = parser.parse_args()
+
+    logger.remove()
+    logger.add(sys.stdout, level=args.loglevel, colorize=True)
 
     RootCheck(require_root=True)
 

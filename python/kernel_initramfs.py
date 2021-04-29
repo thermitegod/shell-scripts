@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 2.6.0
+# 2.7.0
 # 2021-04-29
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
@@ -17,6 +17,9 @@
 #    along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import argparse
+import sys
+
+from loguru import logger
 
 from python.utils.execute import Execute
 from python.utils.root_check import RootCheck
@@ -85,7 +88,17 @@ def main():
                         type=str,
                         nargs=1,
                         help='kernel version to gen initramfs for')
+    debug = parser.add_argument_group('debug')
+    debug.add_argument('-L', '--loglevel',
+                       default='INFO',
+                       metavar='LEVEL',
+                       type=str.upper,
+                       choices=['NONE', 'CRITICAL', 'ERROR', 'WARNING', 'INFO', 'VERBOSE', 'DEBUG', 'TRACE'],
+                       help='Levels: %(choices)s')
     args = parser.parse_args()
+
+    logger.remove()
+    logger.add(sys.stdout, level=args.loglevel, colorize=True)
 
     RootCheck(require_root=True)
 

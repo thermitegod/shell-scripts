@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 2.4.0
+# 2.5.0
 # 2021-04-29
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
@@ -20,8 +20,11 @@ import argparse
 import atexit
 import os
 import shutil
+import sys
 import tempfile
 from pathlib import Path
+
+from loguru import logger
 
 from python.utils.execute import Execute
 from python.utils.get_files import GetOnlyFiles
@@ -108,6 +111,16 @@ def main():
     parser.add_argument('-i', '--iso',
                         action='store_true',
                         help='')
+    debug = parser.add_argument_group('debug')
+    debug.add_argument('-L', '--loglevel',
+                       default='INFO',
+                       metavar='LEVEL',
+                       type=str.upper,
+                       choices=['NONE', 'CRITICAL', 'ERROR', 'WARNING', 'INFO', 'VERBOSE', 'DEBUG', 'TRACE'],
+                       help='Levels: %(choices)s')
     args = parser.parse_args()
+
+    logger.remove()
+    logger.add(sys.stdout, level=args.loglevel, colorize=True)
 
     Convert(args=args)

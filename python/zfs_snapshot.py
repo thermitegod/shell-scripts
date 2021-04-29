@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 5.11.0
-# 2021-01-01
+# 5.12.0
+# 2021-04-29
 
 # Copyright (C) 2018,2019,2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -17,8 +17,11 @@
 #    along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import argparse
+import sys
 import time
 from pathlib import Path
+
+from loguru import logger
 
 from python.utils.execute import Execute
 from python.utils.root_check import RootCheck
@@ -47,7 +50,17 @@ def main():
     pools.add_argument('-m', '--snapshot',
                        metavar='POOLS',
                        choices=['1', '2', '3', '4', '5', '6', '7'])
+    debug = parser.add_argument_group('debug')
+    debug.add_argument('-L', '--loglevel',
+                       default='INFO',
+                       metavar='LEVEL',
+                       type=str.upper,
+                       choices=['NONE', 'CRITICAL', 'ERROR', 'WARNING', 'INFO', 'VERBOSE', 'DEBUG', 'TRACE'],
+                       help='Levels: %(choices)s')
     args = parser.parse_args()
+
+    logger.remove()
+    logger.add(sys.stdout, level=args.loglevel, colorize=True)
 
     if args.extra:
         print('zfs send pool/dataset@snapshot | zstd -T0 >| /tmp/backup.zst\n'

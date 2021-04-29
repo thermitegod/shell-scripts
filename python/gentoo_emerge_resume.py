@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 1.7.0
+# 1.8.0
 # 2021-04-29
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
@@ -20,9 +20,12 @@ import argparse
 import atexit
 import os
 import shutil
+import sys
 import tempfile
 import time
 from pathlib import Path
+
+from loguru import logger
 
 from python.utils import confirm
 from python.utils.execute import Execute
@@ -94,6 +97,16 @@ def main():
     required.add_argument('-r', '--remove',
                           action='store_true',
                           help='remove backuped mtimdb')
+    debug = parser.add_argument_group('debug')
+    debug.add_argument('-L', '--loglevel',
+                       default='INFO',
+                       metavar='LEVEL',
+                       type=str.upper,
+                       choices=['NONE', 'CRITICAL', 'ERROR', 'WARNING', 'INFO', 'VERBOSE', 'DEBUG', 'TRACE'],
+                       help='Levels: %(choices)s')
     args = parser.parse_args()
+
+    logger.remove()
+    logger.add(sys.stdout, level=args.loglevel, colorize=True)
 
     Backup(args=args)
