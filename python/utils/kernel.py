@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-# 1.7.0
-# 2020-12-13
+# 1.8.0
+# 2021-05-06
 
-# Copyright (C) 2020 Brandon Zorn <brandonzorn@cock.li>
+# Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
 # This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License version 3
@@ -21,6 +21,8 @@ from pathlib import Path
 
 from loguru import logger
 
+from python.utils.execute import Execute
+
 
 class _Kernel:
     def __init__(self):
@@ -33,6 +35,14 @@ class _Kernel:
 
     def get_kernel_dir(self):
         return self.__src
+
+    def write_running_config(self):
+        kernel_config = Path('/proc/config.gz')
+        if Path.is_file(kernel_config):
+            Execute(f'zcat {kernel_config} >| {self.__src}/.config', sh_wrap=True)
+            return True
+
+        return False
 
     @staticmethod
     def _kernel_conf_action(src: Path, dst: Path, act: str):

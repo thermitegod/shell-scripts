@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 4.6.0
-# 2021-04-29
+# 4.7.0
+# 2021-05-06
 
 # Copyright (C) 2019,2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -18,11 +18,11 @@
 
 import argparse
 import sys
-from pathlib import Path
 
 from loguru import logger
 
 from python.utils.execute import Execute
+from python.utils.kernel import Kernel
 from python.utils.root_check import RootCheck
 
 
@@ -31,9 +31,14 @@ class Install:
         self.__verbose = 'quiet'
         self.__kernel_ebuild = 'sys-kernel/gentoo-sources'
 
-        self.run(args=args)
+        self.parse_args(args=args)
 
-    def run(self, args):
+        Execute(f'emerge --ignore-default-opts --oneshot --{self.__verbose} {self.__kernel_ebuild}')
+
+        if not Kernel.write_running_config():
+            logger.error('Unable to write running kernel .config')
+
+    def parse_args(self, args):
         if args.verbose:
             self.__verbose = 'verbose'
 
@@ -41,12 +46,6 @@ class Install:
             self.__kernel_ebuild = 'sys-kernel/git-sources'
         elif args.vanilla:
             self.__kernel_ebuild = 'sys-kernel/vanilla-sources'
-
-        Execute(f'emerge --ignore-default-opts --oneshot --{self.__verbose} {self.__kernel_ebuild}')
-
-        kernel_config = Path() / '/proc/config.gz'
-        if Path.is_file(kernel_config):
-            Execute(f'zcat {kernel_config} >| /usr/src/linux/.config', sh_wrap=True)
 
 
 def main():
