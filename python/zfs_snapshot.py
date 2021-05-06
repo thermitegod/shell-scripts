@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 5.12.0
-# 2021-04-29
+# 6.0.0
+# 2021-05-06
 
 # Copyright (C) 2018,2019,2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -25,6 +25,66 @@ from loguru import logger
 
 from python.utils.execute import Execute
 from python.utils.root_check import RootCheck
+
+
+class ZfsPools:
+    def __init__(self, args=None):
+        self.__selected_pool = None
+        self.__cmd = 'zfs '
+
+        self.run(args=args)
+
+    def run(self, args):
+        if args.extra:
+            print('zfs send pool/dataset@snapshot | zstd -T0 >| /tmp/backup.zst\n'
+                  'unzstd -c backup.zst | zfs receive pool/newdataset\n'
+                  '\n'
+                  'zfs set mountpoint=/newmount pool/dataset\n'
+                  '\n'
+                  'zfs snapshot -r zroot/ROOT/gentoo@<type>-<date>\n'
+                  'zfs rollback -r <pool/dataset@snapshot>\n'
+                  'zfs destroy <pool/dataset@snapshot>\n'
+                  'zfs list -t snapshot\n'
+                  'zfs list -r pool')
+        if args.list:
+            self.__cmd += 'list -t snapshot '
+            self.__selected_pool = args.list
+        if args.snapshot:
+            RootCheck(require_root=True)
+
+            self.__cmd += 'snapshot '
+            self.__selected_pool = args.snapshot
+
+        if self.__selected_pool:
+            if self.__selected_pool == '1':
+                self.__cmd += 'zroot/ROOT/gentoo'
+                if args.list:
+                    # self.__cmd += ' zroot/ROOT/pkg'
+                    self.__cmd += ' zroot/ROOT/gentoo/var'
+            elif self.__selected_pool == '2':
+                self.__cmd += 'zroot/HOME/brandon'
+            elif self.__selected_pool == '3':
+                self.__cmd += 'storage/anime'
+            elif self.__selected_pool == '4':
+                self.__cmd += 'storage/data'
+            elif self.__selected_pool == '5':
+                self.__cmd += 'ssd-mirror/KVM'
+            elif self.__selected_pool == '6':
+                self.__cmd += 'torrents'
+            elif self.__selected_pool == '7':
+                self.__cmd += 'zroot/CACHE/torrents'
+
+            if args.snapshot:
+                snapshot_time = time.strftime('%F-%H%M', time.localtime())
+                self.__cmd += f'@manual-{snapshot_time}'
+
+            Execute(self.__cmd)
+
+        if args.export:
+            RootCheck(require_root=True)
+
+            Execute(f'zfs send {args.export} | zstd -T0 >| {Path.cwd()}/{Path(args.export).name}.zst',
+                    sh_wrap=True)
 
 
 def main():
@@ -62,57 +122,4 @@ def main():
     logger.remove()
     logger.add(sys.stdout, level=args.loglevel, colorize=True)
 
-    if args.extra:
-        print('zfs send pool/dataset@snapshot | zstd -T0 >| /tmp/backup.zst\n'
-              'unzstd -c backup.zst | zfs receive pool/newdataset\n'
-              '\n'
-              'zfs set mountpoint=/newmount pool/dataset\n'
-              '\n'
-              'zfs snapshot -r zroot/ROOT/gentoo@<type>-<date>\n'
-              'zfs rollback -r <pool/dataset@snapshot>\n'
-              'zfs destroy <pool/dataset@snapshot>\n'
-              'zfs list -t snapshot\n'
-              'zfs list -r pool')
-        raise SystemExit
-
-    selected_pool = None
-    cmd = 'zfs '
-
-    if args.list:
-        cmd += 'list -t snapshot '
-        selected_pool = args.list
-
-    if args.snapshot:
-        RootCheck(require_root=True)
-        cmd += 'snapshot '
-        selected_pool = args.snapshot
-
-    if selected_pool:
-        if selected_pool == '1':
-            cmd += 'zroot/ROOT/gentoo'
-            if args.list:
-                cmd += ' zroot/ROOT/pkg'
-                cmd += ' zroot/ROOT/gentoo/var'
-        elif selected_pool == '2':
-            cmd += 'zroot/HOME/brandon'
-        elif selected_pool == '3':
-            cmd += 'storage/anime'
-        elif selected_pool == '4':
-            cmd += 'storage/data'
-        elif selected_pool == '5':
-            cmd += 'ssd-mirror/KVM'
-        elif selected_pool == '6':
-            cmd += 'torrents'
-        elif selected_pool == '7':
-            cmd += 'zroot/CACHE/torrents'
-
-        if args.snapshot:
-            snapshot_time = time.strftime('%F-%H%M', time.localtime())
-            cmd += f'@manual-{snapshot_time}'
-        Execute(cmd)
-
-    if args.export:
-        RootCheck(require_root=True)
-        target = args.export
-        Execute(f'zfs send {target} | zstd -T0 >| {Path.cwd()}/{Path(target).name}.zst',
-                sh_wrap=True)
+    ZfsPools(args=args)
