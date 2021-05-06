@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.3.0
-# 2021-01-01
+# 2.0.0
+# 2021-05-06
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -17,9 +17,24 @@
 #    along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import argparse
+import sys
+
+from loguru import logger
 
 from python.utils.execute import Execute
 from python.utils.root_check import RootCheck
+
+
+class Grub:
+    def __init__(self, args=None):
+        logger.info('Someone fucked up the boot loader, again')
+        Execute('grub-install --target=x86_64-efi --efi-directory=/boot/efi')
+
+        if args.mkconf:
+            Execute('kernel-grub')
+
+        logger.info('\n\nCheck below is correct\n\n')
+        Execute('/usr/sbin/efibootmgr')
 
 
 def main():
@@ -27,15 +42,18 @@ def main():
     parser.add_argument('-m', '--mkconf',
                         action='store_true',
                         help='Rebuild grub.cfg')
+    debug = parser.add_argument_group('debug')
+    debug.add_argument('-L', '--loglevel',
+                       default='INFO',
+                       metavar='LEVEL',
+                       type=str.upper,
+                       choices=['NONE', 'CRITICAL', 'ERROR', 'WARNING', 'INFO', 'VERBOSE', 'DEBUG', 'TRACE'],
+                       help='Levels: %(choices)s')
     args = parser.parse_args()
 
     RootCheck(require_root=True)
 
-    print('Someone fucked up the boot loader, again')
-    Execute('grub-install --target=x86_64-efi --efi-directory=/boot/efi')
+    logger.remove()
+    logger.add(sys.stdout, level=args.loglevel, colorize=True)
 
-    if args.mkconf:
-        Execute('kernel-grub')
-
-    print('\n\nCheck below is correct\n\n')
-    Execute('/usr/sbin/efibootmgr')
+    Grub(args=args)
