@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.7.1
-# 2021-04-15
+# 2.0.0
+# 2021-05-06
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -17,34 +17,35 @@
 #    along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import argparse
+import sys
 from pathlib import Path
+
+from loguru import logger
 
 from python.utils.execute import Execute
 from python.utils.root_check import RootCheck
 
 
-def main():
-    parser = argparse.ArgumentParser()
-    required = parser.add_argument_group('required exclusive arguments').add_mutually_exclusive_group(required=True)
-    required.add_argument('-g', '--rebuild-gcc',
-                          action='store_true',
-                          help='rebuils all pkgs build with gcc')
-    required.add_argument('-c', '--rebuild-clang',
-                          action='store_true',
-                          help='rebuils all pkgs build with clang')
-    args = parser.parse_args()
+class Rebuild:
+    def __init__(self, args=None):
+        env = Path('/etc/portage/package.env')
 
-    RootCheck(require_root=True)
+        self.__gcc_req_ebuilds = ''
+        for pkg in Path.open(env):
+            if 'cc-gcc' in pkg:
+                pkg = pkg.split(' ')[0]
+                if '#' not in pkg:
+                    self.__gcc_req_ebuilds += f'{pkg} '
 
-    env = Path() / '/etc/portage/package.env'
-    gcc_req_ebuilds = ''
-    for pkg in Path.open(env):
-        if 'cc-gcc' in pkg:
-            pkg = pkg.split(' ')[0]
-            if '#' not in pkg:
-                gcc_req_ebuilds += f'{pkg} '
+        self.run(args)
 
-    if args.rebuild_clang:
+    def run(self, args):
+        if args.rebuild_clang:
+            self.rebuild_clang()
+        if args.rebuild_gcc:
+            self.rebuild_gcc()
+
+    def rebuild_clang(self):
         bin_pkg = 'www-client/google-chrome-unstable ' \
                   'dev-lang/rust-bin ' \
                   'dev-util/clion ' \
@@ -60,11 +61,37 @@ def main():
         user_group = 'acct-group/* acct-user/*'
         gcc = "sys-devel/gcc"
         Execute('emerge --jobs --oneshot --emptytree @world '
-                f'--exclude \'{gcc_req_ebuilds}\' '
+                f'--exclude \'{self.__gcc_req_ebuilds}\' '
                 f'--exclude \'{virtual}\' '
                 f'--exclude \'{user_group}\' '
                 f'--exclude \'{gcc}\' '
                 f'--exclude \'{bin_pkg}\'')
 
-    if args.rebuild_gcc:
-        Execute(f'emerge --jobs --oneshot {gcc_req_ebuilds}')
+    def rebuild_gcc(self):
+        Execute(f'emerge --jobs --oneshot {self.__gcc_req_ebuilds}')
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    required = parser.add_argument_group('required exclusive arguments').add_mutually_exclusive_group(required=True)
+    required.add_argument('-g', '--rebuild-gcc',
+                          action='store_true',
+                          help='rebuils all pkgs build with gcc')
+    required.add_argument('-c', '--rebuild-clang',
+                          action='store_true',
+                          help='rebuils all pkgs build with clang')
+    debug = parser.add_argument_group('debug')
+    debug.add_argument('-L', '--loglevel',
+                       default='INFO',
+                       metavar='LEVEL',
+                       type=str.upper,
+                       choices=['NONE', 'CRITICAL', 'ERROR', 'WARNING', 'INFO', 'VERBOSE', 'DEBUG', 'TRACE'],
+                       help='Levels: %(choices)s')
+    args = parser.parse_args()
+
+    RootCheck(require_root=True)
+
+    logger.remove()
+    logger.add(sys.stdout, level=args.loglevel, colorize=True)
+
+    Rebuild(args=args)
