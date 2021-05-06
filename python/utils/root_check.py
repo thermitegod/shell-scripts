@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.0.0
-# 2021-01-01
+# 2.0.0
+# 2021-05-06
 
 # Copyright (C) 2019,2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -22,8 +22,9 @@ from python.utils.colors import Colors
 
 
 class RootCheck:
-    def __init__(self, require_root: bool):
+    def __init__(self, require_root: bool = True):
         """
+        Can bypass not allowing root to run scripts by setting env var PY_IGNORE_ROOT_CHECK
         :param require_root:
             If True, running as root is required otherwise will terminate.
             If False, running as root will terminate.
@@ -36,6 +37,12 @@ class RootCheck:
                 return
             msg = 'Requires root, exiting'
         else:
+            try:
+                if os.environ['PY_IGNORE_ROOT_CHECK']:
+                    return
+            except KeyError:
+                pass
+
             if not os.geteuid() == 0:
                 return
             msg = 'Do not run as root, exiting'
