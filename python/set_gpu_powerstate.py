@@ -31,9 +31,9 @@ class Powerstate:
         self.__card = Path() / '/sys/class/drm/card0/device/power_dpm_force_performance_level'
         self.__current_state = Path.open(self.__card, 'r').read().rstrip()
 
-        self.run(args=args)
+        self.parse_args(args=args)
 
-    def run(self, args):
+    def parse_args(self, args):
         if args.current:
             print(f'Current GPU power state is: {Colors.GRE}{self.__current_state}{Colors.NC}')
         if args.set:

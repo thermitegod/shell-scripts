@@ -49,7 +49,7 @@ class Convert:
         self.__mimecheck = True
         self.__strip_exif = True
 
-        self.run(args=args)
+        self.parse_args(args=args)
 
     @staticmethod
     def test_size(img_orig, img_new):
@@ -188,7 +188,7 @@ class Convert:
             if Path.is_dir(Path(dirs)):
                 self.convert_main()
 
-    def run(self, args):
+    def parse_args(self, args):
         if args.directory:
             self.__directory = args.directory
         else:

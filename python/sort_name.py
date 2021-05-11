@@ -51,7 +51,7 @@ class Sort:
         self.__total_after = None
         self.__total_before = len(self.__file_list)
 
-        self.run(args=args)
+        self.parse_args(args=args)
 
     def sort(self):
         if self.__total_before == 0:
@@ -135,7 +135,7 @@ class Sort:
         print(f'After\t: {self.__total_after}')
         print(f'Total\t: {self.__total_before - self.__total_after}')
 
-    def run(self, args):
+    def parse_args(self, args):
         if args.test:
             self.__dest = self.__test_dir
         if args.print:

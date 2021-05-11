@@ -31,7 +31,9 @@ class Initramfs:
         self.__kernel_version = None
         self.__no_firmware = False
 
-        self.run(args=args)
+        self.parse_args(args=args)
+
+        self.gen_initramfs()
 
     def gen_initramfs(self):
         cmd = '/usr/bin/dracut ' \
@@ -59,15 +61,13 @@ class Initramfs:
 
         Execute(cmd)
 
-    def run(self, args):
+    def parse_args(self, args):
         if args.compression:
             self.__compression = args.compression[0]
         if args.kver:
             self.__kernel_version = args.kver[0]
         if args.no_firmware:
             self.__no_firmware = False
-
-        self.gen_initramfs()
 
 
 def main():

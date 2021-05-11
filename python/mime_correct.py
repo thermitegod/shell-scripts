@@ -33,6 +33,7 @@ class MimeCorrect:
         self.__list_only = False
         self.__rm_hash_collision = False
 
+        self.__check_all = False
         self.__verbose = False
 
         self.__total_checked = 0
@@ -40,7 +41,18 @@ class MimeCorrect:
         self.__total_corrected = 0
         self.__total_collision = 0
 
-        self.run(args=args)
+        self.parse_args(args=args)
+
+        if self.__check_all:
+            RecursiveExecute(function=self.main)
+        else:
+            self.main()
+
+        if self.__total_checked > 0:
+            print(f'\nTOTAL')
+            self.print_totals(self.__total_checked, self.__total_found,
+                              self.__total_corrected, self.__total_collision,
+                              print_totals=True)
 
     def main(self):
         checked = 0
@@ -125,7 +137,7 @@ class MimeCorrect:
 
         print(f'{checked_out}\t{problematic_out}\t{collision_out}\t{pwd_out}')
 
-    def run(self, args):
+    def parse_args(self, args):
         if args.list:
             self.__list_only = True
         if args.rm_hash_collision:
@@ -133,15 +145,7 @@ class MimeCorrect:
         if args.verbose:
             self.__verbose = True
         if args.check_all:
-            RecursiveExecute(function=self.main)
-        else:
-            self.main()
-
-        if self.__total_checked > 0:
-            print(f'\nTOTAL')
-            self.print_totals(self.__total_checked, self.__total_found,
-                              self.__total_corrected, self.__total_collision,
-                              print_totals=True)
+            self.__check_all = True
 
 
 def main():

@@ -30,7 +30,7 @@ class Trash:
     def __init__(self, args: argparse = None):
         self.__trashdir = Path('/tmp/.Trash-1000')
 
-        self.run(args=args)
+        self.parse_args(args=args)
 
     def remove(self):
         if Path.is_dir(self.__trashdir):
@@ -43,7 +43,7 @@ class Trash:
         else:
             print(f'There is no trash dir: {self.__trashdir}')
 
-    def run(self, args):
+    def parse_args(self, args):
         if args.remove:
             self.remove()
         elif args.size:

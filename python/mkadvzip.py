@@ -35,7 +35,9 @@ class Optimize:
 
         self.__cpu = os.cpu_count()
 
-        self.run(args=args)
+        self.parse_args(args=args)
+
+        self.main()
 
     def get_size(self, start: bool):
         size = sum(f.stat().st_size for f in Path.cwd().glob('**/*') if f.is_file())
@@ -59,11 +61,9 @@ class Optimize:
                   f'After      : {self.__size_end}\n'
                   f'% of orig  : {self.__size_end / self.__size_start}')
 
-    def run(self, args):
+    def parse_args(self, args):
         if args.verbose:
             self.__verbose = True
-
-        self.main()
 
 
 def main():

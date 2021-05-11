@@ -40,7 +40,7 @@ class Count:
 
         self.__pretend = False
 
-        self.run(args=args)
+        self.parse_args(args=args)
 
     def count_files(self):
         for f in Path(Path.cwd()).iterdir():
@@ -95,7 +95,7 @@ class Count:
 
         self.reset_vars()
 
-    def run(self, args):
+    def parse_args(self, args):
         if args.pretend:
             self.__pretend = True
         if args.prefix:

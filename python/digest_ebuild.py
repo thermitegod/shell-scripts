@@ -28,7 +28,8 @@ from python.utils.recursion import RecursiveExecute
 
 class Digest:
     def __init__(self, args: argparse = None):
-        self.run(args=args)
+        self.parse_args(args=args)
+        self.digest()
 
     @staticmethod
     def digest():
@@ -45,13 +46,11 @@ class Digest:
 
         Execute(f'ebuild {ebuild_list[-1]} manifest')
 
-    def run(self, args):
+    def parse_args(self, args):
         # general
         if args.all:
             RecursiveExecute(function=self.digest)
             raise SystemExit
-
-        self.digest()
 
 
 def main():

@@ -32,9 +32,9 @@ class ZfsPools:
         self.__selected_pool = None
         self.__cmd = 'zfs '
 
-        self.run(args=args)
+        self.parse_args(args=args)
 
-    def run(self, args):
+    def parse_args(self, args):
         if args.extra:
             print('zfs send pool/dataset@snapshot | zstd -T0 >| /tmp/backup.zst\n'
                   'unzstd -c backup.zst | zfs receive pool/newdataset\n'

@@ -117,7 +117,9 @@ class Build:
 
         self.version_check_kernel(ver=self.__kernel_module_dir.partition('-')[0])
 
-        self.run(args=args)
+        self.parse_args(args=args)
+
+        self.build()
 
     def intro(self):
         print(f'kernel             : {self.__kernel_src}\n'
@@ -367,7 +369,7 @@ class Build:
         if self.__run_kernel_build:
             self.build_kernel()
 
-    def run(self, args):
+    def parse_args(self, args):
         # General
         if args.no_intro:
             self.__run_intro = False
@@ -400,8 +402,6 @@ class Build:
             self.__run_kernel_build = False
         if args.experimental:
             self.__experimental = True
-
-        self.build()
 
 
 def main():

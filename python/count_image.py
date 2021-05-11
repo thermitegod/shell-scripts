@@ -43,13 +43,20 @@ class Count:
             print(f'Unknown mode: {script}')
             raise SystemExit(1)
 
+        self.__list = False
+
         self.__counter = 0
         self.__counter_total = 0
 
         self.__file_list_done = []
         self.__file_list = []
 
-        self.run(args=args)
+        self.parse_args(args=args)
+
+        if self.__list:
+            self.main_list()
+        else:
+            self.main_count()
 
     def main_count(self):
         self.__file_list = RecursiveFindFiles().get_files(pathlib=True)
@@ -84,11 +91,9 @@ class Count:
                 if f.endswith(ext):
                     print(f)
 
-    def run(self, args):
+    def parse_args(self, args):
         if args.list:
-            self.main_list()
-        else:
-            self.main_count()
+            self.__list = True
 
 
 def main():

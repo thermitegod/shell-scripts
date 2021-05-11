@@ -32,7 +32,9 @@ class Ytdl:
         self.__link = ''
         self.__audio_only = False
 
-        self.run(args=args)
+        self.parse_args(args=args)
+
+        self.dl()
 
     def dl(self):
         cmd = 'youtube-dl ' \
@@ -56,15 +58,12 @@ class Ytdl:
         Execute(cmd)
         print(f'downloaded: {self.__link}\n')
 
-    def run(self, args):
+    def parse_args(self, args):
         if args.audio:
             self.__audio_only = True
 
         self.__link = clipboard.from_flag_else_clipboard(args.url)
-
         net.link_check(self.__link)
-
-        self.dl()
 
 
 def main():

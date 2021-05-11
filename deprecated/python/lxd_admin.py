@@ -99,7 +99,9 @@ class Container:
         self.__container_name = None
         self.__container_save_override = None
 
-        self.run(args=args)
+        self.parse_args(args=args)
+
+        self.main()
 
     def print_config(self, verbose: bool = False):
         print(f'Container Name      : {self.__container_fullname}\n'
@@ -371,7 +373,7 @@ class Container:
             elif self.__action == 'print':
                 self.print_config(self.__print_verbose)
 
-    def run(self, args):
+    def parse_args(self, args):
         # container
         if args.only:
             self.__only_container = args.only
@@ -406,8 +408,6 @@ class Container:
         if args.print_verbose:
             self.__action = 'print'
             self.__print_verbose = True
-
-        self.main()
 
 
 def main():

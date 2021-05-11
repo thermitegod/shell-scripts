@@ -44,6 +44,10 @@ class Compress:
     def __init__(self, args: argparse = None):
         self.__output_dir = Path.cwd()
 
+        self.__input_files = None
+        self.__directories = False
+        self.__files = False
+
         self.__exclude = ''
 
         self.__junk_paths = False
@@ -52,7 +56,10 @@ class Compress:
 
         self.__destructive = False
 
-        self.run(args=args)
+        self.parse_args(args=args)
+
+        GetFiles(function=self.compress, input_files=self.__input_files,
+                 only_directories=self.__directories, only_files=self.__files)
 
     def compress(self, filename, compressing_dir):
         test_file = Path() / self.__output_dir / f'{filename}.tar'
@@ -109,7 +116,7 @@ class Compress:
             print(f'ERROR: archive not created for: \'{filename}\'')
             raise SystemExit(1)
 
-    def run(self, args):
+    def parse_args(self, args):
         # destructive
         if args.destructive:
             self.__destructive = True
@@ -124,8 +131,9 @@ class Compress:
         if args.junk_paths:
             self.__junk_paths = True
 
-        GetFiles(function=self.compress, input_files=args.input_files,
-                 only_directories=args.directories, only_files=args.files)
+        self.__input_files = args.input_files
+        self.__files = args.files
+        self.__directories = args.directories
 
 
 def main():

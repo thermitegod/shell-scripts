@@ -33,7 +33,7 @@ class Backup:
         self.__tape = '/dev/st0'
         self.__target = None
 
-        self.run(args=args)
+        self.parse_args(args=args)
 
     def t_rewind(self):
         Execute(f'mt -f \'{self.__tape}\' rewind')
@@ -91,7 +91,7 @@ class Backup:
         self.t_rewind()
         Execute(f'tar -tvf \'{self.__tape}\'')
 
-    def run(self, args):
+    def parse_args(self, args):
         # general
         if args.backup:
             self.__target = Path() / args.backup

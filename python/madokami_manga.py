@@ -51,7 +51,7 @@ class Download:
         self.__save_path = Path('/mnt/data')
         self.__symlink = True
 
-        self.run(args=args)
+        self.parse_args(args=args)
 
     def dl(self):
         net.link_check(self.__link)
@@ -85,7 +85,7 @@ class Download:
             if not Path.exists(save_path_full) and not Path.is_symlink(save_path_full):
                 os.symlink(save_path_full, Path() / os.environ['HOME'] / 'media/manga-reading')
 
-    def run(self, args):
+    def parse_args(self, args):
         if args.save_dir:
             self.__save_path = Path() / self.__save_path / 'manga/neglected/finished'
         else:

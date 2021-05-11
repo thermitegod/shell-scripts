@@ -25,7 +25,7 @@ from loguru import logger
 
 
 class Count:
-    def __init__(self, args: argparse = None):
+    def __init__(self):
         Ranges = namedtuple('Ranges', ['dest', 'lower', 'upper'])
 
         self.__size_ranges = (
@@ -53,7 +53,7 @@ class Count:
             if f.is_file():
                 self.__file_list.append(f)
 
-        self.run(args=args)
+        self.main_move()
 
     def main_move(self):
         for ranges in self.__size_ranges:
@@ -78,9 +78,6 @@ class Count:
                 self.__file_list.remove(item)
             self.__file_list_done = []
 
-    def run(self, args):
-        self.main_move()
-
 
 def main():
     parser = argparse.ArgumentParser()
@@ -96,4 +93,4 @@ def main():
     logger.remove()
     logger.add(sys.stdout, level=args.loglevel, colorize=True)
 
-    Count(args=args)
+    Count()

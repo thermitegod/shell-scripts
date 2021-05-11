@@ -47,7 +47,9 @@ class Process:
         self.__numerical_rename = False
         self.__detect_nested_dirs = True
 
-        self.run(args=args)
+        self.parse_args(args=args)
+
+        self.process_main()
 
     def get_time(self, start: bool):
         current_time = time.strftime("%B %d %H:%M:%S", time.localtime())
@@ -139,7 +141,7 @@ class Process:
                   f'Start : {self.__time_start}\n'
                   f'End   : {self.__time_end}\n\n')
 
-    def run(self, args):
+    def parse_args(self, args):
         # general
         if args.numerical:
             self.__numerical_rename = True
@@ -166,8 +168,6 @@ class Process:
             self.__show_time = False
         if args.match_zzz:
             self.__match_zzz = True
-
-        self.process_main()
 
 
 def main():

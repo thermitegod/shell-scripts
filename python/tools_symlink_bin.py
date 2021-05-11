@@ -43,9 +43,9 @@ class Symlink:
                         '--ignore="tools" ' \
                         '--ignore="utils" '
 
-        self.run(args=args)
+        self.parse_args(args=args)
 
-    def run(self, args):
+    def parse_args(self, args):
         if args.user:
             self.__home = Path() / '/home' / args.user
         if args.stow_bin:

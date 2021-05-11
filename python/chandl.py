@@ -50,7 +50,7 @@ class Chandl:
         self.url_folder_regex = '.*\\/([.\\w+]+[^.html])'
         self.update_interval = 60
 
-        self.run(args=args)
+        self.parse_args(args=args)
 
     @staticmethod
     def chunks(seq, num):
@@ -193,7 +193,7 @@ class Chandl:
             self.write_hashlist()
             time.sleep(float(self.update_interval))
 
-    def run(self, args):
+    def parse_args(self, args):
         url = args.url
 
         if args.destination is None:

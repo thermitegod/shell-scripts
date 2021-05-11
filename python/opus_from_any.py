@@ -38,7 +38,12 @@ class Convert:
 
         self.__inc_iso = False
 
-        self.run(args=args)
+        self.__input_files = None
+        self.__files = False
+
+        self.parse_args(args=args)
+
+        GetOnlyFiles(function=self.convert_main, input_files=self.__input_files, only_files=self.__files)
 
     def remove_tmpdir(self):
         shutil.rmtree(self.__tmpdir)
@@ -65,8 +70,9 @@ class Convert:
         Execute(f'mv -- "{self.__tmpdir}/{basename}.opus" "{Path.cwd()}"')
         Execute(f'mv -- "{Path.cwd()}/{filename}" "{original}"')
 
-    def run(self, args):
-        GetOnlyFiles(function=self.convert_main, input_files=args.input_files, only_files=args.files)
+    def parse_args(self, args):
+        self.__input_files = args.input_files
+        self.__files = args.files
 
 
 def main():

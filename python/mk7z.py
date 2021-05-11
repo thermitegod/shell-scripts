@@ -46,6 +46,10 @@ class Compress:
     def __init__(self, args: argparse = None):
         self.__output_dir = Path.cwd()
 
+        self.__input_files = None
+        self.__directories = False
+        self.__files = False
+
         self.__exclude = ''
 
         self.__run_tests = True
@@ -59,7 +63,12 @@ class Compress:
         self.__test_passed = 0
         self.__test_failed = 0
 
-        self.run(args=args)
+        self.parse_args(args=args)
+
+        GetFiles(function=self.compress, input_files=self.__input_files,
+                 only_directories=self.__directories, only_files=self.__files)
+
+        self.run_tests()
 
     @staticmethod
     def shell_escape(string: str):
@@ -136,7 +145,7 @@ class Compress:
             print(f'ERROR: archive not created for: \'{filename}\'')
             raise SystemExit(1)
 
-    def run(self, args):
+    def parse_args(self, args):
         # other
         if args.disable_tests:
             self.__run_tests = False
@@ -160,10 +169,9 @@ class Compress:
             for e in args.exclude:
                 self.__exclude += f'-x "{e}" '
 
-        GetFiles(function=self.compress, input_files=args.input_files,
-                 only_directories=args.directories, only_files=args.files)
-
-        self.run_tests()
+        self.__input_files = args.input_files
+        self.__files = args.files
+        self.__directories = args.directories
 
 
 def main():

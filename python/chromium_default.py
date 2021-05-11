@@ -42,7 +42,10 @@ class Chrome:
         except KeyError:
             pass
 
-        self.run(args=args)
+        self.parse_args(args=args)
+
+        profile_path = Path() / os.environ['XDG_CONFIG_HOME'] / 'chrome' / self.__chrome_profile
+        self.start_chrome(profile_path=profile_path)
 
     def start_chrome(self, profile_path):
         Execute(f'{self.__chrome} '
@@ -50,7 +53,7 @@ class Chrome:
                 f'--ozone-platform={self.__display_server} '
                 f'--no-default-browser-check')
 
-    def run(self, args):
+    def parse_args(self, args):
         if args.chrome == 'chromium':
             self.__chrome = 'chromium'
         elif args.chrome == 'unstable':
@@ -67,10 +70,6 @@ class Chrome:
             # or this can be changed
             # e.g. ln -s chromium-default chromium-<profile>
             self.__chrome_profile = f'{self.__chrome}-{self.__profile_name}'
-
-        profile_path = Path() / os.environ['XDG_CONFIG_HOME'] / 'chrome' / self.__chrome_profile
-
-        self.start_chrome(profile_path=profile_path)
 
 
 def main():

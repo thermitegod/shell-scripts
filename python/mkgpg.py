@@ -36,7 +36,12 @@ class Compress:
 
         self.__user = None
 
-        self.run(args=args)
+        self.__input_files = None
+        self.__files = False
+
+        self.parse_args(args=args)
+
+        GetOnlyFiles(function=self.compress, input_files=self.__input_files, only_files=self.__files)
 
     def compress(self, filename):
         if self.__decrypt:
@@ -47,7 +52,7 @@ class Compress:
             print(f'Encrypting : {filename}')
             Execute(f'nice -19 gpg --yes --batch -e -r "{self.__user}" "{filename}"')
 
-    def run(self, args):
+    def parse_args(self, args):
         # compression type
         if args.decrypt_dir:
             self.__decrypt = True
@@ -64,7 +69,8 @@ class Compress:
             # TODO
             raise NotImplementedError
 
-        GetOnlyFiles(function=self.compress, input_files=args.input_files, only_files=args.files)
+        self.__input_files = args.input_files
+        self.__files = args.files
 
 
 def main():

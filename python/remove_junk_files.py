@@ -46,7 +46,7 @@ class RemoveJunk:
         self.__file_list_only = []
         self.__file_list = []
 
-        self.run(args=args)
+        self.parse_args(args=args)
 
     def main(self, list_only: bool = False):
         self.__file_list = RecursiveFindFiles(inc_dirs=True).get_files(pathlib=True)
@@ -79,7 +79,7 @@ class RemoveJunk:
                 print('\n')
                 self.__file_list_only = []
 
-    def run(self, args):
+    def parse_args(self, args):
         if args.list:
             self.main(list_only=True)
         else:

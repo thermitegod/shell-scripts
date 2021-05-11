@@ -39,7 +39,7 @@ class Container:
 
         self.__backup_dir = Path() / '/mnt/data/backup/lxd' / current_date
 
-        self.run(args=args)
+        self.parse_args(args=args)
 
     def export_container(self, container):
         if not Path.is_dir(self.__backup_dir):
@@ -63,7 +63,7 @@ class Container:
         logger.info(f'Importing {container}')
         Execute(f'lxc import {container}', to_stdout=True)
 
-    def run(self, args):
+    def parse_args(self, args):
         if args.export:
             self.export_container(container=args.export)
 

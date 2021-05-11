@@ -40,7 +40,7 @@ class Backup:
         self.__mtimdb = Path('/var/cache/edb/mtimedb')
         self.__backup_dir = Path('/mnt/data/backup/mtimedb')
 
-        self.run(args=args)
+        self.parse_args(args=args)
 
     def remove_tmpdir(self):
         shutil.rmtree(self.__tmpdir)
@@ -71,7 +71,7 @@ class Backup:
             if confirm.confirm_run(text=f'Remove \'{self.__backup_dir}\'? '):
                 shutil.rmtree(self.__backup_dir)
 
-    def run(self, args):
+    def parse_args(self, args):
         if args.backup:
             self.backup()
         if args.list:

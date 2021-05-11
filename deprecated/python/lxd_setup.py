@@ -33,7 +33,8 @@ class Container:
         self.__base_rutorrent = Lxd.base_rutorrent
         self.__base_transmission = Lxd.base_transmission
 
-        self.run(args=args)
+        self.stop_base()
+        self.parse_args(args=args)
 
     def stop_base(self):
         logger.info(f'Stopping {self.__base_container}')
@@ -59,9 +60,7 @@ class Container:
         logger.info(f'Stopping {container}')
         Execute(f'lxc stop {container}', to_stdout=True)
 
-    def run(self, args):
-        self.stop_base()
-
+    def parse_args(self, args):
         if args.rutorrent:
             self.update_generic(container=self.__base_rutorrent,
                                 setup_script='/root/setup-rutorrent.sh')

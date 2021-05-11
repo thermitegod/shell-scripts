@@ -34,7 +34,7 @@ class Clean:
     def __init__(self, args: argparse = None):
         self.__kdir = Kernel.get_kernel_dir()
 
-        self.run(args=args)
+        self.parse_args(args=args)
 
     def kernel_rm(self):
         if Path.is_symlink(self.__kdir):
@@ -58,7 +58,7 @@ class Clean:
             os.chdir(self.__kdir)
             Execute(cmd)
 
-    def run(self, args):
+    def parse_args(self, args):
         if args.rm:
             self.kernel_rm()
         elif args.clean:

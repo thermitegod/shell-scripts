@@ -43,7 +43,7 @@ class Convert:
 
         self.__jpeg_xl_speed = None
 
-        self.run(args=args)
+        self.parse_args(args=args)
 
     def convert_image(self, filename: Path):
         path = filename.parent
@@ -109,7 +109,7 @@ class Convert:
                 else:
                     logger.error(f'missing dir: {orig}')
 
-    def run(self, args):
+    def parse_args(self, args):
         if not args.disable_warning:
             for f in range(10):
                 logger.warning(f'JPEG-XL standard is still in progress')

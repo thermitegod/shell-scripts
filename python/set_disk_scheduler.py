@@ -34,13 +34,13 @@ class Scheduler:
         self.__pool_root = ['nvme0n1', 'nvme1n1']
         self.__disks = self.__pool_storage + self.__pool_torrents + self.__pool_ssd + self.__pool_root
 
-        self.run(args=args)
+        self.parse_args(args=args)
 
     @staticmethod
     def get_scheduler(disk):
         return Path.open(Path() / '/sys/block' / disk / 'queue/scheduler', 'r').read().partition(' ')[0]
 
-    def run(self, args):
+    def parse_args(self, args):
         if args.current:
             for disk in self.__disks:
                 sched = self.get_scheduler(disk)

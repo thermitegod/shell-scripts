@@ -47,7 +47,8 @@ class Backup:
 
         self.__date = time.strftime('%Y-%m-%d', time.localtime())
 
-        self.run(args=args)
+        self.parse_args(args=args)
+        self.backup()
 
     def remove_tmpdir(self):
         shutil.rmtree(self.__tmpdir)
@@ -107,15 +108,13 @@ class Backup:
             Execute(f'{CheckEnv.get_script_name()} -m 3')
             Execute(f'{CheckEnv.get_script_name()} -m 4')
 
-    def run(self, args):
+    def parse_args(self, args):
         if args.verbose:
             self.__verbose = '-v'
         if args.user:
             self.__user = args.user
         if args.mode:
             self.__mode = args.mode
-
-        self.backup()
 
 
 def main():

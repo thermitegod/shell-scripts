@@ -37,9 +37,9 @@ class Rebuild:
                 if '#' not in pkg:
                     self.__gcc_req_ebuilds += f'{pkg} '
 
-        self.run(args)
+        self.parse_args(args=args)
 
-    def run(self, args):
+    def parse_args(self, args):
         if args.rebuild_clang:
             self.rebuild_clang()
         if args.rebuild_gcc:

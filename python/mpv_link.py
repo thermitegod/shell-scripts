@@ -28,15 +28,15 @@ from python.utils.execute import Execute
 
 class Mpv:
     def __init__(self, args: argparse = None):
-        self.__link = None
+        self.__link = ''
 
-        self.run(args=args)
-
-    def run(self, args):
-        self.__link = clipboard.from_flag_else_clipboard(args.url)
+        self.parse_args(args=args)
 
         net.link_check(self.__link)
         Execute(f'mpv {self.__link}')
+
+    def parse_args(self, args):
+        self.__link = clipboard.from_flag_else_clipboard(args.url)
 
 
 def main():

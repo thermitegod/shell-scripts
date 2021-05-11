@@ -36,10 +36,15 @@ class Decompress:
     def __init__(self, args: argparse = None):
         self.__output_dir = None
 
+        self.__input_files = None
+        self.__files = False
+
         self.__extract_to = False
         self.__extract_to_subdir = True
 
-        self.run(args=args)
+        self.parse_args(args=args)
+
+        GetOnlyFiles(function=self.run_extraction, input_files=self.__input_files, only_files=self.__files)
 
     def extract_to(self, filename):
         if self.__extract_to_subdir:
@@ -114,7 +119,7 @@ class Decompress:
         else:
             print(f'cannot extract: \'{filename_path}\'')
 
-    def run(self, args):
+    def parse_args(self, args):
         # decompression type
         if args.no_subdir:
             self.__extract_to_subdir = False
@@ -123,7 +128,8 @@ class Decompress:
             self.__extract_to = True
             self.__output_dir = OutputDir(directory=args.output_dir).get_dir()
 
-        GetOnlyFiles(function=self.run_extraction, input_files=args.input_files, only_files=args.files)
+        self.__input_files = args.input_files
+        self.__files = args.files
 
 
 def main():
