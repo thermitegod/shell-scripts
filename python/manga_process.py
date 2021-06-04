@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.10.0
-# 2021-04-29
+# 1.10.1
+# 2021-06-03
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -64,7 +64,7 @@ class Process:
 
         if self.__remove_junk:
             Execute('remove-junk-files -l')
-            Execute('remove-junk-files -Ar')
+            Execute('remove-junk-files')
 
         detected_credits = Execute('remove-manga-credits -l', to_stdout=True).get_out()
         if detected_credits:
