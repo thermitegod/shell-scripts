@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 2.29.0
-# 2021-04-29
+# 2.30.0
+# 2021-06-05
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -248,9 +248,9 @@ class Build:
             # clang
             cc = 'clang'
             ld = 'ld.lld'
-            kmake += f'LLVM=1 '
-            if self.__experimental:
-                kmake += 'LLVM_IAS=1 '
+            kmake += f'LLVM=1 LLVM_IAS=1 '
+            # if self.__experimental:
+            #     kmake += 'LLVM_IAS=1 '
 
         kmake += f'nice -19 make -j{cores * 2 + 1} -l{cores + 1} CC={cc} LD={ld} {act}'
         if return_only:
