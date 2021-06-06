@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 2.32.0
-# 2021-06-05
+# 2.33.0
+# 2021-06-06
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -379,8 +379,16 @@ class Build:
                 logger.critical(f'missing switch config \'{self.__kernel_switch_config}\'')
                 raise SystemExit(1)
 
-        # need to use gcc for this
-        self.run_compiler(act='prepare', force_gcc=True)
+        if not self.__experimental:
+            # get error when running zfs configure
+            # 	*** Unable to build an empty module.
+            # 	*** Please run 'make scripts' inside the kernel source tree.
+            # running 'make scripts' does not fix the problem
+            # using gcc does fix the problem
+            Kernel.kernel_conf_copy(src=self.__kernel_src, dst=self.__tmpdir)
+            self.run_compiler(act='prepare', force_gcc=True)
+        else:
+            self.run_compiler(act='prepare')
 
         if Path.is_file(self.__zfs_kmod_src):
             Path.unlink(self.__zfs_kmod_src)
@@ -405,8 +413,8 @@ class Build:
         shutil.move(Path(f'{zfs_build_version}.tar.zst'),
                     Path() / self.__zfs_kmod_src)
 
-        if not self.__kernel_has_module_support:
-            Kernel.kernel_conf_move(src=self.__tmpdir, dst=self.__kernel_src)
+        if not self.__kernel_has_module_support or not self.__experimental:
+            Kernel.kernel_conf_copy(src=self.__tmpdir, dst=self.__kernel_src)
 
         if self.__cc_use_clang:
             # when using clang to run 'make prepare' get error when running zfs configure
