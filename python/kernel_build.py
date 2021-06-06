@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 2.30.0
+# 2.31.0
 # 2021-06-05
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
@@ -100,6 +100,7 @@ class Build:
         self.__zfs_ebuild: Path = Path('sys-fs/zfs-kmod')
         self.__zfs_ebuild_path: Path = Path()
         self.__zfs_version: Path = Path()
+        self.__zfs_version_path: Path = Path()
         self.__zfs_kmod_build_path: Path = Path()
 
         self.__run_intro: bool = True
@@ -350,7 +351,7 @@ class Build:
             self.__run_kmod_build = True
 
     def build_zfs(self):
-        zver_path = self.__zfs_version
+        self.__zfs_version_path = self.__zfs_version
 
         if 'rc' in self.__zfs_version:
             # rc ebuilds
@@ -360,61 +361,66 @@ class Build:
             self.__zfs_version = self.__zfs_version.rpartition('-')[0]
 
         if self.__run_kmod_build:
-            self.cdkdir()
-            self.msc()
-
-            if not self.__kernel_has_module_support:
-                if Path.is_file(self.__kernel_switch_config):
-                    Kernel.kernel_conf_move(src=self.__kernel_src, dst=self.__tmpdir)
-                    Kernel.kernel_conf_copy(src=self.__kernel_switch_config, dst=self.__kernel_src)
-                else:
-                    logger.critical(f'missing switch config \'{self.__kernel_switch_config}\'')
-                    raise SystemExit(1)
-
-            # need to use gcc for this
-            self.run_compiler(act='prepare', force_gcc=True)
-
-            if Path.is_file(self.__zfs_kmod_src):
-                Path.unlink(self.__zfs_kmod_src)
-
-            portage_env = f'export PORTAGE_TMPDIR="{self.__tmpdir}"\n'
-            if self.__use_local_distdir:
-                portage_env += f'export DISTDIR="{self.__storage_distfiles}"\n'
-
-            zfs_build_path = Path() / self.__tmpdir / 'portage' / f'{self.__zfs_ebuild}-{zver_path}' / 'work'
-            zfs_build_version = f'{self.__zfs_kmod_build_path}-{self.__zfs_version}'
-
-            # this is just simpler
-            text = f'{portage_env}\n' \
-                   f'EXTRA_ECONF="--with-linux={self.__kernel_src} --enable-linux-builtin" ebuild ' \
-                   f'{self.__zfs_ebuild_path} configure || die "build failed"\n'
-            ExecuteScript(text)
-
-            os.chdir(Path() / zfs_build_path / zfs_build_version)
-            Execute(f'./copy-builtin {self.__kernel_src}')
-            os.chdir(zfs_build_path)
-            Execute(f'mkzst {zfs_build_version}')
-            shutil.move(Path(f'{zfs_build_version}.tar.zst'),
-                        Path() / self.__zfs_kmod_src)
-
-            if not self.__kernel_has_module_support:
-                Kernel.kernel_conf_move(src=self.__tmpdir, dst=self.__kernel_src)
-
-            if self.__cc_use_clang:
-                # when using clang to run 'make prepare' get error when running zfs configure
-                # 'Unable to build an empty module.'
-                # so clean kernel src since gcc was used in prepare
-                Execute('kernel-clean-src -c')
-
+            self.build_zfs_clean_build()
         else:
-            if not Path.is_file(self.__zfs_kmod_src):
-                logger.critical(f'Archive missing: {self.__zfs_kmod_src}')
+            self.build_zfs_install_preconfigured()
+
+    def build_zfs_clean_build(self):
+        self.cdkdir()
+        self.msc()
+
+        if not self.__kernel_has_module_support:
+            if Path.is_file(self.__kernel_switch_config):
+                Kernel.kernel_conf_move(src=self.__kernel_src, dst=self.__tmpdir)
+                Kernel.kernel_conf_copy(src=self.__kernel_switch_config, dst=self.__kernel_src)
+            else:
+                logger.critical(f'missing switch config \'{self.__kernel_switch_config}\'')
                 raise SystemExit(1)
 
-            archive = Path() / self.__storage_kernel_individual / self.__zfs_kmod_archive
-            Execute(f'extract -s -o {self.__tmpdir} {archive}')
-            os.chdir(Path() / self.__tmpdir / f'{self.__zfs_kmod_build_path}-{self.__zfs_version}')
-            Execute(f'./copy-builtin {self.__kernel_src}')
+        # need to use gcc for this
+        self.run_compiler(act='prepare', force_gcc=True)
+
+        if Path.is_file(self.__zfs_kmod_src):
+            Path.unlink(self.__zfs_kmod_src)
+
+        portage_env = f'export PORTAGE_TMPDIR="{self.__tmpdir}"\n'
+        if self.__use_local_distdir:
+            portage_env += f'export DISTDIR="{self.__storage_distfiles}"\n'
+
+        zfs_build_path = Path() / self.__tmpdir / 'portage' / f'{self.__zfs_ebuild}-{self.__zfs_version_path}' / 'work'
+        zfs_build_version = f'{self.__zfs_kmod_build_path}-{self.__zfs_version}'
+
+        # this is just simpler
+        text = f'{portage_env}\n' \
+               f'EXTRA_ECONF="--with-linux={self.__kernel_src} --enable-linux-builtin" ebuild ' \
+               f'{self.__zfs_ebuild_path} configure || die "build failed"\n'
+        ExecuteScript(text)
+
+        os.chdir(Path() / zfs_build_path / zfs_build_version)
+        Execute(f'./copy-builtin {self.__kernel_src}')
+        os.chdir(zfs_build_path)
+        Execute(f'mkzst {zfs_build_version}')
+        shutil.move(Path(f'{zfs_build_version}.tar.zst'),
+                    Path() / self.__zfs_kmod_src)
+
+        if not self.__kernel_has_module_support:
+            Kernel.kernel_conf_move(src=self.__tmpdir, dst=self.__kernel_src)
+
+        if self.__cc_use_clang:
+            # when using clang to run 'make prepare' get error when running zfs configure
+            # 'Unable to build an empty module.'
+            # so clean kernel src since gcc was used in prepare
+            Execute('kernel-clean-src -c')
+
+    def build_zfs_install_preconfigured(self):
+        if not Path.is_file(self.__zfs_kmod_src):
+            logger.critical(f'Archive missing: {self.__zfs_kmod_src}')
+            raise SystemExit(1)
+
+        archive = Path() / self.__storage_kernel_individual / self.__zfs_kmod_archive
+        Execute(f'extract -s -o {self.__tmpdir} {archive}')
+        os.chdir(Path() / self.__tmpdir / f'{self.__zfs_kmod_build_path}-{self.__zfs_version}')
+        Execute(f'./copy-builtin {self.__kernel_src}')
 
     def build_kernel(self):
         self.cdkdir()
