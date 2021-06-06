@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 2.31.0
+# 2.32.0
 # 2021-06-05
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
@@ -80,6 +80,8 @@ class Build:
 
         self.__kernel_src: Path = Kernel.get_kernel_dir()
         self.__kernel_config: Path = Path() / self.__kernel_src / '.config'
+
+        self.__kernel_vmlinux = self.__kernel_src / 'vmlinux'
 
         if not Path.is_file(self.__kernel_config):
             logger.critical('ERROR: no config in kenrel directory')
@@ -425,7 +427,26 @@ class Build:
     def build_kernel(self):
         self.cdkdir()
         self.msc()
-        self.run_compiler()
+
+        for idx, item in enumerate(range(4)):
+            if idx == 3:
+                # only try 3 time otherwise something else is wrong
+                logger.critical('Multiple build failures, exiting')
+                raise SystemExit(1)
+
+            self.run_compiler()
+
+            if Path.is_file(self.__kernel_vmlinux):
+                # deal with an llvm compile bug where the build will fail
+                # but just running 'make' again will finish the build
+                break
+            else:
+                logger.warning('build failure, resuming build')
+
+        if not Path.is_file(self.__kernel_vmlinux):
+            # extra guard, not really needed
+            logger.critical('missing vmlinux, exiting')
+            raise SystemExit(1)
 
         if self.__run_kernel_install:
             if self.__kernel_has_module_support:
