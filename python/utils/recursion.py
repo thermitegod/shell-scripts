@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 2.5.0
-# 2020-01-13
+# 3.0.0
+# 2021-06-09
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -17,6 +17,7 @@
 #    along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import os
+from multiprocessing.dummy import Pool as ThreadPool
 from pathlib import Path
 from typing import Callable
 
@@ -87,3 +88,27 @@ class RecursiveExecute:
                 os.chdir(f)
                 function()
                 RecursiveExecute(function=function)
+
+
+class RecursiveExecuteThreadpool:
+    def __init__(self, function: Callable):
+        """
+        :param function:
+            run this function in each sub dir,
+            function must take a Path arg and
+            should use abs paths for everything
+            without using os.chdir, otherwise you're
+            going to have a bad time
+        """
+
+        super().__init__()
+
+        # limit total number
+        threadpool = ThreadPool(os.cpu_count() // 4)
+
+        # dir_list = [d for d in Path(Path.cwd()).iterdir() if d.is_dir()]
+        dir_list = [d for d in Path.cwd().rglob("*") if d.is_dir()]
+
+        threadpool.map(function, dir_list)
+        threadpool.close()
+        threadpool.join()
