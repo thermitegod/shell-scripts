@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.2.0
-# 2021-04-29
+# 2.0.0
+# 2021-06-09
 
 # Copyright (C) 2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -17,70 +17,89 @@
 #    along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import argparse
+import os
 import shutil
 import sys
+from multiprocessing.dummy import Pool as ThreadPool
 from pathlib import Path
 
 from loguru import logger
 
 from python.utils.execute import Execute
-from python.utils.mimecheck import Mimecheck
-from python.utils.recursion import RecursiveExecute
+from python.utils.recursion import RecursiveExecuteThreadpool
 
 
 class Convert:
     def __init__(self, args: argparse = None):
+        os.nice(19)
+
+        self.__orig = 'jxl_original'
+
+        self.__error_counter = 0
+
         self.__rm_orig = False
-        self.__mimecheck = True
 
         self.__jpeg_xl_supported_ext = ('.png', '.apng', '.gif', '.jpg', '.jpeg' '.exr', '.ppm', '.pfm', '.pgx')
 
-        self.__jpeg_xl_binary = None
         self.__jpeg_xl_speed = None
 
         self.run(args=args)
 
-    def convert_main(self):
-        orig = Path.cwd() / 'orig'
-        if not Path.is_dir(orig):
-            # need this check for RecursiveExecute()
-            if str(orig.parent).endswith('orig'):
-                return
-            orig.mkdir(parents=True, exist_ok=True)
+    def convert_image(self, filename: Path):
+        path = filename.parent
+        filename_new = Path() / path / f'{filename.stem}.jxl'
 
-        c1 = 0
-        c2 = 0
+        # Execute(f'cjxl --effort=1 "{filename}" "{filename_new}"')
+        Execute(f'cjxl --effort={self.__jpeg_xl_speed} "{filename}" "{filename_new}"')
 
-        if self.__mimecheck:
-            Execute('mime-correct')
+        if Path.is_file(filename_new):
+            orig = path / self.__orig
+            if not Path.is_dir(orig):
+                orig.mkdir(parents=True, exist_ok=True)
+            Path.rename(filename, orig / filename.name)
+        else:
+            logger.error(f'Missing: {filename_new}')
+            self.__error_counter += 1
 
-        for filename in Path.cwd().iterdir():
-            if Path.is_dir(filename):
-                continue
+    def convert_main(self, path: Path = None):
+        if path.name == self.__orig:
+            # prevents recursion if run again
+            return
+        else:
+            orig = path / self.__orig
 
-            if Mimecheck.check_if_image(filename=filename):
-                filename_base = filename.stem
-                filename_ext = filename.suffix
+        filenames = [f for f in path.iterdir()
+                     if f.is_file() and
+                     f.suffix in self.__jpeg_xl_supported_ext]
 
-                if filename_ext not in self.__jpeg_xl_supported_ext:
-                    continue
-
-                Execute(f'{self.__jpeg_xl_binary} -s {self.__jpeg_xl_speed} -E 3 {filename.name} {filename_base}.jxl')
-                Path.rename(filename, Path() / orig / filename.name)
-                c1 += 1
+        threadpool = ThreadPool(os.cpu_count())
+        threadpool.map(self.convert_image, filenames)
+        threadpool.close()
+        threadpool.join()
 
         if Path.exists(orig):
-            for f in Path.cwd().iterdir():
+            c1 = 0  # original
+            c2 = 0  # converted
+            for f in Path(orig).iterdir():
+                if f.is_file():
+                    c1 += 1
+            for f in path.iterdir():
                 if f.is_file():
                     c2 += 1
 
             if c1 != c2:
-                logger.error(f'total file count does not match: {c1}, {c2} in \'{Path.cwd()}\'')
-                raise SystemExit
+                logger.error(f'total file count does not match: {c1}, {c2} in \'{path}\'')
+                self.__error_counter += 1
+                return
+            else:
+                logger.debug(f'counters match in \'{path}\'')
 
             if self.__rm_orig:
-                logger.debug(f'Removing Original: {orig}')
-                shutil.rmtree(orig)
+                if Path.is_dir(orig):
+                    logger.debug(f'removing original: {orig}')
+                    shutil.rmtree(orig)
+                else:
+                    logger.error(f'missing dir: {orig}')
 
     def run(self, args):
         if not args.disable_warning:
@@ -93,9 +112,6 @@ class Convert:
             raise SystemExit
 
         # jpeg-xl
-        if args.binary:
-            self.__jpeg_xl_binary = Path(args.binary[0])
-
         if args.speed:
             self.__jpeg_xl_speed = args.speed[0]
 
@@ -103,12 +119,16 @@ class Convert:
             self.__rm_orig = True
 
         if args.mimecheck:
-            self.__mimecheck = False
+            Execute('mime-correct')
 
         if args.convert_all:
-            RecursiveExecute(function=self.convert_main)
+            RecursiveExecuteThreadpool(function=self.convert_main)
         else:
-            self.convert_main()
+            self.convert_main(path=Path.cwd())
+
+        if self.__error_counter > 0:
+            logger.error(f'Errors encountered durring conversion')
+            logger.error(f'Error count is: {self.__error_counter}')
 
 
 def main():
@@ -128,14 +148,9 @@ def main():
     modify = parser.add_argument_group('file modification')
     modify.add_argument('-m', '--mimecheck',
                         action='store_true',
-                        help='disable mime check and correction')
+                        help='run mime check and correction')
 
     general = parser.add_argument_group('jpeg-xl')
-    general.add_argument('-b', '--binary',
-                         default=['/home/brandon/projects/jpeg-xl/build/tools/cjxl'],
-                         metavar='BINARY',
-                         nargs=1,
-                         help='location of jpeg-xl binary \'cjxl\'')
     general.add_argument('-s', '--speed',
                          default=['9'],
                          metavar='SPEED',
