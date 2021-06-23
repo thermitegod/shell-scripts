@@ -136,7 +136,7 @@ def main():
                        nargs=1,
                        metavar='CM',
                        choices=['store', 'deflate', 'bzip2'],
-                       help='set zip compression methon, [store, defalte, bzip2]')
+                       help='set zip compression method, [store, defalte, bzip2]')
     batch = parser.add_argument_group('batch creation')
     batch.add_argument('-d', '--directories',
                        action='store_true',
