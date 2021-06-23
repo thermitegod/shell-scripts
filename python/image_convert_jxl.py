@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 2.0.0
-# 2021-06-09
+# 2.1.0
+# 2021-06-23
 
 # Copyright (C) 2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -50,7 +50,15 @@ class Convert:
         filename_new = Path() / path / f'{filename.stem}.jxl'
 
         # Execute(f'cjxl --effort=1 "{filename}" "{filename_new}"')
-        Execute(f'cjxl --effort={self.__jpeg_xl_speed} "{filename}" "{filename_new}"')
+
+        Execute(f'cjxl -d 1 --strip --effort={self.__jpeg_xl_speed} "{filename}" "{filename_new}"')
+
+        # --keep_invisible=1
+
+        # Execute(f'cjxl --effort={self.__jpeg_xl_speed} "{filename}" "{filename_new}"')
+
+        # Execute(f'cjxl --strip --keep_invisible=1 --extra-properties=3 '
+        #         f'--effort={self.__jpeg_xl_speed} "{filename}" "{filename_new}"')
 
         if Path.is_file(filename_new):
             orig = path / self.__orig
@@ -65,8 +73,8 @@ class Convert:
         if path.name == self.__orig:
             # prevents recursion if run again
             return
-        else:
-            orig = path / self.__orig
+
+        orig = path / self.__orig
 
         filenames = [f for f in path.iterdir()
                      if f.is_file() and
