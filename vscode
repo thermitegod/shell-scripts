@@ -1,0 +1,6 @@
+#!/usr/bin/env python3
+from python import vscode
+try:
+    vscode.main()
+except KeyboardInterrupt:
+    raise SystemExit
