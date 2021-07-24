@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 4.7.0
-# 2021-05-06
+# 4.7.1
+# 2021-07-24
 
 # Copyright (C) 2019,2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -22,7 +22,6 @@ import sys
 from loguru import logger
 
 from python.utils.execute import Execute
-from python.utils.kernel import Kernel
 from python.utils.root_check import RootCheck
 
 
@@ -34,6 +33,8 @@ class Install:
         self.parse_args(args=args)
 
         Execute(f'emerge --ignore-default-opts --oneshot --{self.__verbose} {self.__kernel_ebuild}')
+
+        from python.utils.kernel import Kernel
 
         if not Kernel.write_running_config():
             logger.error('Unable to write running kernel .config')
