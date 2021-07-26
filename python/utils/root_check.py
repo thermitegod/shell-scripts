@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 2.0.0
-# 2021-05-06
+# 2.1.0
+# 2021-07-26
 
 # Copyright (C) 2019,2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -45,7 +45,7 @@ class RootCheck:
 
             if not os.geteuid() == 0:
                 return
-            msg = 'Do not run as root, exiting'
+            msg = 'Do not run as root, exiting\n\nTo bypass root check use: PY_IGNORE_ROOT_CHECK=1'
 
         print(f'{Colors.BRED}\n\n{msg}\n\n{Colors.NC}')
         raise SystemExit(1)
