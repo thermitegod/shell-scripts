@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 1.10.0
-# 2021-04-29
+# 1.11.0
+# 2021-07-27
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -30,9 +30,9 @@ from python.utils.recursion import RecursiveExecute
 class Count:
     def __init__(self, args: argparse = None):
         self.__file_counter = 0
-        self.__counter_total = 0
 
         self.__padding = None
+        self.__prefix = None
 
         self.__file_list = []
 
@@ -43,7 +43,7 @@ class Count:
     def count_files(self):
         for f in Path(Path.cwd()).iterdir():
             if f.is_file():
-                self.__file_list.append(str(Path(f).name))
+                self.__file_list.append(Path(f).name)
                 self.__file_counter += 1
 
         natural_sort.alphanumeric_sort(self.__file_list)
@@ -56,7 +56,6 @@ class Count:
 
     def reset_vars(self):
         self.__file_counter = 0
-        self.__counter_total = 0
         self.__padding = None
         self.__file_list = []
 
@@ -64,11 +63,14 @@ class Count:
         for idx, item in enumerate(self.__file_list, start=1):
             ext = item.rpartition('.')[-1]
             file_original = Path(item).resolve()
-            file_new = Path() / Path.cwd() / f'{idx:{self.__padding}}.{ext}'
+            if self.__prefix is None:
+                file_new = Path() / Path.cwd() / f'{idx:{self.__padding}}.{ext}'
+            else:
+                file_new = Path() / Path.cwd() / f'{self.__prefix} {idx:{self.__padding}}.{ext}'
 
             if not Path.exists(Path(file_new)):
                 if self.__pretend:
-                    logger.debug(f'[PRETEND] Renamed \'{file_original}\' -> \'{file_new}\'')
+                    logger.info(f'[PRETEND] Renamed \'{file_original}\' -> \'{file_new}\'')
                     continue
 
                 Path.rename(file_original, file_new)
@@ -94,6 +96,8 @@ class Count:
     def run(self, args):
         if args.pretend:
             self.__pretend = True
+        if args.prefix:
+            self.__prefix = args.prefix
         if args.batch:
             RecursiveExecute(function=self.main_rename)
         else:
@@ -107,7 +111,11 @@ def main():
                         help='Rename all files in all subdirectories numerically')
     parser.add_argument('-p', '--pretend',
                         action='store_true',
-                        help='Rename all files in all subdirectories numerically')
+                        help='Print what new filenames will be, RECOMMENDED before running')
+    parser.add_argument('-P', '--prefix',
+                        default=None,
+                        type=str,
+                        help='Filename prefix to use when renaming files')
     debug = parser.add_argument_group('debug')
     debug.add_argument('-L', '--loglevel',
                        default='INFO',
