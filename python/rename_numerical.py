@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # 1.11.0
-# 2021-07-27
+# 2021-07-28
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -31,6 +31,8 @@ class Count:
     def __init__(self, args: argparse = None):
         self.__file_counter = 0
 
+        self.__start_index = 1
+
         self.__padding = None
         self.__prefix = None
 
@@ -60,7 +62,7 @@ class Count:
         self.__file_list = []
 
     def rename_files(self):
-        for idx, item in enumerate(self.__file_list, start=1):
+        for idx, item in enumerate(self.__file_list, start=self.__start_index):
             ext = item.rpartition('.')[-1]
             file_original = Path(item).resolve()
             if self.__prefix is None:
@@ -98,6 +100,8 @@ class Count:
             self.__pretend = True
         if args.prefix:
             self.__prefix = args.prefix
+        if args.zero:
+            self.__start_index = 0
         if args.batch:
             RecursiveExecute(function=self.main_rename)
         else:
@@ -116,6 +120,10 @@ def main():
                         default=None,
                         type=str,
                         help='Filename prefix to use when renaming files')
+    parser.add_argument('-z', '--zero',
+                        default=None,
+                        type=str,
+                        help='Start renaming files from zero instead of one')
     debug = parser.add_argument_group('debug')
     debug.add_argument('-L', '--loglevel',
                        default='INFO',
