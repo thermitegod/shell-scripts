@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 2.0.0
-# 2021-05-06
+# 2.1.0
+# 2021-08-04
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -51,6 +51,7 @@ class Rebuild:
                   'dev-util/clion ' \
                   'dev-util/pycharm-community ' \
                   'dev-java/openjdk-bin ' \
+                  'app-editors/vscode' \
                   'sys-kernel/gentoo-sources ' \
                   'sys-kernel/git-sources ' \
                   'sys-kernel/linux-firmware ' \
