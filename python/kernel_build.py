@@ -47,6 +47,7 @@ from loguru import logger
 from packaging import version
 
 from python.utils.execute import Execute
+from python.utils.gentoo import GentooCheck
 from python.utils.kernel import Kernel
 from python.utils.root_check import RootCheck
 from python.utils.script import ExecuteScript
@@ -103,7 +104,7 @@ class Build:
 
         self.__initramfs_compression: str = 'zstd'
 
-        # gets module version for 'dracut -k' and versioned storage path for saved work
+        # gets module version for 'dracut -k'
         self.__kernel_module_dir = self.__kernel_src.name[6:]
         if 'rc' in self.__kernel_module_dir:
             # release candidate
@@ -457,6 +458,7 @@ def main():
     args = parser.parse_args()
 
     RootCheck(require_root=True)
+    GentooCheck()
 
     logger.remove()
     logger.add(sys.stdout, level=args.loglevel, colorize=True)
