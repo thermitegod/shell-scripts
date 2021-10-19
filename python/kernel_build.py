@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 2.33.0
-# 2021-06-06
+# 2.34.0
+# 2021-10-19
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -222,18 +222,19 @@ class Build:
 
     def init_compression_check(self):
         for line in Path.open(self.__kernel_config):
-            if 'CONFIG_RD_ZSTD=y' in line:
-                self.__initramfs_compression = 'zstd'
-                break
-            elif 'CONFIG_RD_LZ4=y' in line:
-                self.__initramfs_compression = 'lz4'
-                break
-            elif 'CONFIG_RD_LZO=y' in line:
-                self.__initramfs_compression = 'lzo'
-                break
-            elif 'CONFIG_RD_XZ=y' in line:
-                self.__initramfs_compression = 'xz'
-                break
+            match line.strip():
+                case 'CONFIG_RD_ZSTD=y':
+                    self.__initramfs_compression = 'zstd'
+                    break
+                case 'CONFIG_RD_LZ4=y':
+                    self.__initramfs_compression = 'lz4'
+                    break
+                case 'CONFIG_RD_LZO=y':
+                    self.__initramfs_compression = 'lzo'
+                    break
+                case 'CONFIG_RD_XZ=y':
+                    self.__initramfs_compression = 'xz'
+                    break
 
         logger.debug(f'initramfs compression: {self.__initramfs_compression}')
 
