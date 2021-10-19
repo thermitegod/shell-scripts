@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 3.1.0
-# 2021-10-19
+# 3.2.0
+# 2021-11-06
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -280,15 +280,15 @@ class Build:
         else:
             self.run_compiler(act='prepare')
 
-        portage_env = f'export PORTAGE_TMPDIR="{self.__tmpdir}"\n'
-
         zfs_build_path = Path() / self.__tmpdir / 'portage' / f'{self.__zfs_ebuild}-{self.__zfs_version_path}' / 'work'
         zfs_build_version = f'{self.__zfs_kmod_build_path}-{self.__zfs_version}'
 
-        # this is just simpler
-        text = f'{portage_env}\n' \
-               f'EXTRA_ECONF="--with-linux={self.__kernel_src} --enable-linux-builtin" ebuild ' \
-               f'{self.__zfs_ebuild_path} configure || die "build failed"\n'
+        # Have to use ExecuteScript because setting env variables
+        # using custom PORTAGE_TMPDIR for two reasons, tempdir will be removed at script exit,
+        # and avoids using PORTAGE_TMPDIR which could also be in use by emerge
+        text = f'export PORTAGE_TMPDIR="{self.__tmpdir}"\n' \
+               f'EXTRA_ECONF="--with-linux={self.__kernel_src} --enable-linux-builtin" ' \
+               f'ebuild {self.__zfs_ebuild_path} configure || die "build failed"\n'
         ExecuteScript(text)
 
         os.chdir(Path() / zfs_build_path / zfs_build_version)
