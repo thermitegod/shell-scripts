@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 3.0.0
+# 3.1.0
 # 2021-10-19
 
 # Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
@@ -81,7 +81,6 @@ class Build:
 
         self.__cc_use_clang: bool = True
         self.__experimental: bool = False
-        self.__gentoo_repo_path: Path = Path()
         self.__clean_kernel_src: bool = True
 
         self.__zfs_ebuild: Path = Path('sys-fs/zfs-kmod')
@@ -132,7 +131,6 @@ class Build:
                   f'Min kernel version : {self.__MIN_KERNEL_VERSION}\n'
                   f'Min ZFS version    : {self.__MIN_ZFS_VERSION}\n'
                   f'Make command       : {self.run_compiler(return_only=True)}\n'
-                  f'PORTDIR            : {self.__gentoo_repo_path}\n'
                   f'kernel module dir  : /lib/modules/{self.__kernel_module_dir}\n'
                   f'Tempdir            : {self.__tmpdir}\n'
                   f'Experimental opts  : {self.__experimental}')
@@ -216,10 +214,9 @@ class Build:
             logger.error(f'must be a dir, {repo_conf_dir}')
             raise SystemExit
 
+        repo_conf = 'gentoo.conf'
         if self.__use_zfs_local_ebuild:
             repo_conf = 'local.conf'
-        else:
-            repo_conf = 'gentoo.conf'
 
         repo_conf_full = Path() / repo_conf_dir / repo_conf
         if not repo_conf_full.is_file():
@@ -228,12 +225,12 @@ class Build:
 
         for line in Path.open(repo_conf_full):
             if 'location' in line:
-                self.__gentoo_repo_path = line.split()[2]
+                gentoo_repo_path = line.split()[2]
                 break
 
         if self.__use_zfs_release_version:
             wanted_ebuild = None
-            zfs_ebuild_path = Path() / self.__gentoo_repo_path / self.__zfs_ebuild
+            zfs_ebuild_path = Path() / gentoo_repo_path / self.__zfs_ebuild
             for ebuild in Path(zfs_ebuild_path).iterdir():
                 ebuild = str(ebuild)
                 if ebuild.endswith('.ebuild') and not ebuild.endswith('9999.ebuild'):
@@ -250,7 +247,7 @@ class Build:
             # build path
             self.__zfs_kmod_build_path = 'zfs-kmod'
 
-        self.__zfs_ebuild_path = Path() / self.__gentoo_repo_path / self.__zfs_ebuild / f'zfs-kmod-{self.__zfs_version}.ebuild'
+        self.__zfs_ebuild_path = Path() / gentoo_repo_path / self.__zfs_ebuild / f'zfs-kmod-{self.__zfs_version}.ebuild'
         if not Path.is_file(self.__zfs_ebuild_path):
             logger.critical(f'missing ebuild \'{self.__zfs_ebuild_path}\'')
             raise SystemExit(1)
