@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# 2.1.0
-# 2021-07-26
+# 2.2.0
+# 2021-10-19
 
 # Copyright (C) 2019,2020,2021 Brandon Zorn <brandonzorn@cock.li>
 #
@@ -17,6 +17,8 @@
 #    along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import os
+
+from loguru import logger
 
 from python.utils.colors import Colors
 
@@ -39,6 +41,7 @@ class RootCheck:
         else:
             try:
                 if os.environ['PY_IGNORE_ROOT_CHECK']:
+                    logger.warning(f'PY_IGNORE_ROOT_CHECK has been set, ignoring root check')
                     return
             except KeyError:
                 pass
