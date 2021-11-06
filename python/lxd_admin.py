@@ -184,8 +184,8 @@ class Container:
                 to_stdout=True)
 
     def stop(self):
-        if not Lxd.get_state(container=self.__container_fullname):
-            return
+        #if not Lxd.get_state(container=self.__container_fullname):
+        #    return
 
         logger.info(f'Stopping container: {self.__container_fullname}')
         Execute(f'lxc stop {self.__container_fullname}', to_stdout=True, blocking=False)
