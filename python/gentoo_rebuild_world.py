@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-# 2.1.1
-# 2021-10-01
+# 2.2.0
+# 2022-01-18
 
-# Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
+# Copyright (C) 2020,2021,2022 Brandon Zorn <brandonzorn@cock.li>
 #
 # This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License version 3
@@ -57,6 +57,7 @@ class Rebuild:
                   'sys-kernel/linux-firmware ' \
                   'media-fonts/noto ' \
                   'media-fonts/noto-cjk ' \
+                  'media-fonts/noto-emoji ' \
                   'media-fonts/liberation-fonts'
         virtual = 'virtual/*'
         user_group = 'acct-group/* acct-user/*'
