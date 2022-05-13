@@ -18,3 +18,6 @@ bin/
 # configs
 python/private/*.py
 
+# cxx
+cxx/build
+
