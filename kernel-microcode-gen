@@ -1,6 +1,0 @@
-#!/usr/bin/env python3
-from python import kernel_microcode_gen
-try:
-    kernel_microcode_gen.main()
-except KeyboardInterrupt:
-    raise SystemExit

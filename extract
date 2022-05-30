@@ -1,6 +1,0 @@
-#!/usr/bin/env python3
-from python import extract
-try:
-    extract.main()
-except KeyboardInterrupt:
-    raise SystemExit

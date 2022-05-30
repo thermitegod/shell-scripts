@@ -1,20 +1,26 @@
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python3
+
+# Copyright (C) 2018-2022 Brandon Zorn <brandonzorn@cock.li>
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+# SCRIPT INFO
+
+# SCRIPT INFO
 # 2.9.0
 # 2021-04-29
 
-# Copyright (C) 2020,2021 Brandon Zorn <brandonzorn@cock.li>
-#
-# This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License version 3
-#    as published by the Free Software Foundation.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-#    GNU General Public License for more details.
-#
-#    You should have received a copy of the GNU General Public License
-#    along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import argparse
 import sys
@@ -22,11 +28,11 @@ from pathlib import Path
 
 from loguru import logger
 
-from python.utils.execute import Execute
-from python.utils.lxd import Lxd
+from utils.execute import Execute
+from utils.lxd import Lxd
 
 try:
-    from python.private.config_lxd import LxdConfig
+    from private.config_lxd import LxdConfig
 except ImportError:
     print('Missing config file, see python/template/config_lxd.py')
     raise SystemExit(1)
@@ -470,3 +476,10 @@ def main():
     logger.add(sys.stdout, level=args.loglevel, colorize=True)
 
     Container(args=args)
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except KeyboardInterrupt:
+        raise SystemExit(1)

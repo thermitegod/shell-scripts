@@ -1,6 +1,0 @@
-#!/usr/bin/env python3
-from python import tmux_sessions
-try:
-    tmux_sessions.main()
-except KeyboardInterrupt:
-    raise SystemExit

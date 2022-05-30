@@ -1,6 +1,0 @@
-#!/usr/bin/env python3
-from python import tmp_trash_cleanup
-try:
-    tmp_trash_cleanup.main()
-except KeyboardInterrupt:
-    raise SystemExit

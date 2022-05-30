@@ -1,6 +1,0 @@
-#!/usr/bin/env python3
-from python import rename_numerical
-try:
-    rename_numerical.main()
-except KeyboardInterrupt:
-    raise SystemExit

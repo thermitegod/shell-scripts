@@ -1,6 +1,0 @@
-#!/usr/bin/env python3
-from python import count_filesize
-try:
-    count_filesize.main()
-except KeyboardInterrupt:
-    raise SystemExit

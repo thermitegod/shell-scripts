@@ -1,6 +1,0 @@
-#!/usr/bin/env python3
-from python import tools_symlink_chrome
-try:
-    tools_symlink_chrome.main()
-except KeyboardInterrupt:
-    raise SystemExit

@@ -1,6 +1,0 @@
-#!/usr/bin/env python3
-from python import grub2_install_efi_fucked
-try:
-    grub2_install_efi_fucked.main()
-except KeyboardInterrupt:
-    raise SystemExit

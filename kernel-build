@@ -1,6 +1,0 @@
-#!/usr/bin/env python3
-from python import kernel_build
-try:
-    kernel_build.main()
-except KeyboardInterrupt:
-    raise SystemExit

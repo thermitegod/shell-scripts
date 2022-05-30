@@ -1,6 +1,0 @@
-#!/usr/bin/env python3
-from python import opus_from_any
-try:
-    opus_from_any.main()
-except KeyboardInterrupt:
-    raise SystemExit

@@ -1,6 +1,0 @@
-#!/usr/bin/env python3
-from python import gentoo_rebuild_world
-try:
-    gentoo_rebuild_world.main()
-except KeyboardInterrupt:
-    raise SystemExit

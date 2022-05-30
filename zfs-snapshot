@@ -1,6 +1,0 @@
-#!/usr/bin/env python3
-from python import zfs_snapshot
-try:
-    zfs_snapshot.main()
-except KeyboardInterrupt:
-    raise SystemExit

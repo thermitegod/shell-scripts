@@ -1,6 +1,0 @@
-#!/usr/bin/env python3
-from python import set_disk_scheduler
-try:
-    set_disk_scheduler.main()
-except KeyboardInterrupt:
-    raise SystemExit

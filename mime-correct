@@ -1,6 +1,0 @@
-#!/usr/bin/env python3
-from python import mime_correct
-try:
-    mime_correct.main()
-except KeyboardInterrupt:
-    raise SystemExit

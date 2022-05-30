@@ -1,20 +1,24 @@
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python3
+
+# Copyright (C) 2018-2022 Brandon Zorn <brandonzorn@cock.li>
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+# SCRIPT INFO
 # 8.5.0
 # 2021-04-29
 
-# Copyright (C) 2018,2019,2020,2021 Brandon Zorn <brandonzorn@cock.li>
-#
-# This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License version 3
-#    as published by the Free Software Foundation.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-#    GNU General Public License for more details.
-#
-#    You should have received a copy of the GNU General Public License
-#    along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import argparse
 import os
@@ -23,9 +27,9 @@ from pathlib import Path
 
 from loguru import logger
 
-from python.utils.check_env import CheckEnv
-from python.utils.execute import Execute
-from python.utils.root_check import RootCheck
+from utils.check_env import CheckEnv
+from utils.execute import Execute
+from utils.root_check import RootCheck
 
 
 class Chrome:
@@ -100,3 +104,10 @@ def main():
     RootCheck(require_root=False)
 
     Chrome(args=args)
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except KeyboardInterrupt:
+        raise SystemExit(1)

@@ -1,6 +1,0 @@
-#!/usr/bin/env python3
-from python import mpv_link
-try:
-    mpv_link.main()
-except KeyboardInterrupt:
-    raise SystemExit
