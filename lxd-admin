@@ -1,6 +1,0 @@
-#!/usr/bin/env python3
-from python import lxd_admin
-try:
-    lxd_admin.main()
-except KeyboardInterrupt:
-    raise SystemExit

@@ -1,6 +1,0 @@
-#!/usr/bin/env python3
-from python import lxd_image
-try:
-    lxd_image.main()
-except KeyboardInterrupt:
-    raise SystemExit
