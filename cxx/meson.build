@@ -269,3 +269,28 @@ endforeach
 # Used for all src files
 target_type = 'executable'
 
+# chromium-default
+
+sources = [
+  'src/chromium-default.cxx',
+
+  'src/lib/env.cxx',
+  'src/lib/commandline.cxx',
+  'src/lib/user-dirs.cxx',
+]
+
+target_name = 'chromium-default'
+
+build_target(
+  target_name,
+  sources,
+  target_type: target_type,
+  include_directories: incdir,
+  install : true,
+  install_dir : bindir,
+  dependencies: [
+    glibmm_dep,
+    spdlog_dep,
+    ztd_dep,
+  ],
+)
