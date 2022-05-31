@@ -1,0 +1,180 @@
+/**
+ * Copyright (C) 2024 Brandon Zorn <brandonzorn@cock.li>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ */
+
+#include <string>
+#include <string_view>
+
+#include <format>
+
+#include <filesystem>
+
+#include <vector>
+
+#include <memory>
+
+#include <utility>
+
+#include <source_location>
+
+#include <CLI/CLI.hpp>
+
+#include <ztd/ztd.hxx>
+#include <ztd/ztd_logger.hxx>
+
+#include "lib/commandline.hxx"
+#include "lib/hash.hxx"
+#include "lib/user-dirs.hxx"
+
+#define PACKAGE_DATE "2024-01-04"
+#define PACKAGE_VERSION "1.0.0"
+
+int
+main(int argc, char** argv)
+{
+    CLI::App app{"TEST"};
+
+    std::filesystem::path run_path = user::download_dir();
+    app.add_option("-p,--path",
+                   run_path,
+                   std::format("Path to run in, default [{}]", run_path.string()));
+
+    bool disable_delete = false;
+    app.add_option("-D,--no-delete", disable_delete, "Do not delete duplicate files");
+
+    auto opt = std::make_shared<commandline_opt_data>();
+    opt->version_data = {std::source_location::current().file_name(),
+                         PACKAGE_DATE,
+                         PACKAGE_VERSION};
+    setup_common_commandline(app, opt, false);
+
+    CLI11_PARSE(app, argc, argv);
+
+    // logic
+
+    // files in dir
+    std::vector<std::filesystem::path> file_list;
+    // files in dir that have chrome dup name marker
+    std::vector<std::pair<std::filesystem::path, std::filesystem::path>> file_dup_name_only_list;
+    // files in dir that have chrome dup name marker but
+    // no file without a marker exists
+    std::vector<std::filesystem::path> file_not_dup_list;
+
+    const std::vector<std::string> chrome_dup_markers =
+        {" (1)", " (2)", " (3)", " (4)", " (5)", " (6)", " (7)", " (8)", " (9)"};
+
+    if (!std::filesystem::is_directory(run_path))
+    {
+        if (!std::filesystem::exists(run_path))
+        {
+            ztd::logger::error("No such directory [{}]", run_path.string());
+        }
+        else
+        {
+            ztd::logger::error("Path must be a directory [{}]", run_path.string());
+        }
+        std::exit(EXIT_FAILURE);
+    }
+
+    for (const auto& entry : std::filesystem::directory_iterator(run_path))
+    {
+        if (entry.is_directory())
+        {
+            continue;
+        }
+
+        const std::filesystem::path file = entry.path();
+        // ztd::logger::info("path : {}", file.string());
+        file_list.push_back(file);
+    }
+
+    for (const auto& file : file_list)
+    {
+        bool contains = false;
+        for (std::string_view chrome_dup_marker : chrome_dup_markers)
+        {
+            if (file.string().contains(chrome_dup_marker))
+            {
+                contains = true;
+                break;
+            }
+        }
+        if (!contains)
+        {
+            continue;
+        }
+
+        std::filesystem::path file_orig = file;
+        for (const std::string_view chrome_dup_marker : chrome_dup_markers)
+        {
+            file_orig = ztd::replace(file_orig.string(), chrome_dup_marker, "");
+        }
+
+        if (std::filesystem::exists(file_orig))
+        {
+            bool hash_same = hash::compare_files(file_orig, file);
+
+            if (hash_same)
+            {
+                if (!disable_delete)
+                {
+                    // ztd::logger::info("Files same [{}] [{}]", file_orig.string(), file.string());
+
+                    ztd::logger::info("delete: {}", file.string());
+                    std::filesystem::remove(file);
+                    if (std::filesystem::exists(file))
+                    {
+                        ztd::logger::error("Failed to delete: {}", file.string());
+                        std::exit(EXIT_FAILURE);
+                    }
+                }
+                else
+                {
+                    ztd::logger::info("[PRETEND] delete: {}", file.string());
+                }
+            }
+            else
+            {
+                file_dup_name_only_list.push_back({file_orig, file});
+            }
+        }
+        else
+        {
+            file_not_dup_list.push_back(file);
+        }
+    }
+
+    if (file_dup_name_only_list.size())
+    {
+        ztd::logger::info("== Name Collisions, Different Files ==");
+        for (const auto& files : file_dup_name_only_list)
+        {
+            // ztd::logger::info("[{}] | [{}]", files.first.string(), files.second.string());
+            ztd::logger::info("{}", files.second.string());
+        }
+    }
+
+    if (file_not_dup_list.size())
+    {
+        ztd::logger::info("== Name Contains Unneeded Duplicate Marker ==");
+        for (const auto& file : file_not_dup_list)
+        {
+            ztd::logger::info(file.string());
+        }
+    }
+
+    std::exit(EXIT_SUCCESS);
+}

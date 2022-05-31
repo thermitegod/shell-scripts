@@ -294,3 +294,29 @@ build_target(
     ztd_dep,
   ],
 )
+
+# clean-downloads
+
+sources = [
+  'src/clean-downloads.cxx',
+
+  'src/lib/commandline.cxx',
+  'src/lib/hash.cxx',
+  'src/lib/user-dirs.cxx',
+]
+
+target_name = 'clean-downloads'
+
+build_target(
+  target_name,
+  sources,
+  target_type: target_type,
+  include_directories: incdir,
+  install : true,
+  install_dir : bindir,
+  dependencies: [
+    glibmm_dep,
+    spdlog_dep,
+    ztd_dep,
+  ],
+)
