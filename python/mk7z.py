@@ -16,8 +16,8 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # SCRIPT INFO
-# 2.11.0
-# 2021-04-29
+# 2.12.0
+# 2022-10-16
 
 
 # changes should be disseminated to the following scripts when applicable
@@ -81,9 +81,26 @@ class Compress:
         return re.escape(string).replace("'", r"\'")
 
     def test_archive(self, filename):
+        # Terminal size info
+        term_rows, term_columns = os.popen('stty size', 'r').read().split()
+        term_rows = int(term_rows)
+        term_columns= int(term_columns)
+
+        term_disp_name = filename
+        term_disp_name_len = len(filename)
+
+        # term_padding_offset = int(term_columns) - term_disp_name_len - 8
+        # term_padding = ' ' * term_padding_offset
+
+        if term_disp_name_len + 10 >= int(term_columns):
+            term_disp_name = filename[:term_columns - 10]
+
+        # File Testing
+
         filename = Path(filename)
         if Path.is_file(filename) and filename.suffix in ('.7z', '.zip'):
-            print(f'\r{Colors.YEL}TEST{Colors.NC}\t{filename}', end='')
+            print(f'{Colors.YEL}TEST{Colors.NC}\t{term_disp_name}', end='\r')
+            # print(f'{term_disp_name}{term_padding}{Colors.YEL}[TEST]{Colors.NC}', end='\r')
 
             # have to use shell_escape because syntax gets fucked up with when using sh_wrap=True.
             # double quotes dont work around filename becuse sh_wrap will provide its own double
@@ -93,10 +110,12 @@ class Compress:
                              sh_wrap=True, to_stdout=True).get_out()
 
             if 'Everything is Ok' in status:
-                print(f'\r{Colors.GRE}PASSED{Colors.NC}\t{filename}')
+                print(f'{Colors.GRE}PASSED{Colors.NC}\t{term_disp_name}')
+                # print(f'{term_disp_name}{term_padding}{Colors.GRE}[PASSED]{Colors.NC}')
                 self.__test_passed += 1
             else:
-                print(f'\r{Colors.RED}FAILED{Colors.NC}\t{filename}')
+                print(f'{Colors.RED}FAILED{Colors.NC}\t{term_disp_name}')
+                # print(f'{term_disp_name}{term_padding}{Colors.RED}[FAILED]{Colors.NC}')
                 self.__test_failed += 1
 
                 if self.__test_move_failed_file:
