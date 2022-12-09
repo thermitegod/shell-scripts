@@ -16,8 +16,8 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # SCRIPT INFO
-# 2.7.0
-# 2021-04-29
+# 2.8.0
+# 2022-11-26
 
 
 import argparse
@@ -40,16 +40,7 @@ class Initramfs:
         self.gen_initramfs()
 
     def gen_initramfs(self):
-        cmd = '/usr/bin/dracut ' \
-              '--hostonly ' \
-              '--force ' \
-              '--nofscks ' \
-              f'--compress {self.__compression} ' \
-              '-o "systemd systemd-initrd systemd-networkd" ' \
-              '-o "lvmmerge btrfs dm dmraid dmsquash-live-ntfs lvm mdraid stratis cifs iscsi nfs" ' \
-              '-o "modsign rngd network-legacy biosdevname masterkey bootchart" ' \
-              '-o "crypt crypt-gpg" ' \
-              '-o "i18n" '
+        cmd = f'dracut --hostonly --force --compress {self.__compression} '
 
         if self.__kernel_version:
             if 'rc' not in self.__kernel_version:
@@ -83,7 +74,7 @@ def main():
                         metavar='COMPRESSION',
                         choices=['zstd', 'lz4', 'lzo', 'xz'],
                         nargs=1,
-                        help='compression algo used to compress initramfs [lz4]')
+                        help='compression algo used to compress initramfs [zstd]')
     group1.add_argument('-f', '--no-firmware',
                         action='store_true',
                         help='do not include firmware in initramfs')
