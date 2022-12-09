@@ -16,8 +16,8 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # SCRIPT INFO
-# 2.2.0
-# 2022-01-18
+# 2.3.0
+# 2022-12-01
 
 
 import argparse
@@ -50,11 +50,10 @@ class Rebuild:
             self.rebuild_gcc()
 
     def rebuild_clang(self):
-        bin_pkg = 'www-client/google-chrome-unstable ' \
+        bin_pkg = 'www-client/google-chrome ' \
+                  'www-client/google-chrome-beta ' \
+                  'www-client/google-chrome-unstable ' \
                   'dev-lang/rust-bin ' \
-                  'dev-util/clion ' \
-                  'dev-util/pycharm-community ' \
-                  'dev-java/openjdk-bin ' \
                   'app-editors/vscode ' \
                   'sys-kernel/gentoo-sources ' \
                   'sys-kernel/git-sources ' \
