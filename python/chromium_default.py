@@ -16,8 +16,8 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # SCRIPT INFO
-# 8.5.0
-# 2021-04-29
+# 8.6.0
+# 2022-12-06
 
 
 import argparse
@@ -65,7 +65,7 @@ class Chrome:
         elif args.chrome == 'beta':
             self.__chrome = 'google-chrome-beta'
         else:
-            self.__chrome = 'google-chrome'
+            self.__chrome = 'google-chrome-stable'
 
         if args.custom:
             self.__chrome_profile = f'{self.__chrome}-{args.extra}'
@@ -85,9 +85,9 @@ def main():
                           help='custom profile, supplied str is used as the profile name')
     browser = parser.add_argument_group('browser', 'which browser version to use')
     browser.add_argument('-c', '--chrome',
-                         default='unstable',
+                         default='stable',
                          metavar='VERSION',
-                         choices=['chromium', 'unstable', 'beta', 'release'],
+                         choices=['chromium', 'unstable', 'beta', 'stable'],
                          help='set specific chrome version to use, [%(choices)s]')
     debug = parser.add_argument_group('debug')
     debug.add_argument('-L', '--loglevel',
