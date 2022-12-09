@@ -16,8 +16,8 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # SCRIPT INFO
-# 2.0.0
-# 2022-05-29
+# 2.1.0
+# 2022-12-08
 
 
 import argparse
@@ -30,7 +30,6 @@ from loguru import logger
 from python.utils import repo
 
 from python.utils.execute import Execute
-from python.utils.root_check import RootCheck
 
 class Symlink:
     def __init__(self, args: argparse = None):
@@ -74,7 +73,9 @@ def main():
     logger.remove()
     logger.add(sys.stdout, level=args.loglevel, colorize=True)
 
-    RootCheck(require_root=True)
+    if os.geteuid() != 0:
+        logger.error('Requires root, exiting')
+        raise SystemExit(1)
 
     Symlink(args=args)
 
