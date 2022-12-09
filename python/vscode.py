@@ -16,8 +16,8 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # SCRIPT INFO
-# 1.0.0
-# 2021-07-16
+# 1.1.0
+# 2022-12-06
 
 
 import argparse
@@ -93,7 +93,14 @@ class Vscode:
         # ~/.vscode/argv.json location cannot be set and the retards at M$
         # dont care, have to use fake $HOME to change where this gets created
 
-        Execute(f'HOME="{fake_home}" /opt/vscode/bin/code --user-data-dir {config} --extensions-dir {extensions}', sh_wrap=True)
+        wayland_flags = ''
+        try:
+            if os.environ['WAYLAND_DISPLAY']:
+                wayland_flags = '--enable-features=WaylandWindowDecorations --ozone-platform-hint=auto'
+        except KeyError:
+            pass
+
+        Execute(f'HOME="{fake_home}" /opt/vscode/bin/code {wayland_flags} --user-data-dir {config} --extensions-dir {extensions}', sh_wrap=True)
 
         # vscode forks, dont remove cache dirs
 
