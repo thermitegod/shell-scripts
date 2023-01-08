@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright (C) 2018-2022 Brandon Zorn <brandonzorn@cock.li>
+# Copyright (C) 2018-2023 Brandon Zorn <brandonzorn@cock.li>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # SCRIPT INFO
-# 2.3.0
-# 2022-12-01
+# 2.4.0
+# 2023-01-06
 
 
 import argparse
@@ -64,13 +64,15 @@ class Rebuild:
                   'media-fonts/liberation-fonts'
         virtual = 'virtual/*'
         user_group = 'acct-group/* acct-user/*'
+        sec_keys = 'sec-keys/*'
         gcc = "sys-devel/gcc"
         Execute('emerge --jobs --oneshot --emptytree @world '
                 f'--exclude \'{self.__gcc_req_ebuilds}\' '
                 f'--exclude \'{virtual}\' '
                 f'--exclude \'{user_group}\' '
+                f'--exclude \'{sec_keys}\' '
                 f'--exclude \'{gcc}\' '
-                f'--exclude \'{bin_pkg}\'')
+                f'--exclude \'{bin_pkg}\' ')
 
     def rebuild_gcc(self):
         Execute(f'emerge --jobs --oneshot {self.__gcc_req_ebuilds}')
