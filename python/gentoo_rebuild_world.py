@@ -16,9 +16,8 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # SCRIPT INFO
-# 2.4.0
-# 2023-01-06
-
+# 2.5.0
+# 2023-03-31
 
 import argparse
 import sys
@@ -53,7 +52,9 @@ class Rebuild:
         bin_pkg = 'www-client/google-chrome ' \
                   'www-client/google-chrome-beta ' \
                   'www-client/google-chrome-unstable ' \
+                  'www-client/firefox-bin ' \
                   'dev-lang/rust-bin ' \
+                  'dev-lang/zig-bin ' \
                   'app-editors/vscode ' \
                   'sys-kernel/gentoo-sources ' \
                   'sys-kernel/git-sources ' \
@@ -65,12 +66,16 @@ class Rebuild:
         virtual = 'virtual/*'
         user_group = 'acct-group/* acct-user/*'
         sec_keys = 'sec-keys/*'
+        app_alt = 'app-alternatives/*'
+        app_eselect = 'app-eselect/*'
         gcc = "sys-devel/gcc"
         Execute('emerge --jobs --oneshot --emptytree @world '
                 f'--exclude \'{self.__gcc_req_ebuilds}\' '
                 f'--exclude \'{virtual}\' '
                 f'--exclude \'{user_group}\' '
                 f'--exclude \'{sec_keys}\' '
+                f'--exclude \'{app_alt}\' '
+                f'--exclude \'{app_eselect}\' '
                 f'--exclude \'{gcc}\' '
                 f'--exclude \'{bin_pkg}\' ')
 
