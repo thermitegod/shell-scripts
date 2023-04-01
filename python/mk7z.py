@@ -16,8 +16,8 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # SCRIPT INFO
-# 2.12.0
-# 2022-10-16
+# 2.13.0
+# 2023-03-31
 
 
 # changes should be disseminated to the following scripts when applicable
@@ -43,7 +43,7 @@ from utils.colors import Colors
 from utils.execute import Execute
 from utils.get_files import GetFiles
 from utils.output_dir import OutputDir
-from utils.script import ExecuteScript
+from utils.script import ExecuteBashScript
 
 
 class Compress:
@@ -156,7 +156,7 @@ class Compress:
                f'-o="{self.__output_dir}" "{Path(filename).name}.7z" "{Path(filename).name}" || ' \
                f'die "Compression failed for \'{Path.resolve(filename)}\'"'
 
-        ExecuteScript(text)
+        ExecuteBashScript(text)
 
         if Path.exists(test_file):
             if self.__destructive:

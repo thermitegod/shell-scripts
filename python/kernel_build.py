@@ -16,8 +16,8 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # SCRIPT INFO
-# 3.2.0
-# 2021-11-06
+# 3.3.0
+# 2023-03-31
 
 
 # ZFS Builtin Kernel Build Script - gentoo
@@ -54,7 +54,7 @@ from utils.execute import Execute
 from utils.gentoo import GentooCheck
 from utils.kernel import Kernel
 from utils.root_check import RootCheck
-from utils.script import ExecuteScript
+from utils.script import ExecuteFishScript
 
 
 # TODO
@@ -290,13 +290,13 @@ class Build:
         zfs_build_path = Path() / self.__tmpdir / 'portage' / f'{self.__zfs_ebuild}-{self.__zfs_version_path}' / 'work'
         zfs_build_version = f'{self.__zfs_kmod_build_path}-{self.__zfs_version}'
 
-        # Have to use ExecuteScript because setting env variables
+        # Have to use ExecuteFishScript() because setting env variables
         # using custom PORTAGE_TMPDIR for two reasons, tempdir will be removed at script exit,
-        # and avoids using PORTAGE_TMPDIR which could also be in use by emerge
-        text = f'export PORTAGE_TMPDIR="{self.__tmpdir}"\n' \
+        # and avoids using the real PORTAGE_TMPDIR which could also be in use by emerge
+        text = f'set -x PORTAGE_TMPDIR {self.__tmpdir}\n' \
                f'EXTRA_ECONF="--with-linux={self.__kernel_src} --enable-linux-builtin" ' \
-               f'ebuild {self.__zfs_ebuild_path} configure || die "build failed"\n'
-        ExecuteScript(text)
+               f'ebuild {self.__zfs_ebuild_path} configure || die "ebuild configure failed"\n'
+        ExecuteFishScript(text)
 
         os.chdir(Path() / zfs_build_path / zfs_build_version)
         Execute(f'./copy-builtin {self.__kernel_src}')

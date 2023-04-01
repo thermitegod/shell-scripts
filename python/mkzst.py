@@ -16,8 +16,8 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # SCRIPT INFO
-# 3.10.0
-# 2021-04-29
+# 3.11.0
+# 2023-03-31
 
 
 # changes should be disseminated to the following scripts when applicable
@@ -40,7 +40,7 @@ from utils.archive_utils import RemoveJunk
 from utils.check_env import CheckEnv
 from utils.get_files import GetFiles
 from utils.output_dir import OutputDir
-from utils.script import ExecuteScript
+from utils.script import ExecuteBashScript
 
 
 class Compress:
@@ -113,7 +113,7 @@ class Compress:
         else:
             text = f'{self.__cmd} --output-dir-flat="{self.__output_dir}" -- "{filename}" || {die}'
 
-        ExecuteScript(text)
+        ExecuteBashScript(text)
 
         if Path.exists(test_file):
             if self.__destructive:

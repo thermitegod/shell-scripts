@@ -1,4 +1,4 @@
-# Copyright (C) 2018-2022 Brandon Zorn <brandonzorn@cock.li>
+# Copyright (C) 2018-2023 Brandon Zorn <brandonzorn@cock.li>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,8 +14,8 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # SCRIPT INFO
-# 2.1.0
-# 2020-12-13
+# 3.0.0
+# 2023-03-31
 
 
 import atexit
@@ -27,16 +27,16 @@ from pathlib import Path
 from utils.execute import Execute
 
 
-class ExecuteScript:
+class ExecuteBashScript:
     def __init__(self, cmd: str):
         """
         Writes the contents of cmd to a a file and executes it.
         reasons to use this over Execute(); setting env variables,
-        complex shell logic, error handeling in the shell code,
+        complex shell logic, error handling in the shell code,
         using >| or >>|, etc ...
 
         includes 'die' function to kill the invoking script,
-        example 'ls /doesnotexist || die "retard"'
+        example 'ls /path/does/not/exist || die "error message"'
 
         :param cmd:
             shell code to be written and executed
@@ -47,9 +47,50 @@ class ExecuteScript:
         atexit.register(self._remove_tmpdir)
         self.__tmpdir: Path = Path(tempfile.mkdtemp())
 
-        script_file: Path = Path() / self.__tmpdir / 'tmp.sh'
-        script: str = '#!/usr/bin/env sh\n' \
-                      f'die(){{ /bin/echo -e $*;kill {os.getpid()};exit; }}\n' \
+        script_file: Path = Path() / self.__tmpdir / 'exec.bash'
+        script: str = f'#!/usr/bin/env bash\n\n' \
+                      f'die() {{\n' \
+                      f'    echo -e $*\n' \
+                      f'    kill {os.getpid()}\n' \
+                      f'    exit\n' \
+                      f'}}\n\n' \
+                      f'{cmd}\n'
+
+        script_file.write_text(script)
+        Path.chmod(script_file, 0o700)
+
+        Execute(str(script_file))
+
+    def _remove_tmpdir(self):
+        shutil.rmtree(self.__tmpdir)
+
+class ExecuteFishScript:
+    def __init__(self, cmd: str):
+        """
+        Writes the contents of cmd to a a file and executes it.
+        reasons to use this over Execute(); setting env variables,
+        complex shell logic, error handling in the shell code,
+        using >| or >>|, etc ...
+
+        includes 'die' function to kill the invoking script,
+        example 'ls /path/does/not/exist || die "error message"'
+
+        :param cmd:
+            shell code to be written and executed
+        """
+
+        super().__init__()
+
+        atexit.register(self._remove_tmpdir)
+        self.__tmpdir: Path = Path(tempfile.mkdtemp())
+
+        script_file: Path = Path() / self.__tmpdir / 'exec.fish'
+        script: str = f'#!/usr/bin/env fish\n\n' \
+                      f'function die\n' \
+                      f'    command echo -e $argv\n' \
+                      f'    kill {os.getpid()}\n' \
+                      f'    exit\n' \
+                      f'end\n\n' \
                       f'{cmd}\n'
 
         script_file.write_text(script)
