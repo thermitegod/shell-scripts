@@ -16,7 +16,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # SCRIPT INFO
-# 3.3.0
+# 3.4.0
 # 2023-03-31
 
 
@@ -126,8 +126,9 @@ class Build:
         self.build()
 
     def intro(self):
-        print(f'kernel             : {self.__kernel_src}\n'
-              f'Using LLVM/Clang   : {self.__cc_use_clang}\n'
+        compiler = "Clang" if self.__cc_use_clang else "GCC"
+        print(f'Kernel Source      : {self.__kernel_src}\n'
+              f'Compiler           : {compiler}\n'
               f'Install            : {self.__run_kernel_install}\n'
               f'ZFS version        : {self.__zfs_version}\n'
               f'ZFS local ebuild   : {self.__use_zfs_local_ebuild}\n'
@@ -387,8 +388,12 @@ class Build:
         if args.use_local_ebuild:
             self.__use_zfs_local_ebuild = True
         # Kernel
-        if args.compiler:
+        if args.compiler == 'clang':
+            self.__cc_use_clang = True
+        elif args.compiler == 'gcc':
             self.__cc_use_clang = False
+        else:
+            raise SystemExit(f'Unknown compiler {args.compiler}')
         if args.no_clean:
             self.__clean_kernel_src = False
         if args.emerge:
@@ -428,9 +433,11 @@ def main():
                      action='store_true',
                      help='use local repo in $PORTDIR_OVERLAY')
     ker = parser.add_argument_group('kernel')
-    ker.add_argument('-G', '--compiler',
-                     action='store_true',
-                     help='build kernel using gcc')
+    ker.add_argument('-c', '--compiler',
+                     default='clang',
+                     metavar='COMPILER',
+                     choices=['clang', 'gcc'],
+                     help='set which compiler to build the kernel with, [%(choices)s], default [clang]')
     ker.add_argument('-C', '--no-clean',
                      action='store_true',
                      help='disable cleaning kernel source dir')
