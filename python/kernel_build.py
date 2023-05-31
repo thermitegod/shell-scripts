@@ -16,8 +16,8 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # SCRIPT INFO
-# 3.4.0
-# 2023-03-31
+# 3.4.1
+# 2023-05-30
 
 
 # ZFS Builtin Kernel Build Script - gentoo
@@ -276,6 +276,24 @@ class Build:
         self.cdkdir()
         self.msc()
 
+        # Cheap workaround for the following portage kernel module check changes,
+        # abridged error below. This is a false positive because ZFS will be built
+        # into the kernel.
+        #
+        # '/usr/src/linux/Module.symvers' was not found implying that the
+        # linux-6.3.5-gentoo tree at that location has not been built.
+        #
+        # Call stack:
+        #              ebuild.sh, line 136:  Called pkg_setup
+        #   zfs-kmod-9999.ebuild, line  92:  Called linux-mod-r1_pkg_setup
+        #    linux-mod-r1.eclass, line 311:  Called _modules_prepare_kernel
+        #    linux-mod-r1.eclass, line 631:  Called _modules_sanity_kernelbuilt
+        #    linux-mod-r1.eclass, line 1029:  Called die
+        # The specific snippet of code:
+        #   		die "built kernel sources are required to build kernel modules"
+        portage_check_module_symvers = Path() / self.__kernel_src / 'Module.symvers'
+        Execute(f'touch {portage_check_module_symvers}')
+
         if not self.__experimental:
             # get error when running zfs configure
             # 	*** Unable to build an empty module.
@@ -301,6 +319,9 @@ class Build:
 
         os.chdir(Path() / zfs_build_path / zfs_build_version)
         Execute(f'./copy-builtin {self.__kernel_src}')
+
+        # remove empty file Module.symvers
+        Execute(f'rm {portage_check_module_symvers}')
 
         if not self.__experimental:
             # Since GCC is used to to configure, any clang specific
