@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright (C) 2018-2022 Brandon Zorn <brandonzorn@cock.li>
+# Copyright (C) 2018-2023 Brandon Zorn <brandonzorn@cock.li>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # SCRIPT INFO
-# 2.8.0
-# 2022-11-26
+# 2.9.0
+# 2023-06-10
 
 
 import argparse
@@ -40,7 +40,7 @@ class Initramfs:
         self.gen_initramfs()
 
     def gen_initramfs(self):
-        cmd = f'dracut --hostonly --force --compress {self.__compression} '
+        cmd = f'dracut --force --hostonly --early-microcode --compress {self.__compression} '
 
         if self.__kernel_version:
             if 'rc' not in self.__kernel_version:

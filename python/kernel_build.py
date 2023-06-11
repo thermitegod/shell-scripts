@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright (C) 2018-2022 Brandon Zorn <brandonzorn@cock.li>
+# Copyright (C) 2018-2023 Brandon Zorn <brandonzorn@cock.li>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,11 +16,13 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # SCRIPT INFO
-# 3.4.1
-# 2023-05-30
+# 3.5.0
+# 2023-06-10
 
 
 # ZFS Builtin Kernel Build Script - gentoo
+
+# recommended bootloader is ZFSBootMenu
 
 # assumptions
 # /usr/src/linux is real source or symlink to real source
@@ -31,11 +33,9 @@
 # installs configured kmod-zfs to /usr/src/linux
 # builds kernel
 # creates initramfs
-# updates grub config
 
 # required external scrips, must be in $PATH
 #   kernel-clean-src
-#   kernel-grub
 #   kernel-initramfs
 
 import argparse
@@ -372,7 +372,6 @@ class Build:
                         Execute('emerge --ignore-default-opts --oneshot --quiet sys-fs/zfs')
                 Execute('emerge --ignore-default-opts --oneshot --jobs @module-rebuild')
             Execute(f'kernel-initramfs -c {self.__initramfs_compression} -k {self.__kernel_module_dir}')
-            Execute('kernel-grub')
             if self.__clean_kernel_src:
                 Execute('kernel-clean-src -c')
 
@@ -470,7 +469,7 @@ def main():
                      help='build kernel but do not install or run post, implies -p')
     ker.add_argument('-p', '--no-post',
                      action='store_true',
-                     help='disable post, emerge, initramfs, and grub configure')
+                     help='disables post, emerge, and initramfs')
     ker.add_argument('-x', '--fancy-make',
                      action='store_true',
                      help='disable zfs build, becomes fancy \'make;make install\'')
