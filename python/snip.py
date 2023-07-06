@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright (C) 2018-2022 Brandon Zorn <brandonzorn@cock.li>
+# Copyright (C) 2018-2023 Brandon Zorn <brandonzorn@cock.li>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,11 +16,12 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # SCRIPT INFO
-# 5.0.0
-# 2021-05-06
+# 6.0.0
+# 2023-07-05
 
 
 import argparse
+import os
 import sys
 import time
 from pathlib import Path
@@ -33,12 +34,25 @@ from utils.execute import Execute
 
 class Snip:
     def __init__(self):
+        self.__is_display_server_wayland = False
+        try:
+            if os.environ['WAYLAND_DISPLAY']:
+                self.__is_display_server_wayland = True
+        except KeyError:
+            pass
+
         snip_path = f'{Path.home()}/{int(time.time())}.png'
 
-        if CheckEnv.get_script_name() == 'snip-root':
-            Execute(f'gm import -window root {snip_path}')
+        if self.__is_display_server_wayland:
+            if CheckEnv.get_script_name() == 'snip-root':
+                Execute(f'grimshot save screen {snip_path}')
+            else:
+                Execute(f'grimshot save area {snip_path}')
         else:
-            Execute(f'gm import {snip_path}')
+            if CheckEnv.get_script_name() == 'snip-root':
+                Execute(f'gm import -window root {snip_path}')
+            else:
+                Execute(f'gm import {snip_path}')
 
 
 def main():
