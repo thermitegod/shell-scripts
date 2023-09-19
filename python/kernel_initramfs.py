@@ -16,8 +16,8 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # SCRIPT INFO
-# 2.9.0
-# 2023-06-10
+# 2.10.0
+# 2023-09-18
 
 
 import argparse
@@ -43,8 +43,8 @@ class Initramfs:
         cmd = f'dracut --force --hostonly --early-microcode --compress {self.__compression} '
 
         if self.__kernel_version:
-            if 'rc' not in self.__kernel_version:
-                if self.__kernel_version.endswith('-gentoo'):
+            if 'rc' not in self.__kernel_version or '-r':
+                if '-gentoo' in self.__kernel_version:
                     cmd += f'--kver {self.__kernel_version} '
                 else:
                     cmd += f'--kver {self.__kernel_version}-gentoo '
