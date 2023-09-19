@@ -16,8 +16,8 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # SCRIPT INFO
-# 3.5.0
-# 2023-06-10
+# 3.6.0
+# 2023-09-18
 
 
 # ZFS Builtin Kernel Build Script - gentoo
@@ -237,14 +237,16 @@ class Build:
                 break
 
         if self.__use_zfs_release_version:
-            wanted_ebuild = None
-            zfs_ebuild_path = Path() / gentoo_repo_path / self.__zfs_ebuild
-            for ebuild in Path(zfs_ebuild_path).iterdir():
-                ebuild = str(ebuild)
-                if ebuild.endswith('.ebuild') and not ebuild.endswith('9999.ebuild'):
-                    wanted_ebuild = ebuild
+            # zfs and zfs-kmod will have matching version numbers,
+            # but trying to use zfs-kmod here causes emerge to throw errors
+            # emerge_out = Execute(f'emerge -pq sys-fs/zfs-kmod', to_stdout=True).get_out()
+            emerge_out = Execute(f'emerge -pq sys-fs/zfs', to_stdout=True).get_out()
 
-            self.__zfs_version = wanted_ebuild.rpartition('.')[0].rpartition('/')[-1][9:]
+            # emerge output post processing
+            # [16:] - removes '[ebuild   R   ] '
+            # partition.(' ') removes USE flags
+            ebuild = emerge_out[16:].partition(' ')[0]
+            self.__zfs_version = ebuild.rpartition('-')[2]
 
             # build path
             self.__zfs_kmod_build_path = "zfs"
@@ -263,16 +265,13 @@ class Build:
     def build_zfs(self):
         self.__zfs_version_path = self.__zfs_version
 
-        if 'rc' in self.__zfs_version:
+        if '_rc' in self.__zfs_version:
             # rc ebuilds
-            self.__zfs_version = self.__zfs_version.rpartition('_')[0]
-        if '-r' in self.__zfs_version:
+            self.__zfs_version = self.__zfs_version.replace('_', '-')
+        elif '-r' in self.__zfs_version:
             # rev bump ebuilds
             self.__zfs_version = self.__zfs_version.rpartition('-')[0]
 
-        self.build_zfs_clean_build()
-
-    def build_zfs_clean_build(self):
         self.cdkdir()
         self.msc()
 
