@@ -16,8 +16,8 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # SCRIPT INFO
-# 2.5.0
-# 2023-03-31
+# 2.6.0
+# 2023-09-20
 
 import argparse
 import sys
@@ -62,7 +62,8 @@ class Rebuild:
                   'media-fonts/noto ' \
                   'media-fonts/noto-cjk ' \
                   'media-fonts/noto-emoji ' \
-                  'media-fonts/liberation-fonts'
+                  'media-fonts/liberation-fonts ' \
+                  'media-fonts/source-code-pro '
         virtual = 'virtual/*'
         user_group = 'acct-group/* acct-user/*'
         sec_keys = 'sec-keys/*'
