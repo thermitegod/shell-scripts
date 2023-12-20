@@ -16,8 +16,8 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # SCRIPT INFO
-# 3.6.0
-# 2023-09-18
+# 3.7.0
+# 2023-12-20
 
 
 # ZFS Builtin Kernel Build Script - gentoo
@@ -147,18 +147,18 @@ class Build:
         input('\nEnter to start kernel build ')
 
     def version_check_kernel(self, ver):
-        required = self.__MIN_KERNEL_VERSION
-
-        if version.parse(required) > version.parse(ver):
-            logger.critical(f'Minimum supported kernel version is: {required}, using {ver}')
-            raise SystemExit(1)
+        return True
+        # required = self.__MIN_KERNEL_VERSION
+        # if version.parse(required) > version.parse(ver):
+        #     logger.critical(f'Minimum supported kernel version is: {required}, using {ver}')
+        #     raise SystemExit(1)
 
     def version_check_zfs(self, ver):
-        required = self.__MIN_ZFS_VERSION
-
-        if version.parse(required) > version.parse(ver):
-            logger.critical(f'Minimum supported zfs version is: {required}, using {ver}')
-            raise SystemExit(1)
+        return True
+        # required = self.__MIN_ZFS_VERSION
+        # if version.parse(required) > version.parse(ver):
+        #     logger.critical(f'Minimum supported zfs version is: {required}, using {ver}')
+        #     raise SystemExit(1)
 
     def cdkdir(self):
         os.chdir(self.__kernel_src)
