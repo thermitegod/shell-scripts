@@ -16,7 +16,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # SCRIPT INFO
-# 3.7.0
+# 3.8.0
 # 2023-12-20
 
 
@@ -244,9 +244,13 @@ class Build:
 
             # emerge output post processing
             # [16:] - removes '[ebuild   R   ] '
-            # partition.(' ') removes USE flags
-            ebuild = emerge_out[16:].partition(' ')[0]
-            self.__zfs_version = ebuild.rpartition('-')[2]
+            ebuild = emerge_out[16:]
+            # removes USE flags
+            ebuild = ebuild.partition('USE=')[0].strip()
+            self.__zfs_version = ebuild.removeprefix('sys-fs/zfs-')
+            # remove any revision number for this ebuild, the zfs and zfs-kmod
+            # revisions number probably will not match
+            self.__zfs_version = self.__zfs_version.rpartition("-r")[0]
 
             # build path
             self.__zfs_kmod_build_path = "zfs"
@@ -257,7 +261,16 @@ class Build:
             # build path
             self.__zfs_kmod_build_path = 'zfs-kmod'
 
-        self.__zfs_ebuild_path = Path() / gentoo_repo_path / self.__zfs_ebuild / f'zfs-kmod-{self.__zfs_version}.ebuild'
+        # support no revision too lots of revisions
+        ebuild_revision_list = ['', '-r1', '-r2', '-r3', '-r4', '-r5', '-r6', '-r7', '-r8', '-r9', '-r10']
+
+        zfs_ebuild_path_base = Path() / gentoo_repo_path / self.__zfs_ebuild
+
+        for revision in reversed(ebuild_revision_list):
+            self.__zfs_ebuild_path = zfs_ebuild_path_base / f'zfs-kmod-{self.__zfs_version}{revision}.ebuild'
+            if Path.is_file(self.__zfs_ebuild_path):
+                break
+
         if not Path.is_file(self.__zfs_ebuild_path):
             logger.critical(f'missing ebuild \'{self.__zfs_ebuild_path}\'')
             raise SystemExit(1)
