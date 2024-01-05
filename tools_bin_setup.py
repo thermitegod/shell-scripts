@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright (C) 2018-2022 Brandon Zorn <brandonzorn@cock.li>
+# Copyright (C) 2024 Brandon Zorn <brandonzorn@cock.li>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # SCRIPT INFO
-# 3.0.0
-# 2022-05-29
+# 4.0.0
+# 2024-01-04
 
 
 import os
@@ -31,7 +31,7 @@ class Symlink:
     def __init__(self):
         self.__repo_base_path = repo.repo_base_dir()
 
-        self.__bin = self.__repo_base_path / 'bin'
+        self.__bin = Path() / os.environ['HOME'] / '.local' / 'bin'
 
         self.__bin_sh = self.__repo_base_path / 'shell'
         self.__bin_py = self.__repo_base_path / 'python'

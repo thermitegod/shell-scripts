@@ -1,10 +1,9 @@
-## Setup bin/ symlinks
+# Build / Install
 
-```
-./tools_bin_setup.py
-```
-
-## Install bin/ symlinks
-```
-./tools_bin_install.py
+```bash
+mkdir build
+meson setup --prefix=${HOME}/.local --buildtype=release ./build
+cd build
+ninja
+ninja install
 ```

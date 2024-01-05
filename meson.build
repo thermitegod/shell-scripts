@@ -19,7 +19,7 @@ python = find_program('python3', required : true)
 build_root = meson.project_build_root()
 source_root = meson.project_source_root()
 
-incdir = include_directories('src')
+incdir = include_directories('cxx')
 
 package = meson.project_name()
 version = meson.project_version()
@@ -272,11 +272,11 @@ target_type = 'executable'
 # chromium-default
 
 sources = [
-  'src/chromium-default.cxx',
+  'cxx/chromium-default.cxx',
 
-  'src/lib/env.cxx',
-  'src/lib/commandline.cxx',
-  'src/lib/user-dirs.cxx',
+  'cxx/lib/env.cxx',
+  'cxx/lib/commandline.cxx',
+  'cxx/lib/user-dirs.cxx',
 ]
 
 target_name = 'chromium-default'
@@ -298,11 +298,11 @@ build_target(
 # clean-downloads
 
 sources = [
-  'src/clean-downloads.cxx',
+  'cxx/clean-downloads.cxx',
 
-  'src/lib/commandline.cxx',
-  'src/lib/hash.cxx',
-  'src/lib/user-dirs.cxx',
+  'cxx/lib/commandline.cxx',
+  'cxx/lib/hash.cxx',
+  'cxx/lib/user-dirs.cxx',
 ]
 
 target_name = 'clean-downloads'
@@ -320,3 +320,6 @@ build_target(
     ztd_dep,
   ],
 )
+
+meson.add_install_script('./tools_bin_setup.py')
+meson.add_install_script('./tools_symlink_chrome.py')
