@@ -1,4 +1,6 @@
 /**
+ * Copyright (C) 2024 Brandon Zorn <brandonzorn@cock.li>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 3 of the License, or
@@ -17,5 +19,21 @@
 
 namespace env
 {
-bool root_check();
+/**
+ * @brief Root Check
+ *
+ * - Check if being run with root privileges
+ *
+ * @return true if user is root or has root privileges, otherwise false
+ */
+bool root_check() noexcept;
+
+/**
+ * @brief Is Wayland
+ *
+ * - Is the display server wayland
+ *
+ * @return true if the display server wayland, otherwise false
+ */
+bool is_wayland() noexcept;
 } // namespace env

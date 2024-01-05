@@ -15,22 +15,20 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <cstdlib>
-#include <cstddef>
+#include <string>
 
-#include <unistd.h>
+#include <filesystem>
 
-#include "lib/env.hxx"
+#include "lib/proc.hxx"
 
-bool
-env::root_check() noexcept
+[[nodiscard]] const std::filesystem::path
+proc::self::exe() noexcept
 {
-    return (geteuid() == 0);
+    return std::filesystem::read_symlink(detail::proc_self_exe);
 }
 
-bool
-env::is_wayland() noexcept
+[[nodiscard]] const std::string
+proc::self::name() noexcept
 {
-    const char* wayland = std::getenv("WAYLAND_DISPLAY");
-    return wayland != nullptr;
+    return std::filesystem::read_symlink(detail::proc_self_exe).filename();
 }
