@@ -227,25 +227,6 @@ nlohmann_json_dep = dependency('nlohmann_json', required : true)
 glibmm_dep = dependency('glibmm-2.68', required : true)
 giomm_dep = dependency('giomm-2.68', required : true)
 
-dependencies = [
-  # gtkmm_dep,
-  glibmm_dep,
-  giomm_dep,
-
-  magic_enum_dep,
-  toml11_dep,
-
-  spdlog_dep,
-  sigc_dep,
-  pugixml_dep,
-  nlohmann_json_dep,
-  cli11_dep,
-
-  openssl_dep,
-
-  ztd_dep,
-]
-
 ## preprocessor static
 
 preprocessor = [
@@ -266,28 +247,20 @@ endforeach
 
 # Builds
 
-# Used for all src files
-target_type = 'executable'
-
 # chromium-default
-
-sources = [
-  'cxx/chromium-default.cxx',
-
-  'cxx/lib/env.cxx',
-  'cxx/lib/commandline.cxx',
-  'cxx/lib/user-dirs.cxx',
-]
-
-target_name = 'chromium-default'
-
 build_target(
-  target_name,
-  sources,
-  target_type: target_type,
+  'chromium-default',
+  sources: [
+    'cxx/chromium-default.cxx',
+
+    'cxx/lib/env.cxx',
+    'cxx/lib/commandline.cxx',
+    'cxx/lib/user-dirs.cxx',
+  ],
+  target_type: 'executable',
   include_directories: incdir,
-  install : true,
-  install_dir : bindir,
+  install: true,
+  install_dir: bindir,
   dependencies: [
     glibmm_dep,
     spdlog_dep,
@@ -296,24 +269,19 @@ build_target(
 )
 
 # clean-downloads
-
-sources = [
-  'cxx/clean-downloads.cxx',
-
-  'cxx/lib/commandline.cxx',
-  'cxx/lib/hash.cxx',
-  'cxx/lib/user-dirs.cxx',
-]
-
-target_name = 'clean-downloads'
-
 build_target(
-  target_name,
-  sources,
-  target_type: target_type,
+  'clean-downloads',
+  sources: [
+    'cxx/clean-downloads.cxx',
+
+    'cxx/lib/commandline.cxx',
+    'cxx/lib/hash.cxx',
+    'cxx/lib/user-dirs.cxx',
+  ],
+  target_type: 'executable',
   include_directories: incdir,
-  install : true,
-  install_dir : bindir,
+  install: true,
+  install_dir: bindir,
   dependencies: [
     glibmm_dep,
     spdlog_dep,
@@ -322,26 +290,21 @@ build_target(
 )
 
 # snip
-
-sources = [
-  'cxx/snip.cxx',
-
-  'cxx/lib/commandline.cxx',
-  'cxx/lib/env.cxx',
-  'cxx/lib/proc.cxx',
-  'cxx/lib/single-instance.cxx',
-  'cxx/lib/user-dirs.cxx',
-]
-
-target_name = 'snip'
-
 build_target(
-  target_name,
-  sources,
-  target_type: target_type,
+  'snip',
+  sources: [
+    'cxx/snip.cxx',
+
+    'cxx/lib/commandline.cxx',
+    'cxx/lib/env.cxx',
+    'cxx/lib/proc.cxx',
+    'cxx/lib/single-instance.cxx',
+    'cxx/lib/user-dirs.cxx',
+  ],
+  target_type: 'executable',
   include_directories: incdir,
-  install : true,
-  install_dir : bindir,
+  install: true,
+  install_dir: bindir,
   dependencies: [
     glibmm_dep,
     spdlog_dep,
