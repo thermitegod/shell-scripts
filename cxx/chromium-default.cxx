@@ -64,11 +64,7 @@ main(int argc, char** argv)
 
     CLI11_PARSE(app, argc, argv);
 
-    if (env::root_check())
-    {
-        ztd::logger::error("Do not run as root");
-        std::exit(EXIT_FAILURE);
-    }
+    env::check_running_user(env::only_run_as::user);
 
     // need to know display server type for ozone to work
     const std::string display_server = env::is_wayland() ? "wayland" : "x11";

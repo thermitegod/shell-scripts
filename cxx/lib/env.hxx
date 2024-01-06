@@ -19,14 +19,21 @@
 
 namespace env
 {
+enum class only_run_as
+{
+    user,
+    root,
+    any,
+};
+
 /**
- * @brief Root Check
+ * @brief check_user
  *
- * - Check if being run with root privileges
+ * - Only allow a user or root to run a command
  *
- * @return true if user is root or has root privileges, otherwise false
+ * @param[in] user allowed user type
  */
-bool root_check() noexcept;
+void check_running_user(const only_run_as user) noexcept;
 
 /**
  * @brief Is Wayland

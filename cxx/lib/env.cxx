@@ -15,17 +15,46 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#if defined(__cpp_lib_print)
+#include <print>
+#else
+#include <iostream>
+#endif
+
 #include <cstdlib>
-#include <cstddef>
 
 #include <unistd.h>
 
 #include "lib/env.hxx"
 
-bool
-env::root_check() noexcept
+void
+env::check_running_user(const only_run_as user) noexcept
 {
-    return (geteuid() == 0);
+    const bool is_root = geteuid() == 0;
+    if (user == only_run_as::root)
+    {
+        if (!is_root)
+        {
+#if defined(__cpp_lib_print)
+            std::println("Requires root, exiting");
+#else
+            std::cout << "Requires root, exiting" << std::endl;
+#endif
+            std::exit(EXIT_FAILURE);
+        }
+    }
+    else if (user == only_run_as::user)
+    {
+        if (is_root)
+        {
+#if defined(__cpp_lib_print)
+            std::println("Do not run as root, exiting");
+#else
+            std::cout << "Do not run as root, exiting" << std::endl;
+#endif
+            std::exit(EXIT_FAILURE);
+        }
+    }
 }
 
 bool
