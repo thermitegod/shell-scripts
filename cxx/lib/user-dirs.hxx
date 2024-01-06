@@ -17,22 +17,22 @@
 
 #pragma once
 
-#include <string>
+#include <filesystem>
 
 namespace user
 {
-const std::string desktop_dir() noexcept;
-const std::string documents_dir() noexcept;
-const std::string download_dir() noexcept;
-const std::string music_dir() noexcept;
-const std::string pictures_dir() noexcept;
-const std::string public_share_dir() noexcept;
-const std::string template_dir() noexcept;
-const std::string videos_dir() noexcept;
+const std::filesystem::path desktop_dir() noexcept;
+const std::filesystem::path documents_dir() noexcept;
+const std::filesystem::path download_dir() noexcept;
+const std::filesystem::path music_dir() noexcept;
+const std::filesystem::path pictures_dir() noexcept;
+const std::filesystem::path public_share_dir() noexcept;
+const std::filesystem::path template_dir() noexcept;
+const std::filesystem::path videos_dir() noexcept;
 
-const std::string home_dir() noexcept;
-const std::string cache_dir() noexcept;
-const std::string data_dir() noexcept;
-const std::string config_dir() noexcept;
-const std::string runtime_dir() noexcept;
+const std::filesystem::path home_dir() noexcept;
+const std::filesystem::path cache_dir() noexcept;
+const std::filesystem::path data_dir() noexcept;
+const std::filesystem::path config_dir() noexcept;
+const std::filesystem::path runtime_dir() noexcept;
 } // namespace user
