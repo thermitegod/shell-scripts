@@ -321,5 +321,33 @@ build_target(
   ],
 )
 
+# snip
+
+sources = [
+  'cxx/snip.cxx',
+
+  'cxx/lib/commandline.cxx',
+  'cxx/lib/env.cxx',
+  'cxx/lib/proc.cxx',
+  'cxx/lib/single-instance.cxx',
+  'cxx/lib/user-dirs.cxx',
+]
+
+target_name = 'snip'
+
+build_target(
+  target_name,
+  sources,
+  target_type: target_type,
+  include_directories: incdir,
+  install : true,
+  install_dir : bindir,
+  dependencies: [
+    glibmm_dep,
+    spdlog_dep,
+    ztd_dep,
+  ],
+)
+
 meson.add_install_script('./tools_bin_setup.py')
 meson.add_install_script('./tools_symlink_chrome.py')

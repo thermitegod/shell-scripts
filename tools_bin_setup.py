@@ -93,8 +93,6 @@ class Symlink:
             Symlinks('optimize-all', 'optimize-gif'),
             Symlinks('optimize-all', 'optimize-jpg'),
             Symlinks('optimize-all', 'optimize-png'),
-
-            Symlinks('snip', 'snip-root'),
         )
 
         os.chdir(self.__bin)
