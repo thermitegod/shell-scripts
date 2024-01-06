@@ -27,6 +27,8 @@
 struct commandline_opt_data : public std::enable_shared_from_this<commandline_opt_data>
 {
     std::string loglevel{"trace"};
+    // std::filesystem::path logfile{"/tmp/test.log"};
+    std::filesystem::path logfile{};
 
     bool show_version{false};
     struct version_data

@@ -16,7 +16,8 @@
  */
 
 #include <format>
-#include <spdlog/common.h>
+
+#include <filesystem>
 
 #if defined(__cpp_lib_print)
 #include <print>
@@ -52,27 +53,27 @@ run_commandline(const commandline_opt_data_t& opt)
 
     if (opt->loglevel == "trace")
     {
-        ztd::logger::initialize(spdlog::level::trace);
+        ztd::logger::initialize(spdlog::level::trace, opt->logfile);
     }
     else if (opt->loglevel == "debug")
     {
-        ztd::logger::initialize(spdlog::level::debug);
+        ztd::logger::initialize(spdlog::level::debug, opt->logfile);
     }
     else if (opt->loglevel == "info")
     {
-        ztd::logger::initialize(spdlog::level::info);
+        ztd::logger::initialize(spdlog::level::info, opt->logfile);
     }
     else if (opt->loglevel == "warning")
     {
-        ztd::logger::initialize(spdlog::level::warn);
+        ztd::logger::initialize(spdlog::level::warn, opt->logfile);
     }
     else if (opt->loglevel == "error")
     {
-        ztd::logger::initialize(spdlog::level::err);
+        ztd::logger::initialize(spdlog::level::err, opt->logfile);
     }
     else if (opt->loglevel == "critical")
     {
-        ztd::logger::initialize(spdlog::level::critical);
+        ztd::logger::initialize(spdlog::level::critical, opt->logfile);
     }
     else
     {
@@ -85,9 +86,24 @@ setup_common_commandline(CLI::App& app, const commandline_opt_data_t& opt, const
 {
     const std::array<std::string, 8> loglevels =
         {"trace", "debug", "info", "warning", "error", "critical", "off"};
-    app.add_option("-l,--loglevel", opt->loglevel, "Set the loglevel")
+    app.add_option("--loglevel", opt->loglevel, "Set the loglevel")
         ->expected(1)
         ->check(CLI::IsMember(loglevels));
+
+    const auto is_absolute_path = CLI::Validator(
+        [](const std::filesystem::path& input)
+        {
+            if (input.is_absolute())
+            {
+                return std::string();
+            }
+            return std::format("Logfile path must be absolute: {}", input.string());
+        },
+        "");
+    app.add_option("--logfile", opt->logfile, "absolute path to the logfile")
+        ->expected(1)
+        ->check(is_absolute_path);
+
     app.add_flag("-v,--version", opt->show_version, "Show version information");
 
     // Everything else
