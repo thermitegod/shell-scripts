@@ -75,7 +75,9 @@ main(int argc, char** argv)
 
     // symlinks must be named 'chromium-<profile>' to work.
     // e.g. ln -s chromium-default chromium-<profile>
-    const std::string profile_name = ztd::removeprefix(argv[0], "chromium-");
+    const std::filesystem::path launch_name = argv[0];
+    const std::string profile_name =
+        ztd::removeprefix(launch_name.filename().string(), "chromium-");
 
     // Get chrome bin name from file path
     std::string bin_name = chrome_bin_name;
@@ -89,6 +91,7 @@ main(int argc, char** argv)
     const std::string profile_path =
         Glib::build_filename(user::config_dir(), "chrome", chrome_profile);
 
+    // ztd::logger::info("argv[0]        = {}", argv[0]);
     // ztd::logger::info("profile_name   = {}", profile_name);
     // ztd::logger::info("chrome_profile = {}", chrome_profile);
     // ztd::logger::info("profile_path   = {}", profile_path);
