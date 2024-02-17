@@ -16,7 +16,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # SCRIPT INFO
-# 3.9.0
+# 3.10.0
 # 2024-02-16
 
 
@@ -87,6 +87,7 @@ class Build:
 
         self.__zfs_ebuild: Path = Path('sys-fs/zfs-kmod')
         self.__zfs_ebuild_path: Path = Path()
+        self.__zfs_ebuild_revision: str
         self.__zfs_version: Path = Path()
         self.__zfs_version_path: Path = Path()
         self.__zfs_kmod_build_path: Path = Path()
@@ -247,6 +248,7 @@ class Build:
         for revision in reversed(ebuild_revision_list):
             self.__zfs_ebuild_path = zfs_ebuild_path_base / f'zfs-kmod-{self.__zfs_version}{revision}.ebuild'
             if Path.is_file(self.__zfs_ebuild_path):
+                self.__zfs_ebuild_revision = revision
                 break
 
         if not Path.is_file(self.__zfs_ebuild_path):
@@ -296,7 +298,7 @@ class Build:
         else:
             self.run_compiler(act='prepare')
 
-        zfs_build_path = Path() / self.__tmpdir / 'portage' / f'{self.__zfs_ebuild}-{self.__zfs_version_path}' / 'work'
+        zfs_build_path = Path() / self.__tmpdir / 'portage' / f'{self.__zfs_ebuild}-{self.__zfs_version_path}{self.__zfs_ebuild_revision}' / 'work'
         zfs_build_version = f'{self.__zfs_kmod_build_path}-{self.__zfs_version}'
 
         # Have to use ExecuteFishScript() because setting env variables
