@@ -16,8 +16,8 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # SCRIPT INFO
-# 3.8.0
-# 2023-12-20
+# 3.9.0
+# 2024-02-16
 
 
 # ZFS Builtin Kernel Build Script - gentoo
@@ -63,9 +63,6 @@ from utils.script import ExecuteFishScript
 
 class Build:
     def __init__(self, args: argparse = None):
-        self.__MIN_KERNEL_VERSION: str = '4.17.0'
-        self.__MIN_ZFS_VERSION: str = '2.1.0'
-
         atexit.register(self.remove_tmpdir)
 
         self.__tmpdir: Path = Path(tempfile.mkdtemp())
@@ -119,8 +116,6 @@ class Build:
             kver_tmp = self.__kernel_module_dir.rpartition('-')
             self.__kernel_module_dir = f'{kver_tmp[0]}.0{kver_tmp[1]}{kver_tmp[2]}'
 
-        self.version_check_kernel(ver=self.__kernel_module_dir.partition('-')[0])
-
         self.parse_args(args=args)
 
         self.build()
@@ -136,8 +131,6 @@ class Build:
               f'Running emerge     : {self.__run_emerge}')
         if self.__run_intro_extra:
             print(f'EXTRA\n'
-                  f'Min kernel version : {self.__MIN_KERNEL_VERSION}\n'
-                  f'Min ZFS version    : {self.__MIN_ZFS_VERSION}\n'
                   f'Make command       : {self.run_compiler(return_only=True)}\n'
                   f'kernel module dir  : /lib/modules/{self.__kernel_module_dir}\n'
                   f'Tempdir            : {self.__tmpdir}\n'
@@ -145,20 +138,6 @@ class Build:
             Execute('eselect kernel list')
 
         input('\nEnter to start kernel build ')
-
-    def version_check_kernel(self, ver):
-        return True
-        # required = self.__MIN_KERNEL_VERSION
-        # if version.parse(required) > version.parse(ver):
-        #     logger.critical(f'Minimum supported kernel version is: {required}, using {ver}')
-        #     raise SystemExit(1)
-
-    def version_check_zfs(self, ver):
-        return True
-        # required = self.__MIN_ZFS_VERSION
-        # if version.parse(required) > version.parse(ver):
-        #     logger.critical(f'Minimum supported zfs version is: {required}, using {ver}')
-        #     raise SystemExit(1)
 
     def cdkdir(self):
         os.chdir(self.__kernel_src)
@@ -254,7 +233,6 @@ class Build:
 
             # build path
             self.__zfs_kmod_build_path = "zfs"
-            self.version_check_zfs(ver=self.__zfs_version)
         else:
             # git
             self.__zfs_version = '9999'
