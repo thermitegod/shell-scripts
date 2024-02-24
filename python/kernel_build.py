@@ -16,8 +16,8 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # SCRIPT INFO
-# 3.10.0
-# 2024-02-16
+# 3.11.0
+# 2024-02-23
 
 
 # ZFS Builtin Kernel Build Script - gentoo
@@ -227,10 +227,13 @@ class Build:
             ebuild = emerge_out[16:]
             # removes USE flags
             ebuild = ebuild.partition('USE=')[0].strip()
-            self.__zfs_version = ebuild.removeprefix('sys-fs/zfs-')
+            version = ebuild.removeprefix('sys-fs/zfs-')
             # remove any revision number for this ebuild, the zfs and zfs-kmod
             # revisions number probably will not match
-            self.__zfs_version = self.__zfs_version.rpartition("-r")[0]
+            if "-r" in version:
+                self.__zfs_version = version.rpartition("-r")[0]
+            else:
+                self.__zfs_version = version
 
             # build path
             self.__zfs_kmod_build_path = "zfs"
