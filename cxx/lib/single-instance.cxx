@@ -65,6 +65,10 @@ create_single_instance() noexcept
     std::atexit(single_instance_finalize);
 
     const auto pid_path = get_pid_path();
+    if (!std::filesystem::exists(pid_path))
+    {
+        return;
+    }
 
     std::ifstream pid_file(pid_path);
     if (pid_file)
