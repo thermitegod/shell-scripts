@@ -19,11 +19,7 @@
 
 #include <filesystem>
 
-#if defined(__cpp_lib_print)
 #include <print>
-#else
-#include <iostream>
-#endif
 
 #include <CLI/CLI.hpp>
 
@@ -48,17 +44,7 @@ run_commandline(const std::shared_ptr<commandline_opt_data>& opt)
 {
     if (opt->version)
     {
-#if defined(__cpp_lib_print)
-        std::println("{} {}",
-                     opt->package_data.package_source_path.filename().string(),
-                     opt->package_data.package_version);
-#else
-        std::cout << std::format("{} {}",
-                                 opt->package.source_path.filename().string(),
-                                 opt->package.version)
-                  << std::endl;
-#endif
-
+        std::println("{} {}", opt->package.source_path.filename().string(), opt->package.version);
         std::exit(EXIT_SUCCESS);
     }
 

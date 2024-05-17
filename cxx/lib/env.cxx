@@ -15,11 +15,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if defined(__cpp_lib_print)
 #include <print>
-#else
-#include <iostream>
-#endif
 
 #include <cstdlib>
 
@@ -35,11 +31,7 @@ env::check_running_user(const only_run_as user) noexcept
     {
         if (!is_root)
         {
-#if defined(__cpp_lib_print)
             std::println("Requires root, exiting");
-#else
-            std::cout << "Requires root, exiting" << std::endl;
-#endif
             std::exit(EXIT_FAILURE);
         }
     }
@@ -47,11 +39,7 @@ env::check_running_user(const only_run_as user) noexcept
     {
         if (is_root)
         {
-#if defined(__cpp_lib_print)
             std::println("Do not run as root, exiting");
-#else
-            std::cout << "Do not run as root, exiting" << std::endl;
-#endif
             std::exit(EXIT_FAILURE);
         }
     }
