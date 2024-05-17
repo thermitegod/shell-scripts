@@ -39,8 +39,8 @@ commandline_opt_data::commandline_opt_data(const package_data& package) noexcept
     this->package = package;
 }
 
-void
-run_commandline(const std::shared_ptr<commandline_opt_data>& opt)
+static void
+run_commandline(const std::shared_ptr<commandline_opt_data>& opt) noexcept
 {
     if (opt->version)
     {
@@ -82,7 +82,7 @@ void
 setup_common_commandline(CLI::App& app, const std::shared_ptr<commandline_opt_data>& opt,
                          const bool file_list)
 {
-    const std::array<std::string, 8> loglevels =
+    static constexpr std::array<std::string, 8> loglevels =
         {"trace", "debug", "info", "warning", "error", "critical", "off"};
     app.add_option("--loglevel", opt->loglevel, "Set the loglevel")
         ->expected(1)
@@ -107,7 +107,7 @@ setup_common_commandline(CLI::App& app, const std::shared_ptr<commandline_opt_da
     // Everything else
     if (file_list)
     {
-        app.add_option("files", opt->files, "File list")->expected(0, -1);
+        app.add_option("FILES", opt->files, "File list")->expected(0, -1);
     }
 
     app.callback([&opt]() { run_commandline(opt); });

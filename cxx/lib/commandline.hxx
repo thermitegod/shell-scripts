@@ -38,7 +38,7 @@ struct commandline_opt_data : public std::enable_shared_from_this<commandline_op
     static const std::shared_ptr<commandline_opt_data> create(const package_data& package) noexcept;
 
     std::string loglevel{"trace"};
-    // std::filesystem::path logfile_{"/tmp/test.log"};
+    // std::filesystem::path logfile{"/tmp/test.log"};
     std::filesystem::path logfile{};
 
     bool version{false};

@@ -289,6 +289,29 @@ build_target(
   ],
 )
 
+# extract
+build_target(
+  'extract',
+  sources: [
+    'cxx/extract.cxx',
+
+    'cxx/lib/commandline.cxx',
+    'cxx/lib/env.cxx',
+    'cxx/lib/proc.cxx',
+    'cxx/lib/single-instance.cxx',
+    'cxx/lib/user-dirs.cxx',
+  ],
+  target_type: 'executable',
+  include_directories: incdir,
+  install: true,
+  install_dir: bindir,
+  dependencies: [
+    glibmm_dep,
+    spdlog_dep,
+    ztd_dep,
+  ],
+)
+
 # snip
 build_target(
   'snip',
