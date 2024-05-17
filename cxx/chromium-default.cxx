@@ -94,7 +94,8 @@ main(int argc, char** argv)
     const std::string command = std::format("{} "
                                             "--user-data-dir={} "
                                             "--ozone-platform={} "
-                                            "--no-default-browser-check ",
+                                            "--no-default-browser-check "
+                                            "--disable-features=CustomizeChromeSidePanel ",
                                             chrome_bin_name,
                                             profile_path,
                                             display_server);
