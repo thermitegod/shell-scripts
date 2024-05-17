@@ -106,7 +106,7 @@ class Compress:
             # double quotes dont work around filename becuse sh_wrap will provide its own double
             # quotes. this is the cleanest solution for dealing with garbage filenames other than
             # renaming them
-            status = Execute(f'nice -19 7z t -- {self.shell_escape(str(filename))} | grep Ok',
+            status = Execute(f'nice -19 7zz t -- {self.shell_escape(str(filename))} | grep Ok',
                              sh_wrap=True, to_stdout=True).get_out()
 
             if 'Everything is Ok' in status:
@@ -151,7 +151,7 @@ class Compress:
         os.chdir(Path(filename).parent)
 
         text = f'nice -19 ' \
-               f'7zr a -t7z -m0=lzma2 -md=1024m -mmf=bt4 -mmt={self.__threads} -mmtf={self.__threads} ' \
+               f'7zz a -t7z -m0=lzma2 -md=1024m -mmf=bt4 -mmt={self.__threads} -mmtf={self.__threads} ' \
                f'-myx=9 -mx=9 -mfb=276 -mhc=on -ms=on -mtm=off -mtc=off -mta=off {self.__exclude}' \
                f'-o="{self.__output_dir}" "{Path(filename).name}.7z" "{Path(filename).name}" || ' \
                f'die "Compression failed for \'{Path.resolve(filename)}\'"'
