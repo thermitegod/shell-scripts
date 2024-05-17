@@ -19,8 +19,6 @@
 
 #include <chrono>
 
-#include <memory>
-
 #include <source_location>
 
 #include <glibmm.h>
@@ -35,8 +33,11 @@
 #include "lib/single-instance.hxx"
 #include "lib/user-dirs.hxx"
 
-#define PACKAGE_DATE "2024-01-05"
-#define PACKAGE_VERSION "7.0.0"
+const auto package = package_data{
+    std::source_location::current().file_name(),
+    "2024-01-05",
+    "7.0.0",
+};
 
 int
 main(int argc, char** argv)
@@ -46,10 +47,8 @@ main(int argc, char** argv)
     bool root = false;
     app.add_flag("-r,--root", root, "Screenshot window root");
 
-    auto opt = std::make_shared<commandline_opt_data>();
-    opt->version_data = {std::source_location::current().file_name(),
-                         PACKAGE_DATE,
-                         PACKAGE_VERSION};
+    auto opt = commandline_opt_data::create(package);
+
     setup_common_commandline(app, opt, false);
 
     CLI11_PARSE(app, argc, argv);

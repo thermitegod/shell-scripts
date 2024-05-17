@@ -32,19 +32,30 @@
 
 #include "lib/commandline.hxx"
 
-void
-run_commandline(const commandline_opt_data_t& opt)
+const std::shared_ptr<commandline_opt_data>
+commandline_opt_data::create(const package_data& package) noexcept
 {
-    if (opt->show_version)
+    return std::make_shared<commandline_opt_data>(package);
+}
+
+commandline_opt_data::commandline_opt_data(const package_data& package) noexcept
+{
+    this->package = package;
+}
+
+void
+run_commandline(const std::shared_ptr<commandline_opt_data>& opt)
+{
+    if (opt->version)
     {
 #if defined(__cpp_lib_print)
         std::println("{} {}",
-                     opt->version_data.source_path.filename().string(),
-                     opt->version_data.version);
+                     opt->package_data.package_source_path.filename().string(),
+                     opt->package_data.package_version);
 #else
         std::cout << std::format("{} {}",
-                                 opt->version_data.source_path.filename().string(),
-                                 opt->version_data.version)
+                                 opt->package.source_path.filename().string(),
+                                 opt->package.version)
                   << std::endl;
 #endif
 
@@ -82,7 +93,8 @@ run_commandline(const commandline_opt_data_t& opt)
 }
 
 void
-setup_common_commandline(CLI::App& app, const commandline_opt_data_t& opt, const bool file_list)
+setup_common_commandline(CLI::App& app, const std::shared_ptr<commandline_opt_data>& opt,
+                         const bool file_list)
 {
     const std::array<std::string, 8> loglevels =
         {"trace", "debug", "info", "warning", "error", "critical", "off"};
@@ -104,7 +116,7 @@ setup_common_commandline(CLI::App& app, const commandline_opt_data_t& opt, const
         ->expected(1)
         ->check(is_absolute_path);
 
-    app.add_flag("-v,--version", opt->show_version, "Show version information");
+    app.add_flag("-v,--version", opt->version, "Show version information");
 
     // Everything else
     if (file_list)

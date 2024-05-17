@@ -24,25 +24,28 @@
 #include <ztd/ztd.hxx>
 #include <ztd/ztd_logger.hxx>
 
+struct package_data
+{
+    std::filesystem::path source_path;
+    std::string date;
+    std::string version;
+};
+
 struct commandline_opt_data : public std::enable_shared_from_this<commandline_opt_data>
 {
+    commandline_opt_data() = delete;
+    commandline_opt_data(const package_data& package) noexcept;
+    static const std::shared_ptr<commandline_opt_data> create(const package_data& package) noexcept;
+
     std::string loglevel{"trace"};
-    // std::filesystem::path logfile{"/tmp/test.log"};
+    // std::filesystem::path logfile_{"/tmp/test.log"};
     std::filesystem::path logfile{};
 
-    bool show_version{false};
-    struct version_data
-    {
-        std::filesystem::path source_path;
-        std::string date;
-        std::string version;
-    };
-    version_data version_data;
+    bool version{false};
+    package_data package;
 
     std::vector<std::filesystem::path> files{};
 };
 
-using commandline_opt_data_t = std::shared_ptr<commandline_opt_data>;
-
-void setup_common_commandline(CLI::App& app, const commandline_opt_data_t& opt,
+void setup_common_commandline(CLI::App& app, const std::shared_ptr<commandline_opt_data>& opt,
                               const bool file_list = true);

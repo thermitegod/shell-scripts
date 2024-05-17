@@ -24,8 +24,6 @@
 
 #include <vector>
 
-#include <memory>
-
 #include <utility>
 
 #include <source_location>
@@ -39,8 +37,11 @@
 #include "lib/hash.hxx"
 #include "lib/user-dirs.hxx"
 
-#define PACKAGE_DATE "2024-01-04"
-#define PACKAGE_VERSION "1.0.0"
+const auto package = package_data{
+    std::source_location::current().file_name(),
+    "2024-01-04",
+    "1.0.0",
+};
 
 int
 main(int argc, char** argv)
@@ -55,10 +56,8 @@ main(int argc, char** argv)
     bool disable_delete = false;
     app.add_option("-D,--no-delete", disable_delete, "Do not delete duplicate files");
 
-    auto opt = std::make_shared<commandline_opt_data>();
-    opt->version_data = {std::source_location::current().file_name(),
-                         PACKAGE_DATE,
-                         PACKAGE_VERSION};
+    auto opt = commandline_opt_data::create(package);
+
     setup_common_commandline(app, opt, false);
 
     CLI11_PARSE(app, argc, argv);
