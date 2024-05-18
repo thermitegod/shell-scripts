@@ -29,20 +29,19 @@
 #include <ztd/ztd_logger.hxx>
 
 #include "lib/commandline.hxx"
-#include "lib/env.hxx"
 #include "lib/single-instance.hxx"
 #include "lib/user-dirs.hxx"
 
 const auto package = package_data{
     std::source_location::current().file_name(),
-    "2024-01-05",
-    "7.0.0",
+    "2024-05-17",
+    "8.0.0",
 };
 
 int
 main(int argc, char** argv)
 {
-    CLI::App app{"Take Screenshots"};
+    CLI::App app{"Take Screenshots on SwayWM"};
 
     bool root = false;
     app.add_flag("-r,--root", root, "Screenshot window root");
@@ -61,27 +60,13 @@ main(int argc, char** argv)
                     std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()));
 
     std::string command;
-    if (env::is_wayland())
+    if (root)
     {
-        if (root)
-        {
-            command = std::format("grimshot save screen {}", snip_path.string());
-        }
-        else
-        {
-            command = std::format("grimshot save area {}", snip_path.string());
-        }
+        command = std::format("grimshot save screen {}", snip_path.string());
     }
     else
     {
-        if (root)
-        {
-            command = std::format("gm import -window root {}", snip_path.string());
-        }
-        else
-        {
-            command = std::format("gm import {}", snip_path.string());
-        }
+        command = std::format("grimshot save area {}", snip_path.string());
     }
 
     i32 exit_status;
