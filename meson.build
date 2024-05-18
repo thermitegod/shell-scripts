@@ -289,6 +289,25 @@ build_target(
   ],
 )
 
+# digest-ebuild
+build_target(
+  'digest-ebuild',
+  sources: [
+    'cxx/digest-ebuild.cxx',
+
+    'cxx/lib/commandline.cxx',
+  ],
+  target_type: 'executable',
+  include_directories: incdir,
+  install: true,
+  install_dir: bindir,
+  dependencies: [
+    glibmm_dep,
+    spdlog_dep,
+    ztd_dep,
+  ],
+)
+
 # extract
 build_target(
   'extract',
