@@ -354,5 +354,23 @@ build_target(
   ],
 )
 
+# vulnerabilities
+build_target(
+  'vulnerabilities',
+  sources: [
+    'cxx/vulnerabilities.cxx',
+
+    'cxx/lib/commandline.cxx',
+  ],
+  target_type: 'executable',
+  include_directories: incdir,
+  install: true,
+  install_dir: bindir,
+  dependencies: [
+    spdlog_dep,
+    ztd_dep,
+  ],
+)
+
 meson.add_install_script('./tools_bin_setup.py')
 meson.add_install_script('./tools_symlink_chrome.py')
