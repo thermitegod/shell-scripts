@@ -354,6 +354,26 @@ build_target(
   ],
 )
 
+# snip
+build_target(
+  'kernel-install-src',
+  sources: [
+    'cxx/kernel-install-src.cxx',
+
+    'cxx/lib/commandline.cxx',
+    'cxx/lib/env.cxx',
+  ],
+  target_type: 'executable',
+  include_directories: incdir,
+  install: true,
+  install_dir: bindir,
+  dependencies: [
+    glibmm_dep,
+    spdlog_dep,
+    ztd_dep,
+  ],
+)
+
 # vulnerabilities
 build_target(
   'vulnerabilities',
