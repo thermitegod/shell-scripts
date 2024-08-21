@@ -3,6 +3,7 @@ project(
   version : '1.0.0',
   license : 'GPL3',
   default_options : [
+    'c_std=c23',
     'cpp_std=c++23',
     'warning_level=3',
     'optimization=2',
@@ -44,11 +45,11 @@ link_flags = []
 
 debug_flags = [
   '-ggdb3',
-
   '-pedantic',
   '-pedantic-errors',
-  # '-Wfatal-errors',
-  # '-ftime-trace',
+  '-fno-omit-frame-pointer',
+  '-mno-omit-leaf-frame-pointer',
+  '-fasynchronous-unwind-tables',
 ]
 
 if get_option('buildtype') == 'debug'
@@ -237,9 +238,11 @@ preprocessor = [
   # '-DGDKMM_DISABLE_DEPRECATED',
   '-DGLIBMM_DISABLE_DEPRECATED',
   '-DGIOMM_DISABLE_DEPRECATED',
-
-  '-DZTD_VERSION=2',
 ]
+
+if get_option('buildtype') == 'debug'
+  # preprocessor += '-D_GLIBCXX_DEBUG'
+endif
 
 foreach a : preprocessor
   add_project_arguments(a, language : ['c', 'cpp'])
