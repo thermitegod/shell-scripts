@@ -238,6 +238,8 @@ preprocessor = [
   # '-DGDKMM_DISABLE_DEPRECATED',
   '-DGLIBMM_DISABLE_DEPRECATED',
   '-DGIOMM_DISABLE_DEPRECATED',
+
+  '-DZTD_SAFE_NUMERICS_TYPES',
 ]
 
 if get_option('buildtype') == 'debug'

@@ -70,7 +70,7 @@ main(int argc, char** argv)
         command = std::format("grimshot save area {}", snip_path.string());
     }
 
-    i32 exit_status;
+    std::int32_t exit_status;
     Glib::spawn_command_line_sync(command, nullptr, nullptr, &exit_status);
     std::exit(exit_status);
 }

@@ -105,7 +105,7 @@ main(int argc, char** argv)
     Glib::spawn_command_line_async(command);
     std::exit(EXIT_SUCCESS);
 #else
-    i32 exit_status;
+    std::int32_t exit_status;
     Glib::spawn_command_line_sync(command, nullptr, nullptr, &exit_status);
     std::exit(exit_status);
 #endif

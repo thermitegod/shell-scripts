@@ -82,7 +82,7 @@ main(int argc, char** argv)
                                          kernel_ebuild);
         logger::debug("COMMAND({})", command);
 
-        i32 exit_status = EXIT_SUCCESS;
+        std::int32_t exit_status = EXIT_SUCCESS;
         Glib::spawn_command_line_sync(command, nullptr, nullptr, &exit_status);
 
         if (exit_status != EXIT_SUCCESS)
@@ -104,7 +104,7 @@ main(int argc, char** argv)
             std::format("bash -c \"zcat /proc/config.gz > /usr/src/linux/.config\"");
         logger::debug("COMMAND({})", command);
 
-        i32 exit_status = EXIT_SUCCESS;
+        std::int32_t exit_status = EXIT_SUCCESS;
         Glib::spawn_command_line_sync(command, nullptr, nullptr, &exit_status);
 
         if (exit_status != EXIT_SUCCESS)

@@ -74,7 +74,7 @@ main(int argc, char** argv)
     const auto command = std::format("ebuild {} manifest", ebuilds.back().string());
     logger::debug("COMMAND({})", command);
 
-    i32 exit_status = EXIT_SUCCESS;
+    std::int32_t exit_status = EXIT_SUCCESS;
     Glib::spawn_command_line_sync(command, nullptr, nullptr, &exit_status);
     std::exit(exit_status);
 }
