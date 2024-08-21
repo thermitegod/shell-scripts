@@ -84,8 +84,7 @@ main(int argc, char** argv)
 
     // Build config path
     const std::string chrome_profile = std::format("{}-{}", bin_name, profile_name);
-    const std::string profile_path =
-        Glib::build_filename(user::config_dir(), "chrome", chrome_profile);
+    const std::string profile_path = user::config_dir() / "chrome" / chrome_profile;
 
     // logger::info("argv[0]        = {}", argv[0]);
     // logger::info("profile_name   = {}", profile_name);
