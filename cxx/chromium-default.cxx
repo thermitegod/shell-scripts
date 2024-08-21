@@ -28,7 +28,8 @@
 #include <CLI/CLI.hpp>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
+
+#include "logger/logger.hxx"
 
 #include "lib/env.hxx"
 #include "lib/commandline.hxx"
@@ -86,10 +87,10 @@ main(int argc, char** argv)
     const std::string profile_path =
         Glib::build_filename(user::config_dir(), "chrome", chrome_profile);
 
-    // ztd::logger::info("argv[0]        = {}", argv[0]);
-    // ztd::logger::info("profile_name   = {}", profile_name);
-    // ztd::logger::info("chrome_profile = {}", chrome_profile);
-    // ztd::logger::info("profile_path   = {}", profile_path);
+    // logger::info("argv[0]        = {}", argv[0]);
+    // logger::info("profile_name   = {}", profile_name);
+    // logger::info("chrome_profile = {}", chrome_profile);
+    // logger::info("profile_path   = {}", profile_path);
 
     const std::string command = std::format("{} "
                                             "--user-data-dir={} "

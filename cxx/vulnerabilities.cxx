@@ -24,7 +24,8 @@
 #include <CLI/CLI.hpp>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
+
+#include "logger/logger.hxx"
 
 #include "lib/commandline.hxx"
 #include "lib/colors.hxx"

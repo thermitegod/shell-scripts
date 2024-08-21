@@ -24,7 +24,8 @@
 #include <glibmm.h>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
+
+#include "logger/logger.hxx"
 
 #include "lib/hash.hxx"
 
@@ -63,9 +64,9 @@ hash::compare_files(const std::filesystem::path& a, const std::filesystem::path&
     const std::string a_hash = ztd::partition(stdout_a, " ")[0];
     const std::string b_hash = ztd::partition(stdout_b, " ")[0];
 
-    // ztd::logger::info("A : {} | {}", a_hash, a);
-    // ztd::logger::info("B : {} | {}", b_hash, b);
-    // ztd::logger::info("================");
+    // logger::info("A : {} | {}", a_hash, a);
+    // logger::info("B : {} | {}", b_hash, b);
+    // logger::info("================");
 
     return a_hash == b_hash;
 }

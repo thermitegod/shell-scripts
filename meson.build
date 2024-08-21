@@ -259,6 +259,8 @@ build_target(
     'cxx/lib/env.cxx',
     'cxx/lib/commandline.cxx',
     'cxx/lib/user-dirs.cxx',
+
+    'cxx/logger/logger.cxx',
   ],
   target_type: 'executable',
   include_directories: incdir,
@@ -280,6 +282,8 @@ build_target(
     'cxx/lib/commandline.cxx',
     'cxx/lib/hash.cxx',
     'cxx/lib/user-dirs.cxx',
+
+    'cxx/logger/logger.cxx',
   ],
   target_type: 'executable',
   include_directories: incdir,
@@ -299,6 +303,8 @@ build_target(
     'cxx/digest-ebuild.cxx',
 
     'cxx/lib/commandline.cxx',
+
+    'cxx/logger/logger.cxx',
   ],
   target_type: 'executable',
   include_directories: incdir,
@@ -322,6 +328,8 @@ build_target(
     'cxx/lib/proc.cxx',
     'cxx/lib/single-instance.cxx',
     'cxx/lib/user-dirs.cxx',
+
+    'cxx/logger/logger.cxx',
   ],
   target_type: 'executable',
   include_directories: incdir,
@@ -345,6 +353,8 @@ build_target(
     'cxx/lib/proc.cxx',
     'cxx/lib/single-instance.cxx',
     'cxx/lib/user-dirs.cxx',
+
+    'cxx/logger/logger.cxx',
   ],
   target_type: 'executable',
   include_directories: incdir,
@@ -365,6 +375,8 @@ build_target(
 
     'cxx/lib/commandline.cxx',
     'cxx/lib/env.cxx',
+
+    'cxx/logger/logger.cxx',
   ],
   target_type: 'executable',
   include_directories: incdir,
@@ -384,6 +396,8 @@ build_target(
     'cxx/vulnerabilities.cxx',
 
     'cxx/lib/commandline.cxx',
+
+    'cxx/logger/logger.cxx',
   ],
   target_type: 'executable',
   include_directories: incdir,

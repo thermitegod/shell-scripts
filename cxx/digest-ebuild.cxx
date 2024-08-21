@@ -30,7 +30,8 @@
 #include <CLI/CLI.hpp>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
+
+#include "logger/logger.hxx"
 
 #include "lib/commandline.hxx"
 
@@ -66,12 +67,12 @@ main(int argc, char** argv)
         std::println("Failed to find an ebuild");
         std::exit(EXIT_FAILURE);
     }
-    ztd::logger::debug("Ebuilds found '{}' ", ebuilds.size());
+    logger::debug("Ebuilds found '{}' ", ebuilds.size());
 
     std::ranges::sort(ebuilds);
 
     const auto command = std::format("ebuild {} manifest", ebuilds.back().string());
-    ztd::logger::debug("COMMAND({})", command);
+    logger::debug("COMMAND({})", command);
 
     i32 exit_status = EXIT_SUCCESS;
     Glib::spawn_command_line_sync(command, nullptr, nullptr, &exit_status);

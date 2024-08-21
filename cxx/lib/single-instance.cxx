@@ -27,7 +27,8 @@
 #include <signal.h>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
+
+#include "logger/logger.hxx"
 
 #include "lib/user-dirs.hxx"
 #include "lib/proc.hxx"
@@ -79,7 +80,7 @@ create_single_instance() noexcept
 
         if (is_process_running(pid))
         {
-            ztd::logger::error("single instance check failed for '{}'", proc::self::name());
+            logger::error("single instance check failed for '{}'", proc::self::name());
             std::exit(EXIT_FAILURE);
         }
     }

@@ -24,7 +24,8 @@
 #include <CLI/CLI.hpp>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
+
+#include "logger/logger.hxx"
 
 #include "lib/commandline.hxx"
 
@@ -48,59 +49,54 @@ run_commandline(const std::shared_ptr<commandline_opt_data>& opt) noexcept
         std::exit(EXIT_SUCCESS);
     }
 
-    if (opt->loglevel == "trace")
-    {
-        ztd::logger::initialize(spdlog::level::trace, opt->logfile);
-    }
-    else if (opt->loglevel == "debug")
-    {
-        ztd::logger::initialize(spdlog::level::debug, opt->logfile);
-    }
-    else if (opt->loglevel == "info")
-    {
-        ztd::logger::initialize(spdlog::level::info, opt->logfile);
-    }
-    else if (opt->loglevel == "warning")
-    {
-        ztd::logger::initialize(spdlog::level::warn, opt->logfile);
-    }
-    else if (opt->loglevel == "error")
-    {
-        ztd::logger::initialize(spdlog::level::err, opt->logfile);
-    }
-    else if (opt->loglevel == "critical")
-    {
-        ztd::logger::initialize(spdlog::level::critical, opt->logfile);
-    }
-    else
-    {
-        ztd::logger::initialize(spdlog::level::off);
-    }
+    logger::initialize(opt->log_levels, opt->logfile);
 }
 
 void
 setup_common_commandline(CLI::App& app, const std::shared_ptr<commandline_opt_data>& opt,
                          const bool file_list)
 {
-    static constexpr std::array<std::string, 8> loglevels =
-        {"trace", "debug", "info", "warning", "error", "critical", "off"};
-    app.add_option("--loglevel", opt->loglevel, "Set the loglevel")
-        ->expected(1)
-        ->check(CLI::IsMember(loglevels));
-
-    const auto is_absolute_path = CLI::Validator(
-        [](const std::filesystem::path& input)
-        {
-            if (input.is_absolute())
+    app.add_option("--loglevel", opt->raw_log_levels, "Set the loglevel. Format: domain=level")
+        ->check(
+            [&opt](const auto& value)
             {
+                constexpr auto log_levels = magic_enum::enum_names<spdlog::level::level_enum>();
+                constexpr auto valid_domains = magic_enum::enum_names<logger::domain>();
+
+                const auto pos = value.find('=');
+                if (pos == std::string::npos)
+                {
+                    return std::string("Must be in format domain=level");
+                }
+
+                const auto domain = value.substr(0, pos);
+                if (!std::ranges::contains(valid_domains, domain))
+                {
+                    return std::format("Invalid domain: {}", domain);
+                }
+
+                const auto level = value.substr(pos + 1);
+                if (!std::ranges::contains(log_levels, level))
+                {
+                    return std::format("Invalid log level: {}", level);
+                }
+
+                opt->log_levels.insert({domain, level});
+
                 return std::string();
-            }
-            return std::format("Logfile path must be absolute: {}", input.string());
-        },
-        "");
+            });
+
     app.add_option("--logfile", opt->logfile, "absolute path to the logfile")
         ->expected(1)
-        ->check(is_absolute_path);
+        ->check(
+            [](const std::filesystem::path& input)
+            {
+                if (input.is_absolute())
+                {
+                    return std::string();
+                }
+                return std::format("Logfile path must be absolute: {}", input.string());
+            });
 
     app.add_flag("-v,--version", opt->version, "Show version information");
 

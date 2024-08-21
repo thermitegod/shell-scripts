@@ -31,7 +31,8 @@
 #include <CLI/CLI.hpp>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
+
+#include "logger/logger.hxx"
 
 #include "lib/commandline.hxx"
 #include "lib/hash.hxx"
@@ -79,11 +80,11 @@ main(int argc, char** argv)
     {
         if (!std::filesystem::exists(run_path))
         {
-            ztd::logger::error("No such directory [{}]", run_path.string());
+            logger::error("No such directory [{}]", run_path.string());
         }
         else
         {
-            ztd::logger::error("Path must be a directory [{}]", run_path.string());
+            logger::error("Path must be a directory [{}]", run_path.string());
         }
         std::exit(EXIT_FAILURE);
     }
@@ -96,7 +97,7 @@ main(int argc, char** argv)
         }
 
         const std::filesystem::path file = entry.path();
-        // ztd::logger::info("path : {}", file.string());
+        // logger::info("path : {}", file.string());
         file_list.push_back(file);
     }
 
@@ -130,19 +131,19 @@ main(int argc, char** argv)
             {
                 if (!disable_delete)
                 {
-                    // ztd::logger::info("Files same [{}] [{}]", file_orig.string(), file.string());
+                    // logger::info("Files same [{}] [{}]", file_orig.string(), file.string());
 
-                    ztd::logger::info("delete: {}", file.string());
+                    logger::info("delete: {}", file.string());
                     std::filesystem::remove(file);
                     if (std::filesystem::exists(file))
                     {
-                        ztd::logger::error("Failed to delete: {}", file.string());
+                        logger::error("Failed to delete: {}", file.string());
                         std::exit(EXIT_FAILURE);
                     }
                 }
                 else
                 {
-                    ztd::logger::info("[PRETEND] delete: {}", file.string());
+                    logger::info("[PRETEND] delete: {}", file.string());
                 }
             }
             else
@@ -158,20 +159,20 @@ main(int argc, char** argv)
 
     if (file_dup_name_only_list.size())
     {
-        ztd::logger::info("== Name Collisions, Different Files ==");
+        logger::info("== Name Collisions, Different Files ==");
         for (const auto& files : file_dup_name_only_list)
         {
-            // ztd::logger::info("[{}] | [{}]", files.first.string(), files.second.string());
-            ztd::logger::info("{}", files.second.string());
+            // logger::info("[{}] | [{}]", files.first.string(), files.second.string());
+            logger::info("{}", files.second.string());
         }
     }
 
     if (file_not_dup_list.size())
     {
-        ztd::logger::info("== Name Contains Unneeded Duplicate Marker ==");
+        logger::info("== Name Contains Unneeded Duplicate Marker ==");
         for (const auto& file : file_not_dup_list)
         {
-            ztd::logger::info(file.string());
+            logger::info(file.string());
         }
     }
 

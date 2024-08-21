@@ -28,7 +28,8 @@
 #include <CLI/CLI.hpp>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
+
+#include "logger/logger.hxx"
 
 #include "lib/commandline.hxx"
 
@@ -136,7 +137,7 @@ main(int argc, char** argv)
         }
         else
         {
-            ztd::logger::error("cannot extract: {}", path.string());
+            logger::error("cannot extract: {}", path.string());
         }
 
         Glib::spawn_command_line_sync(command);

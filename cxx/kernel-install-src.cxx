@@ -28,7 +28,8 @@
 #include <CLI/CLI.hpp>
 
 #include <ztd/ztd.hxx>
-#include <ztd/ztd_logger.hxx>
+
+#include "logger/logger.hxx"
 
 #include "lib/commandline.hxx"
 #include "lib/env.hxx"
@@ -79,14 +80,14 @@ main(int argc, char** argv)
         const auto command = std::format("emerge --ignore-default-opts --oneshot {} {}",
                                          verbose ? "--verbose" : "--quiet",
                                          kernel_ebuild);
-        ztd::logger::debug("COMMAND({})", command);
+        logger::debug("COMMAND({})", command);
 
         i32 exit_status = EXIT_SUCCESS;
         Glib::spawn_command_line_sync(command, nullptr, nullptr, &exit_status);
 
         if (exit_status != EXIT_SUCCESS)
         {
-            ztd::logger::critical("Kernel install failed");
+            logger::critical("Kernel install failed");
             std::exit(exit_status);
         }
     }
@@ -95,20 +96,20 @@ main(int argc, char** argv)
     { // Install kernel config
         if (std::filesystem::exists("/usr/src/linux/.config"))
         {
-            ztd::logger::critical("Kernel config already exists, aborting");
+            logger::critical("Kernel config already exists, aborting");
             std::exit(EXIT_FAILURE);
         }
 
         const auto command =
             std::format("bash -c \"zcat /proc/config.gz > /usr/src/linux/.config\"");
-        ztd::logger::debug("COMMAND({})", command);
+        logger::debug("COMMAND({})", command);
 
         i32 exit_status = EXIT_SUCCESS;
         Glib::spawn_command_line_sync(command, nullptr, nullptr, &exit_status);
 
         if (exit_status != EXIT_SUCCESS)
         {
-            ztd::logger::critical("Kernel config install failed");
+            logger::critical("Kernel config install failed");
             std::exit(exit_status);
         }
     }
