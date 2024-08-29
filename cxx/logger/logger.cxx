@@ -42,7 +42,7 @@ logger::initialize(const std::unordered_map<std::string, std::string>& options,
                               default_logger_options_data,
                               magic_enum::enum_count<logger::domain>()>
         default_logger_options{{
-            {logger::domain::basic, {spdlog::level::warn, "%^%H:%M:%S.%F [%t] %-10l %v%$"}},
+            {logger::domain::basic, {spdlog::level::debug, "%^%H:%M:%S.%F [%t] %-10l %v%$"}},
         }};
 
     spdlog::sink_ptr file_sink = nullptr;
