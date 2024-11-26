@@ -211,14 +211,6 @@ if not magic_enum_dep.found() # using subproject
   magic_enum_dep = magic_enum_proj.get_variable('magic_enum_dep')
 endif
 
-# toml11 use system or subproject
-toml11_dep = dependency('toml11', required : false)
-if not toml11_dep.found() # using subproject
-  cmake = import('cmake')
-  toml11_proj = cmake.subproject('toml11', required : true)
-  toml11_dep = toml11_proj.dependency('toml11')
-endif
-
 # CLI11 use system or subproject
 cli11_dep = dependency('CLI11', required : false)
 if not cli11_dep.found() # using subproject
@@ -230,8 +222,6 @@ openssl_dep = dependency('openssl', required : true)
 
 spdlog_dep = dependency('spdlog', required : true)
 sigc_dep = dependency('sigc++-3.0', required : true)
-pugixml_dep = dependency('pugixml', required : true)
-nlohmann_json_dep = dependency('nlohmann_json', required : true)
 
 # Gtk4 CPP
 # gtkmm_dep = dependency('gtkmm-4.0', required : true)
@@ -249,7 +239,7 @@ preprocessor = [
   '-DGLIBMM_DISABLE_DEPRECATED',
   '-DGIOMM_DISABLE_DEPRECATED',
 
-  '-DZTD_SAFE_NUMERICS_TYPES',
+  # '-DZTD_SAFE_NUMERICS_TYPES',
 ]
 
 foreach a : preprocessor
