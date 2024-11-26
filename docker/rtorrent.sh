@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+echo "example only, use docker_torrent_admin"
+exit 1
+
 # docker pull ghcr.io/crazy-max/rtorrent-rutorrent:latest
 
 docker run -d \
