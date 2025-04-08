@@ -205,9 +205,9 @@ if not ztd_dep.found() # using subproject
 endif
 
 # magic_enum use system or subproject
-magic_enum_dep = dependency('magic_enum', required : false)
+magic_enum_dep = dependency('magic_enum', required : false, version: '>=0.9.7')
 if not magic_enum_dep.found() # using subproject
-  magic_enum_proj = subproject('magic_enum', required : true)
+  magic_enum_proj =  dependency('magic_enum', required: true, version: '>=0.9.7')
   magic_enum_dep = magic_enum_proj.get_variable('magic_enum_dep')
 endif
 
@@ -218,15 +218,13 @@ if not cli11_dep.found() # using subproject
   cli11_dep_dep = cli11_dep_proj.get_variable('CLI11_dep')
 endif
 
-openssl_dep = dependency('openssl', required : true)
-
 spdlog_dep = dependency('spdlog', required : true)
 sigc_dep = dependency('sigc++-3.0', required : true)
 
 # Gtk4 CPP
-# gtkmm_dep = dependency('gtkmm-4.0', required : true)
+gtkmm_dep = dependency('gtkmm-4.0', required : true)
 glibmm_dep = dependency('glibmm-2.68', required : true)
-giomm_dep = dependency('giomm-2.68', required : true)
+# giomm_dep = dependency('giomm-2.68', required : true)
 
 ## preprocessor static
 
