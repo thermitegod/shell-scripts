@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright (C) 2018-2023 Brandon Zorn <brandonzorn@cock.li>
+# Copyright (C) 2018-2025 Brandon Zorn <brandonzorn@cock.li>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # SCRIPT INFO
-# 3.11.0
-# 2024-02-23
+# 3.12.0
+# 2025-04-16
 
 
 # ZFS Builtin Kernel Build Script - gentoo
@@ -190,7 +190,7 @@ class Build:
             # if self.__experimental:
             #     kmake += 'LLVM_IAS=1 '
 
-        kmake += f'nice -19 make -j{cores * 2 + 1} -l{cores + 1} CC={cc} LD={ld} {act}'
+        kmake += f'chrt --idle 0 make -j{cores * 2 + 1} -l{cores + 1} CC={cc} LD={ld} {act}'
         if return_only:
             return kmake
 
