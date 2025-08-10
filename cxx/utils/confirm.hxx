@@ -15,39 +15,18 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <print>
+#pragma once
 
-#include <cstdlib>
+#include <string_view>
 
-#include <unistd.h>
-
-#include "lib/env.hxx"
-
-void
-env::check_running_user(const only_run_as user) noexcept
+namespace utils::confirm
 {
-    const bool is_root = geteuid() == 0;
-    if (user == only_run_as::root)
-    {
-        if (!is_root)
-        {
-            std::println("Requires root, exiting");
-            std::exit(EXIT_FAILURE);
-        }
-    }
-    else if (user == only_run_as::user)
-    {
-        if (is_root)
-        {
-            std::println("Do not run as root, exiting");
-            std::exit(EXIT_FAILURE);
-        }
-    }
-}
-
-bool
-env::is_wayland() noexcept
-{
-    const char* wayland = std::getenv("WAYLAND_DISPLAY");
-    return wayland != nullptr;
-}
+/**
+ * @brief Confirm
+ *
+ * - Prompt user for a y/n
+ *
+ * @return true if user enters 'y/yes/1', otherwise false
+ */
+bool run(std::string_view prompt = "Confirm run? [y/n]") noexcept;
+} // namespace utils::confirm

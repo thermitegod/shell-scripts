@@ -22,10 +22,10 @@
 
 #include "logger/logger.hxx"
 
-#include "lib/execute.hxx"
+#include "vfs/execute.hxx"
 
 std::string
-execute::quote(const std::string_view str) noexcept
+vfs::execute::quote(const std::string_view str) noexcept
 {
     if (str.empty())
     {
@@ -34,8 +34,8 @@ execute::quote(const std::string_view str) noexcept
     return std::format(R"("{}")", ztd::replace(str, "\"", "\\\""));
 }
 
-execute::sync_data
-execute::command_line_sync(const std::string_view command) noexcept
+vfs::execute::sync_data
+vfs::execute::command_line_sync(const std::string_view command) noexcept
 {
     logger::info<logger::domain::execute>("{}", command);
 
@@ -49,7 +49,7 @@ execute::command_line_sync(const std::string_view command) noexcept
 }
 
 void
-execute::command_line_async(const std::string_view command) noexcept
+vfs::execute::command_line_async(const std::string_view command) noexcept
 {
     logger::info<logger::domain::execute>("{}", command);
 

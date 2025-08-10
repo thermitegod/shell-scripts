@@ -27,10 +27,12 @@
 
 #include "logger/logger.hxx"
 
-#include "lib/commandline.hxx"
-#include "lib/execute.hxx"
-#include "lib/single-instance.hxx"
-#include "lib/user-dirs.hxx"
+#include "commandline/commandline.hxx"
+
+#include "utils/single-instance.hxx"
+
+#include "vfs/execute.hxx"
+#include "vfs/user-dirs.hxx"
 
 const auto package = package_data{
     std::source_location::current().file_name(),
@@ -52,10 +54,10 @@ main(int argc, char** argv)
 
     CLI11_PARSE(app, argc, argv);
 
-    create_single_instance();
+    utils::instance::create();
 
     const std::filesystem::path snip_path =
-        user::home_dir() /
+        vfs::user::home_dir() /
         std::format("{}.png",
                     std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()));
 
@@ -69,6 +71,6 @@ main(int argc, char** argv)
         command = std::format("grimshot save area {}", snip_path.string());
     }
 
-    auto result = execute::command_line_sync(command);
+    auto result = vfs::execute::command_line_sync(command);
     std::exit(result.exit_status);
 }

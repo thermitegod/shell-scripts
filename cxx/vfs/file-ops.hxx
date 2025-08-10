@@ -23,9 +23,9 @@
 
 #include "logger/logger.hxx"
 
-#include "lib/error.hxx"
+#include "vfs/error.hxx"
 
-namespace lib
+namespace vfs
 {
 /**
  * Read an entire file into a string. Does not support no partial reads, either
@@ -49,7 +49,7 @@ read_file(const std::filesystem::path& path,
     if (!file.is_open()) [[unlikely]]
     {
         logger::error("Failed to open file for reading: {}", path.string());
-        return std::unexpected{lib::error_code::file_open_failure};
+        return std::unexpected{vfs::error_code::file_open_failure};
     }
 
     std::string result;
@@ -62,14 +62,14 @@ read_file(const std::filesystem::path& path,
         result.append(buffer.data(), static_cast<std::string::size_type>(file.gcount()));
         if (result.size() > max_size) [[unlikely]]
         {
-            return std::unexpected{lib::error_code::file_too_large};
+            return std::unexpected{vfs::error_code::file_too_large};
         }
     }
 
     if (file.fail() && !file.eof()) [[unlikely]]
     {
         logger::error("Failed to read file: {}", path.string());
-        return std::unexpected{lib::error_code::file_read_failure};
+        return std::unexpected{vfs::error_code::file_read_failure};
     }
 
     file.close();
@@ -77,7 +77,7 @@ read_file(const std::filesystem::path& path,
     if (file.is_open()) [[unlikely]]
     {
         logger::error("Failed to close file: {}", path.string());
-        return std::unexpected{lib::error_code::file_close_failure};
+        return std::unexpected{vfs::error_code::file_close_failure};
     }
 
     return result;
@@ -98,7 +98,7 @@ read_file_partial(const std::filesystem::path& path, const std::size_t size) noe
     if (!file.is_open()) [[unlikely]]
     {
         logger::error("Failed to open file for reading: {}", path.string());
-        return std::unexpected{lib::error_code::file_open_failure};
+        return std::unexpected{vfs::error_code::file_open_failure};
     }
 
     std::string result;
@@ -110,7 +110,7 @@ read_file_partial(const std::filesystem::path& path, const std::size_t size) noe
     if (file.fail() && !file.eof()) [[unlikely]]
     {
         logger::error("Failed to read file: {}", path.string());
-        return std::unexpected{lib::error_code::file_read_failure};
+        return std::unexpected{vfs::error_code::file_read_failure};
     }
 
     file.close();
@@ -118,7 +118,7 @@ read_file_partial(const std::filesystem::path& path, const std::size_t size) noe
     if (file.is_open()) [[unlikely]]
     {
         logger::error("Failed to close file: {}", path.string());
-        return std::unexpected{lib::error_code::file_close_failure};
+        return std::unexpected{vfs::error_code::file_close_failure};
     }
 
     return result;
@@ -139,7 +139,7 @@ write_file(const std::filesystem::path& path, auto&& buffer) noexcept
     if (!file.is_open()) [[unlikely]]
     {
         logger::error("Failed to open file for writing: {}", path.string());
-        return {lib::error_code::file_open_failure};
+        return {vfs::error_code::file_open_failure};
     }
 
     file.write(buffer.data(), static_cast<std::streamsize>(buffer.size()));
@@ -147,7 +147,7 @@ write_file(const std::filesystem::path& path, auto&& buffer) noexcept
     if (file.fail()) [[unlikely]]
     {
         logger::error("Failed to write file: {}", path.string());
-        return {lib::error_code::file_write_failure};
+        return {vfs::error_code::file_write_failure};
     }
 
     file.close();
@@ -155,9 +155,9 @@ write_file(const std::filesystem::path& path, auto&& buffer) noexcept
     if (file.fail()) [[unlikely]]
     {
         logger::error("Failed to close file: {}", path.string());
-        return {lib::error_code::file_close_failure};
+        return {vfs::error_code::file_close_failure};
     }
 
     return {};
 }
-} // namespace lib
+} // namespace vfs

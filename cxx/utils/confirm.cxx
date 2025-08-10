@@ -15,19 +15,28 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <filesystem>
+#include <iostream>
 #include <string>
+#include <string_view>
 
-#include "lib/proc.hxx"
+#include <unistd.h>
 
-[[nodiscard]] const std::filesystem::path
-proc::self::exe() noexcept
+#include <ztd/ztd.hxx>
+
+#include "utils/confirm.hxx"
+
+bool
+utils::confirm::run(std::string_view prompt) noexcept
 {
-    return std::filesystem::read_symlink(detail::proc_self_exe);
-}
-
-[[nodiscard]] const std::string
-proc::self::name() noexcept
-{
-    return std::filesystem::read_symlink(detail::proc_self_exe).filename();
+    std::string val;
+    std::cout << prompt << std::endl;
+    if (std::getline(std::cin, val))
+    {
+        if (ztd::lower(val) == "y" || ztd::lower(val) == "yes" || val == "1")
+        {
+            return true;
+        }
+        return false;
+    }
+    return false;
 }

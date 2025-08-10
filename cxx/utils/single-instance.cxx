@@ -28,15 +28,16 @@
 
 #include "logger/logger.hxx"
 
-#include "lib/file-ops.hxx"
-#include "lib/proc.hxx"
-#include "lib/single-instance.hxx"
-#include "lib/user-dirs.hxx"
+#include "utils/single-instance.hxx"
+
+#include "vfs/file-ops.hxx"
+#include "vfs/proc.hxx"
+#include "vfs/user-dirs.hxx"
 
 const std::filesystem::path
 get_pid_path() noexcept
 {
-    return user::runtime_dir() / std::format("{}.pid", proc::self::name());
+    return vfs::user::runtime_dir() / std::format("{}.pid", vfs::proc::self::name());
 }
 
 void
@@ -58,7 +59,7 @@ is_process_running(pid_t pid) noexcept
 }
 
 void
-create_single_instance() noexcept
+utils::instance::create() noexcept
 {
     std::atexit(single_instance_finalize);
 
@@ -77,13 +78,13 @@ create_single_instance() noexcept
 
         if (is_process_running(pid))
         {
-            logger::error("single instance check failed for '{}'", proc::self::name());
+            logger::error("single instance check failed for '{}'", vfs::proc::self::name());
             std::exit(EXIT_FAILURE);
         }
     }
 
     // use std::to_string to avoid locale formating of pid
     // from '12345' -> '12,345'
-    const auto ec = lib::write_file(path, std::to_string(::getpid()));
+    const auto ec = vfs::write_file(path, std::to_string(::getpid()));
     logger::critical_if(bool(ec), "Failed to write pid file: {} {}", path.string(), ec.message());
 }

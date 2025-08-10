@@ -29,9 +29,10 @@
 
 #include "logger/logger.hxx"
 
-#include "lib/commandline.hxx"
-#include "lib/hash.hxx"
-#include "lib/user-dirs.hxx"
+#include "commandline/commandline.hxx"
+
+#include "vfs/hash.hxx"
+#include "vfs/user-dirs.hxx"
 
 const auto package = package_data{
     std::source_location::current().file_name(),
@@ -44,7 +45,7 @@ main(int argc, char** argv)
 {
     CLI::App app{"TEST"};
 
-    std::filesystem::path run_path = user::download_dir();
+    std::filesystem::path run_path = vfs::user::download_dir();
     app.add_option("-p,--path",
                    run_path,
                    std::format("Path to run in, default [{}]", run_path.string()));
@@ -120,7 +121,7 @@ main(int argc, char** argv)
 
         if (std::filesystem::exists(file_orig))
         {
-            bool hash_same = hash::compare_files(file_orig, file);
+            bool hash_same = vfs::hash::compare_files(file_orig, file);
 
             if (hash_same)
             {

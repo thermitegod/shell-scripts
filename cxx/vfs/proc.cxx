@@ -15,18 +15,19 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#pragma once
-
 #include <filesystem>
+#include <string>
 
-namespace hash
+#include "vfs/proc.hxx"
+
+[[nodiscard]] const std::filesystem::path
+vfs::proc::self::exe() noexcept
 {
-/**
- * @brief Compare
- *
- * - Check if two files have the same hash
- *
- * @return true both files have the same hash, otherwise false.
- */
-bool compare_files(const std::filesystem::path& a, const std::filesystem::path& b) noexcept;
-} // namespace hash
+    return std::filesystem::read_symlink(detail::proc_self_exe);
+}
+
+[[nodiscard]] const std::string
+vfs::proc::self::name() noexcept
+{
+    return std::filesystem::read_symlink(detail::proc_self_exe).filename();
+}

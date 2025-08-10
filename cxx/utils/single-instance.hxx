@@ -1,4 +1,6 @@
 /**
+ * Copyright (C) 2024 Brandon Zorn <brandonzorn@cock.li>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 3 of the License, or
@@ -13,32 +15,14 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <string>
-#include <system_error>
+#pragma once
 
-#include <magic_enum/magic_enum.hpp>
-
-#include <ztd/ztd.hxx>
-
-#include "lib/error.hxx"
-
-const std::error_category&
-lib::error_category() noexcept
+namespace utils::instance
 {
-    struct category final : std::error_category
-    {
-        const char*
-        name() const noexcept override final
-        {
-            return "lib::error_category()";
-        }
-
-        std::string
-        message(int c) const override final
-        {
-            return ztd::replace(magic_enum::enum_name(static_cast<lib::error_code>(c)), "_", " ");
-        }
-    };
-    static const category instance{};
-    return instance;
-}
+/**
+ * @brief create_single_instance
+ *
+ * Only allow a single instance of this program to be running at a time
+ */
+void create() noexcept;
+} // namespace utils::instance

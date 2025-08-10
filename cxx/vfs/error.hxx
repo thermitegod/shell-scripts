@@ -20,7 +20,7 @@
 
 #include <cstdint>
 
-namespace lib
+namespace vfs
 {
 enum class error_code : std::int32_t
 {
@@ -45,12 +45,12 @@ enum class error_code : std::int32_t
 const std::error_category& error_category() noexcept;
 
 inline std::error_code
-make_error_code(lib::error_code e) noexcept
+make_error_code(vfs::error_code e) noexcept
 {
     return std::error_code{static_cast<int>(e), error_category()};
 }
-} // namespace lib
+} // namespace vfs
 
-template<> struct std::is_error_code_enum<lib::error_code> : public std::true_type
+template<> struct std::is_error_code_enum<vfs::error_code> : public std::true_type
 {
 };

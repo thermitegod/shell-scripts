@@ -17,7 +17,7 @@
 
 #pragma once
 
-namespace env
+namespace vfs::env
 {
 enum class only_run_as
 {
@@ -43,4 +43,4 @@ void check_running_user(const only_run_as user) noexcept;
  * @return true if the display server wayland, otherwise false
  */
 bool is_wayland() noexcept;
-} // namespace env
+} // namespace vfs::env

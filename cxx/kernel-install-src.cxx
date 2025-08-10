@@ -27,9 +27,10 @@
 
 #include "logger/logger.hxx"
 
-#include "lib/commandline.hxx"
-#include "lib/env.hxx"
-#include "lib/execute.hxx"
+#include "commandline/commandline.hxx"
+
+#include "vfs/env.hxx"
+#include "vfs/execute.hxx"
 
 const auto package = package_data{
     std::source_location::current().file_name(),
@@ -57,7 +58,7 @@ main(int argc, char** argv)
 
     CLI11_PARSE(app, argc, argv);
 
-    env::check_running_user(env::only_run_as::root);
+    vfs::env::check_running_user(vfs::env::only_run_as::root);
 
     std::string kernel_ebuild;
     if (kernel == "gentoo")
@@ -74,9 +75,10 @@ main(int argc, char** argv)
     }
 
     { // Install kernel
-        auto result = execute::command_line_sync("emerge --ignore-default-opts --oneshot {} {}",
-                                                 verbose ? "--verbose" : "--quiet",
-                                                 kernel_ebuild);
+        auto result =
+            vfs::execute::command_line_sync("emerge --ignore-default-opts --oneshot {} {}",
+                                            verbose ? "--verbose" : "--quiet",
+                                            kernel_ebuild);
         if (result.exit_status != EXIT_SUCCESS)
         {
             logger::critical("Kernel install failed");
@@ -92,8 +94,8 @@ main(int argc, char** argv)
             std::exit(EXIT_FAILURE);
         }
 
-        auto result =
-            execute::command_line_sync("bash -c \"zcat /proc/config.gz > /usr/src/linux/.config\"");
+        auto result = vfs::execute::command_line_sync(
+            "bash -c \"zcat /proc/config.gz > /usr/src/linux/.config\"");
         if (result.exit_status != EXIT_SUCCESS)
         {
             logger::critical("Kernel config install failed");

@@ -19,7 +19,7 @@
 
 #include <string_view>
 
-namespace colors
+namespace utils::colors
 {
 // reset
 constexpr std::string_view nc = "\033[0m";
@@ -93,4 +93,4 @@ constexpr std::string_view on_iblu = "\033[0;104m";
 constexpr std::string_view on_ipur = "\033[0;105m";
 constexpr std::string_view on_icya = "\033[0;106m";
 constexpr std::string_view on_iwhi = "\033[0;107m";
-} // namespace colors
+} // namespace utils::colors

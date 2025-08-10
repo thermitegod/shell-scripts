@@ -14,16 +14,14 @@
  */
 
 #include <filesystem>
-
 #include <memory>
-
 #include <unordered_map>
 
 #include <magic_enum/magic_enum.hpp>
 
-#include <spdlog/spdlog.h>
-#include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/sinks/basic_file_sink.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/spdlog.h>
 
 #include <ztd/ztd.hxx>
 
@@ -42,7 +40,7 @@ logger::initialize(const std::unordered_map<std::string, std::string>& options,
                               default_logger_options_data,
                               magic_enum::enum_count<logger::domain>()>
         default_logger_options{{
-            {logger::domain::basic, {spdlog::level::trace, "%^%H:%M:%S.%F [%t] %-10l\t\t\t%v%$"}},
+            {logger::domain::basic, {spdlog::level::info, "%^%H:%M:%S.%F [%t] %-10l\t\t\t%v%$"}},
             {logger::domain::execute, {spdlog::level::off, "%^%H:%M:%S.%F [%t] %-10l %n\t\t%v%$"}},
         }};
 

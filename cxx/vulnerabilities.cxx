@@ -23,8 +23,9 @@
 
 #include <ztd/ztd.hxx>
 
-#include "lib/colors.hxx"
-#include "lib/commandline.hxx"
+#include "commandline/commandline.hxx"
+
+#include "utils/colors.hxx"
 
 const auto package = package_data{
     std::source_location::current().file_name(),
@@ -65,9 +66,9 @@ main(int argc, char** argv)
         file.close();
 
         std::println("{}{}{} : {}",
-                     colors::yel,
+                     utils::colors::yel,
                      ztd::rjust(filename.string(), width),
-                     colors::nc,
+                     utils::colors::nc,
                      ztd::strip(state));
     }
 

@@ -28,8 +28,9 @@
 
 #include "logger/logger.hxx"
 
-#include "lib/commandline.hxx"
-#include "lib/execute.hxx"
+#include "commandline/commandline.hxx"
+
+#include "vfs/execute.hxx"
 
 const auto package = package_data{
     std::source_location::current().file_name(),
@@ -138,7 +139,7 @@ main(int argc, char** argv)
             logger::error("cannot extract: {}", path.string());
         }
 
-        auto result = execute::command_line_sync(command);
+        auto result = vfs::execute::command_line_sync(command);
         if (result.exit_status != EXIT_SUCCESS)
         {
             logger::error("{}", result.standard_error);

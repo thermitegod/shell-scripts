@@ -175,8 +175,12 @@ IncludeCategories:
   # Internal
   - Regex: '^"logger/.*"'
     Priority: 50
-  - Regex: '^"lib/.*"'
+  - Regex: '^"commandline/.*"'
     Priority: 51
+  - Regex: '^"utils/.*"'
+    Priority: 52
+  - Regex: '^"vfs/.*"'
+    Priority: 53
   - Regex: '.*' # everything else
     Priority: 100
 IncludeIsMainRegex: 'x' # using a 'bad' regex will disable this feature

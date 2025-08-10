@@ -21,16 +21,16 @@
 
 #include <ztd/ztd.hxx>
 
-#include "lib/recursion.hxx"
+#include "vfs/recursion.hxx"
 
-recursion::find_files::find_files(const std::filesystem::path& path, const i32 max_depth)
+vfs::recursion::find_files::find_files(const std::filesystem::path& path, const i32 max_depth)
     : start_path_(path), max_depth_(max_depth)
 {
     this->recursive_find_files(this->start_path_);
 }
 
 void
-recursion::find_files::recursive_find_files(const std::filesystem::path& path) noexcept
+vfs::recursion::find_files::recursive_find_files(const std::filesystem::path& path) noexcept
 {
     this->total_descent_ += 1;
     this->current_depth_ += 1;
@@ -65,25 +65,25 @@ recursion::find_files::recursive_find_files(const std::filesystem::path& path) n
 }
 
 const std::span<const std::filesystem::path>
-recursion::find_files::only_files() const noexcept
+vfs::recursion::find_files::only_files() const noexcept
 {
     return this->only_file_list_;
 }
 
 const std::span<const std::filesystem::path>
-recursion::find_files::only_dirs() const noexcept
+vfs::recursion::find_files::only_dirs() const noexcept
 {
     return this->only_dir_list_;
 }
 
 const std::span<const std::filesystem::path>
-recursion::find_files::all_entries() const noexcept
+vfs::recursion::find_files::all_entries() const noexcept
 {
     return this->file_dir_list_;
 }
 
 usize
-recursion::find_files::total_descent() const noexcept
+vfs::recursion::find_files::total_descent() const noexcept
 {
     return this->total_descent_;
 }

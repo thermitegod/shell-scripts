@@ -23,7 +23,7 @@
 
 #include <ztd/ztd.hxx>
 
-namespace recursion
+namespace vfs::recursion
 {
 class find_files
 {
@@ -81,4 +81,4 @@ class find_files
     std::vector<std::filesystem::path> only_dir_list_;
     std::vector<std::filesystem::path> file_dir_list_;
 };
-} // namespace recursion
+} // namespace vfs::recursion

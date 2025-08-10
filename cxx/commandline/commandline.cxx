@@ -25,7 +25,7 @@
 
 #include "logger/logger.hxx"
 
-#include "lib/commandline.hxx"
+#include "commandline/commandline.hxx"
 
 const std::shared_ptr<commandline_opt_data>
 commandline_opt_data::create(const package_data& package) noexcept

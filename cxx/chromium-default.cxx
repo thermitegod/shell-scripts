@@ -28,10 +28,11 @@
 
 #include "logger/logger.hxx"
 
-#include "lib/commandline.hxx"
-#include "lib/env.hxx"
-#include "lib/execute.hxx"
-#include "lib/user-dirs.hxx"
+#include "commandline/commandline.hxx"
+
+#include "vfs/env.hxx"
+#include "vfs/execute.hxx"
+#include "vfs/user-dirs.hxx"
 
 const auto package = package_data{
     std::source_location::current().file_name(),
@@ -60,10 +61,10 @@ main(int argc, char** argv)
 
     CLI11_PARSE(app, argc, argv);
 
-    env::check_running_user(env::only_run_as::user);
+    vfs::env::check_running_user(vfs::env::only_run_as::user);
 
     // need to know display server type for ozone to work
-    const std::string display_server = env::is_wayland() ? "wayland" : "x11";
+    const std::string display_server = vfs::env::is_wayland() ? "wayland" : "x11";
 
     // symlinks must be named 'chromium-<profile>' to work.
     // e.g. ln -s chromium-default chromium-<profile>
@@ -80,7 +81,7 @@ main(int argc, char** argv)
 
     // Build config path
     const std::string chrome_profile = std::format("{}-{}", bin_name, profile_name);
-    const std::string profile_path = user::config_dir() / "chrome" / chrome_profile;
+    const std::string profile_path = vfs::user::config_dir() / "chrome" / chrome_profile;
 
     // logger::info("argv[0]        = {}", argv[0]);
     // logger::info("profile_name   = {}", profile_name);
@@ -96,6 +97,6 @@ main(int argc, char** argv)
                                             profile_path,
                                             display_server);
 
-    execute::command_line_async(command);
+    vfs::execute::command_line_async(command);
     std::exit(EXIT_SUCCESS);
 }

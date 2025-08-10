@@ -21,13 +21,13 @@
 
 #include "logger/logger.hxx"
 
-#include "lib/execute.hxx"
-#include "lib/mouse.hxx"
+#include "vfs/execute.hxx"
+#include "vfs/mouse.hxx"
 
 void
-mouse::set_position(const u32 x, const u32 y) noexcept
+vfs::mouse::set_position(const u32 x, const u32 y) noexcept
 {
-    auto result = execute::command_line_sync("swaymsg seat seat0 cursor set {} {}", x, y);
+    auto result = vfs::execute::command_line_sync("swaymsg seat seat0 cursor set {} {}", x, y);
     if (result.exit_status != EXIT_SUCCESS)
     {
         logger::error("mouse::set_position() failed with code '{}'", result.exit_status);
@@ -37,9 +37,9 @@ mouse::set_position(const u32 x, const u32 y) noexcept
 
 #if 0
 std::array<u32, 2>
-mouse::get_position() noexcept
+vfs::mouse::get_position() noexcept
 {
-    auto result = execute::command_line_sync("slurp -p");
+    auto result = vfs::execute::command_line_sync("slurp -p");
     if (result.exit_status != EXIT_SUCCESS)
     {
         logger::error("mouse::get_position() failed with code '{}'", result.exit_status);
@@ -55,10 +55,11 @@ mouse::get_position() noexcept
 #endif
 
 void
-mouse::left_click(const bool double_click) noexcept
+vfs::mouse::left_click(const bool double_click) noexcept
 {
     { // press
-        auto result = execute::command_line_sync("swaymsg 'seat \"seat0\" cursor press button1'");
+        auto result =
+            vfs::execute::command_line_sync("swaymsg 'seat \"seat0\" cursor press button1'");
         if (result.exit_status != EXIT_SUCCESS)
         {
             logger::error("mouse::left_click() press failed with code '{}'", result.exit_status);
@@ -67,7 +68,8 @@ mouse::left_click(const bool double_click) noexcept
     }
 
     { // release
-        auto result = execute::command_line_sync("swaymsg 'seat \"seat0\" cursor release button1'");
+        auto result =
+            vfs::execute::command_line_sync("swaymsg 'seat \"seat0\" cursor release button1'");
         if (result.exit_status != EXIT_SUCCESS)
         {
             logger::error("mouse::left_click() release failed with code '{}'", result.exit_status);
@@ -82,10 +84,11 @@ mouse::left_click(const bool double_click) noexcept
 }
 
 void
-mouse::right_click() noexcept
+vfs::mouse::right_click() noexcept
 {
     { // press
-        auto result = execute::command_line_sync("swaymsg 'seat \"seat0\" cursor press button3'");
+        auto result =
+            vfs::execute::command_line_sync("swaymsg 'seat \"seat0\" cursor press button3'");
         if (result.exit_status != EXIT_SUCCESS)
         {
             logger::error("mouse::right_click() press failed with code '{}'", result.exit_status);
@@ -94,7 +97,8 @@ mouse::right_click() noexcept
     }
 
     { // release
-        auto result = execute::command_line_sync("swaymsg 'seat \"seat0\" cursor release button3'");
+        auto result =
+            vfs::execute::command_line_sync("swaymsg 'seat \"seat0\" cursor release button3'");
         if (result.exit_status != EXIT_SUCCESS)
         {
             logger::error("mouse::right_click() release failed with code '{}'", result.exit_status);

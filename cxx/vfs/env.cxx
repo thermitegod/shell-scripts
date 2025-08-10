@@ -15,11 +15,39 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#pragma once
+#include <print>
 
-/**
- * @brief create_single_instance
- *
- * Only allow a single instance of this program to be running at a time
- */
-void create_single_instance() noexcept;
+#include <cstdlib>
+
+#include <unistd.h>
+
+#include "vfs/env.hxx"
+
+void
+vfs::env::check_running_user(const only_run_as user) noexcept
+{
+    const bool is_root = geteuid() == 0;
+    if (user == only_run_as::root)
+    {
+        if (!is_root)
+        {
+            std::println("Requires root, exiting");
+            std::exit(EXIT_FAILURE);
+        }
+    }
+    else if (user == only_run_as::user)
+    {
+        if (is_root)
+        {
+            std::println("Do not run as root, exiting");
+            std::exit(EXIT_FAILURE);
+        }
+    }
+}
+
+bool
+vfs::env::is_wayland() noexcept
+{
+    const char* wayland = std::getenv("WAYLAND_DISPLAY");
+    return wayland != nullptr;
+}

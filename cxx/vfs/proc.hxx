@@ -18,21 +18,29 @@
 #pragma once
 
 #include <filesystem>
+#include <string>
 
-namespace user
+namespace vfs::proc::self
 {
-const std::filesystem::path desktop_dir() noexcept;
-const std::filesystem::path documents_dir() noexcept;
-const std::filesystem::path download_dir() noexcept;
-const std::filesystem::path music_dir() noexcept;
-const std::filesystem::path pictures_dir() noexcept;
-const std::filesystem::path public_share_dir() noexcept;
-const std::filesystem::path template_dir() noexcept;
-const std::filesystem::path videos_dir() noexcept;
+namespace detail
+{
+const std::filesystem::path proc{"/proc"};
+const std::filesystem::path proc_self{"/proc/self"};
+const std::filesystem::path proc_self_exe{"/proc/self/exe"};
+const std::filesystem::path proc_self_stat{"/proc/self/stat"};
+} // namespace detail
 
-const std::filesystem::path home_dir() noexcept;
-const std::filesystem::path cache_dir() noexcept;
-const std::filesystem::path data_dir() noexcept;
-const std::filesystem::path config_dir() noexcept;
-const std::filesystem::path runtime_dir() noexcept;
-} // namespace user
+/**
+ * @brief Program Executable
+ *
+ * @return Current executing program path
+ */
+[[nodiscard]] const std::filesystem::path exe() noexcept;
+
+/**
+ * @brief Program Name
+ *
+ * @return Current executing program name
+ */
+[[nodiscard]] const std::string name() noexcept;
+} // namespace vfs::proc::self

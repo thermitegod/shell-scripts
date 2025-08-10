@@ -252,10 +252,11 @@ build_target(
   sources: [
     'cxx/chromium-default.cxx',
 
-    'cxx/lib/env.cxx',
-    'cxx/lib/commandline.cxx',
-    'cxx/lib/execute.cxx',
-    'cxx/lib/user-dirs.cxx',
+    'cxx/commandline/commandline.cxx',
+
+    'cxx/vfs/env.cxx',
+    'cxx/vfs/execute.cxx',
+    'cxx/vfs/user-dirs.cxx',
 
     'cxx/logger/logger.cxx',
   ],
@@ -276,10 +277,11 @@ build_target(
   sources: [
     'cxx/clean-downloads.cxx',
 
-    'cxx/lib/commandline.cxx',
-    'cxx/lib/execute.cxx',
-    'cxx/lib/hash.cxx',
-    'cxx/lib/user-dirs.cxx',
+    'cxx/commandline/commandline.cxx',
+
+    'cxx/vfs/execute.cxx',
+    'cxx/vfs/hash.cxx',
+    'cxx/vfs/user-dirs.cxx',
 
     'cxx/logger/logger.cxx',
   ],
@@ -300,8 +302,9 @@ build_target(
   sources: [
     'cxx/digest-ebuild.cxx',
 
-    'cxx/lib/commandline.cxx',
-    'cxx/lib/execute.cxx',
+    'cxx/commandline/commandline.cxx',
+
+    'cxx/vfs/execute.cxx',
 
     'cxx/logger/logger.cxx',
   ],
@@ -322,13 +325,15 @@ build_target(
   sources: [
     'cxx/extract.cxx',
 
-    'cxx/lib/commandline.cxx',
-    'cxx/lib/env.cxx',
-    'cxx/lib/error.cxx',
-    'cxx/lib/execute.cxx',
-    'cxx/lib/proc.cxx',
-    'cxx/lib/single-instance.cxx',
-    'cxx/lib/user-dirs.cxx',
+    'cxx/commandline/commandline.cxx',
+
+    'cxx/utils/single-instance.cxx',
+
+    'cxx/vfs/env.cxx',
+    'cxx/vfs/error.cxx',
+    'cxx/vfs/execute.cxx',
+    'cxx/vfs/proc.cxx',
+    'cxx/vfs/user-dirs.cxx',
 
     'cxx/logger/logger.cxx',
   ],
@@ -349,13 +354,15 @@ build_target(
   sources: [
     'cxx/snip.cxx',
 
-    'cxx/lib/commandline.cxx',
-    'cxx/lib/env.cxx',
-    'cxx/lib/error.cxx',
-    'cxx/lib/execute.cxx',
-    'cxx/lib/proc.cxx',
-    'cxx/lib/single-instance.cxx',
-    'cxx/lib/user-dirs.cxx',
+    'cxx/commandline/commandline.cxx',
+
+    'cxx/utils/single-instance.cxx',
+
+    'cxx/vfs/env.cxx',
+    'cxx/vfs/error.cxx',
+    'cxx/vfs/execute.cxx',
+    'cxx/vfs/proc.cxx',
+    'cxx/vfs/user-dirs.cxx',
 
     'cxx/logger/logger.cxx',
   ],
@@ -376,9 +383,10 @@ build_target(
   sources: [
     'cxx/kernel-install-src.cxx',
 
-    'cxx/lib/commandline.cxx',
-    'cxx/lib/env.cxx',
-    'cxx/lib/execute.cxx',
+    'cxx/commandline/commandline.cxx',
+
+    'cxx/vfs/env.cxx',
+    'cxx/vfs/execute.cxx',
 
     'cxx/logger/logger.cxx',
   ],
@@ -399,7 +407,7 @@ build_target(
   sources: [
     'cxx/vulnerabilities.cxx',
 
-    'cxx/lib/commandline.cxx',
+    'cxx/commandline/commandline.cxx',
 
     'cxx/logger/logger.cxx',
   ],

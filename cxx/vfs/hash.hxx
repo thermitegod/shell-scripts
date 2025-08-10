@@ -15,26 +15,18 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
-#include <string>
-#include <string_view>
+#pragma once
 
-#include <unistd.h>
+#include <filesystem>
 
-#include <ztd/ztd.hxx>
-
-bool
-confirm_run(std::string_view prompt) noexcept
+namespace vfs::hash
 {
-    std::string val;
-    std::cout << prompt << std::endl;
-    if (std::getline(std::cin, val))
-    {
-        if (ztd::lower(val) == "y" || ztd::lower(val) == "yes" || val == "1")
-        {
-            return true;
-        }
-        return false;
-    }
-    return false;
-}
+/**
+ * @brief Compare
+ *
+ * - Check if two files have the same hash
+ *
+ * @return true both files have the same hash, otherwise false.
+ */
+bool compare_files(const std::filesystem::path& a, const std::filesystem::path& b) noexcept;
+} // namespace vfs::hash

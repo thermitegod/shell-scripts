@@ -19,10 +19,10 @@
 
 #include <ztd/ztd.hxx>
 
-namespace mouse
+namespace vfs::mouse
 {
 void set_position(const u32 x, const u32 y) noexcept;
 // std::array<u32, 2> get_position() noexcept;
 void left_click(const bool double_click = false) noexcept;
 void right_click() noexcept;
-} // namespace mouse
+} // namespace vfs::mouse

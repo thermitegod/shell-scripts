@@ -25,16 +25,16 @@
 
 #include "logger/logger.hxx"
 
-#include "lib/execute.hxx"
-#include "lib/hash.hxx"
+#include "vfs/execute.hxx"
+#include "vfs/hash.hxx"
 
 bool
-hash::compare_files(const std::filesystem::path& a, const std::filesystem::path& b) noexcept
+vfs::hash::compare_files(const std::filesystem::path& a, const std::filesystem::path& b) noexcept
 {
     // Glib::find_program_in_path("xxhsum");
 
-    auto result_a = execute::command_line_sync("xxhsum {}", execute::quote(a.c_str()));
-    auto result_b = execute::command_line_sync("xxhsum {}", execute::quote(b.c_str()));
+    auto result_a = vfs::execute::command_line_sync("xxhsum {}", vfs::execute::quote(a.c_str()));
+    auto result_b = vfs::execute::command_line_sync("xxhsum {}", vfs::execute::quote(b.c_str()));
 
     const std::string a_hash = ztd::partition(result_a.standard_output, " ")[0];
     const std::string b_hash = ztd::partition(result_b.standard_output, " ")[0];

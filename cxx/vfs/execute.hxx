@@ -21,7 +21,7 @@
 
 #include <cstdint>
 
-namespace execute
+namespace vfs::execute
 {
 /**
  * @brief add quotes and escape existing quotes in a string,
@@ -54,4 +54,4 @@ command_line_async(std::format_string<Args...> fmt, Args&&... args) noexcept
 {
     command_line_async(std::format(fmt, std::forward<Args>(args)...));
 }
-} // namespace execute
+} // namespace vfs::execute
