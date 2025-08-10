@@ -27,19 +27,19 @@
 
 #include "commandline/commandline.hxx"
 
-const std::shared_ptr<commandline_opt_data>
-commandline_opt_data::create(const package_data& package) noexcept
+const std::shared_ptr<commandline::opt_data>
+commandline::opt_data::create(const package_data& package) noexcept
 {
-    return std::make_shared<commandline_opt_data>(package);
+    return std::make_shared<commandline::opt_data>(package);
 }
 
-commandline_opt_data::commandline_opt_data(const package_data& package) noexcept
+commandline::opt_data::opt_data(const package_data& package) noexcept
 {
     this->package = package;
 }
 
 static void
-run_commandline(const std::shared_ptr<commandline_opt_data>& opt) noexcept
+run_commandline(const std::shared_ptr<commandline::opt_data>& opt) noexcept
 {
     if (opt->version)
     {
@@ -51,8 +51,8 @@ run_commandline(const std::shared_ptr<commandline_opt_data>& opt) noexcept
 }
 
 void
-setup_common_commandline(CLI::App& app, const std::shared_ptr<commandline_opt_data>& opt,
-                         const bool file_list)
+commandline::create_common(CLI::App& app, const std::shared_ptr<commandline::opt_data>& opt,
+                           const bool file_list)
 {
     app.add_option("--loglevel", opt->raw_log_levels, "Set the loglevel. Format: domain=level")
         ->check(

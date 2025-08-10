@@ -30,11 +30,13 @@ struct package_data
     std::string version;
 };
 
-struct commandline_opt_data : public std::enable_shared_from_this<commandline_opt_data>
+namespace commandline
 {
-    commandline_opt_data() = delete;
-    commandline_opt_data(const package_data& package) noexcept;
-    static const std::shared_ptr<commandline_opt_data> create(const package_data& package) noexcept;
+struct opt_data
+{
+    opt_data() = delete;
+    opt_data(const package_data& package) noexcept;
+    static const std::shared_ptr<opt_data> create(const package_data& package) noexcept;
 
     std::vector<std::string> raw_log_levels;
     std::unordered_map<std::string, std::string> log_levels;
@@ -47,5 +49,6 @@ struct commandline_opt_data : public std::enable_shared_from_this<commandline_op
     std::vector<std::filesystem::path> files{};
 };
 
-void setup_common_commandline(CLI::App& app, const std::shared_ptr<commandline_opt_data>& opt,
-                              const bool file_list = true);
+void create_common(CLI::App& app, const std::shared_ptr<opt_data>& opt,
+                   const bool file_list = true);
+} // namespace commandline

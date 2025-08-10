@@ -55,9 +55,9 @@ main(int argc, char** argv)
     //              extract_to_subdir,
     //              "Extract files to output dir without creating sub directories, req -o");
 
-    auto opt = commandline_opt_data::create(package);
+    auto opt = commandline::opt_data::create(package);
 
-    setup_common_commandline(app, opt);
+    commandline::create_common(app, opt);
 
     CLI11_PARSE(app, argc, argv);
 

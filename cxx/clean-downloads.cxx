@@ -53,9 +53,9 @@ main(int argc, char** argv)
     bool disable_delete = false;
     app.add_option("-D,--no-delete", disable_delete, "Do not delete duplicate files");
 
-    auto opt = commandline_opt_data::create(package);
+    auto opt = commandline::opt_data::create(package);
 
-    setup_common_commandline(app, opt, false);
+    commandline::create_common(app, opt, false);
 
     CLI11_PARSE(app, argc, argv);
 

@@ -44,9 +44,9 @@ main(int argc, char** argv)
 {
     CLI::App app{"Regenerate Ebuild Manifest"};
 
-    auto opt = commandline_opt_data::create(package);
+    auto opt = commandline::opt_data::create(package);
 
-    setup_common_commandline(app, opt, false);
+    commandline::create_common(app, opt, false);
 
     CLI11_PARSE(app, argc, argv);
 

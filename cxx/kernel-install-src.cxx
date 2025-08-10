@@ -43,7 +43,7 @@ main(int argc, char** argv)
 {
     CLI::App app{"Install Kernel Source"};
 
-    auto opt = commandline_opt_data::create(package);
+    auto opt = commandline::opt_data::create(package);
 
     std::string kernel = "gentoo";
     static constexpr std::array<std::string, 3> kernels = {"gentoo", "git", "vanilla"};
@@ -54,7 +54,7 @@ main(int argc, char** argv)
     bool verbose = false;
     app.add_flag("--verbose", verbose, "Enable verbose emerge");
 
-    setup_common_commandline(app, opt, false);
+    commandline::create_common(app, opt, false);
 
     CLI11_PARSE(app, argc, argv);
 
