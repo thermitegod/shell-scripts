@@ -15,14 +15,12 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <cstdlib>
+#include <filesystem>
+#include <format>
+#include <fstream>
 #include <string>
 
-#include <format>
-
-#include <filesystem>
-
-#include <fstream>
+#include <cstdlib>
 
 #include <signal.h>
 
@@ -30,11 +28,10 @@
 
 #include "logger/logger.hxx"
 
-#include "lib/user-dirs.hxx"
 #include "lib/proc.hxx"
-#include "lib/write.hxx"
-
 #include "lib/single-instance.hxx"
+#include "lib/user-dirs.hxx"
+#include "lib/write.hxx"
 
 const std::filesystem::path
 get_pid_path() noexcept

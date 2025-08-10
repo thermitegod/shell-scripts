@@ -20,9 +20,9 @@
 
 #include <ztd/ztd.hxx>
 
-#include "lib/execute.hxx"
-
 #include "logger/logger.hxx"
+
+#include "lib/execute.hxx"
 
 std::string
 execute::quote(const std::string_view str) noexcept

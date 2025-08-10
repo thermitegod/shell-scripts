@@ -15,13 +15,10 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <string>
-
-#include <format>
-
 #include <array>
-
+#include <format>
 #include <source_location>
+#include <string>
 
 #include <glibmm.h>
 
@@ -31,9 +28,9 @@
 
 #include "logger/logger.hxx"
 
+#include "lib/commandline.hxx"
 #include "lib/env.hxx"
 #include "lib/execute.hxx"
-#include "lib/commandline.hxx"
 #include "lib/user-dirs.hxx"
 
 const auto package = package_data{

@@ -15,11 +15,9 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <string>
-
-#include <format>
-
 #include <filesystem>
+#include <format>
+#include <string>
 
 #include <glibmm.h>
 

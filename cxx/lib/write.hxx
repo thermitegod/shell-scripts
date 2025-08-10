@@ -18,7 +18,6 @@
 #pragma once
 
 #include <filesystem>
-
 #include <fstream>
 
 #include <ztd/ztd.hxx>

@@ -15,18 +15,13 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <filesystem>
+#include <format>
+#include <source_location>
 #include <string>
 #include <string_view>
-
-#include <format>
-
-#include <filesystem>
-
-#include <vector>
-
 #include <utility>
-
-#include <source_location>
+#include <vector>
 
 #include <CLI/CLI.hpp>
 

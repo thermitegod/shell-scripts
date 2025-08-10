@@ -19,10 +19,10 @@
 
 #include <ztd/ztd.hxx>
 
+#include "logger/logger.hxx"
+
 #include "lib/execute.hxx"
 #include "lib/mouse.hxx"
-
-#include "logger/logger.hxx"
 
 void
 mouse::set_position(const u32 x, const u32 y) noexcept

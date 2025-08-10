@@ -15,13 +15,10 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <string>
-
-#include <print>
-
 #include <filesystem>
-
+#include <print>
 #include <source_location>
+#include <string>
 
 #include <glibmm.h>
 

@@ -15,10 +15,8 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <format>
-
 #include <filesystem>
-
+#include <format>
 #include <print>
 
 #include <CLI/CLI.hpp>

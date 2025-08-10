@@ -15,18 +15,16 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <string>
-
 #include <print>
-
 #include <source_location>
+#include <string>
 
 #include <CLI/CLI.hpp>
 
 #include <ztd/ztd.hxx>
 
-#include "lib/commandline.hxx"
 #include "lib/colors.hxx"
+#include "lib/commandline.hxx"
 
 const auto package = package_data{
     std::source_location::current().file_name(),
