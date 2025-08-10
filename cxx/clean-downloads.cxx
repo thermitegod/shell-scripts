@@ -172,7 +172,7 @@ main(int argc, char** argv)
         logger::info("== Name Contains Unneeded Duplicate Marker ==");
         for (const auto& file : file_not_dup_list)
         {
-            logger::info(file.string());
+            logger::info("{}", file.string());
         }
     }
 
