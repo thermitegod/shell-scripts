@@ -57,7 +57,7 @@ main(int argc, char** argv)
     utils::instance::create();
 
     const std::filesystem::path snip_path =
-        vfs::user::home_dir() /
+        vfs::user::home() /
         std::format("{}.png",
                     std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()));
 

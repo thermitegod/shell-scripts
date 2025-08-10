@@ -45,7 +45,7 @@ main(int argc, char** argv)
 {
     CLI::App app{"TEST"};
 
-    std::filesystem::path run_path = vfs::user::download_dir();
+    std::filesystem::path run_path = vfs::user::download();
     app.add_option("-p,--path",
                    run_path,
                    std::format("Path to run in, default [{}]", run_path.string()));

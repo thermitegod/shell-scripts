@@ -37,7 +37,7 @@
 const std::filesystem::path
 get_pid_path() noexcept
 {
-    return vfs::user::runtime_dir() / std::format("{}.pid", vfs::proc::self::name());
+    return vfs::user::runtime() / std::format("{}.pid", vfs::proc::self::name());
 }
 
 void
