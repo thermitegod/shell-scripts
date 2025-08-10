@@ -324,6 +324,7 @@ build_target(
 
     'cxx/lib/commandline.cxx',
     'cxx/lib/env.cxx',
+    'cxx/lib/error.cxx',
     'cxx/lib/execute.cxx',
     'cxx/lib/proc.cxx',
     'cxx/lib/single-instance.cxx',
@@ -350,6 +351,7 @@ build_target(
 
     'cxx/lib/commandline.cxx',
     'cxx/lib/env.cxx',
+    'cxx/lib/error.cxx',
     'cxx/lib/execute.cxx',
     'cxx/lib/proc.cxx',
     'cxx/lib/single-instance.cxx',

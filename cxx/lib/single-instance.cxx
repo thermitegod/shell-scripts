@@ -28,10 +28,10 @@
 
 #include "logger/logger.hxx"
 
+#include "lib/file-ops.hxx"
 #include "lib/proc.hxx"
 #include "lib/single-instance.hxx"
 #include "lib/user-dirs.hxx"
-#include "lib/write.hxx"
 
 const std::filesystem::path
 get_pid_path() noexcept
@@ -62,13 +62,13 @@ create_single_instance() noexcept
 {
     std::atexit(single_instance_finalize);
 
-    const auto pid_path = get_pid_path();
-    if (!std::filesystem::exists(pid_path))
+    const auto path = get_pid_path();
+    if (!std::filesystem::exists(path))
     {
         return;
     }
 
-    std::ifstream pid_file(pid_path);
+    std::ifstream pid_file(path);
     if (pid_file)
     {
         pid_t pid;
@@ -84,5 +84,6 @@ create_single_instance() noexcept
 
     // use std::to_string to avoid locale formating of pid
     // from '12345' -> '12,345'
-    write_file(pid_path, std::to_string(::getpid()));
+    const auto ec = lib::write_file(path, std::to_string(::getpid()));
+    logger::critical_if(bool(ec), "Failed to write pid file: {} {}", path.string(), ec.message());
 }
