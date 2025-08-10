@@ -18,7 +18,6 @@
 #pragma once
 
 #include <filesystem>
-#include <span>
 #include <vector>
 
 #include <ztd/ztd.hxx>
@@ -32,53 +31,57 @@ class find_files
     find_files(const std::filesystem::path& path, const i32 max_depth = -1);
 
     /**
-     * @brief only_files
-     *
-     * - Get vector of only files in and below a directory.
-     *
+     * @brief only_files - Get vector of only files in and below a directory.
      * @return vector of file paths
      */
-    const std::span<const std::filesystem::path> only_files() const noexcept;
+    const auto&
+    only_files() const noexcept
+    {
+        return this->only_files_;
+    }
 
     /**
-     * @brief only_dirs
-     *
-     * - Get vector of files and dirs in and below a directory.
+     * @brief only_dirs - Get vector of files and dirs in and below a directory.
      * All other file types are ignored
-     *
      * @return vector of dir paths
      */
-    const std::span<const std::filesystem::path> only_dirs() const noexcept;
+    const auto&
+    only_dirs() const noexcept
+    {
+        return this->only_dirs_;
+    }
 
     /**
-     * @brief all_entries
-     *
-     * - Get vector of files and dirs in and below a directory.
+     * @brief all_files - Get vector of files and dirs in and below a directory.
      * All other file types are ignored
-     *
      * @return vector of dir paths
      */
-    const std::span<const std::filesystem::path> all_entries() const noexcept;
+    const auto&
+    all_files() const noexcept
+    {
+        return this->all_files_;
+    }
 
     /**
-     * @brief total_descent
-     *
-     * - Total number of nodes descended
-     *
+     * @brief total_descent - Total number of nodes descended
      * @return descent count
      */
-    usize total_descent() const noexcept;
+    usize
+    total_descent() const noexcept
+    {
+        return this->total_descent_;
+    }
 
   private:
     void recursive_find_files(const std::filesystem::path& path) noexcept;
 
     std::filesystem::path start_path_;
-    i32 max_depth_{0};
-    i32 current_depth_{0};
-    usize total_descent_{0};
+    i32 max_depth_;
+    i32 current_depth_;
+    usize total_descent_;
 
-    std::vector<std::filesystem::path> only_file_list_;
-    std::vector<std::filesystem::path> only_dir_list_;
-    std::vector<std::filesystem::path> file_dir_list_;
+    std::vector<std::filesystem::path> only_files_;
+    std::vector<std::filesystem::path> only_dirs_;
+    std::vector<std::filesystem::path> all_files_;
 };
 } // namespace vfs::recursion

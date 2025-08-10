@@ -42,48 +42,28 @@ vfs::recursion::find_files::recursive_find_files(const std::filesystem::path& pa
 
     for (const auto& entry : std::filesystem::directory_iterator(path))
     {
-        if (entry.is_directory())
+        auto file = std::filesystem::absolute(entry);
+
+        this->all_files_.push_back(file);
+
+        if (entry.is_directory() && !entry.is_symlink())
         {
-            this->only_dir_list_.push_back(entry.path());
+            this->only_dirs_.push_back(file);
 
             if (this->current_depth_ == this->max_depth_)
             {
                 continue;
             }
 
-            recursive_find_files(entry.path().string());
+            this->recursive_find_files(file);
             this->current_depth_ -= 1;
             continue;
         }
 
         if (entry.is_regular_file())
         {
-            this->only_file_list_.push_back(entry.path());
+            this->only_files_.push_back(file);
             continue;
         }
     }
-}
-
-const std::span<const std::filesystem::path>
-vfs::recursion::find_files::only_files() const noexcept
-{
-    return this->only_file_list_;
-}
-
-const std::span<const std::filesystem::path>
-vfs::recursion::find_files::only_dirs() const noexcept
-{
-    return this->only_dir_list_;
-}
-
-const std::span<const std::filesystem::path>
-vfs::recursion::find_files::all_entries() const noexcept
-{
-    return this->file_dir_list_;
-}
-
-usize
-vfs::recursion::find_files::total_descent() const noexcept
-{
-    return this->total_descent_;
 }

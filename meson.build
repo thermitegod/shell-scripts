@@ -296,6 +296,30 @@ build_target(
   ],
 )
 
+# count-filesize
+build_target(
+  'count-filesize',
+  sources: [
+    'cxx/count-filesize.cxx',
+
+    'cxx/commandline/commandline.cxx',
+
+    'cxx/vfs/execute.cxx',
+    'cxx/vfs/recursion.cxx',
+
+    'cxx/logger/logger.cxx',
+  ],
+  target_type: 'executable',
+  include_directories: incdir,
+  install: true,
+  install_dir: bindir,
+  dependencies: [
+    glibmm_dep,
+    spdlog_dep,
+    ztd_dep,
+  ],
+)
+
 # digest-ebuild
 build_target(
   'digest-ebuild',
