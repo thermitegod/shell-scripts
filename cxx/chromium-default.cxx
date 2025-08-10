@@ -32,6 +32,7 @@
 #include "logger/logger.hxx"
 
 #include "lib/env.hxx"
+#include "lib/execute.hxx"
 #include "lib/commandline.hxx"
 #include "lib/user-dirs.hxx"
 
@@ -40,8 +41,6 @@ const auto package = package_data{
     "2024-01-04",
     "9.0.0",
 };
-
-#define LAUNCH_ASYNC
 
 int
 main(int argc, char** argv)
@@ -100,12 +99,6 @@ main(int argc, char** argv)
                                             profile_path,
                                             display_server);
 
-#if defined(LAUNCH_ASYNC)
-    Glib::spawn_command_line_async(command);
+    execute::command_line_async(command);
     std::exit(EXIT_SUCCESS);
-#else
-    std::int32_t exit_status;
-    Glib::spawn_command_line_sync(command, nullptr, nullptr, &exit_status);
-    std::exit(exit_status);
-#endif
 }

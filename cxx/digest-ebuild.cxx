@@ -34,6 +34,7 @@
 #include "logger/logger.hxx"
 
 #include "lib/commandline.hxx"
+#include "lib/execute.hxx"
 
 const auto package = package_data{
     std::source_location::current().file_name(),
@@ -74,7 +75,6 @@ main(int argc, char** argv)
     const auto command = std::format("ebuild {} manifest", ebuilds.back().string());
     logger::debug("COMMAND({})", command);
 
-    std::int32_t exit_status = EXIT_SUCCESS;
-    Glib::spawn_command_line_sync(command, nullptr, nullptr, &exit_status);
-    std::exit(exit_status);
+    auto result = execute::command_line_sync(command);
+    std::exit(result.exit_status);
 }

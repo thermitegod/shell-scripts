@@ -254,6 +254,7 @@ build_target(
 
     'cxx/lib/env.cxx',
     'cxx/lib/commandline.cxx',
+    'cxx/lib/execute.cxx',
     'cxx/lib/user-dirs.cxx',
 
     'cxx/logger/logger.cxx',
@@ -276,6 +277,7 @@ build_target(
     'cxx/clean-downloads.cxx',
 
     'cxx/lib/commandline.cxx',
+    'cxx/lib/execute.cxx',
     'cxx/lib/hash.cxx',
     'cxx/lib/user-dirs.cxx',
 
@@ -299,6 +301,7 @@ build_target(
     'cxx/digest-ebuild.cxx',
 
     'cxx/lib/commandline.cxx',
+    'cxx/lib/execute.cxx',
 
     'cxx/logger/logger.cxx',
   ],
@@ -321,6 +324,7 @@ build_target(
 
     'cxx/lib/commandline.cxx',
     'cxx/lib/env.cxx',
+    'cxx/lib/execute.cxx',
     'cxx/lib/proc.cxx',
     'cxx/lib/single-instance.cxx',
     'cxx/lib/user-dirs.cxx',
@@ -346,6 +350,7 @@ build_target(
 
     'cxx/lib/commandline.cxx',
     'cxx/lib/env.cxx',
+    'cxx/lib/execute.cxx',
     'cxx/lib/proc.cxx',
     'cxx/lib/single-instance.cxx',
     'cxx/lib/user-dirs.cxx',
@@ -371,6 +376,7 @@ build_target(
 
     'cxx/lib/commandline.cxx',
     'cxx/lib/env.cxx',
+    'cxx/lib/execute.cxx',
 
     'cxx/logger/logger.cxx',
   ],

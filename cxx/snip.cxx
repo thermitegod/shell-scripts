@@ -30,6 +30,7 @@
 #include "logger/logger.hxx"
 
 #include "lib/commandline.hxx"
+#include "lib/execute.hxx"
 #include "lib/single-instance.hxx"
 #include "lib/user-dirs.hxx"
 
@@ -70,7 +71,6 @@ main(int argc, char** argv)
         command = std::format("grimshot save area {}", snip_path.string());
     }
 
-    std::int32_t exit_status;
-    Glib::spawn_command_line_sync(command, nullptr, nullptr, &exit_status);
-    std::exit(exit_status);
+    auto result = execute::command_line_sync(command);
+    std::exit(result.exit_status);
 }

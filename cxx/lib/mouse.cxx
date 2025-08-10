@@ -19,6 +19,7 @@
 
 #include <ztd/ztd.hxx>
 
+#include "lib/execute.hxx"
 #include "lib/mouse.hxx"
 
 #include "logger/logger.hxx"
@@ -26,14 +27,11 @@
 void
 mouse::set_position(const u32 x, const u32 y) noexcept
 {
-    const auto command = std::format("swaymsg seat seat0 cursor set {} {}", x, y);
-
-    std::int32_t exit_status = EXIT_SUCCESS;
-    Glib::spawn_command_line_sync(command, nullptr, nullptr, &exit_status);
-    if (exit_status != EXIT_SUCCESS)
+    auto result = execute::command_line_sync("swaymsg seat seat0 cursor set {} {}", x, y);
+    if (result.exit_status != EXIT_SUCCESS)
     {
-        logger::error("mouse::set_position() failed with code '{}'", exit_status);
-        std::exit(exit_status);
+        logger::error("mouse::set_position() failed with code '{}'", result.exit_status);
+        std::exit(result.exit_status);
     }
 }
 
@@ -41,18 +39,16 @@ mouse::set_position(const u32 x, const u32 y) noexcept
 std::array<u32, 2>
 mouse::get_position() noexcept
 {
-    std::string standard_output;
-    std::int32_t exit_status = EXIT_SUCCESS;
-    Glib::spawn_command_line_sync("slurp -p", &standard_output, nullptr, &exit_status);
-    if (exit_status != EXIT_SUCCESS)
+    auto result = execute::command_line_sync("slurp -p");
+    if (result.exit_status != EXIT_SUCCESS)
     {
-        logger::error("mouse::get_position() failed with code '{}'", exit_status);
-        std::exit(exit_status);
+        logger::error("mouse::get_position() failed with code '{}'", result.exit_status);
+        std::exit(result.exit_status);
     }
 
     // Parse slurp position output
     // 1948,901 1x1
-    const auto coords = ztd::partition(ztd::partition(standard_output, ' ')[0], ',');
+    const auto coords = ztd::partition(ztd::partition(result.standard_output, ' ')[0], ',');
 
     return {std::stoi(coords[0]), std::stoi(coords[2])};
 }
@@ -61,24 +57,22 @@ mouse::get_position() noexcept
 void
 mouse::left_click(const bool double_click) noexcept
 {
-    // swaymsg 'seat "seat0" cursor press button1' && swaymsg 'seat "seat0" cursor release button1'
-
-    const auto press = "swaymsg 'seat \"seat0\" cursor press button1'";
-    const auto release = "swaymsg 'seat \"seat0\" cursor release button1'";
-
-    std::int32_t exit_status = EXIT_SUCCESS;
-    Glib::spawn_command_line_sync(press, nullptr, nullptr, &exit_status);
-    if (exit_status != EXIT_SUCCESS)
-    {
-        logger::error("mouse::left_click() press failed with code '{}'", exit_status);
-        std::exit(exit_status);
+    { // press
+        auto result = execute::command_line_sync("swaymsg 'seat \"seat0\" cursor press button1'");
+        if (result.exit_status != EXIT_SUCCESS)
+        {
+            logger::error("mouse::left_click() press failed with code '{}'", result.exit_status);
+            std::exit(result.exit_status);
+        }
     }
 
-    Glib::spawn_command_line_sync(release, nullptr, nullptr, &exit_status);
-    if (exit_status != EXIT_SUCCESS)
-    {
-        logger::error("mouse::left_click() release failed with code '{}'", exit_status);
-        std::exit(exit_status);
+    { // release
+        auto result = execute::command_line_sync("swaymsg 'seat \"seat0\" cursor release button1'");
+        if (result.exit_status != EXIT_SUCCESS)
+        {
+            logger::error("mouse::left_click() release failed with code '{}'", result.exit_status);
+            std::exit(result.exit_status);
+        }
     }
 
     if (double_click)
@@ -90,21 +84,21 @@ mouse::left_click(const bool double_click) noexcept
 void
 mouse::right_click() noexcept
 {
-    const auto press = "swaymsg 'seat \"seat0\" cursor press button3'";
-    const auto release = "swaymsg 'seat \"seat0\" cursor release button3'";
-
-    std::int32_t exit_status = EXIT_SUCCESS;
-    Glib::spawn_command_line_sync(press, nullptr, nullptr, &exit_status);
-    if (exit_status != EXIT_SUCCESS)
-    {
-        logger::error("mouse::right_click() press failed with code '{}'", exit_status);
-        std::exit(exit_status);
+    { // press
+        auto result = execute::command_line_sync("swaymsg 'seat \"seat0\" cursor press button3'");
+        if (result.exit_status != EXIT_SUCCESS)
+        {
+            logger::error("mouse::right_click() press failed with code '{}'", result.exit_status);
+            std::exit(result.exit_status);
+        }
     }
 
-    Glib::spawn_command_line_sync(release, nullptr, nullptr, &exit_status);
-    if (exit_status != EXIT_SUCCESS)
-    {
-        logger::error("mouse::right_click() release failed with code '{}'", exit_status);
-        std::exit(exit_status);
+    { // release
+        auto result = execute::command_line_sync("swaymsg 'seat \"seat0\" cursor release button3'");
+        if (result.exit_status != EXIT_SUCCESS)
+        {
+            logger::error("mouse::right_click() release failed with code '{}'", result.exit_status);
+            std::exit(result.exit_status);
+        }
     }
 }

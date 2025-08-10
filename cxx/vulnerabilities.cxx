@@ -25,8 +25,6 @@
 
 #include <ztd/ztd.hxx>
 
-#include "logger/logger.hxx"
-
 #include "lib/commandline.hxx"
 #include "lib/colors.hxx"
 

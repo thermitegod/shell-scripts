@@ -27,42 +27,19 @@
 
 #include "logger/logger.hxx"
 
+#include "lib/execute.hxx"
 #include "lib/hash.hxx"
-
-/**
- * @brief Shell Quote
- *
- * - quote string so that is will work with Glib::spawn_command_line_sync
- *
- * @param[in] str The string to be quoted
- *
- * @return a quoted string, if string is empty returns empty quotes
- */
-[[nodiscard]] const std::string
-shell_quote(const std::string_view str) noexcept
-{
-    if (str.empty())
-    {
-        return "\"\"";
-    }
-    return std::format("\"{}\"", ztd::replace(str, "\"", "\\\""));
-}
 
 bool
 hash::compare_files(const std::filesystem::path& a, const std::filesystem::path& b) noexcept
 {
     // Glib::find_program_in_path("xxhsum");
 
-    const std::string command_a = std::format("xxhsum {}", shell_quote(a.c_str()));
-    std::string stdout_a;
-    Glib::spawn_command_line_sync(command_a, &stdout_a);
+    auto result_a = execute::command_line_sync("xxhsum {}", execute::quote(a.c_str()));
+    auto result_b = execute::command_line_sync("xxhsum {}", execute::quote(b.c_str()));
 
-    const std::string command_b = std::format("xxhsum {}", shell_quote(b.c_str()));
-    std::string stdout_b;
-    Glib::spawn_command_line_sync(command_b, &stdout_b);
-
-    const std::string a_hash = ztd::partition(stdout_a, " ")[0];
-    const std::string b_hash = ztd::partition(stdout_b, " ")[0];
+    const std::string a_hash = ztd::partition(result_a.standard_output, " ")[0];
+    const std::string b_hash = ztd::partition(result_b.standard_output, " ")[0];
 
     // logger::info("A : {} | {}", a_hash, a);
     // logger::info("B : {} | {}", b_hash, b);

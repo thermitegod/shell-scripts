@@ -19,8 +19,6 @@
 
 #include <filesystem>
 
-#include <print>
-
 #include <source_location>
 
 #include <glibmm.h>
@@ -33,6 +31,7 @@
 
 #include "lib/commandline.hxx"
 #include "lib/env.hxx"
+#include "lib/execute.hxx"
 
 const auto package = package_data{
     std::source_location::current().file_name(),
@@ -77,18 +76,13 @@ main(int argc, char** argv)
     }
 
     { // Install kernel
-        const auto command = std::format("emerge --ignore-default-opts --oneshot {} {}",
-                                         verbose ? "--verbose" : "--quiet",
-                                         kernel_ebuild);
-        logger::debug("COMMAND({})", command);
-
-        std::int32_t exit_status = EXIT_SUCCESS;
-        Glib::spawn_command_line_sync(command, nullptr, nullptr, &exit_status);
-
-        if (exit_status != EXIT_SUCCESS)
+        auto result = execute::command_line_sync("emerge --ignore-default-opts --oneshot {} {}",
+                                                 verbose ? "--verbose" : "--quiet",
+                                                 kernel_ebuild);
+        if (result.exit_status != EXIT_SUCCESS)
         {
             logger::critical("Kernel install failed");
-            std::exit(exit_status);
+            std::exit(result.exit_status);
         }
     }
 
@@ -100,17 +94,12 @@ main(int argc, char** argv)
             std::exit(EXIT_FAILURE);
         }
 
-        const auto command =
-            std::format("bash -c \"zcat /proc/config.gz > /usr/src/linux/.config\"");
-        logger::debug("COMMAND({})", command);
-
-        std::int32_t exit_status = EXIT_SUCCESS;
-        Glib::spawn_command_line_sync(command, nullptr, nullptr, &exit_status);
-
-        if (exit_status != EXIT_SUCCESS)
+        auto result =
+            execute::command_line_sync("bash -c \"zcat /proc/config.gz > /usr/src/linux/.config\"");
+        if (result.exit_status != EXIT_SUCCESS)
         {
             logger::critical("Kernel config install failed");
-            std::exit(exit_status);
+            std::exit(result.exit_status);
         }
     }
 

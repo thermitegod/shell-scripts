@@ -28,6 +28,7 @@ namespace logger
 enum class domain
 {
     basic,
+    execute,
 };
 
 void initialize(const std::unordered_map<std::string, std::string>& options,
