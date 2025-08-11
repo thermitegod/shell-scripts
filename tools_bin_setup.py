@@ -75,9 +75,6 @@ class Symlink:
 
             Symlinks('chromium-default', 'chromium-sandbox'),
 
-            Symlinks('count-image', 'count-archive'),
-            Symlinks('count-image', 'count-video'),
-
             Symlinks('madokami-manga', 'madokami-manga-publishing'),
             Symlinks('madokami-manga', 'madokami-novels-publishing'),
 

@@ -18,16 +18,26 @@
 #include <filesystem>
 #include <string>
 
+#include <ztd/ztd.hxx>
+
 #include "vfs/proc.hxx"
 
 [[nodiscard]] const std::filesystem::path
 vfs::proc::self::exe() noexcept
 {
+    ztd::panic_if(!std::filesystem::exists(detail::proc_self_exe),
+                  "missing proc file: {}\nHINT do not use in code run before main()",
+                  detail::proc_self_exe.string());
+
     return std::filesystem::read_symlink(detail::proc_self_exe);
 }
 
 [[nodiscard]] const std::string
 vfs::proc::self::name() noexcept
 {
+    ztd::panic_if(!std::filesystem::exists(detail::proc_self_exe),
+                  "missing proc file: {}\nHINT do not use in code run before main()",
+                  detail::proc_self_exe.string());
+
     return std::filesystem::read_symlink(detail::proc_self_exe).filename();
 }

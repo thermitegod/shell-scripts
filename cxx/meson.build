@@ -61,6 +61,39 @@ build_target(
 )
 
 build_target(
+  'count-image',
+  sources: [
+    'count-image.cxx',
+    'commandline/commandline.cxx',
+    'vfs/execute.cxx',
+    'vfs/recursion.cxx',
+    'vfs/tools.cxx',
+    'logger/logger.cxx',
+  ],
+  target_type: 'executable',
+  include_directories: incdir,
+  install: true,
+  install_dir: bindir,
+  dependencies: [
+    glibmm_dep,
+    spdlog_dep,
+    ztd_dep,
+  ],
+)
+
+install_symlink(
+  'count-archive',
+  install_dir: bindir,
+  pointing_to: 'count-image',
+)
+
+install_symlink(
+  'count-video',
+  install_dir: bindir,
+  pointing_to: 'count-image',
+)
+
+build_target(
   'digest-ebuild',
   sources: [
     'digest-ebuild.cxx',
