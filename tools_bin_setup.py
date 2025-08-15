@@ -75,11 +75,6 @@ class Symlink:
 
             Symlinks('chromium-default', 'chromium-sandbox'),
 
-            Symlinks('backup-meta', 'backup-chromium'),
-            Symlinks('backup-meta', 'backup-user-bin'),
-            Symlinks('backup-meta', 'backup-user-config'),
-            Symlinks('backup-meta', 'backup-user-local'),
-
             Symlinks('count-image', 'count-archive'),
             Symlinks('count-image', 'count-video'),
 
