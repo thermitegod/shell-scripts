@@ -246,5 +246,6 @@ endforeach
 
 subdir('cxx')
 
-meson.add_install_script('./tools_bin_setup.py')
-meson.add_install_script('./tools_symlink_chrome.py')
+# hangs when running install
+# meson.add_install_script('./tools_bin_setup.py')
+# meson.add_install_script('./tools_symlink_chrome.py')
