@@ -46,7 +46,7 @@ enum class filetype
 {
     archive,
     image,
-    video
+    video,
 };
 
 // clang-format off
