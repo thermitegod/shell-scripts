@@ -15,9 +15,12 @@ __pycache__/
 # bin/
 bin/
 
+# meson subprojects
+subprojects/packagecache/
+subprojects/.wraplock
+
 # configs
 python/private/*.py
 
 # cxx
 cxx/build
-

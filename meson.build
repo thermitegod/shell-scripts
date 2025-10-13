@@ -218,7 +218,17 @@ if not cli11_dep.found() # using subproject
   cli11_dep_dep = cli11_dep_proj.get_variable('CLI11_dep')
 endif
 
-spdlog_dep = dependency('spdlog', required : true)
+if false
+  spdlog_dep = dependency('spdlog', required : true)
+else
+  cmake = import('cmake')
+  # use std::format over bundled fmt::format
+  cmake_opt_var = cmake.subproject_options()
+  cmake_opt_var.add_cmake_defines({'SPDLOG_USE_STD_FORMAT': '1'})
+  spdlog_proj = cmake.subproject('spdlog', required: true, options: cmake_opt_var)
+  spdlog_dep = spdlog_proj.dependency('spdlog')
+endif
+
 sigc_dep = dependency('sigc++-3.0', required : true)
 
 # Gtk4 CPP
