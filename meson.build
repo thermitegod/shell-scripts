@@ -195,47 +195,6 @@ link_flags += cpp.get_supported_link_arguments([
 add_global_arguments(flags, language: ['c', 'cpp'])
 add_global_link_arguments(link_flags, language: ['c', 'cpp'])
 
-## dependencies
-
-# ztd use system or subproject
-ztd_dep = dependency('ztd', required : false)
-if not ztd_dep.found() # using subproject
-  ztd_proj = subproject('ztd', required : true)
-  ztd_dep = ztd_proj.get_variable('ztd_dep')
-endif
-
-# magic_enum use system or subproject
-magic_enum_dep = dependency('magic_enum', required : false, version: '>=0.9.7')
-if not magic_enum_dep.found() # using subproject
-  magic_enum_proj =  dependency('magic_enum', required: true, version: '>=0.9.7')
-  magic_enum_dep = magic_enum_proj.get_variable('magic_enum_dep')
-endif
-
-# CLI11 use system or subproject
-cli11_dep = dependency('CLI11', required : false)
-if not cli11_dep.found() # using subproject
-  cli11_dep_proj = subproject('cli11', required : true)
-  cli11_dep_dep = cli11_dep_proj.get_variable('CLI11_dep')
-endif
-
-if false
-  spdlog_dep = dependency('spdlog', required : true)
-else
-  cmake = import('cmake')
-  # use std::format over bundled fmt::format
-  cmake_opt_var = cmake.subproject_options()
-  cmake_opt_var.add_cmake_defines({'SPDLOG_USE_STD_FORMAT': '1'})
-  spdlog_proj = cmake.subproject('spdlog', required: true, options: cmake_opt_var)
-  spdlog_dep = spdlog_proj.dependency('spdlog')
-endif
-
-sigc_dep = dependency('sigc++-3.0', required : true)
-
-# Gtk4 CPP
-gtkmm_dep = dependency('gtkmm-4.0', required : true)
-glibmm_dep = dependency('glibmm-2.68', required : true)
-# giomm_dep = dependency('giomm-2.68', required : true)
-
 ## preprocessor static
 
 preprocessor = [
