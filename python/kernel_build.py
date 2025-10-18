@@ -16,8 +16,8 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # SCRIPT INFO
-# 3.12.0
-# 2025-04-16
+# 4.0.0
+# 2025-10-17
 
 
 # ZFS Builtin Kernel Build Script - gentoo
@@ -29,8 +29,8 @@
 
 # What this script does, basically
 
-# runs configure phase on sys-fs/zfs-kmod ebuild
-# installs configured kmod-zfs to /usr/src/linux
+# runs configure phase on sys-fs/zfs ebuild
+# installs configured zfs to /usr/src/linux
 # builds kernel
 # creates initramfs
 
@@ -85,12 +85,11 @@ class Build:
         self.__experimental: bool = False
         self.__clean_kernel_src: bool = True
 
-        self.__zfs_ebuild: Path = Path('sys-fs/zfs-kmod')
+        self.__zfs_ebuild: Path = Path('sys-fs/zfs')
         self.__zfs_ebuild_path: Path = Path()
         self.__zfs_ebuild_revision: str
         self.__zfs_version: Path = Path()
         self.__zfs_version_path: Path = Path()
-        self.__zfs_kmod_build_path: Path = Path()
 
         self.__run_intro: bool = True
         self.__run_intro_extra: bool = False
@@ -123,19 +122,19 @@ class Build:
 
     def intro(self):
         compiler = "Clang" if self.__cc_use_clang else "GCC"
-        print(f'Kernel Source      : {self.__kernel_src}\n'
-              f'Compiler           : {compiler}\n'
-              f'Install            : {self.__run_kernel_install}\n'
-              f'ZFS version        : {self.__zfs_version}\n'
-              f'ZFS local ebuild   : {self.__use_zfs_local_ebuild}\n'
-              f'ZFS build          : {self.__run_zfs_build}\n'
-              f'Running emerge     : {self.__run_emerge}')
+        print(f'Kernel Source          : {self.__kernel_src}\n'
+              f'Compiler               : {compiler}\n'
+              f'Install                : {self.__run_kernel_install}\n'
+              f'ZFS version            : {self.__zfs_version}\n'
+              f'ZFS local ebuild       : {self.__use_zfs_local_ebuild}\n'
+              f'ZFS build              : {self.__run_zfs_build}\n'
+              f'emerge @module-rebuild : {self.__run_emerge}')
         if self.__run_intro_extra:
             print(f'EXTRA\n'
-                  f'Make command       : {self.run_compiler(return_only=True)}\n'
-                  f'kernel module dir  : /lib/modules/{self.__kernel_module_dir}\n'
-                  f'Tempdir            : {self.__tmpdir}\n'
-                  f'Experimental opts  : {self.__experimental}')
+                  f'Make command           : {self.run_compiler(return_only=True)}\n'
+                  f'kernel module dir      : /lib/modules/{self.__kernel_module_dir}\n'
+                  f'Tempdir                : {self.__tmpdir}\n'
+                  f'Experimental opts      : {self.__experimental}')
             Execute('eselect kernel list')
 
         input('\nEnter to start kernel build ')
@@ -164,12 +163,6 @@ class Build:
                 case 'CONFIG_RD_LZ4=y':
                     self.__initramfs_compression = 'lz4'
                     return True
-                case 'CONFIG_RD_LZO=y':
-                    self.__initramfs_compression = 'lzo'
-                    return True
-                case 'CONFIG_RD_XZ=y':
-                    self.__initramfs_compression = 'xz'
-                    return True
         return False
 
     def run_compiler(self, act='', force_gcc=False, return_only=False):
@@ -187,8 +180,6 @@ class Build:
             cc = 'clang'
             ld = 'ld.lld'
             kmake += f'LLVM=1 LLVM_IAS=1 '
-            # if self.__experimental:
-            #     kmake += 'LLVM_IAS=1 '
 
         kmake += f'chrt --idle 0 make -j{cores * 2 + 1} -l{cores + 1} CC={cc} LD={ld} {act}'
         if return_only:
@@ -213,13 +204,10 @@ class Build:
 
         for line in Path.open(repo_conf_full):
             if 'location' in line:
-                gentoo_repo_path = line.split()[2]
+                repo_path = line.split()[2]
                 break
 
         if self.__use_zfs_release_version:
-            # zfs and zfs-kmod will have matching version numbers,
-            # but trying to use zfs-kmod here causes emerge to throw errors
-            # emerge_out = Execute(f'emerge -pq sys-fs/zfs-kmod', to_stdout=True).get_out()
             emerge_out = Execute(f'emerge -pq sys-fs/zfs', to_stdout=True).get_out()
 
             # emerge output post processing
@@ -228,28 +216,18 @@ class Build:
             # removes USE flags
             ebuild = ebuild.partition('USE=')[0].strip()
             version = ebuild.removeprefix('sys-fs/zfs-')
-            # remove any revision number for this ebuild, the zfs and zfs-kmod
-            # revisions number probably will not match
+            # remove any revision number for this ebuild
             if "-r" in version:
                 self.__zfs_version = version.rpartition("-r")[0]
             else:
                 self.__zfs_version = version
-
-            # build path
-            self.__zfs_kmod_build_path = "zfs"
         else:
             # git
             self.__zfs_version = '9999'
-            # build path
-            self.__zfs_kmod_build_path = 'zfs-kmod'
 
-        # support no revision too lots of revisions
-        ebuild_revision_list = ['', '-r1', '-r2', '-r3', '-r4', '-r5', '-r6', '-r7', '-r8', '-r9', '-r10']
-
-        zfs_ebuild_path_base = Path() / gentoo_repo_path / self.__zfs_ebuild
-
-        for revision in reversed(ebuild_revision_list):
-            self.__zfs_ebuild_path = zfs_ebuild_path_base / f'zfs-kmod-{self.__zfs_version}{revision}.ebuild'
+        ebuild_revision_tags = ['', '-r1', '-r2', '-r3', '-r4', '-r5', '-r6', '-r7', '-r8', '-r9', '-r10']
+        for revision in reversed(ebuild_revision_tags):
+            self.__zfs_ebuild_path = Path() / repo_path / self.__zfs_ebuild / f'zfs-{self.__zfs_version}{revision}.ebuild'
             if Path.is_file(self.__zfs_ebuild_path):
                 self.__zfs_ebuild_revision = revision
                 break
@@ -287,7 +265,10 @@ class Build:
         # The specific snippet of code:
         #   		die "built kernel sources are required to build kernel modules"
         portage_check_module_symvers = Path() / self.__kernel_src / 'Module.symvers'
-        Execute(f'touch {portage_check_module_symvers}')
+        portage_check_module_symvers_user_created = False
+        if not portage_check_module_symvers.exists():
+            portage_check_module_symvers_user_created = True
+            Execute(f'touch {portage_check_module_symvers}')
 
         if not self.__experimental:
             # get error when running zfs configure
@@ -301,22 +282,56 @@ class Build:
         else:
             self.run_compiler(act='prepare')
 
-        zfs_build_path = Path() / self.__tmpdir / 'portage' / f'{self.__zfs_ebuild}-{self.__zfs_version_path}{self.__zfs_ebuild_revision}' / 'work'
-        zfs_build_version = f'{self.__zfs_kmod_build_path}-{self.__zfs_version}'
+        zfs_portage_build_path = Path() / self.__tmpdir / 'portage' / f'{self.__zfs_ebuild}-{self.__zfs_version_path}{self.__zfs_ebuild_revision}' / 'work' / f'zfs-{self.__zfs_version}'
 
-        # Have to use ExecuteFishScript() because setting env variables
-        # using custom PORTAGE_TMPDIR for two reasons, tempdir will be removed at script exit,
-        # and avoids using the real PORTAGE_TMPDIR which could also be in use by emerge
-        text = f'set -x PORTAGE_TMPDIR {self.__tmpdir}\n' \
-               f'EXTRA_ECONF="--with-linux={self.__kernel_src} --enable-linux-builtin" ' \
-               f'ebuild {self.__zfs_ebuild_path} configure || die "ebuild configure failed"\n'
-        ExecuteFishScript(text)
+        # Have to use ExecuteFishScript() because we use a custom portage tmpdir
+        # using an env variable. Want the custom tmpdir because we only run the
+        # configure phase for the zfs ebuild and I dont want to manualy remove it,
+        # and the real tmpdir could also be in use.
+        if self.__experimental:
+            # zfs will configure and install into kernel source tree, the kernel build
+            # will then fail with lots of errors.
+            # the problem is the new ebuild does not use have a kernel-builtin
+            # use flag that would set --with-config=kernel
+            ExecuteFishScript(
+                f'set -x PORTAGE_TMPDIR {self.__tmpdir}\n' \
+                f'EXTRA_ECONF="--with-linux={self.__kernel_src} --enable-linux-builtin" ' \
+                f'ebuild {self.__zfs_ebuild_path} configure ' \
+                f'|| die "ebuild configure failed"\n')
 
-        os.chdir(Path() / zfs_build_path / zfs_build_version)
-        Execute(f'./copy-builtin {self.__kernel_src}')
+            if not zfs_portage_build_path.exists():
+                logger.critical(f'zfs build path missing: {zfs_portage_build_path}')
+                raise SystemExit(1)
+            os.chdir(zfs_portage_build_path)
+            Execute(f'./copy-builtin {self.__kernel_src}')
 
-        # remove empty file Module.symvers
-        Execute(f'rm {portage_check_module_symvers}')
+        else:
+            # run the configure phase manually to bypass configure flags set in the zfs ebuild.
+            #
+            # have to force gcc when runing configure to avoid this error
+            # configure: error:
+            #                 *** This kernel is unable to compile object files.
+            #                 ***
+            #                 *** Please make sure you prepared the Linux source tree
+            #                 *** by running `make prepare` there.
+
+            ExecuteFishScript(f'PORTAGE_TMPDIR={self.__tmpdir} ebuild {self.__zfs_ebuild_path} prepare')
+
+            if not zfs_portage_build_path.exists():
+                logger.critical(f'zfs build path missing: {zfs_portage_build_path}')
+                raise SystemExit(1)
+            os.chdir(zfs_portage_build_path)
+
+            ExecuteFishScript(
+                f'CC=gcc LD=ld.bfd ' \
+                f'./configure --with-linux={self.__kernel_src} --enable-linux-builtin --with-config=kernel ' \
+                f'|| die "configure failed"\n')
+
+            Execute(f'./copy-builtin {self.__kernel_src}')
+
+        if portage_check_module_symvers_user_created:
+            # remove user created empty file Module.symvers
+            Execute(f'rm {portage_check_module_symvers}')
 
         if not self.__experimental:
             # Since GCC is used to to configure, any clang specific

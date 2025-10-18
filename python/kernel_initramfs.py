@@ -16,8 +16,8 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # SCRIPT INFO
-# 2.10.0
-# 2023-09-18
+# 2.11.0
+# 2025-10-17
 
 
 import argparse
@@ -72,7 +72,7 @@ def main():
                         default='zstd',
                         type=str,
                         metavar='COMPRESSION',
-                        choices=['zstd', 'lz4', 'lzo', 'xz'],
+                        choices=['zstd', 'lz4'],
                         nargs=1,
                         help='compression algo used to compress initramfs [zstd]')
     group1.add_argument('-f', '--no-firmware',
