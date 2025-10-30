@@ -16,8 +16,8 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # SCRIPT INFO
-# 4.0.0
-# 2025-10-17
+# 4.1.0
+# 2025-10-29
 
 
 # ZFS Builtin Kernel Build Script - gentoo
@@ -33,10 +33,6 @@
 # installs configured zfs to /usr/src/linux
 # builds kernel
 # creates initramfs
-
-# required external scrips, must be in $PATH
-#   kernel-clean-src
-#   kernel-initramfs
 
 import argparse
 import atexit
@@ -103,19 +99,6 @@ class Build:
 
         self.__run_emerge: bool = False
 
-        self.__initramfs_compression: str = 'zstd'
-
-        # gets module version for 'dracut -k'
-        self.__kernel_module_dir = self.__kernel_src.name[6:]
-        if 'rc' in self.__kernel_module_dir:
-            # release candidate
-
-            # fun shit
-            # modules naming scheme is x.x.x-rcx but gentoo naming is x.x-rcx
-            # i.e. 5.7-rc1 -> 5.7.0-rc1
-            kver_tmp = self.__kernel_module_dir.rpartition('-')
-            self.__kernel_module_dir = f'{kver_tmp[0]}.0{kver_tmp[1]}{kver_tmp[2]}'
-
         self.parse_args(args=args)
 
         self.build()
@@ -123,16 +106,16 @@ class Build:
     def intro(self):
         compiler = "Clang" if self.__cc_use_clang else "GCC"
         print(f'Kernel Source          : {self.__kernel_src}\n'
+              f'Kernel Build           : {self.__run_kernel_build}\n'
+              f'Kernel Install         : {self.__run_kernel_install}\n'
               f'Compiler               : {compiler}\n'
-              f'Install                : {self.__run_kernel_install}\n'
               f'ZFS version            : {self.__zfs_version}\n'
-              f'ZFS local ebuild       : {self.__use_zfs_local_ebuild}\n'
-              f'ZFS build              : {self.__run_zfs_build}\n'
+              f'ZFS ebuild repo        : {'local' if self.__use_zfs_local_ebuild else 'gentoo'}\n'
+              f'ZFS rebuild userland   : {self.__run_zfs_build}\n'
               f'emerge @module-rebuild : {self.__run_emerge}')
         if self.__run_intro_extra:
             print(f'EXTRA\n'
                   f'Make command           : {self.run_compiler(return_only=True)}\n'
-                  f'kernel module dir      : /lib/modules/{self.__kernel_module_dir}\n'
                   f'Tempdir                : {self.__tmpdir}\n'
                   f'Experimental opts      : {self.__experimental}')
             Execute('eselect kernel list')
@@ -152,17 +135,6 @@ class Build:
         for line in Path.open(self.__kernel_config):
             if 'CONFIG_MODULES=y' in line:
                 return True
-        return False
-
-    def init_compression_check(self):
-        for line in Path.open(self.__kernel_config):
-            match line.strip():
-                case 'CONFIG_RD_ZSTD=y':
-                    self.__initramfs_compression = 'zstd'
-                    return True
-                case 'CONFIG_RD_LZ4=y':
-                    self.__initramfs_compression = 'lz4'
-                    return True
         return False
 
     def run_compiler(self, act='', force_gcc=False, return_only=False):
@@ -213,8 +185,9 @@ class Build:
             # emerge output post processing
             # [16:] - removes '[ebuild   R   ] '
             ebuild = emerge_out[16:]
-            # removes USE flags
-            ebuild = ebuild.partition('USE=')[0].strip()
+            # removes USE flags and current version text box,
+            # [ebuild     U ] sys-fs/zfs-2.4.0_rc3 [2.3.4] USE="..."
+            ebuild = ebuild.partition('USE=')[0].partition(' ')[0].strip()
             version = ebuild.removeprefix('sys-fs/zfs-')
             # remove any revision number for this ebuild
             if "-r" in version:
@@ -303,8 +276,6 @@ class Build:
                 logger.critical(f'zfs build path missing: {zfs_portage_build_path}')
                 raise SystemExit(1)
             os.chdir(zfs_portage_build_path)
-            Execute(f'./copy-builtin {self.__kernel_src}')
-
         else:
             # run the configure phase manually to bypass configure flags set in the zfs ebuild.
             #
@@ -327,7 +298,7 @@ class Build:
                 f'./configure --with-linux={self.__kernel_src} --enable-linux-builtin --with-config=kernel ' \
                 f'|| die "configure failed"\n')
 
-            Execute(f'./copy-builtin {self.__kernel_src}')
+        Execute(f'./copy-builtin {self.__kernel_src}')
 
         if portage_check_module_symvers_user_created:
             # remove user created empty file Module.symvers
@@ -381,19 +352,14 @@ class Build:
                         # will always rebuild zfs when using git
                         Execute('emerge --ignore-default-opts --oneshot --quiet sys-fs/zfs')
                 Execute('emerge --ignore-default-opts --oneshot --jobs @module-rebuild')
-            Execute(f'kernel-initramfs -c {self.__initramfs_compression} -k {self.__kernel_module_dir}')
+
             if self.__clean_kernel_src:
-                Execute('kernel-clean-src -c')
+                self.run_compiler(act='distclean')
 
     def build(self):
         if not self.modules_check():
             logger.error(f'Missing module support')
             raise SystemExit(1)
-
-        if not self.init_compression_check():
-            logger.error(f'Unable to get initramfs compression')
-            raise SystemExit(1)
-        logger.debug(f'initramfs compression: {self.__initramfs_compression}')
 
         if self.__run_zfs_checks:
             self.zfs_checks()
