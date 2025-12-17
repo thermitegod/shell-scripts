@@ -222,6 +222,21 @@ build_target(
 )
 
 build_target(
+  'image-convert',
+  sources: [
+    'image-convert.cxx',
+  ],
+  target_type: 'executable',
+  include_directories: incdir,
+  install: true,
+  install_dir: bindir,
+  dependencies: [
+    cli_dep,
+    vfs_dep,
+  ],
+)
+
+build_target(
   'snip',
   sources: [
     'snip.cxx',
