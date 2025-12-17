@@ -93,19 +93,42 @@ vfs_dep = declare_dependency(
     dependencies : vfs_dependencies,
 )
 
+# Commandline static lib
+cli_dependencies = [
+    logger_dep,
+]
+
+cli_sources = files(
+  'commandline/commandline.cxx',
+)
+
+cli_lib = static_library(
+    'cli',
+    cli_sources,
+    include_directories : include_directories('.'),
+    dependencies : cli_dependencies,
+    install: false,
+)
+
+cli_dep = declare_dependency(
+    link_with : cli_lib,
+    include_directories : include_directories('.'),
+    dependencies : cli_dependencies,
+)
+
 # Builds
 
 build_target(
   'chromium-default',
   sources: [
     'chromium-default.cxx',
-    'commandline/commandline.cxx',
   ],
   target_type: 'executable',
   include_directories: incdir,
   install: true,
   install_dir: bindir,
   dependencies: [
+    cli_dep,
     vfs_dep,
   ],
 )
@@ -114,13 +137,13 @@ build_target(
   'clean-downloads',
   sources: [
     'clean-downloads.cxx',
-    'commandline/commandline.cxx',
   ],
   target_type: 'executable',
   include_directories: incdir,
   install: true,
   install_dir: bindir,
   dependencies: [
+    cli_dep,
     vfs_dep,
   ],
 )
@@ -129,13 +152,13 @@ build_target(
   'count-filesize',
   sources: [
     'count-filesize.cxx',
-    'commandline/commandline.cxx',
   ],
   target_type: 'executable',
   include_directories: incdir,
   install: true,
   install_dir: bindir,
   dependencies: [
+    cli_dep,
     vfs_dep,
   ],
 )
@@ -144,13 +167,13 @@ build_target(
   'count-image',
   sources: [
     'count-image.cxx',
-    'commandline/commandline.cxx',
   ],
   target_type: 'executable',
   include_directories: incdir,
   install: true,
   install_dir: bindir,
   dependencies: [
+    cli_dep,
     vfs_dep,
   ],
 )
@@ -171,13 +194,13 @@ build_target(
   'digest-ebuild',
   sources: [
     'digest-ebuild.cxx',
-    'commandline/commandline.cxx',
   ],
   target_type: 'executable',
   include_directories: incdir,
   install: true,
   install_dir: bindir,
   dependencies: [
+    cli_dep,
     vfs_dep,
   ],
 )
@@ -186,7 +209,6 @@ build_target(
   'extract',
   sources: [
     'extract.cxx',
-    'commandline/commandline.cxx',
     'utils/single-instance.cxx',
   ],
   target_type: 'executable',
@@ -194,6 +216,7 @@ build_target(
   install: true,
   install_dir: bindir,
   dependencies: [
+    cli_dep,
     vfs_dep,
   ],
 )
@@ -202,7 +225,6 @@ build_target(
   'snip',
   sources: [
     'snip.cxx',
-    'commandline/commandline.cxx',
     'utils/single-instance.cxx',
   ],
   target_type: 'executable',
@@ -210,6 +232,7 @@ build_target(
   install: true,
   install_dir: bindir,
   dependencies: [
+    cli_dep,
     vfs_dep,
   ],
 )
@@ -218,13 +241,13 @@ build_target(
   'kernel-install-src',
   sources: [
     'kernel-install-src.cxx',
-    'commandline/commandline.cxx',
   ],
   target_type: 'executable',
   include_directories: incdir,
   install: true,
   install_dir: bindir,
   dependencies: [
+    cli_dep,
     vfs_dep,
   ],
 )
@@ -233,13 +256,12 @@ build_target(
   'vulnerabilities',
   sources: [
     'vulnerabilities.cxx',
-    'commandline/commandline.cxx',
   ],
   target_type: 'executable',
   include_directories: incdir,
   install: true,
   install_dir: bindir,
   dependencies: [
-    logger_dep,
+    cli_dep,
   ],
 )
