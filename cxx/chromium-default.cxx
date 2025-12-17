@@ -70,7 +70,7 @@ main(int argc, char** argv)
     // e.g. ln -s chromium-default chromium-<profile>
     const std::filesystem::path launch_name = argv[0];
     const std::string profile_name =
-        ztd::removeprefix(launch_name.filename().string(), "chromium-");
+        ztd::remove_prefix(launch_name.filename().string(), "chromium-");
 
     // Get chrome bin name from file path
     std::string bin_name = chrome_bin_name;
