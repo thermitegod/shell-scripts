@@ -1,3 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-find ./cxx -iname '*.cxx' -o -iname '*.hxx' | xargs --max-args=$(nproc) clang-format -i
+find \
+    ./cxx \
+    -iname '*.cxx' -o -iname '*.hxx' | \
+    clang-format -i --files=/dev/stdin
