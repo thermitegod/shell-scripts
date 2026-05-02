@@ -53,6 +53,7 @@ class Rebuild:
                   'www-client/google-chrome-beta ' \
                   'www-client/google-chrome-unstable ' \
                   'www-client/firefox-bin ' \
+                  'dev-lang/deno-bin ' \
                   'dev-lang/rust-bin ' \
                   'dev-lang/zig-bin ' \
                   'app-editors/vscode ' \
