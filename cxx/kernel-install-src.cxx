@@ -18,6 +18,7 @@
 #include <filesystem>
 #include <source_location>
 #include <string>
+#include <string_view>
 
 #include <glibmm.h>
 
@@ -46,7 +47,7 @@ main(int argc, char** argv)
     auto opt = commandline::opt_data::create(package);
 
     std::string kernel = "gentoo";
-    static constexpr std::array<std::string, 3> kernels = {"gentoo", "git", "vanilla"};
+    static constexpr std::array<std::string_view, 3> kernels = {"gentoo", "git", "vanilla"};
     app.add_option("-k,--kernel", kernel, "Set install kernel")
         ->expected(1)
         ->check(CLI::IsMember(kernels));
