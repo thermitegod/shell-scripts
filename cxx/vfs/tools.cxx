@@ -18,6 +18,8 @@
 #include <string>
 #include <string_view>
 
+#include <cassert>
+
 #include <ztd/ztd.hxx>
 
 #include "vfs/tools.hxx"
